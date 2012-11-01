@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.cakeframework</groupId>
+    <artifactId>cake-root-pom</artifactId>
+    <version>1.0.4</version>
+  </parent>
+
+  <groupId>dk.dma.ais</groupId>
+  <artifactId>ais-parent</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <name>AIS Parent</name>
+  <packaging>pom</packaging>
+  <description>This parent pom for AIS</description>
+
+  <modules>
+    <module>ais-communication</module>
+    <module>ais-messages</module>
+  </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.9</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
