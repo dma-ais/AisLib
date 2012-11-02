@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.enav.messaging.MessageMetadata;
+import dk.dma.enav.messaging.MaritimeMessageMetadata;
 
 /**
  * A doublet filter.
@@ -110,7 +110,7 @@ public class MessageDoubletFilter extends GenericFilter {
      * Receive message from source or other filter
      */
     @Override
-    public synchronized void process(AisMessage aisMessage, MessageMetadata medatadata) {
+    public synchronized void handle(AisMessage aisMessage, MaritimeMessageMetadata medatadata) {
         // Get time now
         Long now = System.currentTimeMillis();
 

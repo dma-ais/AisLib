@@ -45,8 +45,8 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
-import dk.dma.enav.messaging.MessageHandler;
-import dk.dma.enav.messaging.MessageMetadata;
+import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.messaging.MaritimeMessageMetadata;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.
@@ -66,7 +66,7 @@ public abstract class AisReader extends Thread {
     /**
      * List receivers for the AIS messages
      */
-    protected List<MessageHandler<AisMessage>> handlers = new ArrayList<>();
+    protected List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
 
     /**
      * List of receiver queues
@@ -98,7 +98,7 @@ public abstract class AisReader extends Thread {
      * 
      * @param aisHandler
      */
-    public void registerHandler(MessageHandler<AisMessage> aisHandler) {
+    public void registerHandler(MaritimeMessageHandler<AisMessage> aisHandler) {
         handlers.add(aisHandler);
     }
 
@@ -279,8 +279,8 @@ public abstract class AisReader extends Thread {
                 if (tags.size() > 0) {
                     message.setTags(new LinkedList<>(tags));
                 }
-                for (MessageHandler<AisMessage> aisHandler : handlers) {
-                    aisHandler.process(message, new MessageMetadata());
+                for (MaritimeMessageHandler<AisMessage> aisHandler : handlers) {
+                    aisHandler.handle(message, new MaritimeMessageMetadata());
                 }
                 for (IAisMessageQueue queue : messageQueues) {
                     try {
