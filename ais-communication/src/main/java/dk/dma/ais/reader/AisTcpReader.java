@@ -131,7 +131,7 @@ public class AisTcpReader extends AisReader {
     }
 
     @Override
-    public void stopReader() {
+    public void close() {
         try {
             // Close socket if open
             if (clientSocket != null) {

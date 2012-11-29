@@ -182,7 +182,7 @@ public abstract class AisReader extends Thread {
     /**
      * Stop the reading thread
      */
-    public abstract void stopReader();
+    public abstract void close();
 
     /**
      * The method to do the actual sending

@@ -241,8 +241,7 @@ public abstract class AisMessage extends MaritimeMessage {
             message = new AisMessageDummy(vdm);
             break;
         case 17:
-            // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisMessage17(vdm);
             break;
         case 18:
             message = new AisMessage18(vdm);
@@ -283,8 +282,9 @@ public abstract class AisMessage extends MaritimeMessage {
      * @return
      */
     public static String trimText(String text) {
-        if (text == null)
+        if (text == null) {
             return null;
+        }
         // Remove @
         int firstAt = text.indexOf("@");
         if (firstAt >= 0) {

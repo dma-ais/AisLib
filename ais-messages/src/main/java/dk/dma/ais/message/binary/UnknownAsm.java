@@ -46,8 +46,10 @@ public class UnknownAsm extends AisApplicationMessage {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString());
-        builder.append(", binary length = ");
-        builder.append(binArray.size());
+        if (binArray != null) {
+            builder.append(", binary length = ");
+            builder.append(binArray.size());
+        }
         builder.append("]");
         return builder.toString();
     }

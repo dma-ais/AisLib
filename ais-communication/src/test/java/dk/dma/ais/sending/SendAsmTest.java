@@ -46,7 +46,7 @@ public class SendAsmTest {
         // We are now guaranteed to have ABK
         System.out.println("ABK: " + abk);
         Assert.assertTrue(abk.isSuccess());
-        aisReader.stopReader();
+        aisReader.close();
     }
 
 }

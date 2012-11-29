@@ -66,7 +66,7 @@ public class AisStreamReader extends AisReader {
     }
 
     @Override
-    public void stopReader() {
+    public void close() {
         if (stream != null) {
             try {
                 stream.close();

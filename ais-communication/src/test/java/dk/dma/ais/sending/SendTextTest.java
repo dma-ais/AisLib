@@ -115,7 +115,7 @@ public class SendTextTest {
         // We are now guaranteed to have ABK
         System.out.println("ABK: " + abk);
         Assert.assertTrue(abk.isSuccess());
-        aisReader.stopReader();
+        aisReader.close();
     }
 
     private void sendAddressedTextSimple(String hostPort, int destination, String message) throws InterruptedException,
@@ -139,7 +139,7 @@ public class SendTextTest {
         // We are now guaranteed to have ABK
         System.out.println("ABK: " + abk);
         Assert.assertTrue(abk.isSuccess());
-        aisReader.stopReader();
+        aisReader.close();
     }
 
     private static void sleep(long ms) {
