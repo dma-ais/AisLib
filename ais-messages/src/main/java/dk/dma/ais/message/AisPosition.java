@@ -117,7 +117,7 @@ public class AisPosition {
      */
     public long getLongitude() {
         long longitude;
-        if (rawLongitude >= (0x8000000 >> bitCorrection)) {
+        if (rawLongitude >= 0x8000000 >> bitCorrection) {
             longitude = (0x10000000 >> bitCorrection) - rawLongitude;
             longitude *= -1;
         } else {
@@ -133,7 +133,7 @@ public class AisPosition {
      */
     public long getLatitude() {
         long latitude;
-        if (rawLatitude >= (0x4000000 >> bitCorrection)) {
+        if (rawLatitude >= 0x4000000 >> bitCorrection) {
             latitude = (0x8000000 >> bitCorrection) - rawLatitude;
             latitude *= -1;
         } else {
@@ -151,31 +151,39 @@ public class AisPosition {
         return Position.create(getLatitude() / resolution / 60.0, getLongitude() / resolution / 60.0);
     }
 
+    public Position tryGetGeoLocation() {
+        double lat = getLatitude() / resolution / 60.0;
+        double lon = getLongitude() / resolution / 60.0;
+        if (Position.isValid(lat, lon)) {
+            return Position.create(lat, lon);
+        }
+        return null;
+    }
+
     /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + bitCorrection;
-        result = prime * result + (int) (rawLatitude ^ (rawLatitude >>> 32));
-        result = prime * result + (int) (rawLongitude ^ (rawLongitude >>> 32));
+        result = prime * result + (int) (rawLatitude ^ rawLatitude >>> 32);
+        result = prime * result + (int) (rawLongitude ^ rawLongitude >>> 32);
         long temp;
         temp = Double.doubleToLongBits(resolution);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + (int) (temp ^ temp >>> 32);
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
         AisPosition pos2 = (AisPosition) obj;
-        return (pos2.rawLatitude == this.rawLatitude && pos2.rawLongitude == this.rawLongitude);
+        return pos2.rawLatitude == this.rawLatitude && pos2.rawLongitude == this.rawLongitude;
     }
 
     @Override
     public String toString() {
-        Position geoLocation = getGeoLocation();
-        return "(" + getRawLatitude() + "," + getRawLongitude() + ") = (" + geoLocation.getLatitude() + ","
-                + geoLocation.getLongitude() + ")";
+        return "(" + getRawLatitude() + "," + getRawLongitude() + ") = (" + getLatitude() / resolution / 60.0 + ","
+                + getLongitude() / resolution / 60.0 + ")";
     }
 
 }
