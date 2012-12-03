@@ -178,4 +178,13 @@ public class AisPosition {
                 + geoLocation.getLongitude() + ")";
     }
 
+    public Position tryGetGeoLocation() {
+        double lat = getLatitude() / resolution / 60.0;
+        double lon = getLongitude() / resolution / 60.0;
+        if (Position.isValid(lat, lon)) {
+            return Position.create(lat, lon);
+        }
+        return null;
+    }
+
 }
