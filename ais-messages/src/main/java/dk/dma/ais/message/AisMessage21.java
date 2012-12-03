@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@ import dk.dma.ais.sentence.Vdm;
  * Aids-to-navigation report (AtoN) as defined by ITU-R M.1371-4
  * 
  */
-public class AisMessage21 extends AisMessage {
+public class AisMessage21 extends AisMessage implements IPositionMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
@@ -57,7 +57,7 @@ public class AisMessage21 extends AisMessage {
 
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
-        if ((binArray.getLength() < 272) || (binArray.getLength() > 360)) {
+        if (binArray.getLength() < 272 || binArray.getLength() > 360) {
             throw new AisMessageException("Message 21 wrong length " + binArray.getLength());
         }
 

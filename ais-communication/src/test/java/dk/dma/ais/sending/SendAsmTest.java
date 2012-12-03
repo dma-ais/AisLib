@@ -1,21 +1,24 @@
 package dk.dma.ais.sending;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import dk.dma.ais.message.AisMessage6;
 import dk.dma.ais.message.binary.RouteSuggestionReply;
 import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisTcpReader;
 import dk.dma.ais.reader.SendException;
-import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.sentence.Abk;
 
 public class SendAsmTest {
 
-    @Ignore
     @Test
+    public void emptyTest() {
+
+    }
+
+    // @Test
     public void sendRouteSuggestionReply() throws InterruptedException, SendException {
         String hostPort = "aistrans1.fomfrv.dk:4001";
         // int destination = 219015063; // DAMSA1
@@ -46,7 +49,7 @@ public class SendAsmTest {
         // We are now guaranteed to have ABK
         System.out.println("ABK: " + abk);
         Assert.assertTrue(abk.isSuccess());
-        aisReader.close();
+        aisReader.stopReader();
     }
 
 }

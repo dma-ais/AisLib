@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -131,7 +131,7 @@ public class AisTcpReader extends AisReader {
     }
 
     @Override
-    public void close() {
+    public void stopReader() {
         try {
             // Close socket if open
             if (clientSocket != null) {

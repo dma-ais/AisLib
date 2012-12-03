@@ -22,14 +22,13 @@ import java.util.Date;
 
 import dk.dma.ais.filter.MessageDoubletFilter;
 import dk.dma.ais.filter.MessageDownSample;
-import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.handler.IAisHandler;
 import dk.dma.ais.proprietary.DmaFactory;
 import dk.dma.ais.proprietary.GatehouseFactory;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.reader.RoundRobinAisTcpReader;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
 
 /**
  * Simple application to filter AIS messages based on various filters
@@ -137,7 +136,7 @@ public class AisFilter {
         MessageHandler messageHandler = new MessageHandler(filterSettings, out);
         messageHandler.setDumpParsed(dumpParsed);
         messageHandler.setReplayTag(replayTag);
-        MaritimeMessageHandler<AisMessage> handler = messageHandler;
+        IAisHandler handler = messageHandler;
 
         // Maybe insert downsampling filter
         if (downsampleRate > 0) {

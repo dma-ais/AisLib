@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,7 +42,7 @@ public class AisMessage5 extends AisStaticCommon {
     int version; // 2 bits
 
     /**
-     * IMO number: 1-999999999; 0 = not available = default Not applicable to SAR aircraft
+     * IMO number: 1-999999999; 0 = not available = default � Not applicable to SAR aircraft
      */
     long imo; // 30 bits
 
@@ -76,7 +76,7 @@ public class AisMessage5 extends AisStaticCommon {
     String dest; // 6x20 (120) bits
 
     /**
-     * DTE: Data terminal equipment (DTE) ready 0 = available 1 = not available = default see 3.3.1
+     * DTE: Data terminal equipment (DTE) ready 0 = available 1 = not available = default see � 3.3.1
      */
     int dte; // 1 bit : DTE flag
 

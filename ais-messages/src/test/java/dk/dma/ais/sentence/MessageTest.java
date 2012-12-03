@@ -12,8 +12,6 @@ import dk.dma.ais.message.AisMessage8;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.binary.Capability;
 import dk.dma.ais.message.binary.MetHyd11;
-import dk.dma.ais.sentence.SentenceException;
-import dk.dma.ais.sentence.Vdm;
 
 public class MessageTest {
 

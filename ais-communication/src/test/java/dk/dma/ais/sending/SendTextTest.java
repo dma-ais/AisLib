@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import dk.dma.ais.message.AisMessage12;
 import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisTcpReader;
 import dk.dma.ais.reader.ClientSendThread;
 import dk.dma.ais.reader.SendException;
 import dk.dma.ais.reader.SendRequest;
-import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.AnySentence;
 
-@Ignore
 public class SendTextTest {
 
     // @Test
@@ -26,8 +24,8 @@ public class SendTextTest {
         String hostPort = "localhost:4001";
         String message = "TEST FROM FRV";
         int destination = 219015063; // DAMSA1
-        // int destination = 219593000; // Jens S??rensen
-        // int destination = 219997000; // Poul L??wen??rn
+        // int destination = 219593000; // Jens Sørensen
+        // int destination = 219997000; // Poul Løwenørn
         sendAddressedTextSimple(hostPort, destination, message);
         sleep(2000);
     }
@@ -41,7 +39,7 @@ public class SendTextTest {
         sleep(2000);
     }
 
-    @Test
+    // @Test
     public void sendAddressedTextTest3() throws InterruptedException, SendException {
         String hostPort = "aistrans1.fomfrv.dk:4001";
         String message = "TEST FROM DAMSA1";
@@ -78,11 +76,16 @@ public class SendTextTest {
         // String message = "TEST FROM FRV";
         String message = "A";
         // int destination = 219015063; // DAMSA1
-        // int destination = 219593000; // Jens S??rensen
-        // int destination = 219997000; // Poul L??wen??rn
+        // int destination = 219593000; // Jens Sørensen
+        // int destination = 219997000; // Poul Løwenørn
         int destination = 123456789;
         sendAddressedWithPrefix(hostPort, destination, message, prefixSentences);
         sleep(2000);
+
+    }
+
+    @Test
+    public void emptyTest() {
 
     }
 
@@ -115,7 +118,7 @@ public class SendTextTest {
         // We are now guaranteed to have ABK
         System.out.println("ABK: " + abk);
         Assert.assertTrue(abk.isSuccess());
-        aisReader.close();
+        aisReader.stopReader();
     }
 
     private void sendAddressedTextSimple(String hostPort, int destination, String message) throws InterruptedException,
@@ -139,7 +142,7 @@ public class SendTextTest {
         // We are now guaranteed to have ABK
         System.out.println("ABK: " + abk);
         Assert.assertTrue(abk.isSuccess());
-        aisReader.close();
+        aisReader.stopReader();
     }
 
     private static void sleep(long ms) {

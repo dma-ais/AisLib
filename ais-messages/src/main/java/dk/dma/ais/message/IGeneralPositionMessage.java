@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@ package dk.dma.ais.message;
 /**
  * Interface to capture the communalities between message 1,2,3 and 18
  */
-public interface IGeneralPositionMessage {
+public interface IGeneralPositionMessage extends IPositionMessage {
 
     /**
      * Speed over ground
@@ -31,20 +31,6 @@ public interface IGeneralPositionMessage {
      * Course over ground
      */
     public int getCog();
-
-    /**
-     * Position
-     * 
-     * @return
-     */
-    public AisPosition getPos();
-
-    /**
-     * Position accuracy
-     * 
-     * @return
-     */
-    public int getPosAcc();
 
     /**
      * True heading

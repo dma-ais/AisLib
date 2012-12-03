@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -64,7 +64,7 @@ public class GatehouseSourceTag implements IProprietarySourceTag {
         builder.append("GatehouseSourceTag [baseMmsi=");
         builder.append(baseMmsi);
         builder.append(", country=");
-        builder.append((country != null) ? country.getTwoLetter() : "null");
+        builder.append(country != null ? country.getTwoLetter() : "null");
         builder.append(", region=");
         builder.append(region);
         builder.append(", timestamp=");

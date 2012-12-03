@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,6 @@ import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
 
-@Ignore
 public class DecodeTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(DecodeTest.class);
@@ -92,7 +90,7 @@ public class DecodeTest {
         // Open file
         URL url = ClassLoader.getSystemResource("stream_example.txt");
         Assert.assertNotNull(url);
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Assert.assertNotNull(in);
             String line;
 

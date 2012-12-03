@@ -96,7 +96,7 @@ public class AisTargetSourceData implements Serializable {
     }
 
     public boolean isSatData() {
-        return (sourceType != null && sourceType.equals("SAT"));
+        return sourceType != null && sourceType.equals("SAT");
     }
 
 }

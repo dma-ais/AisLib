@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.enav.messaging.MaritimeMessageMetadata;
 
 /**
  * A doublet filter.
@@ -110,7 +109,7 @@ public class MessageDoubletFilter extends GenericFilter {
      * Receive message from source or other filter
      */
     @Override
-    public synchronized void handle(AisMessage aisMessage, MaritimeMessageMetadata medatadata) {
+    public synchronized void receive(AisMessage aisMessage) {
         // Get time now
         Long now = System.currentTimeMillis();
 

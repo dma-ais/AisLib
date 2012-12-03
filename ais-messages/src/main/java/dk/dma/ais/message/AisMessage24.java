@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +41,8 @@ public class AisMessage24 extends AisStaticCommon {
      */
 
     /**
-     * Unique identification of the Unit by a number as defined by the manufacturer (option; = not available = default)
+     * Unique identification of the Unit by a number as defined by the manufacturer (option; “@@@@@@@” = not available =
+     * default)
      */
     long vendorId; // 42 bits
 

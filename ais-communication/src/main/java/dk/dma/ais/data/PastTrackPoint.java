@@ -23,7 +23,7 @@ import dk.dma.enav.model.geometry.Position;
 /**
  * Class to represent a point on a past track
  */
-public class PastTrackPoint implements Serializable {
+public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> {
 
     private static final long serialVersionUID = 1L;
 
@@ -37,8 +37,8 @@ public class PastTrackPoint implements Serializable {
         Position pos = vesselPosition.getPos();
         this.lat = pos.getLatitude();
         this.lon = pos.getLongitude();
-        this.cog = (vesselPosition.getCog() != null) ? vesselPosition.getCog() : 0;
-        this.sog = (vesselPosition.getSog() != null) ? vesselPosition.getSog() : 0;
+        this.cog = vesselPosition.getCog() != null ? vesselPosition.getCog() : 0;
+        this.sog = vesselPosition.getSog() != null ? vesselPosition.getSog() : 0;
         this.time = vesselPosition.getSourceTimestamp();
         if (this.time == null) {
             this.time = vesselPosition.received;
@@ -47,7 +47,7 @@ public class PastTrackPoint implements Serializable {
 
     public boolean isDead(int ttl) {
         int elapsed = (int) ((System.currentTimeMillis() - this.time.getTime()) / 1000);
-        return (elapsed > ttl);
+        return elapsed > ttl;
     }
 
     public double getLat() {
@@ -89,4 +89,25 @@ public class PastTrackPoint implements Serializable {
     public void setTime(Date time) {
         this.time = time;
     }
+
+    @Override
+    public int compareTo(PastTrackPoint p2) {
+        if (this.time.getTime() < p2.time.getTime()) {
+            return -1;
+        } else if (this.time.getTime() > p2.time.getTime()) {
+            return 1;
+        }
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "PastTrackPoint [time=" + time + ", lat=" + lat + ", lon=" + lon + ", cog=" + cog + ", sog=" + sog + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) getTime().getTime();
+    }
+
 }

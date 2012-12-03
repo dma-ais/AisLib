@@ -1,0 +1,16 @@
+This library includes the following software
+
+Apache Common Lang 2.5 (commons-lang-2.5.jar)
+   Copyright 2001-2011 The Apache Software Foundation    
+   The Apache Software License, Version 2.0
+   http://commons.apache.org/lang/
+   
+Apache log4j 1.2.15 (log4j-1.2.15.jar)
+   Copyright 2001-2011 The Apache Software Foundation
+   The Apache Software License, Version 2.0
+   http://logging.apache.org/log4j/
+   
+JUnit 4.8 (junit-4.8.jar)
+   Common Public License - v 1.0
+   http://www.junit.org/
+   

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,14 +39,14 @@ public abstract class AisStaticCommon extends AisMessage {
     protected String name; // 20x6 (120) bits
 
     /**
-     * Type of ship and cargo type: 0 = not available or no ship = default 1-99 = as defined in 3.3.2 100-199 =
+     * Type of ship and cargo type: 0 = not available or no ship = default 1-99 = as defined in � 3.3.2 100-199 =
      * reserved, for regional use 200-255 = reserved, for future use Not applicable to SAR aircraft
      */
     protected int shipType; // 8 bits
 
     /**
      * GPS Ant. Distance from bow (A): Reference point for reported position. Also indicates the dimension of ship (m)
-     * (see Fig. 42 and 3.3.3)
+     * (see Fig. 42 and § 3.3.3)
      * 
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be 0
      */
@@ -54,7 +54,7 @@ public abstract class AisStaticCommon extends AisMessage {
 
     /**
      * GPS Ant. Distance from stern (B) Reference point for reported position. Also indicates the dimension of ship (m)
-     * (see Fig. 42 and 3.3.3)
+     * (see Fig. 42 and § 3.3.3)
      * 
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be
      * representing the length of the ship
@@ -63,7 +63,7 @@ public abstract class AisStaticCommon extends AisMessage {
 
     /**
      * GPS Ant. Distance from port (C) Reference point for reported position. Also indicates the dimension of ship (m)
-     * (see Fig. 42 and 3.3.3)
+     * (see Fig. 42 and § 3.3.3)
      * 
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be 0
      */
@@ -71,7 +71,7 @@ public abstract class AisStaticCommon extends AisMessage {
 
     /**
      * GPS Ant. Distance from starboard (D): Reference point for reported position. Also indicates the dimension of ship
-     * (m) (see Fig. 42 and 3.3.3)
+     * (m) (see Fig. 42 and § 3.3.3)
      * 
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be
      * representing the with of the ship

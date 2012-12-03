@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -119,8 +119,9 @@ public abstract class Sentence {
             e.printStackTrace();
         }
         msgChecksum = Integer.toString(checksum, 16).toUpperCase();
-        if (msgChecksum.length() < 2)
+        if (msgChecksum.length() < 2) {
             msgChecksum = "0" + msgChecksum;
+        }
         encoded += "*" + msgChecksum;
 
         return encoded;
@@ -136,7 +137,7 @@ public abstract class Sentence {
         char[] lineArray = line.toCharArray();
         int i = 0;
         for (char x : lineArray) {
-            if ((x == '!') || (x == '$')) {
+            if (x == '!' || x == '$') {
                 this.prefix = line.substring(0, i);
                 this.msg = line.substring(i);
                 return;
@@ -166,10 +167,12 @@ public abstract class Sentence {
         int checksum = 0;
         for (int i = 1; i < sentence.length(); i++) {
             char c = sentence.charAt(i);
-            if ((c == '!') || (c == '$'))
+            if (c == '!' || c == '$') {
                 throw new SentenceException("Start Character Found before Checksum");
-            if (c == '*')
+            }
+            if (c == '*') {
                 break;
+            }
             checksum ^= c;
         }
         return checksum;
@@ -217,7 +220,7 @@ public abstract class Sentence {
      * @return
      */
     public static boolean hasSentence(String line) {
-        return (line.indexOf("!") >= 0 || line.indexOf("$") >= 0);
+        return line.indexOf("!") >= 0 || line.indexOf("$") >= 0;
     }
 
     /**
@@ -227,7 +230,7 @@ public abstract class Sentence {
      * @return
      */
     public static boolean hasProprietarySentence(String line) {
-        return (line.indexOf("$P") >= 0);
+        return line.indexOf("$P") >= 0;
     }
 
     /**
@@ -289,8 +292,9 @@ public abstract class Sentence {
         newSentence = newSentence.substring(6, newSentence.length() - 3);
         newSentence = "!" + talker + formatter + newSentence;
         String checksum = Integer.toString(getChecksum(newSentence), 16).toUpperCase();
-        if (checksum.length() < 2)
+        if (checksum.length() < 2) {
             checksum = "0" + checksum;
+        }
         newSentence += "*" + checksum;
         return newSentence;
     }

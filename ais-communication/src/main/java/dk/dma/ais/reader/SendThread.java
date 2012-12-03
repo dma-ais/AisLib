@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,15 +33,15 @@ public class SendThread extends Thread {
     /**
      * Hash value for this send thread
      */
-    private final String hash;
+    private String hash;
     /**
      * The result listener wanting reply
      */
-    private final ISendResultListener resultListener;
+    private ISendResultListener resultListener;
     /**
      * The pool of send threads that this send thread is member of
      */
-    private final SendThreadPool sendThreadPool;
+    private SendThreadPool sendThreadPool;
     /**
      * The returned ABK
      */

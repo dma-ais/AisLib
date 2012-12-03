@@ -20,9 +20,9 @@ import dk.dma.ais.message.IGeneralPositionMessage;
 import dk.dma.enav.model.geometry.Position;
 
 /**
- * Abstract class for representing the common position of an AIS class A and class B target
+ * Class for representing the common position of an AIS class A and class B target
  */
-public abstract class AisVesselPosition extends AisReport {
+public class AisVesselPosition extends AisReport {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,9 +39,9 @@ public abstract class AisVesselPosition extends AisReport {
     }
 
     public void update(IGeneralPositionMessage posMessage) {
-        sog = (posMessage.isSogValid() ? posMessage.getSog() / 10.0 : null);
-        cog = (posMessage.isCogValid() ? posMessage.getCog() / 10.0 : null);
-        heading = (posMessage.isHeadingValid() ? (double) posMessage.getTrueHeading() : null);
+        sog = posMessage.isSogValid() ? posMessage.getSog() / 10.0 : null;
+        cog = posMessage.isCogValid() ? posMessage.getCog() / 10.0 : null;
+        heading = posMessage.isHeadingValid() ? (double) posMessage.getTrueHeading() : null;
         if (posMessage.isPositionValid()) {
             pos = posMessage.getPos().getGeoLocation();
         } else {

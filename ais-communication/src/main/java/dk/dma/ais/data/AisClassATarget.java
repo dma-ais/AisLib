@@ -31,10 +31,14 @@ public class AisClassATarget extends AisVesselTarget {
     }
 
     @Override
-    public void update(AisMessage aisMessage) {
-        // Check that update has same class as this
-        if (!(aisMessage instanceof AisPositionMessage || aisMessage instanceof AisMessage5)) {
-            // Simply ignore as another vessel uses same MMSI
+    public void update(AisMessage aisMessage) throws IllegalArgumentException {
+        // Throw error if message is from other type of target
+        if (AisClassBTarget.isClassBPosOrStatic(aisMessage) || AisBsTarget.isBsReport(aisMessage)
+                || AisAtonTarget.isAtonReport(aisMessage)) {
+            throw new IllegalArgumentException("Trying to update class A target with report of other target type");
+        }
+        // Ignore everything but class A pos and static reports (could be ASM messages etc)
+        if (!isClassAPosOrStatic(aisMessage)) {
             return;
         }
         super.update(aisMessage);
@@ -46,6 +50,16 @@ public class AisClassATarget extends AisVesselTarget {
 
     public AisClassAStatic getClassAStatic() {
         return (AisClassAStatic) this.vesselStatic;
+    }
+
+    /**
+     * Determine if AIS message is class A position report or static report
+     * 
+     * @param aisMessage
+     * @return
+     */
+    public static boolean isClassAPosOrStatic(AisMessage aisMessage) {
+        return (aisMessage instanceof AisPositionMessage || aisMessage instanceof AisMessage5);
     }
 
 }

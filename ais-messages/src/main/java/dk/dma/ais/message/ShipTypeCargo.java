@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,22 +17,25 @@ package dk.dma.ais.message;
 
 import java.io.Serializable;
 
-import dk.dma.enav.model.ship.ShipType;
-import dk.dma.enav.model.voyage.cargo.CargoType;
-
 public class ShipTypeCargo implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public enum ShipType {
+        UNDEFINED, WIG, PILOT, SAR, TUG, PORT_TENDER, ANTI_POLLUTION, LAW_ENFORCEMENT, MEDICAL, FISHING, TOWING, TOWING_LONG_WIDE, DREDGING, DIVING, MILITARY, SAILING, PLEASURE, HSC, PASSENGER, CARGO, TANKER, SHIPS_ACCORDING_TO_RR, UNKNOWN
+    }
+
+    public enum CargoType {
+        UNDEFINED, A, B, C, D
+    }
+
     private ShipType shipType;
-    private final CargoType cargoType;
+    private CargoType cargoType;
 
     public ShipTypeCargo(int intShipType) {
         shipType = ShipType.UNDEFINED;
+        cargoType = CargoType.UNDEFINED;
         int firstDigit = intShipType / 10;
         int secondDigit = intShipType % 10;
-
-        cargoType = (firstDigit == 2 || firstDigit == 4 || firstDigit > 5) ? CargoType.fromAIS(secondDigit)
-                : CargoType.UNDEFINED;
 
         if (firstDigit == 3) {
             switch (secondDigit) {
@@ -91,10 +94,10 @@ public class ShipTypeCargo implements Serializable {
                 break;
             case 6:
                 shipType = ShipType.UNKNOWN;
-                break; // Spare ?? for assignments to local vessels
+                break; // Spare  for assignments to local vessels
             case 7:
                 shipType = ShipType.UNKNOWN;
-                break; // Spare ?? for assignments to local vessels
+                break; // Spare  for assignments to local vessels
             case 8:
                 shipType = ShipType.MEDICAL;
                 break;
@@ -122,6 +125,21 @@ public class ShipTypeCargo implements Serializable {
                 break;
             case 9:
                 shipType = ShipType.UNKNOWN;
+                break;
+            }
+
+            switch (secondDigit) {
+            case 1:
+                cargoType = CargoType.A;
+                break;
+            case 2:
+                cargoType = CargoType.B;
+                break;
+            case 3:
+                cargoType = CargoType.C;
+                break;
+            case 4:
+                cargoType = CargoType.D;
                 break;
             }
         }
@@ -154,12 +172,37 @@ public class ShipTypeCargo implements Serializable {
         return result;
     }
 
+    public String prettyCargo() {
+        CargoType shipTypeCargo = this.getShipCargo();
+        String result;
+        result = "Undefined";
+
+        switch (shipTypeCargo) {
+        case A:
+            result = "Category A";
+            break;
+        case B:
+            result = "Category B";
+            break;
+        case C:
+            result = "Category C";
+            break;
+        case D:
+            result = "Category D";
+            break;
+        default:
+            break;
+        }
+
+        return result;
+    }
+
     @Override
     public String toString() {
         // only capitalize the first letter - need to remove underscore - maybe
         ShipTypeCargo shipTypeCargo = this;
 
-        return shipTypeCargo.prettyType() + " cargo of " + getShipCargo();
+        return shipTypeCargo.prettyType() + " cargo of " + shipTypeCargo.prettyCargo();
 
     }
 

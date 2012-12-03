@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ import dk.dma.ais.sentence.Vdm;
  * Base station report as defined by ITU-R M.1371-4
  * 
  */
-public class AisMessage4 extends AisMessage {
+public class AisMessage4 extends AisMessage implements IPositionMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
@@ -59,8 +59,9 @@ public class AisMessage4 extends AisMessage {
 
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
-        if (binArray.getLength() != 168)
+        if (binArray.getLength() != 168) {
             throw new AisMessageException("Message 4 wrong length " + binArray.getLength());
+        }
 
         super.parse(binArray);
 

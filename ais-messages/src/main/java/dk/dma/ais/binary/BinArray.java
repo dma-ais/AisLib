@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -168,13 +168,13 @@ public class BinArray extends BitSet {
      * @throws SixbitException
      */
     public static int sixbitToInt(int chr) throws SixbitException {
-        if ((chr < 48) || (chr > 119) || ((chr > 87) && (chr < 96))) {
+        if (chr < 48 || chr > 119 || chr > 87 && chr < 96) {
             throw new SixbitException("Illegal sixbit ascii char: " + chr);
         }
         if (chr < 0x60) {
-            return (chr - 48) & 0x3F;
+            return chr - 48 & 0x3F;
         } else {
-            return (chr - 56) & 0x3F;
+            return chr - 56 & 0x3F;
         }
     }
 

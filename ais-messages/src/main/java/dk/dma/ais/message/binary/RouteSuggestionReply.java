@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +29,8 @@ public class RouteSuggestionReply extends AisApplicationMessage {
     private int refMsgLinkId; // 10 bits: The Message Linkage ID of the message
                               // responded to.
     /**
-     * 0 = Accept Ship intends to adjust intended route 1 = Reject Ship does not intend to adjust intended route 2 =
-     * Noted Ship acknowledges reception, but cannot, or will not, consider the recommendation.
+     * 0 = Accept – Ship intends to adjust intended route 1 = Reject – Ship does not intend to adjust intended route 2 =
+     * Noted – Ship acknowledges reception, but cannot, or will not, consider the recommendation.
      */
     private int response; // 6 bits
 

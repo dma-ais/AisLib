@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -70,16 +70,19 @@ public class AisMessage7 extends AisMessage {
         this.spare = (int) sixbit.getVal(2);
         this.dest1 = sixbit.getVal(30);
         this.seq1 = (int) sixbit.getVal(2);
-        if (!sixbit.hasMoreBits())
+        if (!sixbit.hasMoreBits()) {
             return;
+        }
         this.dest2 = sixbit.getVal(30);
         this.seq2 = (int) sixbit.getVal(2);
-        if (!sixbit.hasMoreBits())
+        if (!sixbit.hasMoreBits()) {
             return;
+        }
         this.dest3 = sixbit.getVal(30);
         this.seq3 = (int) sixbit.getVal(2);
-        if (!sixbit.hasMoreBits())
+        if (!sixbit.hasMoreBits()) {
             return;
+        }
         this.dest4 = sixbit.getVal(30);
         this.seq4 = (int) sixbit.getVal(2);
     }

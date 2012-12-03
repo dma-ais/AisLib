@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -118,9 +118,9 @@ public class AisMessage18 extends AisMessage implements IGeneralPositionMessage 
     private int commStateSelectorFlag; // 1 bit
 
     /**
-     * Communication state: SOTDMA communication state (see 3.3.7.2.1, Annex 2), if communication state selector flag is
-     * set to 0, or ITDMA communication state (see 3.3.7.3.2, Annex 2), if communication state selector flag is set to 1
-     * Because Class B CS does not use any Communication State information, this field should be filled with the
+     * Communication state: SOTDMA communication state (see � 3.3.7.2.1, Annex 2), if communication state selector flag
+     * is set to 0, or ITDMA communication state (see � 3.3.7.3.2, Annex 2), if communication state selector flag is set
+     * to 1 Because Class B CS does not use any Communication State information, this field should be filled with the
      * following value: 1100000000000000110
      */
     private int commState; // 19 bits : SOTDMA sync state

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.enav.messaging.MaritimeMessageMetadata;
 
 /**
  * A down sampling filter.
@@ -67,7 +66,7 @@ public class MessageDownSample extends GenericFilter {
      * Receive message from source or other filter
      */
     @Override
-    public synchronized void handle(AisMessage aisMessage, MaritimeMessageMetadata medatadata) {
+    public synchronized void receive(AisMessage aisMessage) {
         // If not sampling just forward
         if (samplingRate == 0) {
             sendMessage(aisMessage);
@@ -99,14 +98,14 @@ public class MessageDownSample extends GenericFilter {
         Long lastReceived = null;
 
         // Get last received
-        Map<Long, Long> receiveSet = (posReport) ? posReceived : statReceived;
+        Map<Long, Long> receiveSet = posReport ? posReceived : statReceived;
         lastReceived = receiveSet.get(aisMessage.getUserId());
         if (lastReceived == null) {
             lastReceived = 0L;
         }
 
         // Elapsed in seconds
-        double elapsed = (now - lastReceived) / 1000.0d;
+        double elapsed = (now - lastReceived) / 1000.0;
 
         // Sample message
         if (elapsed < samplingRate) {

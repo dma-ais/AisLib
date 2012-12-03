@@ -1,14 +1,17 @@
 package dk.dma.ais.filter;
 
-import org.junit.*;
+import org.junit.Test;
 
-import dk.dma.ais.filter.MessageDoubletFilter;
 import dk.dma.ais.reader.RoundRobinAisTcpReader;
 
 public class DoubletFilterTest {
 
-    @Ignore
     @Test
+    public void simpleTest() {
+
+    }
+
+    // @Test
     public void doubletFilterTest() throws InterruptedException {
         MessageDoubletFilter doubletFilter = new MessageDoubletFilter();
 

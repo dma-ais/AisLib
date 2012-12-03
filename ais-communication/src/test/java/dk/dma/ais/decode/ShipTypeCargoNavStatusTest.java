@@ -3,8 +3,8 @@ package dk.dma.ais.decode;
 import org.junit.Assert;
 import org.junit.Test;
 
+import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
-import dk.dma.enav.model.voyage.NavigationalStatus;
 
 public class ShipTypeCargoNavStatusTest {
 
@@ -65,22 +65,22 @@ public class ShipTypeCargoNavStatusTest {
         int ais_sart = 14;
 
         // Prepare Ships
-        NavigationalStatus underWayUsingengine = NavigationalStatus.fromAIS(under_way_using_engine);
-        NavigationalStatus moored2 = NavigationalStatus.fromAIS(moored);
-        NavigationalStatus engagedInFishing = NavigationalStatus.fromAIS(engaged_in_fishing);
-        NavigationalStatus aisSart = NavigationalStatus.fromAIS(ais_sart);
+        NavigationalStatus underWayUsingengine = new NavigationalStatus(under_way_using_engine);
+        NavigationalStatus moored2 = new NavigationalStatus(moored);
+        NavigationalStatus engagedInFishing = new NavigationalStatus(engaged_in_fishing);
+        NavigationalStatus aisSart = new NavigationalStatus(ais_sart);
 
         System.out.println(underWayUsingengine);
-        Assert.assertEquals(underWayUsingengine.toString(), "Under way using engine");
+        Assert.assertEquals(underWayUsingengine.prettyStatus(), "Under way using engine");
 
         System.out.println(moored2);
-        Assert.assertEquals(moored2.toString(), "Moored");
+        Assert.assertEquals(moored2.prettyStatus(), "Moored");
 
         System.out.println(engagedInFishing);
-        Assert.assertEquals(engagedInFishing.toString(), "Engaged in fishing");
+        Assert.assertEquals(engagedInFishing.prettyStatus(), "Engaged in fishing");
 
         System.out.println(aisSart);
-        Assert.assertEquals(aisSart.toString(), "AIS-SART");
+        Assert.assertEquals(aisSart.prettyStatus(), "AIS-SART");
 
     }
 

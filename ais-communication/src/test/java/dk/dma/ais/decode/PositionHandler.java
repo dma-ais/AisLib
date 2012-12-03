@@ -3,12 +3,11 @@ package dk.dma.ais.decode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.dma.ais.handler.IAisHandler;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
-import dk.dma.enav.messaging.MaritimeMessageMetadata;
 
-public class PositionHandler implements MaritimeMessageHandler<AisMessage> {
+public class PositionHandler implements IAisHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(PositionHandler.class);
 
@@ -17,7 +16,7 @@ public class PositionHandler implements MaritimeMessageHandler<AisMessage> {
      * 
      * For debug out adjust log4j.xml level
      */
-    public void handle(AisMessage aisMessage, MaritimeMessageMetadata medatadata) {
+    public void receive(AisMessage aisMessage) {
         // Ignore everything but position reports
         if (aisMessage.getMsgId() > 3) {
             return;

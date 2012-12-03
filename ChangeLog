@@ -1,0 +1,31 @@
+2012-12-03 Version 1.7
+  * Message filter based on source metadata
+  * Message filter based on simple circle geometry
+  * Enhancements to data classes
+  
+2012-11-01 Version 1.6
+  * Enhanced DMA proprietary tag for use in replay. Added support in AisFilter.
+  * Added interface IGeneralPositionMessage to capture the commonalities
+    between message 1,2,3 and 18
+  * New asynchronous message queue possibility for receiving AIS messages from 
+    readers.
+
+2012-07-17 Version 1.5
+  * Support for multiple proprietary tags
+  * Support for stopping readers
+  * Better support for sending messages with accompanying JUnit test classes
+  * Moved VirtualNet to own project 
+
+2012-02-09 Version 1.4
+  * Virtual NET simulator tool
+  * Various improvements
+
+2011-11-03 Version 1.3
+
+  * Implemented intended route ASM (DAC=219, FI=1)
+  * Implemented route suggestion ASM (DAC=219, FI=2)
+  * Implemented route suggestion response ASM (DAC=219, FI=3)
+  * Representation of ship type in class ShipTypeCargo
+
+
+ 

@@ -32,7 +32,7 @@ public class SrmSend implements ISendResultListener {
 
     private Abk abk = null;
     private Boolean abkReceived = false;
-    private final AisReader aisReader;
+    private AisReader aisReader;
 
     private SrmSend(String hostPort) {
         aisReader = new AisTcpReader(hostPort);

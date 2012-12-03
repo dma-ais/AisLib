@@ -14,11 +14,6 @@ import dk.dma.ais.message.AisMessage8;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.binary.AsmAcknowledge;
 import dk.dma.ais.message.binary.BroadcastRouteInformation;
-import dk.dma.ais.sentence.Abm;
-import dk.dma.ais.sentence.Bbm;
-import dk.dma.ais.sentence.SendSentence;
-import dk.dma.ais.sentence.SentenceException;
-import dk.dma.ais.sentence.Vdm;
 
 public class EncodeParseTest {
 

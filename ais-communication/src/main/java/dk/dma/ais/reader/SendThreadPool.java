@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,7 @@ public class SendThreadPool {
     /**
      * The pool is implemented as a hash map
      */
-    private final Map<String, SendThread> threads = new HashMap<>();
+    private Map<String, SendThread> threads = new HashMap<>();
 
     public SendThreadPool() {}
 

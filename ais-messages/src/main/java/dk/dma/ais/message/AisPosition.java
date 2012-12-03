@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,10 +25,10 @@ import dk.dma.enav.model.geometry.Position;
  */
 public class AisPosition {
 
-    private long rawLongitude;
+    private int bitCorrection = 0;
     private long rawLatitude;
 
-    private int bitCorrection = 0;
+    private long rawLongitude;
     private double resolution = 10000.0;
 
     public AisPosition() {}
@@ -54,12 +54,103 @@ public class AisPosition {
         setLongitude(Math.round(location.getLongitude() * resolution * 60.0));
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        AisPosition pos2 = (AisPosition) obj;
+        return pos2.rawLatitude == this.rawLatitude && pos2.rawLongitude == this.rawLongitude;
+    }
+
+    /**
+     * Get position as {@link Position} object
+     * 
+     * @return
+     */
+    public Position getGeoLocation() {
+        return Position.create(getLatitude() / resolution / 60.0, getLongitude() / resolution / 60.0);
+    }
+
+    /**
+     * Get signed latitude
+     * 
+     * @return
+     */
+    public long getLatitude() {
+        long latitude;
+        if (rawLatitude >= 0x4000000 >> bitCorrection) {
+            latitude = (0x8000000 >> bitCorrection) - rawLatitude;
+            latitude *= -1;
+        } else {
+            latitude = rawLatitude;
+        }
+        return latitude;
+    }
+
+    /**
+     * Get signed longitude
+     * 
+     * @return
+     */
+    public long getLongitude() {
+        long longitude;
+        if (rawLongitude >= 0x8000000 >> bitCorrection) {
+            longitude = (0x10000000 >> bitCorrection) - rawLongitude;
+            longitude *= -1;
+        } else {
+            longitude = rawLongitude;
+        }
+        return longitude;
+    }
+
+    public long getRawLatitude() {
+        return rawLatitude;
+    }
+
+    public long getRawLongitude() {
+        return rawLongitude;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + bitCorrection;
+        result = prime * result + (int) (rawLatitude ^ rawLatitude >>> 32);
+        result = prime * result + (int) (rawLongitude ^ rawLongitude >>> 32);
+        long temp;
+        temp = Double.doubleToLongBits(resolution);
+        result = prime * result + (int) (temp ^ temp >>> 32);
+        return result;
+    }
+
     /**
      * Set the resolution to be 25 and 24 bits for longitude and latitude respectively
      */
     public void set2524() {
         resolution = 1000.0;
         bitCorrection = 3;
+    }
+
+    /**
+     * Set signed latitude
+     */
+    public void setLatitude(long latitude) {
+        if (latitude < 0) {
+            rawLatitude = latitude + (0x8000000 >> bitCorrection);
+        } else {
+            rawLatitude = latitude;
+        }
+    }
+
+    /**
+     * Set signed longitude
+     */
+    public void setLongitude(long longitude) {
+        if (longitude < 0) {
+            rawLongitude = longitude + (0x10000000 >> bitCorrection);
+        } else {
+            rawLongitude = longitude;
+        }
     }
 
     /**
@@ -80,110 +171,11 @@ public class AisPosition {
         this.rawLongitude = rawLongitude;
     }
 
-    public long getRawLatitude() {
-        return rawLatitude;
-    }
-
-    public long getRawLongitude() {
-        return rawLongitude;
-    }
-
-    /**
-     * Set signed longitude
-     */
-    public void setLongitude(long longitude) {
-        if (longitude < 0) {
-            rawLongitude = longitude + (0x10000000 >> bitCorrection);
-        } else {
-            rawLongitude = longitude;
-        }
-    }
-
-    /**
-     * Set signed latitude
-     */
-    public void setLatitude(long latitude) {
-        if (latitude < 0) {
-            rawLatitude = latitude + (0x8000000 >> bitCorrection);
-        } else {
-            rawLatitude = latitude;
-        }
-    }
-
-    /**
-     * Get signed longitude
-     * 
-     * @return
-     */
-    public long getLongitude() {
-        long longitude;
-        if (rawLongitude >= 0x8000000 >> bitCorrection) {
-            longitude = (0x10000000 >> bitCorrection) - rawLongitude;
-            longitude *= -1;
-        } else {
-            longitude = rawLongitude;
-        }
-        return longitude;
-    }
-
-    /**
-     * Get signed latitude
-     * 
-     * @return
-     */
-    public long getLatitude() {
-        long latitude;
-        if (rawLatitude >= 0x4000000 >> bitCorrection) {
-            latitude = (0x8000000 >> bitCorrection) - rawLatitude;
-            latitude *= -1;
-        } else {
-            latitude = rawLatitude;
-        }
-        return latitude;
-    }
-
-    /**
-     * Get position as {@link Position} object
-     * 
-     * @return
-     */
-    public Position getGeoLocation() {
-        return Position.create(getLatitude() / resolution / 60.0, getLongitude() / resolution / 60.0);
-    }
-
-    public Position tryGetGeoLocation() {
-        double lat = getLatitude() / resolution / 60.0;
-        double lon = getLongitude() / resolution / 60.0;
-        if (Position.isValid(lat, lon)) {
-            return Position.create(lat, lon);
-        }
-        return null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + bitCorrection;
-        result = prime * result + (int) (rawLatitude ^ rawLatitude >>> 32);
-        result = prime * result + (int) (rawLongitude ^ rawLongitude >>> 32);
-        long temp;
-        temp = Double.doubleToLongBits(resolution);
-        result = prime * result + (int) (temp ^ temp >>> 32);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        AisPosition pos2 = (AisPosition) obj;
-        return pos2.rawLatitude == this.rawLatitude && pos2.rawLongitude == this.rawLongitude;
-    }
-
     @Override
     public String toString() {
-        return "(" + getRawLatitude() + "," + getRawLongitude() + ") = (" + getLatitude() / resolution / 60.0 + ","
-                + getLongitude() / resolution / 60.0 + ")";
+        Position geoLocation = getGeoLocation();
+        return "(" + getRawLatitude() + "," + getRawLongitude() + ") = (" + geoLocation.getLatitude() + ","
+                + geoLocation.getLongitude() + ")";
     }
 
 }

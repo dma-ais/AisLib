@@ -41,7 +41,7 @@ public class AisMessageQueue implements IAisMessageQueue {
 
     @Override
     public int push(AisMessage aisMessage) throws AisMessageQueueOverflowException {
-        if (!queue.add(new AisMessageQueueEntry(aisMessage))) {
+        if (!queue.offer(new AisMessageQueueEntry(aisMessage))) {
             throw new AisMessageQueueOverflowException();
         }
         return queue.size();

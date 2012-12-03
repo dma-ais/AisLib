@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.handler.IAisHandler;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.proprietary.DmaSourceTag;
@@ -45,8 +46,6 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
-import dk.dma.enav.messaging.MaritimeMessageMetadata;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.
@@ -66,7 +65,7 @@ public abstract class AisReader extends Thread {
     /**
      * List receivers for the AIS messages
      */
-    protected List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
+    protected List<IAisHandler> handlers = new ArrayList<>();
 
     /**
      * List of receiver queues
@@ -98,7 +97,7 @@ public abstract class AisReader extends Thread {
      * 
      * @param aisHandler
      */
-    public void registerHandler(MaritimeMessageHandler<AisMessage> aisHandler) {
+    public void registerHandler(IAisHandler aisHandler) {
         handlers.add(aisHandler);
     }
 
@@ -182,7 +181,7 @@ public abstract class AisReader extends Thread {
     /**
      * Stop the reading thread
      */
-    public abstract void close();
+    public abstract void stopReader();
 
     /**
      * The method to do the actual sending
@@ -279,8 +278,8 @@ public abstract class AisReader extends Thread {
                 if (tags.size() > 0) {
                     message.setTags(new LinkedList<>(tags));
                 }
-                for (MaritimeMessageHandler<AisMessage> aisHandler : handlers) {
-                    aisHandler.handle(message, new MaritimeMessageMetadata());
+                for (IAisHandler aisHandler : handlers) {
+                    aisHandler.receive(message);
                 }
                 for (IAisMessageQueue queue : messageQueues) {
                     try {

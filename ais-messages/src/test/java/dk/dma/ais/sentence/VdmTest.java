@@ -8,8 +8,6 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage12;
 import dk.dma.ais.message.AisMessageException;
-import dk.dma.ais.sentence.SentenceException;
-import dk.dma.ais.sentence.Vdm;
 
 public class VdmTest {
 

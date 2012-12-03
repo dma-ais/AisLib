@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,8 +31,8 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(RoundRobinAisTcpReader.class);
 
-    private final List<String> hostnames = new ArrayList<>();
-    private final List<Integer> ports = new ArrayList<>();
+    private List<String> hostnames = new ArrayList<>();
+    private List<Integer> ports = new ArrayList<>();
     private int currentHost = -1;
 
     public RoundRobinAisTcpReader() {

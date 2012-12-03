@@ -4,7 +4,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import dk.dma.ais.message.AisPosition;
 import dk.dma.enav.model.geometry.Position;
 
 public class PosTest {

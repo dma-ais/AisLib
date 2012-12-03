@@ -37,7 +37,7 @@ public class EncodeTest {
      */
     @Test
     public void rawEncodeDecodeTest() {
-        Random rand = new Random((new Date()).getTime());
+        Random rand = new Random(new Date().getTime());
 
         int iterations = 1000;
 
@@ -69,7 +69,7 @@ public class EncodeTest {
 
         URL url = ClassLoader.getSystemResource("decode_encode_messages.txt");
         Assert.assertNotNull(url);
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Assert.assertNotNull(in);
             String line;
             Vdm vdm = new Vdm();
