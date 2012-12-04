@@ -40,7 +40,7 @@ public class TargetLocationFilter extends GenericFilter {
     private List<FilterGeometry> geomtries = new ArrayList<>();
 
     @Override
-    public void receive(AisMessage aisMessage) {
+    public void handle(AisMessage aisMessage) {
         if (geomtries.size() == 0) {
             sendMessage(aisMessage);
             return;

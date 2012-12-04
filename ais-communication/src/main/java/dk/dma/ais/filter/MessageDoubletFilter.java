@@ -109,7 +109,7 @@ public class MessageDoubletFilter extends GenericFilter {
      * Receive message from source or other filter
      */
     @Override
-    public synchronized void receive(AisMessage aisMessage) {
+    public synchronized void handle(AisMessage aisMessage) {
         // Get time now
         Long now = System.currentTimeMillis();
 

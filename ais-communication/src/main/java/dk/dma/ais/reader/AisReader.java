@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.binary.SixbitException;
-import dk.dma.ais.handler.IAisHandler;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.proprietary.DmaSourceTag;
@@ -46,6 +45,7 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.messaging.MaritimeMessageHandler;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.
@@ -65,7 +65,7 @@ public abstract class AisReader extends Thread {
     /**
      * List receivers for the AIS messages
      */
-    protected List<IAisHandler> handlers = new ArrayList<>();
+    protected List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
 
     /**
      * List of receiver queues
@@ -97,7 +97,7 @@ public abstract class AisReader extends Thread {
      * 
      * @param aisHandler
      */
-    public void registerHandler(IAisHandler aisHandler) {
+    public void registerHandler(MaritimeMessageHandler<AisMessage> aisHandler) {
         handlers.add(aisHandler);
     }
 
@@ -278,8 +278,8 @@ public abstract class AisReader extends Thread {
                 if (tags.size() > 0) {
                     message.setTags(new LinkedList<>(tags));
                 }
-                for (IAisHandler aisHandler : handlers) {
-                    aisHandler.receive(message);
+                for (MaritimeMessageHandler<AisMessage> aisHandler : handlers) {
+                    aisHandler.handle(message);
                 }
                 for (IAisMessageQueue queue : messageQueues) {
                     try {

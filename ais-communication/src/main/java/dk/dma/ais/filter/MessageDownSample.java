@@ -66,7 +66,7 @@ public class MessageDownSample extends GenericFilter {
      * Receive message from source or other filter
      */
     @Override
-    public synchronized void receive(AisMessage aisMessage) {
+    public synchronized void handle(AisMessage aisMessage) {
         // If not sampling just forward
         if (samplingRate == 0) {
             sendMessage(aisMessage);

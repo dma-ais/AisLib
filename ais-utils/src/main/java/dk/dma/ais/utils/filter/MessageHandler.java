@@ -22,15 +22,15 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import dk.dma.ais.binary.SixbitException;
-import dk.dma.ais.handler.IAisHandler;
 import dk.dma.ais.message.AisBinaryMessage;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.binary.AisApplicationMessage;
 import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.enav.messaging.MaritimeMessageHandler;
 
-public class MessageHandler implements IAisHandler {
+public class MessageHandler implements MaritimeMessageHandler<AisMessage> {
 
     private volatile boolean stop = false;
 
@@ -49,7 +49,7 @@ public class MessageHandler implements IAisHandler {
     }
 
     @Override
-    public void receive(AisMessage aisMessage) {
+    public void handle(AisMessage aisMessage) {
 
         end = System.currentTimeMillis();
         if (start == 0) {
