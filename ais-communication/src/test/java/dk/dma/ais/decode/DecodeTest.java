@@ -26,6 +26,7 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.messaging.MaritimeMessageHandler;
 
 public class DecodeTest {
 
@@ -161,6 +162,26 @@ public class DecodeTest {
 
         // Make AIS reader instance
         AisStreamReader aisReader = new AisStreamReader(inputStream);
+        aisReader.start();
+        aisReader.join();
+    }
+    
+    @Test
+    public void decodeWithCommentBlocks() throws IOException, InterruptedException {
+    	// Open input stream
+        URL url = ClassLoader.getSystemResource("small_cb_example.txt");
+        Assert.assertNotNull(url);
+        InputStream inputStream = url.openStream();
+        Assert.assertNotNull(inputStream);
+    	
+    	// Make AIS reader instance
+        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        aisReader.registerHandler(new MaritimeMessageHandler<AisMessage>() {
+			@Override
+			public void handle(AisMessage message) { 
+				System.out.println(message.getVdm().getCommentBlock());
+			}
+		});
         aisReader.start();
         aisReader.join();
     }

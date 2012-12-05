@@ -38,6 +38,7 @@ public abstract class Sentence {
     protected String prefix;
     protected List<String> orgLines = new ArrayList<>();
     protected LinkedList<String> encodedFields;
+    protected CommentBlock commentBlock;
 
     public Sentence() {
         talker = "AI";
@@ -76,8 +77,15 @@ public abstract class Sentence {
 
         // Split into prefix and sentence
         splitLine(line);
+        
+        // Check for comment block
+        if (prefix.length() > 0 && CommentBlock.hasCommentBlock(prefix)) {
+        	addCommentBlock(prefix);
+        }
+        
         // Calculate checksum
         calculateChecksum();
+        
         // Check checksum
         checkChecksum();
 
@@ -94,6 +102,17 @@ public abstract class Sentence {
         talker = fields[0].substring(1, 3);
         formatter = fields[0].substring(3, 6);
     }
+    
+	public void addCommentBlock(String line) throws SentenceException {
+		if (commentBlock == null) {
+			commentBlock = new CommentBlock();
+		}
+		try {
+			commentBlock.addLine(line);
+		} catch (CommentBlockException e) {
+			throw new SentenceException("CommentBlockException: " + e.getMessage());
+		}
+	}
 
     /**
      * The top most encode method
@@ -277,6 +296,14 @@ public abstract class Sentence {
     public void setFormatter(String formatter) {
         this.formatter = formatter;
     }
+    
+    /**
+     * Get possible comment block
+     * @return
+     */
+    public CommentBlock getCommentBlock() {
+		return commentBlock;
+	}
 
     /**
      * Convert any sentence to new sentence with !<talker><formatter>,....,

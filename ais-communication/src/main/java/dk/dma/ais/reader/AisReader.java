@@ -42,6 +42,7 @@ import dk.dma.ais.queue.AisMessageQueueReader;
 import dk.dma.ais.queue.IAisMessageQueue;
 import dk.dma.ais.queue.IAisQueueEntryHandler;
 import dk.dma.ais.sentence.Abk;
+import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
@@ -228,6 +229,15 @@ public abstract class AisReader extends Thread {
 
         // Ignore everything else than sentences
         if (!Sentence.hasSentence(line)) {
+        	// The line may be a single comment block
+        	if (CommentBlock.hasCommentBlock(line)) {
+        		try {
+					vdm.addCommentBlock(line);
+				} catch (SentenceException e) {
+					LOG.error("Comment block error: " + e.getMessage() + ": " + line);
+				}
+        		return;
+        	}
             tags.clear();
             return;
         }
@@ -256,11 +266,14 @@ public abstract class AisReader extends Thread {
             }
             return;
         }
+        
+        // This may be a comment block only line
+        
 
         // Check for VDM
         if (!Vdm.isVdm(line)) {
-            tags.clear();
-            return;
+    		tags.clear();        		
+        	return;
         }
 
         try {
@@ -293,13 +306,13 @@ public abstract class AisReader extends Thread {
                 return;
             }
         } catch (SentenceException se) {
-            LOG.debug("Sentence error: " + se.getMessage() + " line: " + line + " tag: "
+            LOG.info("Sentence error: " + se.getMessage() + " line: " + line + " tag: "
                     + (tags.size() > 0 ? tags.peekLast() : "null"));
         } catch (AisMessageException ae) {
-            LOG.debug("AIS message error: " + ae.getMessage() + " line: " + line + " tag: "
+            LOG.info("AIS message error: " + ae.getMessage() + " line: " + line + " tag: "
                     + (tags.size() > 0 ? tags.peekLast() : "null"));
         } catch (SixbitException se) {
-            LOG.debug("Six bit error: " + se.getMessage() + " line: " + line + " tag: "
+            LOG.info("Six bit error: " + se.getMessage() + " line: " + line + " tag: "
                     + (tags.size() > 0 ? tags.peekLast() : "null"));
         }
 
