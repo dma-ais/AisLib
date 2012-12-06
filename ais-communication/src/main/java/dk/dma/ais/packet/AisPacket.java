@@ -34,15 +34,7 @@ import dk.dma.ais.sentence.Vdm;
 /**
  * Encapsulation of the VDM lines containing a single AIS message
  * including leading proprietary tags and comment/tag blocks.
- * 
- * List of lines rather than string?
- * Parsed proprietary tags?
- * Parsed comment blocks?
- * Parsed VDM object?
- * Parsed AIS message?
- * 
- * Or parse later?
- * 
+ *  
  * @author Kasper Nielsen
  */
 public class AisPacket {
