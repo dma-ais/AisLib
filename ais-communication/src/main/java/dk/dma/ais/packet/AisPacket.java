@@ -17,29 +17,41 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.List;
+
 import com.google.common.hash.Hashing;
 
 import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.ais.sentence.Vdm;
 
 /**
+ * Encapsulation of the VDM lines containing a single AIS message
+ * including leading proprietary tags and comment/tag blocks.
+ * 
+ * List of lines rather than string?
+ * Parsed proprietary tags?
+ * Parsed comment blocks?
+ * Parsed VDM object?
+ * Parsed AIS message?
+ * 
+ * Or parse later?
  * 
  * @author Kasper Nielsen
  */
 public class AisPacket {
-    // Jeg vil helst ikke gemme AisMessage da den er mutable.
-    // Kan vi vaere sikker paa at den ikke bliver modificeret undervejs??
-    private volatile AisMessage aisMessage;
+    private final Vdm vdm;
+    private final List<IProprietaryTag> proprietaryTags; 
     private final long insertTimestamp;
     private final String stringMessage;
+    private final String sourceName;
 
-    /**
-     * @param stringMessage
-     * @param aisMessage
-     * @param receiveTimestamp
-     */
-    public AisPacket(String stringMessage, long receiveTimestamp) {
+    public AisPacket(Vdm vdm, List<IProprietaryTag> proprietaryTags, String stringMessage, long receiveTimestamp, String sourceName) {
+    	this.vdm = vdm;
+    	this.proprietaryTags = proprietaryTags;
         this.stringMessage = requireNonNull(stringMessage);
         this.insertTimestamp = receiveTimestamp;
+        this.sourceName = sourceName;        
     }
 
     /**
@@ -48,11 +60,7 @@ public class AisPacket {
      * @return a 128 hash on the received package
      */
     public byte[] calculateHash128() {
-        return Hashing.murmur3_128().hashString(stringMessage).asBytes();
-    }
-
-    public AisMessage getAisMessage() {
-        return aisMessage;
+        return Hashing.murmur3_128().hashString(stringMessage + ((sourceName != null) ? sourceName : "")).asBytes();
     }
 
     public long getReceiveTimestamp() {
@@ -62,8 +70,17 @@ public class AisPacket {
     public String getStringMessage() {
         return stringMessage;
     }
-
-    public static AisPacket from(String message, long received) {
-        return new AisPacket(message, received);
+    
+    public Vdm getVdm() {
+		return vdm;
+	}
+    
+    public List<IProprietaryTag> getProprietaryTags() {
+		return proprietaryTags;
+	}
+    
+    public static AisPacket from(Vdm vdm, List<IProprietaryTag> proprietaryTags, String stringMessage, long receiveTimestamp, String sourceName) {
+        return new AisPacket(vdm, proprietaryTags, stringMessage, receiveTimestamp, sourceName);
     }
+    
 }

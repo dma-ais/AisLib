@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.IProprietaryFactory;
 import dk.dma.ais.proprietary.IProprietaryTag;
@@ -72,6 +73,11 @@ public abstract class AisReader extends Thread {
      * List of receiver queues
      */
     protected List<IAisMessageQueue> messageQueues = new ArrayList<>();
+    
+    /**
+     * List of packet handlers
+     */
+    protected List<IAisPacketHandler> packetHandlers = new ArrayList<>();
 
     /**
      * List of proprietary factories
@@ -87,6 +93,11 @@ public abstract class AisReader extends Thread {
      * A received VDO/VDM
      */
     protected Vdm vdm = new Vdm();
+    
+    /**
+     * List of the raw lines of the AIS packet
+     */
+    protected List<String> packetLines = new ArrayList<>();
 
     /**
      * Possible proprietary tags for current VDM
@@ -100,6 +111,15 @@ public abstract class AisReader extends Thread {
      */
     public void registerHandler(MaritimeMessageHandler<AisMessage> aisHandler) {
         handlers.add(aisHandler);
+    }
+    
+    /**
+     * Add a packet handler
+     * 
+     * @param packetHandler
+     */
+    public void registerPacketHandler(IAisPacketHandler packetHandler) {
+    	packetHandlers.add(packetHandler);
     }
 
     /**
@@ -232,6 +252,7 @@ public abstract class AisReader extends Thread {
         	// The line may be a single comment block
         	if (CommentBlock.hasCommentBlock(line)) {
         		try {
+        			packetLines.add(line);
 					vdm.addCommentBlock(line);
 				} catch (SentenceException e) {
 					LOG.error("Comment block error: " + e.getMessage() + ": " + line);
@@ -255,6 +276,9 @@ public abstract class AisReader extends Thread {
             tags.clear();
             return;
         }
+        
+        // Add line to raw packet
+        packetLines.add(line);
 
         // Check if proprietary line
         if (Sentence.hasProprietarySentence(line)) {
@@ -267,9 +291,6 @@ public abstract class AisReader extends Thread {
             return;
         }
         
-        // This may be a comment block only line
-        
-
         // Check for VDM
         if (!Vdm.isVdm(line)) {
     		tags.clear();        		
@@ -281,6 +302,16 @@ public abstract class AisReader extends Thread {
             // LOG.info("result = " + result);
             if (result == 0) {
                 // Complete message
+            	
+            	// Distribute packet
+            	if (packetHandlers.size() > 0) {
+            		AisPacket packet = new AisPacket(vdm, new LinkedList<>(tags), StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis(), sourceName);
+            		for (IAisPacketHandler packetHandler : packetHandlers) {
+						packetHandler.receivePacket(packet);
+					}
+            	}
+            	
+            	// Parse AIS message
                 message = AisMessage.getInstance(vdm);
                 // Maybe add temporary DMA tag
                 if (addDmaTag && sourceName != null) {
@@ -317,6 +348,7 @@ public abstract class AisReader extends Thread {
         }
 
         vdm = new Vdm();
+        packetLines.clear();
         tags.clear();
     }
 
