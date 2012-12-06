@@ -17,9 +17,17 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Date;
+
 import com.google.common.hash.Hashing;
 
+import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.AisMessageException;
+import dk.dma.ais.proprietary.IProprietarySourceTag;
+import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.reader.AisPacketReader;
+import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
 
@@ -90,6 +98,45 @@ public class AisPacket {
     	}
     	return vdm;
 	}
+    
+    /**
+     * Try to get AIS message from packet
+     * @return
+     * @throws SixbitException 
+     * @throws AisMessageException 
+     */
+    public AisMessage getAisMessage() throws AisMessageException, SixbitException {
+    	if (getVdm() == null) return null;
+    	return AisMessage.getInstance(getVdm());
+    }
+    
+    /**
+     * Try to get timestamp for packet. 
+     * @return
+     */
+    public Date getTimestamp() {
+    	if (getVdm() == null) return null;
+    	// Try comment block first
+		CommentBlock cb = vdm.getCommentBlock();
+		if (cb != null) {
+			Long ts = cb.getTimestamp();
+			if (ts != null) {
+				return new Date(ts * 1000);
+			}
+		}
+		// Try from proprietary source tags
+		if (vdm.getProprietaryTags() != null) {
+			for (IProprietaryTag tag : vdm.getProprietaryTags()) {
+				if (tag instanceof IProprietarySourceTag) {
+					Date t = ((IProprietarySourceTag) tag).getTimestamp();
+					if (t != null) {
+						return t;
+					}
+				}
+			}
+		}
+		return null;
+    }
     
     public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {
         return new AisPacket(stringMessage, receiveTimestamp, sourceName);

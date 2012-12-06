@@ -28,12 +28,9 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.proprietary.GatehouseFactory;
-import dk.dma.ais.proprietary.GatehouseSourceTag;
-import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.reader.IAisPacketHandler;
-import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
 
 public class AisPacketTest {
@@ -57,35 +54,15 @@ public class AisPacketTest {
 			public void receivePacket(AisPacket aisPacket) {
 				System.out.println("--\npacket received:\n" + aisPacket.getStringMessage());
 
-				// Try to get timestamp from comment block
-				Long timestamp = null;
-				CommentBlock cb = aisPacket.getVdm().getCommentBlock();
-				if (cb != null) {
-					timestamp = cb.getTimestamp();
-				}
-				System.out.println("cb timestamp: " + timestamp);
-				// Try proprietary tag if no timestamp
-				if (aisPacket.getVdm().getProprietaryTags() != null) {
-					for (IProprietaryTag tag : aisPacket.getVdm().getProprietaryTags()) {
-						if (tag instanceof GatehouseSourceTag) {
-							Date t = ((GatehouseSourceTag) tag).getTimestamp();
-							if (t != null) {
-								timestamp = t.getTime();
-								System.out.println("pt timestamp: " + timestamp);
-								break;
-							}
-						}
-					}
-				}
+				// Try to get timestamp
+				Date timestamp = aisPacket.getTimestamp();
+				System.out.println("timestamp: " + timestamp);
 
-				// If we cannot get timestamp we need to warn and discard the message
-				if (timestamp == null) {
-					System.out.println("Failed to get timestamp");
-				}
 
 				// Try to get AIS message
+				
 				try {
-					AisMessage message = AisMessage.getInstance(aisPacket.getVdm());
+					AisMessage message = aisPacket.getAisMessage();
 					if (message instanceof IPositionMessage) {
 						// Position message
 						((IPositionMessage) message).getPos();
