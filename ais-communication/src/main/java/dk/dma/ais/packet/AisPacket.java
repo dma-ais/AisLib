@@ -17,11 +17,10 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
-
 import com.google.common.hash.Hashing;
 
-import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.ais.reader.AisPacketReader;
+import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
 
 /**
@@ -39,18 +38,21 @@ import dk.dma.ais.sentence.Vdm;
  * @author Kasper Nielsen
  */
 public class AisPacket {
-    private final Vdm vdm;
-    private final List<IProprietaryTag> proprietaryTags; 
+	
     private final long insertTimestamp;
     private final String stringMessage;
     private final String sourceName;
+    private Vdm vdm;
 
-    public AisPacket(Vdm vdm, List<IProprietaryTag> proprietaryTags, String stringMessage, long receiveTimestamp, String sourceName) {
-    	this.vdm = vdm;
-    	this.proprietaryTags = proprietaryTags;
-        this.stringMessage = requireNonNull(stringMessage);
+    public AisPacket(String stringMessage, long receiveTimestamp, String sourceName) {
+    	this.stringMessage = requireNonNull(stringMessage);
         this.insertTimestamp = receiveTimestamp;
-        this.sourceName = sourceName;        
+        this.sourceName = sourceName;    	
+    }
+    
+    public AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp, String sourceName) {
+    	this(stringMessage, receiveTimestamp, sourceName);
+    	this.vdm = vdm;
     }
 
     /**
@@ -70,16 +72,27 @@ public class AisPacket {
         return stringMessage;
     }
     
+    /**
+     * Get existing VDM or parse one from message string
+     * @return Vdm
+     */
     public Vdm getVdm() {
-		return vdm;
+    	if (vdm == null) {
+    		AisPacket packet;
+			try {
+				packet = AisPacketReader.from(stringMessage);
+				if (packet != null) {
+	        		vdm = packet.getVdm();
+	        	}
+			} catch (SentenceException e) {
+				return null;
+			}        	
+    	}
+    	return vdm;
 	}
     
-    public List<IProprietaryTag> getProprietaryTags() {
-		return proprietaryTags;
-	}
-    
-    public static AisPacket from(Vdm vdm, List<IProprietaryTag> proprietaryTags, String stringMessage, long receiveTimestamp, String sourceName) {
-        return new AisPacket(vdm, proprietaryTags, stringMessage, receiveTimestamp, sourceName);
+    public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {
+        return new AisPacket(stringMessage, receiveTimestamp, sourceName);
     }
     
 }

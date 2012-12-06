@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.proprietary.IProprietaryTag;
 
 /**
  * Abstract base class for representing IEC sentences
@@ -39,6 +40,7 @@ public abstract class Sentence {
     protected List<String> orgLines = new ArrayList<>();
     protected LinkedList<String> encodedFields;
     protected CommentBlock commentBlock;
+    protected List<IProprietaryTag> proprietaryTags = null; // Possible proprietary source tags for the message
 
     public Sentence() {
         talker = "AI";
@@ -303,6 +305,14 @@ public abstract class Sentence {
      */
     public CommentBlock getCommentBlock() {
 		return commentBlock;
+	}
+    
+    public List<IProprietaryTag> getProprietaryTags() {
+		return proprietaryTags;
+	}
+    
+    public void setProprietaryTags(List<IProprietaryTag> proprietaryTags) {
+		this.proprietaryTags = proprietaryTags;
 	}
 
     /**

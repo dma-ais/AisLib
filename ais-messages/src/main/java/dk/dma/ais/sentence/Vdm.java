@@ -50,7 +50,7 @@ public class Vdm extends EncapsulatedSentence {
      * Implemented parse method. See {@link EncapsulatedSentence}
      */
     @Override
-    public int parse(String line) throws SentenceException, SixbitException {
+    public int parse(String line) throws SentenceException {
 
         // Do common parsing
         super.baseParse(line);
@@ -81,7 +81,11 @@ public class Vdm extends EncapsulatedSentence {
 
         // Six bit field
         this.sixbitString += fields[5];
-        binArray.appendSixbit(fields[5], padBits);
+        try {
+        	binArray.appendSixbit(fields[5], padBits);
+        } catch (SixbitException e) {
+        	throw new SentenceException("Invalid sixbit in VDM: " + e.getMessage() + ": " + line);
+        }
 
         // Complete packet?
         if (completePacket) {

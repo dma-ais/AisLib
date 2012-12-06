@@ -30,9 +30,11 @@ import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.proprietary.GatehouseFactory;
 import dk.dma.ais.proprietary.GatehouseSourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.reader.IAisPacketHandler;
 import dk.dma.ais.sentence.CommentBlock;
+import dk.dma.ais.sentence.SentenceException;
 
 public class AisPacketTest {
 
@@ -47,14 +49,14 @@ public class AisPacketTest {
 		// Make AIS reader instance
 		AisStreamReader aisReader = new AisStreamReader(inputStream);
 		aisReader.addProprietaryFactory(new GatehouseFactory());
-		// Set the source name 
+		// Set the source name
 		aisReader.setSourceName("some_file_dump");
-		
+
 		aisReader.registerPacketHandler(new IAisPacketHandler() {
 			@Override
 			public void receivePacket(AisPacket aisPacket) {
-				System.out.println("--\npacket received: " + aisPacket.getStringMessage());
-				
+				System.out.println("--\npacket received:\n" + aisPacket.getStringMessage());
+
 				// Try to get timestamp from comment block
 				Long timestamp = null;
 				CommentBlock cb = aisPacket.getVdm().getCommentBlock();
@@ -63,42 +65,56 @@ public class AisPacketTest {
 				}
 				System.out.println("cb timestamp: " + timestamp);
 				// Try proprietary tag if no timestamp
-				for (IProprietaryTag tag : aisPacket.getProprietaryTags()) {
-					if (tag instanceof GatehouseSourceTag) {
-						Date t = ((GatehouseSourceTag)tag).getTimestamp();
-						if (t != null) {
-							timestamp = t.getTime();
-							System.out.println("pt timestamp: " + timestamp);
-							break;
+				if (aisPacket.getVdm().getProprietaryTags() != null) {
+					for (IProprietaryTag tag : aisPacket.getVdm().getProprietaryTags()) {
+						if (tag instanceof GatehouseSourceTag) {
+							Date t = ((GatehouseSourceTag) tag).getTimestamp();
+							if (t != null) {
+								timestamp = t.getTime();
+								System.out.println("pt timestamp: " + timestamp);
+								break;
+							}
 						}
 					}
 				}
-				
+
 				// If we cannot get timestamp we need to warn and discard the message
 				if (timestamp == null) {
 					System.out.println("Failed to get timestamp");
 				}
-								
-				
+
 				// Try to get AIS message
 				try {
 					AisMessage message = AisMessage.getInstance(aisPacket.getVdm());
 					if (message instanceof IPositionMessage) {
 						// Position message
-						((IPositionMessage)message).getPos();
+						((IPositionMessage) message).getPos();
 					}
 				} catch (AisMessageException | SixbitException e) {
 					// Failed to parse AIS message in VDM
 					e.printStackTrace();
 				}
-				
-				
+
 			}
 		});
 
 		aisReader.start();
 		aisReader.join();
 
+	}
+	
+	@Test
+	public void packetFromStringTest() throws SentenceException, AisMessageException, SixbitException {
+		String msg;
+		msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
+		msg += "\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
+		msg += "\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
+		AisPacket packet = AisPacketReader.from(msg);
+		Assert.assertNotNull(packet);
+		Assert.assertNotNull(packet.getVdm());
+		Assert.assertNotNull(packet.getVdm().getProprietaryTags());
+		AisMessage aisMessage = AisMessage.getInstance(packet.getVdm());
+		Assert.assertEquals(aisMessage.getMsgId(), 5);		
 	}
 
 }
