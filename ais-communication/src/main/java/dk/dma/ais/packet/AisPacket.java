@@ -21,7 +21,6 @@ import java.util.List;
 
 import com.google.common.hash.Hashing;
 
-import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.Vdm;
 
