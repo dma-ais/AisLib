@@ -43,6 +43,7 @@ public class AisPacket {
     private final String stringMessage;
     private final String sourceName;
     private Vdm vdm;
+    private AisMessage aisMessage;
 
     public AisPacket(String stringMessage, long receiveTimestamp, String sourceName) {
     	this.stringMessage = requireNonNull(stringMessage);
@@ -98,8 +99,23 @@ public class AisPacket {
      * @throws AisMessageException 
      */
     public AisMessage getAisMessage() throws AisMessageException, SixbitException {
+    	if (aisMessage != null) return aisMessage;
     	if (getVdm() == null) return null;
-    	return AisMessage.getInstance(getVdm());
+    	this.aisMessage = AisMessage.getInstance(getVdm()); 
+    	return this.aisMessage;
+    }
+    
+    /**
+     * Check if VDM contains a valid AIS message
+     * @return
+     */
+    public boolean isValidMessage() {
+    	try {
+			getAisMessage();
+		} catch (AisMessageException | SixbitException e) {
+			return false;
+		}
+    	return (this.aisMessage != null);
     }
     
     /**
