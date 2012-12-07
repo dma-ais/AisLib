@@ -97,7 +97,7 @@ public class AisPacketReader {
 			if (CommentBlock.hasCommentBlock(line)) {
 				packetLines.add(line);
 				try { 
-					vdm.addCommentBlock(line);
+					vdm.addSingleCommentBlock(line);
 				} catch (SentenceException e) {
 					newVdm();
 					throw e;

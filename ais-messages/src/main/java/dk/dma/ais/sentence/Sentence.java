@@ -107,7 +107,12 @@ public abstract class Sentence {
         formatter = fields[0].substring(3, 6);
     }
     
-	public void addCommentBlock(String line) throws SentenceException {
+	public void addSingleCommentBlock(String line) throws SentenceException {
+		this.orgLines.add(line);
+		addCommentBlock(line);		
+	}
+    
+	private void addCommentBlock(String line) throws SentenceException {
 		if (commentBlock == null) {
 			commentBlock = new CommentBlock();
 		}
