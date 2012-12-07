@@ -28,6 +28,7 @@ public abstract class EncapsulatedSentence extends Sentence {
     protected int msgId;
     protected int total = 0;
     protected Integer sequence = null;
+    private int lastSeq = -1;
     protected int num = 0;
     protected Character channel;
     protected BinArray binArray = new BinArray();
@@ -54,30 +55,36 @@ public abstract class EncapsulatedSentence extends Sentence {
         }
 
         // Get sentence count properties
-        int multipartTotal = Sentence.parseInt(fields[1]);
-        int multipartNum = Sentence.parseInt(fields[2]);
-        int multipartSeq = 0;
+        int thisTotal = Sentence.parseInt(fields[1]);
+        int thisNum = Sentence.parseInt(fields[2]);
+        int thisSeq = 0;
         try {
-            multipartSeq = Sentence.parseInt(fields[3]);
+            thisSeq = Sentence.parseInt(fields[3]);
         } catch (SentenceException e) {
             // null sequence is not fatal
         }
-
-        // Are we looking for more
-        if (this.total > 0) {
-            if ((this.sequence != multipartSeq) || (this.num != multipartNum - 1)) {
-                throw new SentenceException("Out of sequence sentence");
-            }
-            this.num++;
+        
+        if (lastSeq < 0) {
+        	// New group of sentences
+        	total = thisTotal;
+        	num = thisNum;
+        	sequence = thisSeq;
+        	lastSeq = thisSeq;
+        	if (num != 1 || num > total) {
+        		throw new SentenceException("Out of sequence sentence: " + line);
+        	}
         } else {
-            this.total = multipartTotal;
-            this.num = multipartNum;
-            this.sequence = multipartSeq;
+        	// Sentence part of existing group
+        	if (total != thisTotal || thisNum != num + 1 || thisSeq != lastSeq) {
+        		throw new SentenceException("Out of sequence sentence: " + line);
+        	}
+        	num = thisNum;
         }
-        if (multipartTotal == 0 || this.total == multipartNum) {
-            this.total = 0;
-            this.num = 0;
-            completePacket = true;
+        
+        // Are we done
+        if (num == total) {
+        	completePacket = true;
+        	lastSeq = -1;        	
         }
 
     }
