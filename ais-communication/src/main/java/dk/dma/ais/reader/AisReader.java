@@ -32,7 +32,6 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.DmaSourceTag;
-import dk.dma.ais.proprietary.IProprietaryFactory;
 import dk.dma.ais.queue.AisMessageQueue;
 import dk.dma.ais.queue.AisMessageQueueOverflowException;
 import dk.dma.ais.queue.AisMessageQueueReader;
@@ -117,15 +116,6 @@ public abstract class AisReader extends Thread {
 		AisMessageQueueReader queueReader = new AisMessageQueueReader(handler, new AisMessageQueue());
 		registerQueue(queueReader.getQueue());
 		queueReader.start();
-	}
-
-	/**
-	 * Add a proprietary factory
-	 * 
-	 * @param proprietaryFactory
-	 */
-	public void addProprietaryFactory(IProprietaryFactory proprietaryFactory) {
-		packetReader.addProprietaryFactory(proprietaryFactory);
 	}
 
 	/**

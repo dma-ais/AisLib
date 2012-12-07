@@ -1,3 +1,12 @@
+201x-xx-xx Version 2.0
+  * Changed to a Maven based project
+  * Introduced the transport entity AisPacket
+  * Re-factored AisReader to use an AisPacketReader to read complete 
+    VDM packets with proprietary tags and comment blocks.
+  * Re-factored handling of proprietary tags. Factories are not added 
+    runtime but compile time in the file:
+        META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
+
 2012-12-03 Version 1.7
   * Message filter based on source metadata
   * Message filter based on simple circle geometry

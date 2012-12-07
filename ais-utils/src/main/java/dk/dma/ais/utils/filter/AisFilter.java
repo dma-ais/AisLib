@@ -23,8 +23,6 @@ import java.util.Date;
 import dk.dma.ais.filter.MessageDoubletFilter;
 import dk.dma.ais.filter.MessageDownSample;
 import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.proprietary.DmaFactory;
-import dk.dma.ais.proprietary.GatehouseFactory;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisStreamReader;
@@ -155,10 +153,6 @@ public class AisFilter {
 
         // Register handler
         aisReader.registerHandler(handler);
-
-        // Register proprietary handlers (optional)
-        aisReader.addProprietaryFactory(new DmaFactory());
-        aisReader.addProprietaryFactory(new GatehouseFactory());
 
         // Start reader thread
         Date start = new Date();

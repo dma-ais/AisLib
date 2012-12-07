@@ -27,7 +27,6 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.IPositionMessage;
-import dk.dma.ais.proprietary.GatehouseFactory;
 import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.reader.IAisPacketHandler;
@@ -45,7 +44,6 @@ public class AisPacketTest {
 
 		// Make AIS reader instance
 		AisStreamReader aisReader = new AisStreamReader(inputStream);
-		aisReader.addProprietaryFactory(new GatehouseFactory());
 		// Set the source name
 		aisReader.setSourceName("some_file_dump");
 

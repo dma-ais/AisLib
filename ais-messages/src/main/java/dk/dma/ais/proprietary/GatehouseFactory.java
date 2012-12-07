@@ -26,19 +26,20 @@ import org.slf4j.LoggerFactory;
 import dk.dma.enav.model.Country;
 
 /**
- * An implementation of the IProprietaryFactory for Gatehouse proprietary sentences
+ * 
+ * @author Kasper Nielsen
  */
-public class GatehouseFactory implements IProprietaryFactory {
+public class GatehouseFactory extends ProprietaryFactory {
+
+    public GatehouseFactory() {
+        super("GHP");
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(GatehouseFactory.class);
 
+    /** {@inheritDoc} */
     @Override
-    public boolean match(String line) {
-        return line.indexOf("$PGHP,1") >= 0;
-    }
-
-    @Override
-    public IProprietarySourceTag getTag(String line) {
+    public IProprietaryTag getTag(String line) {
         int start = line.indexOf("$PGHP,1");
         if (start < 0) {
             return null;
@@ -86,6 +87,7 @@ public class GatehouseFactory implements IProprietaryFactory {
         }
 
         return new GatehouseSourceTag(baseMmsi, midCountry, region, timestamp, line);
+
     }
 
 }

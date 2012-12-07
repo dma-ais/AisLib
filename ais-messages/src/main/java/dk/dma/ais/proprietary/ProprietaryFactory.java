@@ -27,13 +27,13 @@ import java.util.ServiceLoader;
  * 
  * @author Kasper Nielsen
  */
-public abstract class ProprietarySourceFactory {
+public abstract class ProprietaryFactory {
 
-    static Map<String, ProprietarySourceFactory> ALL_FACTORIES;
+    static Map<String, ProprietaryFactory> ALL_FACTORIES;
 
     static {
-        Map<String, ProprietarySourceFactory> map = new HashMap<>();
-        for (ProprietarySourceFactory f : ServiceLoader.load(ProprietarySourceFactory.class)) {
+        Map<String, ProprietaryFactory> map = new HashMap<>();
+        for (ProprietaryFactory f : ServiceLoader.load(ProprietaryFactory.class)) {
             // We should probably check that we do not have two factories with the same name
             map.put(f.prefix, f);
         }
@@ -42,7 +42,7 @@ public abstract class ProprietarySourceFactory {
 
     private final String prefix;
 
-    public ProprietarySourceFactory(String prefix) {
+    public ProprietaryFactory(String prefix) {
         this.prefix = requireNonNull(prefix);
         if (prefix.length() != 3) {
             throw new IllegalArgumentException("Prefix length must be exactly 3, was '" + prefix + "'");
@@ -61,12 +61,12 @@ public abstract class ProprietarySourceFactory {
      */
     public abstract IProprietaryTag getTag(String line);
 
-    public static Collection<ProprietarySourceFactory> getAllFactories() {
+    public static Collection<ProprietaryFactory> getAllFactories() {
         return ALL_FACTORIES.values();
     }
 
-    public static IProprietaryTag getTag2(String str) {
-        ProprietarySourceFactory psf = match(str);
+    public static IProprietaryTag parseTag(String str) {
+        ProprietaryFactory psf = match(str);
         return psf == null ? null : psf.getTag(str);
     }
 
@@ -74,7 +74,7 @@ public abstract class ProprietarySourceFactory {
         return line.length() >= 5 && line.startsWith("$P");
     }
 
-    public static ProprietarySourceFactory match(String line) {
+    public static ProprietaryFactory match(String line) {
         if (isProprietaryTag(line)) {
             String p = line.substring(2, 5);
             return ALL_FACTORIES.get(p);

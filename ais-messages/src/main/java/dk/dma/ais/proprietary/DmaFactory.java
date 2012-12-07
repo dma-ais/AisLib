@@ -18,15 +18,18 @@ package dk.dma.ais.proprietary;
 /**
  * An implementation of the IProprietaryFactory for DMA proprietary sentences
  */
-public class DmaFactory implements IProprietaryFactory {
-
-    @Override
-    public boolean match(String line) {
-        return (line.indexOf("$PDMA,") >= 0);
-    }
+public class DmaFactory extends ProprietaryFactory {
+	
+	public DmaFactory() {
+		super("DMA");
+	}
 
     @Override
     public IProprietaryTag getTag(String line) {
+    	int start = line.indexOf("$PDMA,");
+        if (start < 0) {
+            return null;
+        }
 
         DmaSourceTag dmaSourceTag = new DmaSourceTag();
 

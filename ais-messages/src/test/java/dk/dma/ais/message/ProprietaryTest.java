@@ -13,16 +13,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.proprietary;
+package dk.dma.ais.message;
 
-/**
- * 
- * @author Kasper Nielsen
- */
-public class PTest {
+import junit.framework.Assert;
 
-    public static void main(String[] args) {
-        System.out.println(ProprietarySourceFactory.getTag2("$PGHP,1,2010,6,11,11,46,11,874,276,0,,1,55*2C"));
+import org.junit.Test;
+
+import dk.dma.ais.proprietary.ProprietaryFactory;
+
+public class ProprietaryTest {
+
+	@Test
+    public void pTest() {
+    	Assert.assertNotNull(ProprietaryFactory.parseTag("$PGHP,1,2010,6,11,11,46,11,874,276,0,,1,55*2C"));
+    	Assert.assertNotNull(ProprietaryFactory.parseTag("$PDMA,TEST,34123123123*hh"));
     }
 
 }

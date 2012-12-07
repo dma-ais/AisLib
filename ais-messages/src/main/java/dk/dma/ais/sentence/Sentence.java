@@ -252,16 +252,6 @@ public abstract class Sentence {
     }
 
     /**
-     * Determine if a line seems to contain a proprietary sentence
-     * 
-     * @param line
-     * @return
-     */
-    public static boolean hasProprietarySentence(String line) {
-        return line.indexOf("$P") >= 0;
-    }
-
-    /**
      * Get original lines for this sentence
      * 
      * @return

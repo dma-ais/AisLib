@@ -25,9 +25,8 @@ import org.apache.commons.lang.StringUtils;
 
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.proprietary.GatehouseFactory;
-import dk.dma.ais.proprietary.IProprietaryFactory;
 import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.ais.proprietary.ProprietaryFactory;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
@@ -61,24 +60,10 @@ public class AisPacketReader {
 	private Deque<IProprietaryTag> tags = new ArrayDeque<>();
 
 	/**
-	 * List of proprietary factories
-	 */
-	private List<IProprietaryFactory> proprietaryFactories = new ArrayList<>();
-
-	/**
 	 * Constructor
 	 */
 	public AisPacketReader() {
 
-	}
-
-	/**
-	 * Add a proprietary factory
-	 * 
-	 * @param proprietaryFactory
-	 */
-	public void addProprietaryFactory(IProprietaryFactory proprietaryFactory) {
-		proprietaryFactories.add(proprietaryFactory);
 	}
 
 	/**
@@ -114,12 +99,11 @@ public class AisPacketReader {
 		packetLines.add(line);
 
 		// Check if proprietary line
-		if (Sentence.hasProprietarySentence(line)) {
-			// Go through factories to find one that fits
-			for (IProprietaryFactory factory : proprietaryFactories) {
-				if (factory.match(line)) {
-					tags.add(factory.getTag(line));
-				}
+		if (ProprietaryFactory.isProprietaryTag(line)) {
+			// Try to parse with one the registered factories in META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
+			IProprietaryTag tag = ProprietaryFactory.parseTag(line);
+			if (tag != null) {
+				tags.add(tag);
 			}
 			return null;
 		}
@@ -182,8 +166,6 @@ public class AisPacketReader {
 	public static AisPacket from(String messageString) throws SentenceException {
 		AisPacket packet = null;
 		AisPacketReader packetReader = new AisPacketReader();
-		// TODO how to handle proprietary factories
-		packetReader.addProprietaryFactory(new GatehouseFactory());
 		String[] lines = StringUtils.split(messageString, "\n");		
 		for (String line : lines) {
 			packet = packetReader.readLine(line);

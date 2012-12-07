@@ -5,7 +5,7 @@ AisLib
 
 ## Introduction ##
 
-DaMSA AisLib is a Java library for handling AIS messages. This include
+DMA AisLib is a Java library for handling AIS messages. This include
 
 * Reading from AIS sources e.g. serial connection, TCP connection or file
 * Handling of proprietary source tagging sentences
@@ -20,52 +20,49 @@ the use.
 
 The project is separated into three parts:
   
-* core     - The main AIS library
-* test     - Various JUnit test code
-* utils    - Various AIS utilities using AisLib
-
+* TODO new structure
 
 ## Building ##
 
 To build you will need
 
 * JDK 1.6+ (http://java.sun.com/j2se/)
-* Apache Ant 1.7+ (http://ant.apache.org)
+* TODO Maven
 
 To build everything
  
-	ant
+	TODO maven
  
-To run tests. All tests with filename *Test.java will be executed. 
-Change build.xml to allow specific test targets.
+To run tests
 
-	ant test
+	TODO maven
 
 Make a distributable JAR file in project root
 
-	ant dist
+	TODO maven
  
 To make Javadoc
 
-	ant javadoc
- 
+	TODO maven
+
 
 ## Utils ##
 
-The utilities source is located in utils/src
+The utilities source is located in ais-utils
 
 To build all utilities use 
 
-	ant 
+	TODO maven
   
 or
 
-	ant utils
+	TODO maven
 
 Each utility are placed under utils/. E.g. the filter application in
 utils/filter. It can be started by first building and then using either
 filter.sh or filter.bat on Linux and Windows respectively.
 
+	TODO maven
 	ant
 	cd utils/filter
 	filter.bat -t localhost:4001 -d
@@ -74,7 +71,7 @@ filter.sh or filter.bat on Linux and Windows respectively.
 ## Contributing ##
 
 You're encouraged to contribute to AisLib. Fork the code from 
-[https://github.com/DaMSA/AisLib](https://github.com/DaMSA/AisLib) and submit pull requests.
+[https://github.com/dma-dk/AisLib](https://github.com/dma-dk/AisLib) and submit pull requests.
 
 ## Versioning/naming ##
 
@@ -127,6 +124,10 @@ reader.setReconnectInterval(1000);
 
 A read timeout can be defined for the reader. If no data is received within this period
 the connection will be closed and a reconnect will be tried. 
+
+### Reading raw message packets ###
+
+TODO IAisPacketHandler
 
 ### Working with messages ###
 
@@ -242,9 +243,10 @@ AisLib can handle some proprietary tags inserted before VDM sentences, but
 implementations of factories must be given. In the example below Gatehouse
 source tags are handled.
 
+TODO how to define factories
+
 ```java
 AisReader reader = new AisStreamReader(new FileInputStream("sentences.txt"));
-reader.addProprietaryFactory(new GatehouseFactory());		
 reader.registerHandler(new IAisHandler() {
 	@Override
 	public void receive(AisMessage aisMessage) {
