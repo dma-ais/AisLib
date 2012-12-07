@@ -38,9 +38,6 @@ public abstract class AisMessage extends MaritimeMessage {
     protected int repeat; // 2 bit: How many times message has been repeated
     protected long userId; // 30 bit: MMSI number
     protected Vdm vdm; // The VDM encapsulating the AIS message
-    protected LinkedList<IProprietaryTag> tags = null; // Possible proprietary
-                                                       // source tags for the
-                                                       // message
 
     /**
      * Constructor given message id
@@ -124,6 +121,7 @@ public abstract class AisMessage extends MaritimeMessage {
      * @return
      */
     public IProprietarySourceTag getSourceTag() {
+    	LinkedList<IProprietaryTag> tags = vdm.getTags();
         if (tags == null) {
             return null;
         }
@@ -143,7 +141,7 @@ public abstract class AisMessage extends MaritimeMessage {
      * @return
      */
     public LinkedList<IProprietaryTag> getTags() {
-        return tags;
+        return vdm.getTags();
     }
 
     /**
@@ -152,14 +150,15 @@ public abstract class AisMessage extends MaritimeMessage {
      * @param sourceTag
      */
     public void setTag(IProprietaryTag tag) {
-        if (this.tags == null) {
-            this.tags = new LinkedList<>();
+    	LinkedList<IProprietaryTag> tags = vdm.getTags();
+        if (tags == null) {
+            tags = new LinkedList<>();
         }
-        this.tags.addFirst(tag);
+        tags.addFirst(tag);
     }
 
     public void setTags(LinkedList<IProprietaryTag> tags) {
-        this.tags = tags;
+    	vdm.setTags(tags);
     }
 
     /**
@@ -300,6 +299,7 @@ public abstract class AisMessage extends MaritimeMessage {
      * @return
      */
     public String reassemble() {
+    	LinkedList<IProprietaryTag> tags = vdm.getTags();
         StringBuilder buf = new StringBuilder();
         if (tags != null) {
             for (IProprietaryTag tag : tags) {

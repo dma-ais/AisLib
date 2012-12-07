@@ -101,7 +101,7 @@ public class AisPacket {
     public AisMessage getAisMessage() throws AisMessageException, SixbitException {
     	if (aisMessage != null) return aisMessage;
     	if (getVdm() == null) return null;
-    	this.aisMessage = AisMessage.getInstance(getVdm()); 
+    	this.aisMessage = AisMessage.getInstance(getVdm());
     	return this.aisMessage;
     }
     
@@ -133,8 +133,8 @@ public class AisPacket {
 			}
 		}
 		// Try from proprietary source tags
-		if (vdm.getProprietaryTags() != null) {
-			for (IProprietaryTag tag : vdm.getProprietaryTags()) {
+		if (vdm.getTags() != null) {
+			for (IProprietaryTag tag : vdm.getTags()) {
 				if (tag instanceof IProprietarySourceTag) {
 					Date t = ((IProprietarySourceTag) tag).getTimestamp();
 					if (t != null) {

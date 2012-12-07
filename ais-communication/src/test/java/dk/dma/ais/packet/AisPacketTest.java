@@ -89,7 +89,7 @@ public class AisPacketTest {
 		AisPacket packet = AisPacketReader.from(msg);
 		Assert.assertNotNull(packet);
 		Assert.assertNotNull(packet.getVdm());
-		Assert.assertNotNull(packet.getVdm().getProprietaryTags());
+		Assert.assertNotNull(packet.getVdm().getTags());
 		AisMessage aisMessage = AisMessage.getInstance(packet.getVdm());
 		Assert.assertEquals(aisMessage.getMsgId(), 5);		
 	}

@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +33,6 @@ import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.IProprietaryFactory;
-import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.queue.AisMessageQueue;
 import dk.dma.ais.queue.AisMessageQueueOverflowException;
 import dk.dma.ais.queue.AisMessageQueueReader;
@@ -249,6 +247,14 @@ public abstract class AisReader extends Thread {
 			return;
 		}
 		
+		// Maybe add temporary DMA tag
+		if (addDmaTag && packetReader.getSourceName() != null) {
+			DmaSourceTag dmaSourceTag = new DmaSourceTag();
+			dmaSourceTag.setSourceName(packetReader.getSourceName());
+			packet.getVdm().getTags().add(dmaSourceTag);
+		}
+
+		
 		// Distribute packet
 		for (IAisPacketHandler packetHandler : packetHandlers) {
 			packetHandler.receivePacket(packet);
@@ -268,20 +274,7 @@ public abstract class AisReader extends Thread {
 			if (message == null) {
 				return;
 			}
-			
-			// Get tags
-			LinkedList<IProprietaryTag> tags = new LinkedList<>(packet.getVdm().getProprietaryTags());
-			
-			// Maybe add temporary DMA tag
-			if (addDmaTag && packetReader.getSourceName() != null) {
-				DmaSourceTag dmaSourceTag = new DmaSourceTag();
-				dmaSourceTag.setSourceName(packetReader.getSourceName());
-				tags.add(dmaSourceTag);
-			}
-			if (tags.size() > 0) {
-				message.setTags(tags);
-			}
-			
+						
 			// Distribute message
 			for (MaritimeMessageHandler<AisMessage> aisHandler : handlers) {
 				aisHandler.handle(message);

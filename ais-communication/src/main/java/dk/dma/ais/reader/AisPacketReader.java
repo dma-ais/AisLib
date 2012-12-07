@@ -148,7 +148,7 @@ public class AisPacketReader {
     	
 		// Put proprietary tags on vdm
     	if (tags.size() > 0) {
-    		vdm.setProprietaryTags(new LinkedList<>(tags));
+    		vdm.setTags(new LinkedList<>(tags));
     	}
     	
     	AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis(), sourceName);

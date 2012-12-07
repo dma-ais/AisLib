@@ -16,12 +16,14 @@
 package dk.dma.ais.sentence;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
 import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 
 /**
@@ -40,7 +42,7 @@ public abstract class Sentence {
     protected List<String> orgLines = new ArrayList<>();
     protected LinkedList<String> encodedFields;
     protected CommentBlock commentBlock;
-    protected List<IProprietaryTag> proprietaryTags = null; // Possible proprietary source tags for the message
+    protected LinkedList<IProprietaryTag> tags = null; // Possible proprietary source tags for the message
 
     public Sentence() {
         talker = "AI";
@@ -307,13 +309,49 @@ public abstract class Sentence {
 		return commentBlock;
 	}
     
-    public List<IProprietaryTag> getProprietaryTags() {
-		return proprietaryTags;
-	}
+    /**
+     * Get all tags
+     * 
+     * @return
+     */
+    public LinkedList<IProprietaryTag> getTags() {
+        return tags;
+    }
     
-    public void setProprietaryTags(List<IProprietaryTag> proprietaryTags) {
-		this.proprietaryTags = proprietaryTags;
-	}
+    public void setTags(LinkedList<IProprietaryTag> tags) {
+        this.tags = tags;
+    }
+    
+    /**
+     * Return the LAST source tag (closest to AIS sentence)
+     * 
+     * @return
+     */
+    public IProprietarySourceTag getSourceTag() {
+        if (tags == null) {
+            return null;
+        }
+        // Iterate backwards
+        for (Iterator<IProprietaryTag> iterator = tags.descendingIterator(); iterator.hasNext();) {
+            IProprietaryTag tag = iterator.next();
+            if (tag instanceof IProprietarySourceTag) {
+                return (IProprietarySourceTag) tag;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add tag (to front)
+     * 
+     * @param sourceTag
+     */
+    public void setTag(IProprietaryTag tag) {
+        if (this.tags == null) {
+            this.tags = new LinkedList<>();
+        }
+        this.tags.addFirst(tag);
+    }
 
     /**
      * Convert any sentence to new sentence with !<talker><formatter>,....,
