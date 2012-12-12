@@ -15,12 +15,22 @@
  */
 package dk.dma.ais.packet;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.beust.jcommander.Parameter;
-import com.google.common.base.Predicate;
 
-public class DefaultAisPacketFilter implements Predicate<AisPacket> {
+import dk.dma.ais.message.AisMessage;
+import dk.dma.app.util.function.Filter;
+
+/**
+ * This class provides common functionality for filtering {@link AisPacket AIS packets}.
+ * 
+ * @author Kasper Nielsen
+ */
+public class AisPacketFilter implements Filter<AisPacket> {
+
     @Parameter(names = "-start", description = "[Filter] Start date (inclusive), format == yyyy-MM-dd")
     private Date start;
 
@@ -28,19 +38,29 @@ public class DefaultAisPacketFilter implements Predicate<AisPacket> {
     private Date stop;
 
     @Parameter(names = "-messagetype", description = "[Filter] The Ais message type")
-    private int messageTypes;
+    private List<Integer> messageTypes = new ArrayList<>();
+
+    private boolean onlyValidMessages = false;
 
     String countries;
 
     // specify source
     // specify country
-
+    // TimeOfDay??
     // include packets that are not proper ais messages
     // host
 
     /** {@inheritDoc} */
     @Override
-    public boolean apply(AisPacket packat) {
+    public boolean accept(AisPacket element) {
+        AisMessage m=element.tryGetAisMessage();
+        if (m==null) {
+            //We can probably only handle source filtering?
+            return start == null && stop != null && messageTypes.isEmpty() && onlyValidMessages;
+        }
+        if (!messageTypes.isEmpty() && !messageTypes.contains(m.getMsgId())) {
+            return false;
+        }
         return true;
     }
 }

@@ -40,15 +40,27 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
     }
 
     /**
+     * Set hosts and ports from a list of hostname:ports
+     * 
+     * @param commaHostPort
+     */
+    public RoundRobinAisTcpReader(List<String> hostPorts) {
+        for (String hp : hostPorts) {
+            addHostPort(hp);
+        }
+    }
+
+    /**
      * Set hosts and ports from a comma separated list on the form: host1:port1,...,hostN:portN
      * 
      * @param commaHostPort
      */
-    public void setCommaseparatedHostPort(String commaHostPort) {
+    public RoundRobinAisTcpReader setCommaseparatedHostPort(String commaHostPort) {
         String[] hostPorts = StringUtils.split(commaHostPort, ",");
         for (String hp : hostPorts) {
             addHostPort(hp);
         }
+        return this;
     }
 
     /**

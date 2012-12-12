@@ -17,6 +17,8 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
 
 import com.google.common.hash.Hashing;
@@ -30,15 +32,23 @@ import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.app.util.io.OutputStreamSink;
 
 /**
  * Encapsulation of the VDM lines containing a single AIS message
  * including leading proprietary tags and comment/tag blocks.
- *  
+ * 
  * @author Kasper Nielsen
  */
 public class AisPacket {
-	
+    /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
+    public static final OutputStreamSink<AisPacket> DEFAULT_TEXT_SINK = new OutputStreamSink<AisPacket>() {
+        @Override
+        public void process(OutputStream stream, AisPacket message) throws IOException {
+            stream.write(message.getStringMessage().getBytes());
+            stream.write('\n');
+        }
+    };
     private final long insertTimestamp;
     private final String stringMessage;
     private final String sourceName;
@@ -46,14 +56,14 @@ public class AisPacket {
     private AisMessage aisMessage;
 
     public AisPacket(String stringMessage, long receiveTimestamp, String sourceName) {
-    	this.stringMessage = requireNonNull(stringMessage);
+        this.stringMessage = requireNonNull(stringMessage);
         this.insertTimestamp = receiveTimestamp;
-        this.sourceName = sourceName;    	
+        this.sourceName = sourceName;
     }
-    
+
     public AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp, String sourceName) {
-    	this(stringMessage, receiveTimestamp, sourceName);
-    	this.vdm = vdm;
+        this(stringMessage, receiveTimestamp, sourceName);
+        this.vdm = vdm;
     }
 
     /**
@@ -62,7 +72,7 @@ public class AisPacket {
      * @return a 128 hash on the received package
      */
     public byte[] calculateHash128() {
-        return Hashing.murmur3_128().hashString(stringMessage + ((sourceName != null) ? sourceName : "")).asBytes();
+        return Hashing.murmur3_128().hashString(stringMessage + (sourceName != null ? sourceName : "")).asBytes();
     }
 
     public long getReceiveTimestamp() {
@@ -72,82 +82,95 @@ public class AisPacket {
     public String getStringMessage() {
         return stringMessage;
     }
-    
+
     /**
      * Get existing VDM or parse one from message string
      * @return Vdm
      */
     public Vdm getVdm() {
-    	if (vdm == null) {
-    		AisPacket packet;
-			try {
-				packet = AisPacketReader.from(stringMessage);
-				if (packet != null) {
-	        		vdm = packet.getVdm();
-	        	}
-			} catch (SentenceException e) {
-				return null;
-			}        	
-    	}
-    	return vdm;
-	}
-    
+        if (vdm == null) {
+            AisPacket packet;
+            try {
+                packet = AisPacketReader.from(stringMessage);
+                if (packet != null) {
+                    vdm = packet.getVdm();
+                }
+            } catch (SentenceException e) {
+                return null;
+            }
+        }
+        return vdm;
+    }
+
+    //TODO fix
+    public AisMessage tryGetAisMessage() {
+        try {
+            return getAisMessage();
+        } catch (AisMessageException| SixbitException ignore){return null;}
+    }
+
     /**
      * Try to get AIS message from packet
      * @return
-     * @throws SixbitException 
-     * @throws AisMessageException 
+     * @throws SixbitException
+     * @throws AisMessageException
      */
     public AisMessage getAisMessage() throws AisMessageException, SixbitException {
-    	if (aisMessage != null) return aisMessage;
-    	if (getVdm() == null) return null;
-    	this.aisMessage = AisMessage.getInstance(getVdm());
-    	return this.aisMessage;
+        if (aisMessage != null) {
+            return aisMessage;
+        }
+        if (getVdm() == null) {
+            return null;
+        }
+        this.aisMessage = AisMessage.getInstance(getVdm());
+        return this.aisMessage;
     }
-    
+
     /**
      * Check if VDM contains a valid AIS message
      * @return
      */
     public boolean isValidMessage() {
-    	try {
-			getAisMessage();
-		} catch (AisMessageException | SixbitException e) {
-			return false;
-		}
-    	return (this.aisMessage != null);
+        try {
+            getAisMessage();
+        } catch (AisMessageException | SixbitException e) {
+            return false;
+        }
+        return this.aisMessage != null;
     }
-    
+
     /**
-     * Try to get timestamp for packet. 
+     * Try to get timestamp for packet.
      * @return
      */
     public Date getTimestamp() {
-    	if (getVdm() == null) return null;
-    	// Try comment block first
-		CommentBlock cb = vdm.getCommentBlock();
-		if (cb != null) {
-			Long ts = cb.getTimestamp();
-			if (ts != null) {
-				return new Date(ts * 1000);
-			}
-		}
-		// Try from proprietary source tags
-		if (vdm.getTags() != null) {
-			for (IProprietaryTag tag : vdm.getTags()) {
-				if (tag instanceof IProprietarySourceTag) {
-					Date t = ((IProprietarySourceTag) tag).getTimestamp();
-					if (t != null) {
-						return t;
-					}
-				}
-			}
-		}
-		return null;
+        if (getVdm() == null) {
+            return null;
+        }
+        // Try comment block first
+        CommentBlock cb = vdm.getCommentBlock();
+        if (cb != null) {
+            Long ts = cb.getTimestamp();
+            if (ts != null) {
+                return new Date(ts * 1000);
+            }
+        }
+        // Try from proprietary source tags
+        if (vdm.getTags() != null) {
+            for (IProprietaryTag tag : vdm.getTags()) {
+                if (tag instanceof IProprietarySourceTag) {
+                    Date t = ((IProprietarySourceTag) tag).getTimestamp();
+                    if (t != null) {
+                        return t;
+                    }
+                }
+            }
+        }
+        return null;
     }
-    
+
     public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {
         return new AisPacket(stringMessage, receiveTimestamp, sourceName);
     }
-    
+
 }
