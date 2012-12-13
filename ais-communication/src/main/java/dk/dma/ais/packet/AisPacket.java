@@ -32,7 +32,7 @@ import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
-import dk.dma.app.util.io.OutputStreamSink;
+import dk.dma.app.io.OutputStreamSink;
 
 /**
  * Encapsulation of the VDM lines containing a single AIS message

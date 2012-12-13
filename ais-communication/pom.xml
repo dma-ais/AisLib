@@ -25,7 +25,13 @@
       <artifactId>jcommander</artifactId>
       <version>1.30</version>
     </dependency>
-
+    
+    <dependency>
+      <groupId>dk.dma.app</groupId>
+      <artifactId>dma-app</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
