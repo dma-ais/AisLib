@@ -19,65 +19,29 @@ The library contains test code and utility applications demonstrating
 the use.
 
 The project is separated into three parts:
-  
-* TODO new structure
+
+
+## Prerequisites ##
+
+* Java 1.7
+* Maven 3
+* dma-app https://github.com/dma-dk/dma-app
+* eNav-api https://github.com/dma-dk
 
 ## Building ##
 
-To build you will need
-
-* JDK 1.6+ (http://java.sun.com/j2se/)
-* TODO Maven
-
 To build everything
  
-	TODO maven
+	mvn install
  
 To run tests
 
-	TODO maven
-
-Make a distributable JAR file in project root
-
-	TODO maven
- 
-To make Javadoc
-
-	TODO maven
-
-
-## Utils ##
-
-The utilities source is located in ais-utils
-
-To build all utilities use 
-
-	TODO maven
-  
-or
-
-	TODO maven
-
-Each utility are placed under utils/. E.g. the filter application in
-utils/filter. It can be started by first building and then using either
-filter.sh or filter.bat on Linux and Windows respectively.
-
-	TODO maven
-	ant
-	cd utils/filter
-	filter.bat -t localhost:4001 -d
-  
+	mvn test
 
 ## Contributing ##
 
 You're encouraged to contribute to AisLib. Fork the code from 
 [https://github.com/dma-dk/AisLib](https://github.com/dma-dk/AisLib) and submit pull requests.
-
-## Versioning/naming ##
-
-The version number/name is controlled in the core/build.xml file. Please use a 
-name relating to the branch name. New official versions will only be made from
-master branch. 
 
 ## License ##
 
@@ -127,7 +91,21 @@ the connection will be closed and a reconnect will be tried.
 
 ### Reading raw message packets ###
 
-TODO IAisPacketHandler
+Instead of working with AisMessage objects, it is possible to work
+with unparsed raw message packets (proprietary tags, comment blocks and VDM's).
+
+```java
+AisTcpReader reader = new AisTcpReader("localhost", 4001);
+reader.registerPacketHandler(new IAisPacketHandler() {			
+	@Override
+	public void receivePacket(AisPacket aisPacket) {
+		
+	}
+});
+reader.start();
+reader.join();
+```
+
 
 ### Working with messages ###
 
@@ -243,7 +221,9 @@ AisLib can handle some proprietary tags inserted before VDM sentences, but
 implementations of factories must be given. In the example below Gatehouse
 source tags are handled.
 
-TODO how to define factories
+Proprietary factories are defined in the file
+
+    ais-messages/src/main/resources/META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
 
 ```java
 AisReader reader = new AisStreamReader(new FileInputStream("sentences.txt"));
