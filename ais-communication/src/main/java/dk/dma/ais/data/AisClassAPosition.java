@@ -16,7 +16,7 @@
 package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.ais.message.IGeneralPositionMessage;
+import dk.dma.ais.message.IVesselPositionMessage;
 
 /**
  * Class to represent a class A position
@@ -47,7 +47,7 @@ public class AisClassAPosition extends AisVesselPosition {
         rot = (posMessage.isRotValid() ? (double) posMessage.getRot() : null);
         navStatus = (byte) posMessage.getNavStatus();
         specialManIndicator = (byte) posMessage.getSpecialManIndicator();
-        super.update((IGeneralPositionMessage) posMessage);
+        super.update((IVesselPositionMessage) posMessage);
     }
 
     public Double getRot() {

@@ -16,7 +16,7 @@
 package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage18;
-import dk.dma.ais.message.IGeneralPositionMessage;
+import dk.dma.ais.message.IVesselPositionMessage;
 
 /**
  * Class to represent a class B postion
@@ -40,7 +40,7 @@ public class AisClassBPosition extends AisVesselPosition {
      * @param msg18
      */
     public void update(AisMessage18 msg18) {
-        super.update((IGeneralPositionMessage) msg18);
+        super.update((IVesselPositionMessage) msg18);
     }
 
 }

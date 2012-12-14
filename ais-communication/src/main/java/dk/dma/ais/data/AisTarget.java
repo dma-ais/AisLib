@@ -26,7 +26,7 @@ import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.AisStaticCommon;
-import dk.dma.ais.message.IGeneralPositionMessage;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.GatehouseSourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
@@ -189,7 +189,7 @@ public abstract class AisTarget implements Serializable {
      * @return
      */
     public static boolean isTargetDataMessage(AisMessage aisMessage) {
-        if (aisMessage instanceof IGeneralPositionMessage) {
+        if (aisMessage instanceof IVesselPositionMessage) {
             return true;
         } else if (aisMessage instanceof AisStaticCommon) {
             return true;
