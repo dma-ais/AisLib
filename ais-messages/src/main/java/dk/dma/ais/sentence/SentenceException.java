@@ -15,17 +15,29 @@
  */
 package dk.dma.ais.sentence;
 
+import java.util.Deque;
+
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Exception class for exceptions related to sentences
  */
 public class SentenceException extends Exception {
 
     private static final long serialVersionUID = 1L;
-
+    
     public SentenceException() {}
 
     public SentenceException(String msg) {
         super(msg);
+    }
+    
+    public SentenceException(String msg, Deque<String> sentenceTrace) {
+    	this(msg + "\nSentence trace:\n---\n" + StringUtils.join(sentenceTrace, "\n") + "\n---\n");
+    }
+    
+    public SentenceException(SentenceException e, Deque<String> sentenceTrace) {
+    	this(e.getMessage(), sentenceTrace);
     }
 
 }

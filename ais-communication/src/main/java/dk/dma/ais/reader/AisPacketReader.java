@@ -39,6 +39,8 @@ import dk.dma.ais.sentence.Vdm;
  */
 public class AisPacketReader {
 	
+	private static final int SENTENCE_TRACE_COUNT = 7;
+	
 	/**
 	 * The name of the source
 	 */
@@ -58,6 +60,8 @@ public class AisPacketReader {
 	 * Possible proprietary tags for current VDM
 	 */
 	private Deque<IProprietaryTag> tags = new ArrayDeque<>();
+	
+	private Deque<String> sentenceTrace = new ArrayDeque<>(SENTENCE_TRACE_COUNT);
 
 	/**
 	 * Constructor
@@ -75,6 +79,12 @@ public class AisPacketReader {
 	 * @throws SixbitException 
 	 */
 	public AisPacket readLine(String line) throws SentenceException {
+		
+		// Save line for later trace
+		while (sentenceTrace.size() > SENTENCE_TRACE_COUNT) {
+			sentenceTrace.removeFirst();
+		}
+		sentenceTrace.addLast(line);
 
 		// Ignore everything else than sentences
 		if (!Sentence.hasSentence(line)) {
@@ -85,13 +95,13 @@ public class AisPacketReader {
 					vdm.addSingleCommentBlock(line);
 				} catch (SentenceException e) {
 					newVdm();
-					throw e;
+					throw new SentenceException(e, sentenceTrace);
 				}
 				return null;
 			} else {
 				// Non sentence line
 				newVdm();
-				throw new SentenceException("Non sentence line in stream: " + line);				
+				throw new SentenceException("Non sentence line in stream: " + line, sentenceTrace);				
 			}
 		}
 
@@ -120,7 +130,7 @@ public class AisPacketReader {
 			result = vdm.parse(line);
 		} catch (SentenceException e) {
 			newVdm();
-			throw e;		
+			throw new SentenceException(e, sentenceTrace);		
 		}
 		
 		// If not complete package wait for more
