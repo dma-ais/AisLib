@@ -19,7 +19,10 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import com.google.common.hash.Hashing;
 
@@ -35,8 +38,8 @@ import dk.dma.ais.sentence.Vdm;
 import dk.dma.app.io.OutputStreamSink;
 
 /**
- * Encapsulation of the VDM lines containing a single AIS message
- * including leading proprietary tags and comment/tag blocks.
+ * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag
+ * blocks.
  * 
  * @author Kasper Nielsen
  */
@@ -49,6 +52,14 @@ public class AisPacket {
             stream.write('\n');
         }
     };
+
+    public static final Comparator<AisPacket> TIMESTAMP_COMPARATOR = new Comparator<AisPacket>() {
+        @Override
+        public int compare(AisPacket p1, AisPacket p2) {
+            return Long.compare(p1.getBestTimestamp(), p2.getBestTimestamp());
+        }
+    };
+
     private final long insertTimestamp;
     private final String stringMessage;
     private final String sourceName;
@@ -75,6 +86,11 @@ public class AisPacket {
         return Hashing.murmur3_128().hashString(stringMessage + (sourceName != null ? sourceName : "")).asBytes();
     }
 
+    public long getBestTimestamp() {
+        Date date = getTimestamp();
+        return date == null ? insertTimestamp : date.getTime();
+    }
+
     public long getReceiveTimestamp() {
         return insertTimestamp;
     }
@@ -85,6 +101,7 @@ public class AisPacket {
 
     /**
      * Get existing VDM or parse one from message string
+     * 
      * @return Vdm
      */
     public Vdm getVdm() {
@@ -102,15 +119,18 @@ public class AisPacket {
         return vdm;
     }
 
-    //TODO fix
+    // TODO fix
     public AisMessage tryGetAisMessage() {
         try {
             return getAisMessage();
-        } catch (AisMessageException| SixbitException ignore){return null;}
+        } catch (AisMessageException | SixbitException ignore) {
+            return null;
+        }
     }
 
     /**
      * Try to get AIS message from packet
+     * 
      * @return
      * @throws SixbitException
      * @throws AisMessageException
@@ -128,6 +148,7 @@ public class AisPacket {
 
     /**
      * Check if VDM contains a valid AIS message
+     * 
      * @return
      */
     public boolean isValidMessage() {
@@ -141,6 +162,7 @@ public class AisPacket {
 
     /**
      * Try to get timestamp for packet.
+     * 
      * @return
      */
     public Date getTimestamp() {
@@ -169,6 +191,22 @@ public class AisPacket {
         return null;
     }
 
+    /**
+     * Filters a list of packets according to their timestamp.
+     * @param packets a list of packets
+     * @param start inclusive start
+     * @param end exclusive end
+     * @return
+     */
+    public static List<AisPacket> filterPackets(Iterable<AisPacket> packets, long start, long end) {
+        ArrayList<AisPacket> result=new ArrayList<>();
+        for (AisPacket p : packets) {
+            if (start<= p.getBestTimestamp() && p.getBestTimestamp()<end) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
     public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {
         return new AisPacket(stringMessage, receiveTimestamp, sourceName);
     }
