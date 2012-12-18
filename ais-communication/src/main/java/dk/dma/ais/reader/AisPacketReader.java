@@ -39,7 +39,7 @@ import dk.dma.ais.sentence.Vdm;
  */
 public class AisPacketReader {
 	
-	private static final int SENTENCE_TRACE_COUNT = 7;
+	private static final int SENTENCE_TRACE_COUNT = 20;
 	
 	/**
 	 * The name of the source
