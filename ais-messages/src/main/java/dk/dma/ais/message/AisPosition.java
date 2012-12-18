@@ -173,9 +173,8 @@ public class AisPosition {
 
     @Override
     public String toString() {
-        Position geoLocation = getGeoLocation();
-        return "(" + getRawLatitude() + "," + getRawLongitude() + ") = (" + geoLocation.getLatitude() + ","
-                + geoLocation.getLongitude() + ")";
+        return "(" + getRawLatitude() + "," + getRawLongitude() + ") = (" + getLatitude() + ","
+                + getLongitude() + ")";
     }
 
     public Position tryGetGeoLocation() {
