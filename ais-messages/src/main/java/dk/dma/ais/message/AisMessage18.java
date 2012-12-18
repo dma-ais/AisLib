@@ -27,7 +27,7 @@ import dk.dma.enav.model.geometry.Position;
  * CLASS B position report implemented according to ITU-R M.1371-4
  * 
  */
-public class AisMessage18 extends AisMessage implements IGeneralPositionMessage {
+public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;

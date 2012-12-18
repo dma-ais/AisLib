@@ -16,7 +16,7 @@
 package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.message.IGeneralPositionMessage;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.enav.model.geometry.Position;
 
 /**
@@ -38,7 +38,7 @@ public class AisVesselPosition extends AisReport {
         super();
     }
 
-    public void update(IGeneralPositionMessage posMessage) {
+    public void update(IVesselPositionMessage posMessage) {
         sog = posMessage.isSogValid() ? posMessage.getSog() / 10.0 : null;
         cog = posMessage.isCogValid() ? posMessage.getCog() / 10.0 : null;
         heading = posMessage.isHeadingValid() ? (double) posMessage.getTrueHeading() : null;

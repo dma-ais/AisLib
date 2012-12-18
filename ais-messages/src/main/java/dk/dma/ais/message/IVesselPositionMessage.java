@@ -18,7 +18,7 @@ package dk.dma.ais.message;
 /**
  * Interface to capture the communalities between message 1,2,3 and 18
  */
-public interface IGeneralPositionMessage extends IPositionMessage {
+public interface IVesselPositionMessage extends IPositionMessage {
 
     /**
      * Speed over ground

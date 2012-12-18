@@ -33,7 +33,7 @@ import dk.dma.enav.model.geometry.Position;
  * mobile equipment)
  * 
  */
-public abstract class AisPositionMessage extends AisMessage implements IGeneralPositionMessage {
+public abstract class AisPositionMessage extends AisMessage implements IVesselPositionMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
