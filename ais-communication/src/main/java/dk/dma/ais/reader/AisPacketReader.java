@@ -88,6 +88,11 @@ public class AisPacketReader {
 
 		// Ignore everything else than sentences
 		if (!Sentence.hasSentence(line)) {
+			// Gracefully ignore empty lines
+			if (line.length() == 0) {
+				newVdm();
+				return null;
+			}			
 			// Special case is a single comment without sentence
 			if (CommentBlock.hasCommentBlock(line)) {
 				packetLines.add(line);
