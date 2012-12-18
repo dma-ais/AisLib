@@ -11,7 +11,7 @@
 
 	<groupId>dk.dma.ais</groupId>
 	<artifactId>ais-parent</artifactId>
-	<version>2.0-SNAPSHOT</version>
+	<version>0.1-SNAPSHOT</version>
 	<name>AIS Parent</name>
 	<packaging>pom</packaging>
 	<description>This parent pom for AIS</description>
