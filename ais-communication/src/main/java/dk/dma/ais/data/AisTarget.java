@@ -39,7 +39,7 @@ public abstract class AisTarget implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected long mmsi;
+    protected int mmsi;
     protected Country country;
     protected Date lastReport;
     protected Date created;
@@ -82,7 +82,7 @@ public abstract class AisTarget implements Serializable {
         String sourceType = "LIVE";
         String sourceSystem = null;
         Country sourceCountry = null;
-        Long sourceBs = null;
+        Integer sourceBs = null;
 
         if (aisMessage.getTags() != null) {
             for (IProprietaryTag tag : aisMessage.getTags()) {
@@ -126,7 +126,7 @@ public abstract class AisTarget implements Serializable {
         return mmsi;
     }
 
-    public void setMmsi(long mmsi) {
+    public void setMmsi(int mmsi) {
         this.mmsi = mmsi;
     }
 

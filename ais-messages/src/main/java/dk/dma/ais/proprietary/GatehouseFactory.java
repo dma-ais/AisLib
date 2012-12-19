@@ -51,10 +51,10 @@ public class GatehouseFactory extends ProprietaryFactory {
                     + line);
             return null;
         }
-        Long baseMmsi = null;
+        Integer baseMmsi = null;
         if (elems[11].length() > 0) {
             try {
-                baseMmsi = Long.parseLong(elems[11]);
+                baseMmsi = Integer.parseInt(elems[11]);
             } catch (NumberFormatException e) {
                 LOG.error("Error in Gatehouse proprietary message: wrong base mmsi: " + elems[11] + " line: " + line);
                 return null;

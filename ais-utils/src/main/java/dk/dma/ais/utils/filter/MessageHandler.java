@@ -56,7 +56,7 @@ public class MessageHandler implements MaritimeMessageHandler<AisMessage> {
             start = end;
         }
 
-        Long baseMMSI = -1L;
+        Integer baseMMSI = -1;
         String country = "";
         String region = "";
 

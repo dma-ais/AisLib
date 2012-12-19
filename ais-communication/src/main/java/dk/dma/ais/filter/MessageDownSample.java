@@ -41,12 +41,12 @@ public class MessageDownSample extends GenericFilter {
     /**
      * Map from MMSI to last time a pos report was received
      */
-    private Map<Long, Long> posReceived = new HashMap<>();
+    private Map<Integer, Long> posReceived = new HashMap<>();
 
     /**
      * Map from MMSI to last time a static report was received
      */
-    private Map<Long, Long> statReceived = new HashMap<>();
+    private Map<Integer, Long> statReceived = new HashMap<>();
 
     /**
      * Empty contructor
@@ -98,7 +98,7 @@ public class MessageDownSample extends GenericFilter {
         Long lastReceived = null;
 
         // Get last received
-        Map<Long, Long> receiveSet = posReport ? posReceived : statReceived;
+        Map<Integer, Long> receiveSet = posReport ? posReceived : statReceived;
         lastReceived = receiveSet.get(aisMessage.getUserId());
         if (lastReceived == null) {
             lastReceived = 0L;

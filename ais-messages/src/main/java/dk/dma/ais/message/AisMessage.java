@@ -36,7 +36,7 @@ public abstract class AisMessage extends MaritimeMessage {
 
     protected int msgId; // 6 bit: message id
     protected int repeat; // 2 bit: How many times message has been repeated
-    protected long userId; // 30 bit: MMSI number
+    protected int userId; // 30 bit: MMSI number
     protected Vdm vdm; // The VDM encapsulating the AIS message
 
     /**
@@ -68,7 +68,7 @@ public abstract class AisMessage extends MaritimeMessage {
      */
     protected void parse(BinArray binArray) throws AisMessageException, SixbitException {
         this.repeat = (int) binArray.getVal(2);
-        this.userId = binArray.getVal(30);
+        this.userId = (int) binArray.getVal(30);
     }
 
     /**
@@ -107,11 +107,11 @@ public abstract class AisMessage extends MaritimeMessage {
         this.repeat = repeat;
     }
 
-    public long getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 

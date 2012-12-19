@@ -81,7 +81,7 @@ public class Bbm extends SendSentence {
         return 1;
     }
 
-    public AisMessage getAisMessage(long mmsi, int repeat) throws SentenceException, SixbitException {
+    public AisMessage getAisMessage(int mmsi, int repeat) throws SentenceException, SixbitException {
         AisMessage aisMessage;
         if (msgId == 14) {
             AisMessage14 msg14 = new AisMessage14();
@@ -112,7 +112,7 @@ public class Bbm extends SendSentence {
      * @throws SixbitException
      * @throws SentenceException
      */
-    public Vdm makeVdm(long mmsi, int repeat) throws SixbitException, SentenceException {
+    public Vdm makeVdm(int mmsi, int repeat) throws SixbitException, SentenceException {
         AisMessage aisMessage = getAisMessage(mmsi, repeat);
         Vdm vdm = new Vdm();
         vdm.setMsgId(getMsgId());

@@ -30,7 +30,7 @@ public class AisTargetSourceData implements Serializable {
     private String sourceType = "LIVE";
     private Country sourceCountry;
     private String sourceRegion;
-    private Long sourceBs;
+    private Integer sourceBs;
     private String sourceSystem;
     private Date lastReport;
     private Date created;
@@ -63,11 +63,11 @@ public class AisTargetSourceData implements Serializable {
         this.sourceRegion = sourceRegion;
     }
 
-    public Long getSourceBs() {
+    public Integer getSourceBs() {
         return sourceBs;
     }
 
-    public void setSourceBs(Long sourceBs) {
+    public void setSourceBs(Integer sourceBs) {
         this.sourceBs = sourceBs;
     }
 

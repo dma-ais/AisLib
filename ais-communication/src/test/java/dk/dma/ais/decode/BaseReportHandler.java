@@ -23,8 +23,8 @@ public class BaseReportHandler implements MaritimeMessageHandler<AisMessage> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseReportHandler.class);
 
-    private Set<Long> baseStations = new HashSet<>();
-    private Set<Long> baseStationOrigins = new HashSet<>();
+    private Set<Integer> baseStations = new HashSet<>();
+    private Set<Integer> baseStationOrigins = new HashSet<>();
 
     public void handle(AisMessage aisMessage) {
         // Try to get proprietary source tag and evaluate base station origin
@@ -45,11 +45,11 @@ public class BaseReportHandler implements MaritimeMessageHandler<AisMessage> {
         LOG.debug("Observed base stations: " + baseStations.size());
     }
 
-    public Set<Long> getBaseStations() {
+    public Set<Integer> getBaseStations() {
         return baseStations;
     }
 
-    public Set<Long> getBaseStationOrigins() {
+    public Set<Integer> getBaseStationOrigins() {
         return baseStationOrigins;
     }
 

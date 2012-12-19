@@ -104,7 +104,7 @@ public class Abm extends SendSentence {
         this.destination = destination;
     }
 
-    public AisMessage getAisMessage(long mmsi, int repeat, int retransmit) throws SentenceException, SixbitException {
+    public AisMessage getAisMessage(int mmsi, int repeat, int retransmit) throws SentenceException, SixbitException {
         AisMessage aisMessage;
         if (msgId == 12) {
             AisMessage12 msg12 = new AisMessage12();
@@ -139,7 +139,7 @@ public class Abm extends SendSentence {
      * @throws SixbitException
      * @throws SentenceException
      */
-    public Vdm makeVdm(long mmsi, int repeat, int retransmit) throws SixbitException, SentenceException {
+    public Vdm makeVdm(int mmsi, int repeat, int retransmit) throws SixbitException, SentenceException {
         AisMessage aisMessage = getAisMessage(mmsi, repeat, retransmit);
 
         Vdm vdm = new Vdm();

@@ -32,7 +32,7 @@ public class TargetLocationFilter extends GenericFilter {
     /**
      * Map from MMSI to position
      */
-    private Map<Long, Position> posMap = new ConcurrentHashMap<>();
+    private Map<Integer, Position> posMap = new ConcurrentHashMap<>();
 
     /**
      * List of geometries

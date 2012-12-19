@@ -50,6 +50,6 @@ public interface IProprietarySourceTag extends IProprietaryTag {
      * 
      * @return
      */
-    Long getBaseMmsi();
+    Integer getBaseMmsi();
 
 }

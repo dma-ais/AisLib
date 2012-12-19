@@ -66,7 +66,7 @@ public class MessageSourceFilter extends GenericFilter {
         }
         HashMap<String, String> tagMap = new HashMap<>();
         if (tag.getBaseMmsi() != null) {
-            tagMap.put("basestation", Long.toString(tag.getBaseMmsi()));
+            tagMap.put("basestation", Integer.toString(tag.getBaseMmsi()));
         }
         if (tag.getRegion() != null) {
             tagMap.put("region", tag.getRegion());

@@ -24,13 +24,13 @@ import dk.dma.enav.model.Country;
  */
 public class GatehouseSourceTag implements IProprietarySourceTag {
 
-    private Long baseMmsi;
+    private Integer baseMmsi;
     private Country country;
     private String region;
     private Date timestamp;
     private String orgSentence;
 
-    public GatehouseSourceTag(Long baseMmsi, Country country, String region, Date timestamp, String orgSentence) {
+    public GatehouseSourceTag(Integer baseMmsi, Country country, String region, Date timestamp, String orgSentence) {
         this.baseMmsi = baseMmsi;
         this.country = country;
         this.region = region;
@@ -38,7 +38,7 @@ public class GatehouseSourceTag implements IProprietarySourceTag {
         this.orgSentence = orgSentence;
     }
 
-    public Long getBaseMmsi() {
+    public Integer getBaseMmsi() {
         return baseMmsi;
     }
 
