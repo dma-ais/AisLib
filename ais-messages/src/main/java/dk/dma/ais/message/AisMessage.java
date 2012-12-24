@@ -15,9 +15,6 @@
  */
 package dk.dma.ais.message;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
@@ -25,6 +22,8 @@ import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.messaging.MaritimeMessage;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Abstract base class for all AIS messages
@@ -211,12 +210,10 @@ public abstract class AisMessage extends MaritimeMessage {
             message = new AisMessage8(vdm);
             break;
         case 9:
-            // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisMessage9(vdm);
             break;
         case 10:
-            // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisMessage10(vdm);
             break;
         case 11:
             // TODO implement real message class
@@ -246,8 +243,7 @@ public abstract class AisMessage extends MaritimeMessage {
             message = new AisMessage18(vdm);
             break;
         case 19:
-            // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisMessage19(vdm);
             break;
         case 20:
             // TODO implement real message class
