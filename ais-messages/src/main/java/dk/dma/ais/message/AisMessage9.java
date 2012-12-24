@@ -361,4 +361,5 @@ public class AisMessage9 extends AisMessage {
 	public void setSubMessage(int subMessage) {
 		this.subMessage = subMessage;
 	}
+
 }
