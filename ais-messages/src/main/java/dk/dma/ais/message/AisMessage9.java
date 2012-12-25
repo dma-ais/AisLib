@@ -154,7 +154,7 @@ public class AisMessage9 extends AisMessage {
 
 	public void parse(BinArray binArray) throws AisMessageException, SixbitException {
 		BinArray sixbit = vdm.getBinArray();
-        if (sixbit.getLength() != 169) {
+        if (sixbit.getLength() < 168) {
             throw new AisMessageException("Message 9 wrong length " + sixbit.getLength());
         }
 
