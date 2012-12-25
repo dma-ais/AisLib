@@ -28,7 +28,7 @@ The project is separated into three parts:
 * Java 1.7
 * Maven 3
 * dma-app https://github.com/dma-dk/dma-app
-* eNav-api https://github.com/dma-dk
+* eNav-api https://github.com/dma-dk/eNav-api
 
 ## Building ##
 
