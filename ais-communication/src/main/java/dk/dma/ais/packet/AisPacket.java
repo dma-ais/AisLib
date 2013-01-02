@@ -188,7 +188,8 @@ public class AisPacket {
                 }
             }
         }
-        return null;
+        // Try to get proprietary MSSIS timestamp        
+        return vdm.getMssisTimestamp();
     }
 
     /**

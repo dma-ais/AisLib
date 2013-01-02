@@ -216,5 +216,5 @@ public class DecodeTest {
 		Assert.assertEquals(abk.getSequence(), 3);
 		Assert.assertEquals(abk.getResult().getRes(), 3);
 	}
-
+	
 }

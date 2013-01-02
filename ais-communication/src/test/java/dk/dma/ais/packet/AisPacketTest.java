@@ -55,6 +55,7 @@ public class AisPacketTest {
 				// Try to get timestamp
 				Date timestamp = aisPacket.getTimestamp();
 				System.out.println("timestamp: " + timestamp);
+				Assert.assertNotNull(timestamp);
 
 
 				// Try to get AIS message
