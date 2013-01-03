@@ -17,14 +17,12 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import com.google.common.hash.Hashing;
+import com.google.common.primitives.Bytes;
 
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
@@ -35,7 +33,6 @@ import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
-import dk.dma.app.io.OutputStreamSink;
 
 /**
  * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag
@@ -44,30 +41,15 @@ import dk.dma.app.io.OutputStreamSink;
  * @author Kasper Nielsen
  */
 public class AisPacket {
-    /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
-    public static final OutputStreamSink<AisPacket> DEFAULT_TEXT_SINK = new OutputStreamSink<AisPacket>() {
-        @Override
-        public void process(OutputStream stream, AisPacket message) throws IOException {
-            stream.write(message.getStringMessage().getBytes());
-            stream.write('\n');
-        }
-    };
 
-    public static final Comparator<AisPacket> TIMESTAMP_COMPARATOR = new Comparator<AisPacket>() {
-        @Override
-        public int compare(AisPacket p1, AisPacket p2) {
-            return Long.compare(p1.getBestTimestamp(), p2.getBestTimestamp());
-        }
-    };
-
-    private final long insertTimestamp;
-    private final String stringMessage;
+    private final transient long insertTimestamp;
+    private final String rawMessage;
     private final String sourceName;
-    private Vdm vdm;
-    private AisMessage aisMessage;
+    private transient Vdm vdm;
+    private AisMessage message;
 
     public AisPacket(String stringMessage, long receiveTimestamp, String sourceName) {
-        this.stringMessage = requireNonNull(stringMessage);
+        this.rawMessage = requireNonNull(stringMessage);
         this.insertTimestamp = receiveTimestamp;
         this.sourceName = sourceName;
     }
@@ -83,7 +65,16 @@ public class AisPacket {
      * @return a 128 hash on the received package
      */
     public byte[] calculateHash128() {
-        return Hashing.murmur3_128().hashString(stringMessage + (sourceName != null ? sourceName : "")).asBytes();
+        return Hashing.murmur3_128().hashString(rawMessage + (sourceName != null ? sourceName : "")).asBytes();
+    }
+
+    public static AisPacket fromByteArray(byte[] array) {
+        byte[] b = Arrays.copyOfRange(array, 1, array.length);
+        return from(new String(b, StandardCharsets.US_ASCII), -1, null);
+    }
+
+    public byte[] toByteArray() {
+        return Bytes.concat(new byte[] { 1 }, rawMessage.getBytes(StandardCharsets.US_ASCII));
     }
 
     public long getBestTimestamp() {
@@ -96,7 +87,7 @@ public class AisPacket {
     }
 
     public String getStringMessage() {
-        return stringMessage;
+        return rawMessage;
     }
 
     /**
@@ -108,11 +99,12 @@ public class AisPacket {
         if (vdm == null) {
             AisPacket packet;
             try {
-                packet = AisPacketReader.from(stringMessage);
+                packet = AisPacketReader.from(rawMessage);
                 if (packet != null) {
                     vdm = packet.getVdm();
                 }
             } catch (SentenceException e) {
+                e.printStackTrace();
                 return null;
             }
         }
@@ -136,14 +128,10 @@ public class AisPacket {
      * @throws AisMessageException
      */
     public AisMessage getAisMessage() throws AisMessageException, SixbitException {
-        if (aisMessage != null) {
-            return aisMessage;
+        if (message != null || getVdm() == null) {
+            return message;
         }
-        if (getVdm() == null) {
-            return null;
-        }
-        this.aisMessage = AisMessage.getInstance(getVdm());
-        return this.aisMessage;
+        return this.message = AisMessage.getInstance(getVdm());
     }
 
     /**
@@ -152,12 +140,7 @@ public class AisPacket {
      * @return
      */
     public boolean isValidMessage() {
-        try {
-            getAisMessage();
-        } catch (AisMessageException | SixbitException e) {
-            return false;
-        }
-        return this.aisMessage != null;
+        return tryGetAisMessage() != null;
     }
 
     /**
@@ -191,24 +174,15 @@ public class AisPacket {
         return null;
     }
 
-    /**
-     * Filters a list of packets according to their timestamp.
-     * @param packets a list of packets
-     * @param start inclusive start
-     * @param end exclusive end
-     * @return
-     */
-    public static List<AisPacket> filterPackets(Iterable<AisPacket> packets, long start, long end) {
-        ArrayList<AisPacket> result=new ArrayList<>();
-        for (AisPacket p : packets) {
-            if (start<= p.getBestTimestamp() && p.getBestTimestamp()<end) {
-                result.add(p);
-            }
-        }
-        return result;
-    }
     public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {
         return new AisPacket(stringMessage, receiveTimestamp, sourceName);
     }
 
+    public String toXml() {
+        return "";
+    }
+
+    public String toJSon() {
+        return "";
+    }
 }
