@@ -3,12 +3,11 @@ package dk.dma.ais.sentence;
 import org.junit.Assert;
 import org.junit.Test;
 
-import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessageException;
 
 public class DecodeStiresTest {
-	
-	private Vdm vdm = new Vdm();
+
+    private Vdm vdm = new Vdm();
 
     /**
      * Test that sentences with preceeding comment blocks can be read
@@ -17,7 +16,7 @@ public class DecodeStiresTest {
      * @throws AisMessageException
      */
     @Test
-    public void basicCbTest() throws SentenceException, SixbitException, AisMessageException {
+    public void basicCbTest() throws SentenceException, AisMessageException {
         cbTest("\\c:1277725284*54\\!ABVDM,1,1,,A,13QKjr001jR94`8RBlB4ESLd45JT,0*5A");
         cbTest("\\1G2:4717,c:1277725285*02\\!BSVDM,2,1,0,A,54S<RB02@guMK8AGN20Lht84j0PDhDp6222222167Pt:75dl0;QjBSk`8888,0*20",
                 1);
@@ -46,15 +45,15 @@ public class DecodeStiresTest {
         cbTest("\\c:1277725312*5A\\!ABVDM,1,1,,A,144i7oPP002:Qc8RBCS=w?wQt5JT,0*23");
     }
 
-    private void cbTest(String line, int expect) throws SentenceException, SixbitException {        
+    private void cbTest(String line, int expect) throws SentenceException {
         int result = vdm.parse(line);
         Assert.assertEquals("vdm parse failed", expect, result);
         if (result == 0) {
-        	vdm = new Vdm();
+            vdm = new Vdm();
         }
     }
 
-    private void cbTest(String line) throws SentenceException, SixbitException {
+    private void cbTest(String line) throws SentenceException {
         cbTest(line, 0);
     }
 

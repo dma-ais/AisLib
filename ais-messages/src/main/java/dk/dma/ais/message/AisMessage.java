@@ -15,6 +15,9 @@
  */
 package dk.dma.ais.message;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
@@ -22,8 +25,6 @@ import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.messaging.MaritimeMessage;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * Abstract base class for all AIS messages
@@ -36,7 +37,7 @@ public abstract class AisMessage extends MaritimeMessage {
     protected int msgId; // 6 bit: message id
     protected int repeat; // 2 bit: How many times message has been repeated
     protected int userId; // 30 bit: MMSI number
-    protected Vdm vdm; // The VDM encapsulating the AIS message
+    protected transient Vdm vdm; // The VDM encapsulating the AIS message
 
     /**
      * Constructor given message id
@@ -120,7 +121,7 @@ public abstract class AisMessage extends MaritimeMessage {
      * @return
      */
     public IProprietarySourceTag getSourceTag() {
-    	LinkedList<IProprietaryTag> tags = vdm.getTags();
+        LinkedList<IProprietaryTag> tags = vdm.getTags();
         if (tags == null) {
             return null;
         }
@@ -149,7 +150,7 @@ public abstract class AisMessage extends MaritimeMessage {
      * @param sourceTag
      */
     public void setTag(IProprietaryTag tag) {
-    	LinkedList<IProprietaryTag> tags = vdm.getTags();
+        LinkedList<IProprietaryTag> tags = vdm.getTags();
         if (tags == null) {
             tags = new LinkedList<>();
         }
@@ -157,7 +158,7 @@ public abstract class AisMessage extends MaritimeMessage {
     }
 
     public void setTags(LinkedList<IProprietaryTag> tags) {
-    	vdm.setTags(tags);
+        vdm.setTags(tags);
     }
 
     /**
@@ -295,7 +296,7 @@ public abstract class AisMessage extends MaritimeMessage {
      * @return
      */
     public String reassemble() {
-    	LinkedList<IProprietaryTag> tags = vdm.getTags();
+        LinkedList<IProprietaryTag> tags = vdm.getTags();
         StringBuilder buf = new StringBuilder();
         if (tags != null) {
             for (IProprietaryTag tag : tags) {

@@ -72,7 +72,7 @@ public abstract class AisTarget implements Serializable {
         // Set last report time
         this.lastReport = new Date();
         // Set MMSI
-        this.mmsi = (int) aisMessage.getUserId();
+        this.mmsi = aisMessage.getUserId();
         // Set source data
         if (sourceData == null) {
             sourceData = new AisTargetSourceData();
