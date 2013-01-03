@@ -16,6 +16,7 @@
 package dk.dma.ais.sentence;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -204,6 +205,28 @@ public abstract class Sentence {
             checksum ^= c;
         }
         return checksum;
+    }
+    
+    /**
+     * Try to get the proprietary MSSIS timestamp appended to the NMEA sentence
+     * @return
+     */
+    public Date getMssisTimestamp() {
+    	int i = this.msg.indexOf('*');
+    	if (i < 0 || i + 4 > this.msg.length()) {
+    		return null;
+    	}
+    	String postfix = this.msg.substring(i + 4).trim();
+    	String[] stamps = StringUtils.split(postfix, ',');
+    	if (stamps.length == 0) {
+    		return null;
+    	}
+    	for (String stamp : stamps) {
+			try {
+				return new Date(Long.parseLong(stamp) * 1000);
+			} catch (NumberFormatException e) { }
+		}    	
+    	return null;
     }
 
     /**

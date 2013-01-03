@@ -171,7 +171,8 @@ public class AisPacket {
                 }
             }
         }
-        return null;
+        // Try to get proprietary MSSIS timestamp        
+        return vdm.getMssisTimestamp();
     }
 
     public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {

@@ -1,5 +1,7 @@
 package dk.dma.ais.sentence;
 
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -168,5 +170,29 @@ public class MessageTest {
         AisMessage msg = AisMessage.getInstance(vdm);
         Assert.assertEquals("Not msg 24", msg.getMsgId(), 24);
     }
+    
+	@Test
+	public void decodeMssisTimestamp() throws SentenceException {
+		String sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E,1357134218\r\n";
+		Vdm vdm = new Vdm();
+        int result = vdm.parse(sentence);
+        Assert.assertEquals("Failed to parse", result, 0);
+        Date timestamp = vdm.getMssisTimestamp();
+        Assert.assertEquals(1357134218000L, timestamp.getTime());
+        
+        sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E";
+        vdm = new Vdm();
+        result = vdm.parse(sentence);
+        Assert.assertEquals("Failed to parse", result, 0);
+        timestamp = vdm.getMssisTimestamp();
+        Assert.assertTrue(timestamp == null);
+        
+        sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E,1357134218,1357134220,1357134222";
+        vdm = new Vdm();
+        result = vdm.parse(sentence);
+        Assert.assertEquals("Failed to parse", result, 0);
+        timestamp = vdm.getMssisTimestamp();
+        Assert.assertEquals(1357134218000L, timestamp.getTime());
+	}
 
 }
