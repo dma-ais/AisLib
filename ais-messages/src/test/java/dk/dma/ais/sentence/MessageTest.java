@@ -204,6 +204,15 @@ public class MessageTest {
 		AisMessage msg = AisMessage.getInstance(vdm);
 		System.out.println("msg: " + msg);
 	}
-
+	
+	@Test
+	public void decodeMsg19() throws SentenceException, AisMessageException, SixbitException {
+		String sentence = "!AIVDM,1,1,,A,C6:`MUh00:;5umTN;<UIM7v0jc0hBM0@bOSQkWf00000S3P62R0P,0*05";
+		Vdm vdm = new Vdm();
+		int result = vdm.parse(sentence);
+		Assert.assertEquals("Failed to parse", result, 0);
+		AisMessage msg = AisMessage.getInstance(vdm);
+		System.out.println("msg: " + msg);		
+	}
 
 }

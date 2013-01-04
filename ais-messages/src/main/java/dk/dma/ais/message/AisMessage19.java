@@ -19,6 +19,7 @@ import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS message 19
@@ -26,7 +27,7 @@ import dk.dma.ais.sentence.Vdm;
  * Extended Class B equipment position report as defined by ITU-R M.1371-4
  * 
  */
-public class AisMessage19 extends AisMessage {
+public class AisMessage19 extends AisMessage implements IVesselPositionMessage {
 
 	/** serialVersionUID. */
 	private static final long serialVersionUID = 1L;
@@ -184,17 +185,13 @@ public class AisMessage19 extends AisMessage {
         this.spare1 = (int) sixbit.getVal(8);
         this.sog = (int) sixbit.getVal(10);
         this.posAcc = (int) sixbit.getVal(1);
-
         this.pos = new AisPosition();
         this.pos.setRawLongitude(sixbit.getVal(28));
         this.pos.setRawLatitude(sixbit.getVal(27));
-
         this.cog = (int) sixbit.getVal(12);
         this.trueHeading = (int) sixbit.getVal(9);
         this.utcSec = (int) sixbit.getVal(6);
-        this.spare2 = (int) sixbit.getVal(2);
-
-		this.spare2 = (int) sixbit.getVal(4);
+        this.spare2 = (int) sixbit.getVal(4);
 		this.name = sixbit.getString(20);
 		this.shipType = (int) sixbit.getVal(8);
 		this.dimBow = (int) sixbit.getVal(9);
@@ -430,6 +427,32 @@ public class AisMessage19 extends AisMessage {
 
 	public void setSpare3(int spare3) {
 		this.spare3 = spare3;
+	}
+	
+	@Override
+    public boolean isPositionValid() {
+        Position geo = pos.getGeoLocation();
+        return (geo != null);
+    }
+
+	@Override
+    public boolean isCogValid() {
+        return cog < 3600;
+    }
+
+	@Override
+    public boolean isSogValid() {
+        return sog < 1023;
+    }
+
+	@Override
+    public boolean isHeadingValid() {
+        return trueHeading < 360;
+    }
+
+	@Override
+	public int getRaim() {
+		return getRaimFlag();
 	}
 	
 }
