@@ -122,7 +122,7 @@ public abstract class AisTarget implements Serializable {
         country = Country.getCountryForMmsi(aisMessage.getUserId());
     }
 
-    public long getMmsi() {
+    public int getMmsi() {
         return mmsi;
     }
 
