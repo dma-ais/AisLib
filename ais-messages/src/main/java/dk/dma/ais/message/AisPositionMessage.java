@@ -325,7 +325,7 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
 
     public boolean isPositionValid() {
         Position geo = pos.getGeoLocation();
-        return geo.getLatitude() <= 90 && geo.getLongitude() <= 180;
+        return (geo != null);
     }
 
     public boolean isCogValid() {

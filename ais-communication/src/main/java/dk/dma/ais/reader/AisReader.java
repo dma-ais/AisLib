@@ -241,7 +241,7 @@ public abstract class AisReader extends Thread {
 		if (addDmaTag && packetReader.getSourceName() != null) {
 			DmaSourceTag dmaSourceTag = new DmaSourceTag();
 			dmaSourceTag.setSourceName(packetReader.getSourceName());
-			packet.getVdm().getTags().add(dmaSourceTag);
+			packet.getVdm().setTag(dmaSourceTag);
 		}
 
 		

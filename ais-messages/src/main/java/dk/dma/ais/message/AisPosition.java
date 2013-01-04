@@ -66,7 +66,11 @@ public class AisPosition {
      * @return
      */
     public Position getGeoLocation() {
-        return Position.create(getLatitude() / resolution / 60.0, getLongitude() / resolution / 60.0);
+    	try {
+    		return Position.create(getLatitude() / resolution / 60.0, getLongitude() / resolution / 60.0);
+    	} catch (IllegalArgumentException e) {
+    		return null;
+    	} 
     }
 
     /**

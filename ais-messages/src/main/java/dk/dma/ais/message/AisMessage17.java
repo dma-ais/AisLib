@@ -72,8 +72,13 @@ public class AisMessage17 extends AisMessage {
         this.seqNum = (int) sixbit.getVal(3);
         this.dataWordCount = (int) sixbit.getVal(5);
         this.health = (int) sixbit.getVal(3);
+        
+        // How many datawords are actually in the remaining part
+        // How to handle if length - 120 does not match the
+        // indicated data word count
+        
         this.dataWords = new int[this.dataWordCount];
-        for (int i = 0; i < this.dataWordCount; i++) {
+        for (int i = 0; i < this.dataWordCount && sixbit.hasMoreBits(); i++) {
             this.dataWords[i] = (int) sixbit.getVal(24);
         }
     }

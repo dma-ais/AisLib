@@ -194,5 +194,16 @@ public class MessageTest {
         timestamp = vdm.getMssisTimestamp();
         Assert.assertEquals(1357134218000L, timestamp.getTime());
 	}
+	
+	@Test
+	public void decodeMsg17() throws SentenceException, AisMessageException, SixbitException {
+		String sentence = "!AIVDM,1,1,,,A0476C1=qHWw82JrVgH`4?mmsRL1,0*09";
+		Vdm vdm = new Vdm();
+		int result = vdm.parse(sentence);
+		Assert.assertEquals("Failed to parse", result, 0);
+		AisMessage msg = AisMessage.getInstance(vdm);
+		System.out.println("msg: " + msg);
+	}
+
 
 }
