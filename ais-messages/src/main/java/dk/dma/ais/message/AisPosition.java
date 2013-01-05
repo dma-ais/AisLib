@@ -66,11 +66,12 @@ public class AisPosition {
      * @return
      */
     public Position getGeoLocation() {
-    	try {
-    		return Position.create(getLatitude() / resolution / 60.0, getLongitude() / resolution / 60.0);
-    	} catch (IllegalArgumentException e) {
-    		return null;
-    	} 
+    	double lat = getLatitude() / resolution / 60.0;
+        double lon = getLongitude() / resolution / 60.0;
+        if (Position.isValid(lat, lon)) {
+            return Position.create(lat, lon);
+        }
+        return null;
     }
 
     /**
@@ -179,15 +180,6 @@ public class AisPosition {
     public String toString() {
         return "(" + getRawLatitude() + "," + getRawLongitude() + ") = (" + getLatitude() + ","
                 + getLongitude() + ")";
-    }
-
-    public Position tryGetGeoLocation() {
-        double lat = getLatitude() / resolution / 60.0;
-        double lon = getLongitude() / resolution / 60.0;
-        if (Position.isValid(lat, lon)) {
-            return Position.create(lat, lon);
-        }
-        return null;
     }
 
 }
