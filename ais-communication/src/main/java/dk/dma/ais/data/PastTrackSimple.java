@@ -24,13 +24,13 @@ import dk.dma.enav.model.geometry.Position;
 /**
  * Class to hold track of a vessel target
  */
-public class PastTrack implements Serializable {
+public class PastTrackSimple implements IPastTrack, Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private ArrayList<PastTrackPoint> points = new ArrayList<>();
 
-    public PastTrack() {
+    public PastTrackSimple() {
 
     }
 
@@ -66,13 +66,13 @@ public class PastTrack implements Serializable {
         points.add(newPoint);
     }
 
-    public synchronized void cleanup(int ttl) {
+    public void cleanup(int ttl) {
     	while (points.size() > 0 && points.get(0).isDead(ttl)) {
     		points.remove(0);
     	}
     }
 
-    public synchronized List<PastTrackPoint> getPoints() {
+    public List<PastTrackPoint> getPoints() {
         List<PastTrackPoint> list = new ArrayList<>(points);
         return list;
     }

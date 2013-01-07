@@ -27,11 +27,11 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
 
     private static final long serialVersionUID = 1L;
 
-    private double lat;
-    private double lon;
-    private double cog;
-    private double sog;
-    private Date time;
+    private final double lat;
+    private final double lon;
+    private final double cog;
+    private final double sog;
+    private final Date time;
 
     public PastTrackPoint(AisVesselPosition vesselPosition) {
         Position pos = vesselPosition.getPos();
@@ -39,9 +39,11 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
         this.lon = pos.getLongitude();
         this.cog = vesselPosition.getCog() != null ? vesselPosition.getCog() : 0;
         this.sog = vesselPosition.getSog() != null ? vesselPosition.getSog() : 0;
-        this.time = vesselPosition.getSourceTimestamp();
-        if (this.time == null) {
+        Date ts = vesselPosition.getSourceTimestamp();
+        if (ts == null) {
             this.time = vesselPosition.received;
+        } else {
+        	this.time = ts;
         }
     }
 
@@ -54,40 +56,20 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
         return lat;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
     public double getLon() {
         return lon;
-    }
-
-    public void setLon(double lon) {
-        this.lon = lon;
     }
 
     public double getCog() {
         return cog;
     }
 
-    public void setCog(double cog) {
-        this.cog = cog;
-    }
-
     public double getSog() {
         return sog;
     }
 
-    public void setSog(double sog) {
-        this.sog = sog;
-    }
-
     public Date getTime() {
         return time;
-    }
-
-    public void setTime(Date time) {
-        this.time = time;
     }
 
     @Override
