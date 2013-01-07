@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import dk.dma.enav.model.geometry.Position;
+
 /**
  * Class to hold track of a vessel target
  */
@@ -50,7 +52,17 @@ public class PastTrack implements Serializable {
         // No previous points allowed
         if (lastPoint != null && lastPoint.getTime().after(newPoint.getTime())) {
         	return;
-        }        
+        }
+        
+        // Downsample on distance
+        if (lastPoint != null) {
+        	Position lastPos = Position.create(lastPoint.getLat(), lastPoint.getLon());
+        	Position thisPos = Position.create(newPoint.getLat(), newPoint.getLon());
+        	if (thisPos.rhumbLineDistanceTo(lastPos) < minDist) {
+        		return;
+        	}
+        }
+        
         points.add(newPoint);
     }
 
