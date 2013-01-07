@@ -64,8 +64,8 @@ public class PastTrackSortedSet implements IPastTrack, Serializable {
 	}
 
 	public void cleanup(int ttl) {
-		while (points.size() > 0 && points.last().isDead(ttl)) {
-			points.pollLast();
+		while (points.size() > 0 && points.first().isDead(ttl)) {
+			points.pollFirst();
 		}
 	}
 
