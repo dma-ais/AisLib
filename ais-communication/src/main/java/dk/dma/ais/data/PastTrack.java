@@ -17,12 +17,7 @@ package dk.dma.ais.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.TreeSet;
-
-import dk.dma.enav.model.geometry.Position;
 
 /**
  * Class to hold track of a vessel target
@@ -31,13 +26,13 @@ public class PastTrack implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private NavigableSet<PastTrackPoint> points = new TreeSet<>();
+    private ArrayList<PastTrackPoint> points = new ArrayList<>();
 
     public PastTrack() {
 
     }
 
-    public synchronized void addPosition(AisVesselPosition vesselPosition, int minDist) {
+    public void addPosition(AisVesselPosition vesselPosition, int minDist) {
         if (vesselPosition == null || vesselPosition.getPos() == null) {
             return;
         }
@@ -49,82 +44,24 @@ public class PastTrack implements Serializable {
             return;
         }
 
+        PastTrackPoint lastPoint = (points.size() > 0) ? points.get(points.size() - 1) : null;
         PastTrackPoint newPoint = new PastTrackPoint(vesselPosition);
+        
+        // No previous points allowed
+        if (lastPoint != null && lastPoint.getTime().after(newPoint.getTime())) {
+        	return;
+        }        
         points.add(newPoint);
-
-        // Downsample. Find neighbour points.
-        PastTrackPoint prevPoint = null;
-        PastTrackPoint nextPoint = null;
-        Iterator<PastTrackPoint> it = null;
-        boolean found = false;
-        for (it = points.descendingIterator(); it.hasNext();) {
-            PastTrackPoint point = it.next();
-
-            if (newPoint == point) {
-                // Found point
-                found = true;
-                break;
-            }
-
-            nextPoint = point;
-        }
-        if (it.hasNext()) {
-            prevPoint = it.next();
-        }
-
-        if (!found) {
-            return;
-        }
-        Position pointPos = Position.create(newPoint.getLat(), newPoint.getLon());
-        if (prevPoint != null) {
-            Position prevPos = Position.create(prevPoint.getLat(), prevPoint.getLon());
-            if (prevPos.rhumbLineDistanceTo(pointPos) < minDist) {
-                points.remove(prevPoint);
-            }
-        }
-        if (nextPoint != null) {
-            Position nextPos = Position.create(nextPoint.getLat(), nextPoint.getLon());
-            if (nextPos.rhumbLineDistanceTo(pointPos) < minDist) {
-                points.remove(newPoint);
-            }
-        }
-
-        // if (points.size() > 3) {
-        // prevPoint = null;
-        // System.out.println("----");
-        // for (it = points.descendingIterator(); it.hasNext();) {
-        // PastTrackPoint point = it.next();
-        // if (prevPoint != null) {
-        // pointPos = new GeoLocation(point.getLat(), point.getLon());
-        // GeoLocation lastPos = new GeoLocation(prevPoint.getLat(), prevPoint.getLon());
-        // System.out.println("   dist: " + pointPos.getRhumbLineDistance(lastPos));
-        // if (pointPos.getRhumbLineDistance(lastPos) < 100) {
-        // System.out.println("DIST ALARM");
-        // System.exit(-1);
-        // }
-        // if (prevPoint.getTime().getTime() < point.getTime().getTime()) {
-        // System.out.println("TIME ALARM");
-        // System.exit(-1);
-        // }
-        // }
-        // System.out.println("point: " + point);
-        // prevPoint = point;
-        // }
-        // }
-
     }
 
     public synchronized void cleanup(int ttl) {
-        while (points.size() > 0 && points.last().isDead(ttl)) {
-            points.pollLast();
-        }
+    	while (points.size() > 0 && points.get(0).isDead(ttl)) {
+    		points.remove(0);
+    	}
     }
 
     public synchronized List<PastTrackPoint> getPoints() {
-        List<PastTrackPoint> list = new ArrayList<>();
-        for (PastTrackPoint point : points) {
-            list.add(point);
-        }
+        List<PastTrackPoint> list = new ArrayList<>(points);
         return list;
     }
 
