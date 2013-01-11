@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import dk.dma.app.io.OutputStreamSink;
@@ -29,21 +28,6 @@ import dk.dma.app.io.OutputStreamSink;
  * @author Kasper Nielsen
  */
 public class AisPackets {
-
-    public static final Comparator<AisPacket> TIMESTAMP_COMPARATOR = new Comparator<AisPacket>() {
-        @Override
-        public int compare(AisPacket p1, AisPacket p2) {
-            return Long.compare(p1.getBestTimestamp(), p2.getBestTimestamp());
-        }
-    };
-
-    /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
-    public static final OutputStreamSink<AisPacket> OUTPUT_TO_JSON = new OutputStreamSink<AisPacket>() {
-        @Override
-        public void process(OutputStream stream, AisPacket message) throws IOException {
-            stream.write(message.toJSon().getBytes(StandardCharsets.US_ASCII));
-        }
-    };
 
     /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_TEXT = new OutputStreamSink<AisPacket>() {
@@ -66,16 +50,7 @@ public class AisPackets {
                 stream.write(str.getBytes(StandardCharsets.US_ASCII));
                 stream.write("</br>".getBytes(StandardCharsets.US_ASCII));
                 stream.write('\n');
-                ;
             }
-        }
-    };
-
-    /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
-    public static final OutputStreamSink<AisPacket> OUTPUT_TO_XML = new OutputStreamSink<AisPacket>() {
-        @Override
-        public void process(OutputStream stream, AisPacket message) throws IOException {
-            stream.write(message.toXml().getBytes(StandardCharsets.US_ASCII));
         }
     };
 
@@ -90,7 +65,7 @@ public class AisPackets {
      *            exclusive end
      * @return
      */
-    public static List<AisPacket> filterPacketList(Iterable<AisPacket> packets, long start, long end) {
+    public static List<AisPacket> filterPacketsByTime(Iterable<AisPacket> packets, long start, long end) {
         ArrayList<AisPacket> result = new ArrayList<>();
         for (AisPacket p : packets) {
             if (start <= p.getBestTimestamp() && p.getBestTimestamp() < end) {

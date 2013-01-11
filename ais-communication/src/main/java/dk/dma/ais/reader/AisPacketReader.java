@@ -33,164 +33,164 @@ import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
 
 /**
- * Class to parse lines in a stream containing VDM sentences. 
+ * Class to parse lines in a stream containing VDM sentences.
  * The class will deliver packets containing complete VDM and associated
  * comment blocks and proprietary tags.
  */
 public class AisPacketReader {
-	
-	private static final int SENTENCE_TRACE_COUNT = 20;
-	
-	/**
-	 * The name of the source
-	 */
-	private String sourceName;
-	
-	/**
-	 * A received VDO/VDM
-	 */
-	private Vdm vdm = new Vdm();
 
-	/**
-	 * List of the raw lines of the AIS packet
-	 */
-	private List<String> packetLines = new ArrayList<>();
+    private static final int SENTENCE_TRACE_COUNT = 20;
 
-	/**
-	 * Possible proprietary tags for current VDM
-	 */
-	private Deque<IProprietaryTag> tags = new ArrayDeque<>();
-	
-	private Deque<String> sentenceTrace = new ArrayDeque<>(SENTENCE_TRACE_COUNT);
+    /**
+     * The name of the source
+     */
+    private String sourceName;
 
-	/**
-	 * Constructor
-	 */
-	public AisPacketReader() {
+    /**
+     * A received VDO/VDM
+     */
+    private Vdm vdm = new Vdm();
 
-	}
+    /**
+     * List of the raw lines of the AIS packet
+     */
+    private List<String> packetLines = new ArrayList<>();
 
-	/**
-	 * Handle a single line. If a complete packet is assembled the package will be returned. Otherwise null is returned.
-	 * 
-	 * @param line
-	 * @return
-	 * @throws SentenceException 
-	 * @throws SixbitException 
-	 */
-	public AisPacket readLine(String line) throws SentenceException {
-		
-		// Save line for later trace
-		while (sentenceTrace.size() > SENTENCE_TRACE_COUNT) {
-			sentenceTrace.removeFirst();
-		}
-		sentenceTrace.addLast(line);
+    /**
+     * Possible proprietary tags for current VDM
+     */
+    private Deque<IProprietaryTag> tags = new ArrayDeque<>();
 
-		// Ignore everything else than sentences
-		if (!Sentence.hasSentence(line)) {
-			// Gracefully ignore empty lines
-			if (line.length() == 0) {
-				newVdm();
-				return null;
-			}			
-			// Special case is a single comment without sentence
-			if (CommentBlock.hasCommentBlock(line)) {
-				packetLines.add(line);
-				try { 
-					vdm.addSingleCommentBlock(line);
-				} catch (SentenceException e) {
-					newVdm();
-					throw new SentenceException(e, sentenceTrace);
-				}
-				return null;
-			} else {
-				// Non sentence line
-				newVdm();
-				throw new SentenceException("Non sentence line in stream: " + line, sentenceTrace);				
-			}
-		}
+    private Deque<String> sentenceTrace = new ArrayDeque<>(SENTENCE_TRACE_COUNT);
 
-		// Add line to raw packet
-		packetLines.add(line);
+    /**
+     * Constructor
+     */
+    public AisPacketReader() {
 
-		// Check if proprietary line
-		if (ProprietaryFactory.isProprietaryTag(line)) {
-			// Try to parse with one the registered factories in META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
-			IProprietaryTag tag = ProprietaryFactory.parseTag(line);
-			if (tag != null) {
-				tags.add(tag);
-			}
-			return null;
-		}
+    }
 
-		// Check if VDM. If not the possible current VDM is broken.
-		if (!Vdm.isVdm(line)) {
-			newVdm();
-			return null;
-		}
-		
-		// Parse VDM
-		int result;
-		try {
-			result = vdm.parse(line);
-		} catch (SentenceException e) {
-			newVdm();
-			throw new SentenceException(e, sentenceTrace);		
-		}
-		
-		// If not complete package wait for more
-		if (result != 0) {
-			return null;
-		}
-		
-		// Complete package have been read
-    	
-		// Put proprietary tags on vdm
-    	if (tags.size() > 0) {
-    		vdm.setTags(new LinkedList<>(tags));
-    	}
-    	
-    	AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis(), sourceName);
-		
-    	newVdm();
+    /**
+     * Handle a single line. If a complete packet is assembled the package will be returned. Otherwise null is returned.
+     * 
+     * @param line
+     * @return
+     * @throws SentenceException
+     * @throws SixbitException
+     */
+    public AisPacket readLine(String line) throws SentenceException {
 
-		return packet;
-	}
+        // Save line for later trace
+        while (sentenceTrace.size() > SENTENCE_TRACE_COUNT) {
+            sentenceTrace.removeFirst();
+        }
+        sentenceTrace.addLast(line);
 
-	public void newVdm() {
-		vdm = new Vdm();
-		tags.clear();
-		packetLines.clear();
-	}
-	
-	public String getSourceName() {
-		return sourceName;
-	}
-	
-	public void setSourceName(String sourceName) {
-		this.sourceName = sourceName;
-	}
+        // Ignore everything else than sentences
+        if (!Sentence.hasSentence(line)) {
+            // Gracefully ignore empty lines
+            if (line.length() == 0) {
+                newVdm();
+                return null;
+            }
+            // Special case is a single comment without sentence
+            if (CommentBlock.hasCommentBlock(line)) {
+                packetLines.add(line);
+                try {
+                    vdm.addSingleCommentBlock(line);
+                } catch (SentenceException e) {
+                    newVdm();
+                    throw new SentenceException(e, sentenceTrace);
+                }
+                return null;
+            } else {
+                // Non sentence line
+                newVdm();
+                throw new SentenceException("Non sentence line in stream: " + line, sentenceTrace);
+            }
+        }
 
-	/**
-	 * Construct AisPacket from raw packet string
-	 * @param messageString
-	 * @param optional factory
-	 * @return
-	 * @throws SentenceException
-	 */
-	public static AisPacket from(String messageString) throws SentenceException {
-		AisPacket packet = null;
-		AisPacketReader packetReader = new AisPacketReader();
-		String[] lines = StringUtils.split(messageString, "\n");		
-		for (String line : lines) {
-			packet = packetReader.readLine(line);
-			if (packet != null) {
-				return packet;
-			}
-		}
-		return null;
-	}
-	
-	
+        // Add line to raw packet
+        packetLines.add(line);
+
+        // Check if proprietary line
+        if (ProprietaryFactory.isProprietaryTag(line)) {
+            // Try to parse with one the registered factories in META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
+            IProprietaryTag tag = ProprietaryFactory.parseTag(line);
+            if (tag != null) {
+                tags.add(tag);
+            }
+            return null;
+        }
+
+        // Check if VDM. If not the possible current VDM is broken.
+        if (!Vdm.isVdm(line)) {
+            newVdm();
+            return null;
+        }
+
+        // Parse VDM
+        int result;
+        try {
+            result = vdm.parse(line);
+        } catch (SentenceException e) {
+            newVdm();
+            throw new SentenceException(e, sentenceTrace);
+        }
+
+        // If not complete package wait for more
+        if (result != 0) {
+            return null;
+        }
+
+        // Complete package have been read
+
+        // Put proprietary tags on vdm
+        if (tags.size() > 0) {
+            vdm.setTags(new LinkedList<>(tags));
+        }
+
+        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis(), sourceName);
+
+        newVdm();
+
+        return packet;
+    }
+
+    public void newVdm() {
+        vdm = new Vdm();
+        tags.clear();
+        packetLines.clear();
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    /**
+     * Construct AisPacket from raw packet string
+     * @param messageString
+     * @param optional factory
+     * @return
+     * @throws SentenceException
+     */
+    public static AisPacket from(String messageString) throws SentenceException {
+        AisPacket packet = null;
+        AisPacketReader packetReader = new AisPacketReader();
+        String[] lines = StringUtils.split(messageString, "\n");
+        for (String line : lines) {
+            packet = packetReader.readLine(line);
+            if (packet != null) {
+                return packet;
+            }
+        }
+        return null;
+    }
+
+
 
 }
