@@ -94,12 +94,10 @@ public abstract class AisTarget implements Serializable {
                     sourceRegion = ghTag.getRegion();
                     sourceCountry = ghTag.getCountry();
                     sourceBs = ghTag.getBaseMmsi();
-                    if (ghTag.getTimestamp() != null) {
-                        this.lastReport = ghTag.getTimestamp();
-                    }
                 }
             }
         }
+        this.lastReport = aisMessage.getVdm().getTimestamp();
 
         sourceData.setSourceSystem(sourceSystem);
         if (sourceRegion != null) {

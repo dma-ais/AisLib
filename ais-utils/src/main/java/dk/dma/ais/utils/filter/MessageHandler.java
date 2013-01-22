@@ -76,15 +76,16 @@ public class MessageHandler implements MaritimeMessageHandler<AisMessage> {
         }
 
         // Maybe check for start date
-        if (filter.getStartDate() != null && sourceTag.getTimestamp() != null) {
-            if (sourceTag.getTimestamp().before(filter.getStartDate())) {
+        Date timestamp = aisMessage.getVdm().getTimestamp();
+        if (filter.getStartDate() != null && timestamp != null) {
+            if (timestamp.before(filter.getStartDate())) {
                 return;
             }
         }
 
         // Maybe check for end date
-        if (filter.getEndDate() != null && sourceTag.getTimestamp() != null) {
-            if (sourceTag.getTimestamp().after(filter.getEndDate())) {
+        if (filter.getEndDate() != null && timestamp != null) {
+            if (timestamp.after(filter.getEndDate())) {
                 System.exit(0);
             }
         }
