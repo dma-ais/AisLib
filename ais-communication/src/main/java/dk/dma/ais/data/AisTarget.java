@@ -30,6 +30,7 @@ import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.GatehouseSourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.enav.model.Country;
 
 /**
@@ -105,8 +106,17 @@ public abstract class AisTarget implements Serializable {
                 sourceRegion = null;
             } else {
                 // TODO This mapping should come from a tag in the future
-                if (sourceRegion.equals("802") || sourceRegion.equals("804") || sourceRegion.equals("808")) {
+                if (sourceRegion.equals("802") || sourceRegion.equals("804")) {
                     sourceType = "SAT";
+                }                
+                if (sourceRegion.equals("808")) {
+                	CommentBlock cb = aisMessage.getVdm().getCommentBlock();
+                	if (cb != null) {
+                		String source = cb.getString("s");
+                		if (source != null && source.contains("ORBCOMM999")) {
+                			sourceType = "SAT";
+                		}
+                	}                	
                 }
             }
         }

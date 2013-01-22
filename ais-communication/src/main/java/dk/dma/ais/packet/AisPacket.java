@@ -27,9 +27,12 @@ import com.google.common.primitives.Bytes;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
+import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.model.geometry.PositionTime;
 
 /**
  * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag
@@ -37,7 +40,7 @@ import dk.dma.ais.sentence.Vdm;
  * 
  * @author Kasper Nielsen
  */
-public class AisPacket {
+public class AisPacket implements Comparable<AisPacket> {
 
     private final transient long insertTimestamp;
     private final String rawMessage;
@@ -152,15 +155,22 @@ public class AisPacket {
         return vdm.getTimestamp();
     }
 
+    public PositionTime tryGetPositionTime() {
+        AisMessage m = tryGetAisMessage();
+        if (m instanceof IPositionMessage) {
+            Position p = ((IPositionMessage) m).getPos().getGeoLocation();
+            return p == null ? null : PositionTime.create(p, getBestTimestamp());
+        }
+        return null;
+
+    }
     public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {
         return new AisPacket(stringMessage, receiveTimestamp, sourceName);
     }
 
-    public String toXml() {
-        return "";
-    }
-
-    public String toJSon() {
-        return "";
+    /** {@inheritDoc} */
+    @Override
+    public int compareTo(AisPacket p) {
+        return Long.compare(getTimestamp().getTime(), p.getTimestamp().getTime());
     }
 }
