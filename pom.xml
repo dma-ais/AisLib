@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>dk.dma</groupId>
-		<artifactId>dma-root-pom</artifactId>
-		<version>1</version>
-	</parent>
+  <parent>
+    <groupId>dk.dma</groupId>
+    <artifactId>dma-root-pom</artifactId>
+    <version>1</version>
+  </parent>
 
-	<groupId>dk.dma.ais</groupId>
-	<artifactId>ais-parent</artifactId>
-	<version>0.1-SNAPSHOT</version>
-	<name>AIS Parent</name>
-	<packaging>pom</packaging>
-	<description>This parent pom for AIS</description>
+  <groupId>dk.dma.ais</groupId>
+  <artifactId>ais-parent</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <name>AIS Parent</name>
+  <packaging>pom</packaging>
+  <description>This parent pom for AIS</description>
 
-	<modules>
-		<module>ais-communication</module>
-		<module>ais-messages</module>
-		<module>ais-utils</module>
-	</modules>
+  <modules>
+    <module>ais-communication</module>
+    <module>ais-messages</module>
+    <module>ais-utils</module>
+  </modules>
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.9</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.6</version>
-			<scope>test</scope>
-		</dependency>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.9</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.6</version>
+      <scope>test</scope>
+    </dependency>
 
-	</dependencies>
+  </dependencies>
 
-	<repositories>
-		<repository>
-			<id>dma-releases</id>
-			<name>Dma Release Repository</name>
-			<url>http://repository-dma.forge.cloudbees.com/release/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+  <repositories>
+    <repository>
+      <id>dma-releases</id>
+      <name>Dma Release Repository</name>
+      <url>http://repository-dma.forge.cloudbees.com/release/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>
