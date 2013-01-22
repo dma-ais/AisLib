@@ -228,6 +228,35 @@ public abstract class Sentence {
 		}    	
     	return null;
     }
+    
+    /**
+     * Try to get timestamp in this order:
+     * Comment block timestamp, proprietary tag timestamp and MSSIS timestamp
+     * @return
+     */
+    public Date getTimestamp() {
+    	// Try comment block first
+        CommentBlock cb = getCommentBlock();
+        if (cb != null) {
+            Long ts = cb.getTimestamp();
+            if (ts != null) {
+                return new Date(ts * 1000);
+            }
+        }
+        // Try from proprietary source tags
+        if (getTags() != null) {
+            for (IProprietaryTag tag : getTags()) {
+                if (tag instanceof IProprietarySourceTag) {
+                    Date t = ((IProprietarySourceTag) tag).getTimestamp();
+                    if (t != null) {
+                        return t;
+                    }
+                }
+            }
+        }
+        // Try to get proprietary MSSIS timestamp        
+        return getMssisTimestamp();
+    }
 
     /**
      * Check calculated checksum with checksum indicated in sentence line

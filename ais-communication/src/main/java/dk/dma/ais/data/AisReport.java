@@ -39,9 +39,7 @@ public abstract class AisReport implements Serializable {
     public void update(AisMessage aisMessage) {
         this.mmsi = aisMessage.getUserId();
         this.received = new Date();
-        if (aisMessage.getSourceTag() != null && aisMessage.getSourceTag().getTimestamp() != null) {
-            this.sourceTimestamp = aisMessage.getSourceTag().getTimestamp();
-        }
+        this.sourceTimestamp = aisMessage.getVdm().getTimestamp();
     }
 
     public Date getReceived() {
