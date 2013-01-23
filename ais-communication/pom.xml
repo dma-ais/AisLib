@@ -21,8 +21,8 @@
     </dependency>
 
     <dependency>
-      <groupId>dk.dma.app</groupId>
-      <artifactId>dma-app</artifactId>
+      <groupId>dk.dma.commons</groupId>
+      <artifactId>dma-commons-app</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
