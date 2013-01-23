@@ -35,16 +35,12 @@ public class Vdm extends EncapsulatedSentence {
     /**
      * Pattern for recognizing VDM/VDO sentences
      */
-    private static final Pattern vdmPattern = Pattern.compile("^.*!..VD(M|O).*$", Pattern.DOTALL);
+    private static final Pattern VDM_PATTERN = Pattern.compile("^.*!..VD(M|O).*$", Pattern.DOTALL);
 
     /**
      * Determines is this is VDM or VDO
      */
-    private boolean ownMessage = false;
-
-    public Vdm() {
-        super();
-    }
+    private boolean ownMessage;
 
     /**
      * Implemented parse method. See {@link EncapsulatedSentence}
@@ -82,9 +78,9 @@ public class Vdm extends EncapsulatedSentence {
         // Six bit field
         this.sixbitString += fields[5];
         try {
-        	binArray.appendSixbit(fields[5], padBits);
+            binArray.appendSixbit(fields[5], padBits);
         } catch (SixbitException e) {
-        	throw new SentenceException("Invalid sixbit in VDM: " + e.getMessage() + ": " + line);
+            throw new SentenceException("Invalid sixbit in VDM: " + e.getMessage() + ": " + line);
         }
 
         // Complete packet?
@@ -108,7 +104,7 @@ public class Vdm extends EncapsulatedSentence {
      * @return
      */
     public static boolean isVdm(String line) {
-        return vdmPattern.matcher(line).matches();
+        return VDM_PATTERN.matcher(line).matches();
     }
 
     /**
@@ -125,7 +121,7 @@ public class Vdm extends EncapsulatedSentence {
      */
     @Override
     public String getEncoded() {
-        formatter = (isOwnMessage()) ? "VDO" : "VDM";
+        formatter = isOwnMessage() ? "VDO" : "VDM";
         super.encode();
         return finalEncode();
     }
@@ -148,7 +144,7 @@ public class Vdm extends EncapsulatedSentence {
         int padBits = encoder.getPadBits();
 
         // Number of sentences necessary
-        int sentenceCount = (encoded.length() / DATA_SENTENCE_MAX_LENGTH) + 1;
+        int sentenceCount = encoded.length() / DATA_SENTENCE_MAX_LENGTH + 1;
         String[] sentences = new String[sentenceCount];
 
         // Split the string
@@ -190,7 +186,7 @@ public class Vdm extends EncapsulatedSentence {
             sequence = 0;
         }
 
-        int sentenceCount = (sixbitString.length() / DATA_SENTENCE_MAX_LENGTH) + 1;
+        int sentenceCount = sixbitString.length() / DATA_SENTENCE_MAX_LENGTH + 1;
         Vdm[] sentences = new Vdm[sentenceCount];
         // Split the string
         for (int i = 0; i < sentenceCount; i++) {

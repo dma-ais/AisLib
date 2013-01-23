@@ -45,7 +45,7 @@ public class SendThread extends Thread {
     /**
      * The returned ABK
      */
-    private Abk abk = null;
+    private Abk abk;
 
     public SendThread(String hash, ISendResultListener resultListener, SendThreadPool sendThreadPool) {
         setDaemon(true);

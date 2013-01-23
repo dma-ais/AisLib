@@ -26,11 +26,11 @@ import dk.dma.ais.reader.SendException;
 import dk.dma.ais.reader.SendRequest;
 import dk.dma.ais.sentence.Abk;
 
-public class SrmSend implements ISendResultListener {
+public final class SrmSend implements ISendResultListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(SrmSend.class);
 
-    private Abk abk = null;
+    private Abk abk;
     private Boolean abkReceived = false;
     private AisReader aisReader;
 

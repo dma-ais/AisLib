@@ -1,4 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Safety Administration
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ public class AisMessageParser {
                 }
             });
 
-            String lines[] = string.split("\\r?\\n");
+            String[] lines = string.split("\\r?\\n");
             for (String s : lines) {
                 dummy.handleLine(s);
             }

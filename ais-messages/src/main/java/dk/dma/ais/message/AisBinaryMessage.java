@@ -29,11 +29,11 @@ public abstract class AisBinaryMessage extends AisMessage {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
-    protected int spare = 0;
+    protected int spare;
     protected int dac; // 10 bits: Designated area code (DAC)
     protected int fi; // 6 bits: Function identifier
     protected BinArray data;
-    protected AisApplicationMessage appMessage = null;
+    protected AisApplicationMessage appMessage;
 
     /**
      * Construct empty binary message with msgId

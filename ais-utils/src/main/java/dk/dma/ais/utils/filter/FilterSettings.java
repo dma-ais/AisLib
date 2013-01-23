@@ -26,8 +26,8 @@ public class FilterSettings {
     private final Set<Long> baseStations = new HashSet<>();
     private final Set<String> countries = new HashSet<>();
     private final Set<String> regions = new HashSet<>();
-    private Date startDate = null;
-    private Date endDate = null;
+    private Date startDate;
+    private Date endDate;
 
     public FilterSettings() {
 

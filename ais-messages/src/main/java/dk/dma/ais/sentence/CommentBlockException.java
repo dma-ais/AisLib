@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,14 +16,14 @@
 package dk.dma.ais.sentence;
 
 /**
- * Comment block exception 
+ * Comment block exception
  */
 public class CommentBlockException extends Exception {
-	
-	private static final long serialVersionUID = 1L;
 
-	public CommentBlockException(String msg) {
-		super(msg);
-	}
+    private static final long serialVersionUID = 1L;
+
+    public CommentBlockException(String msg) {
+        super(msg);
+    }
 
 }

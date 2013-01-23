@@ -25,7 +25,7 @@ import dk.dma.enav.model.geometry.Position;
  */
 public class AisPosition {
 
-    private int bitCorrection = 0;
+    private int bitCorrection;
     private long rawLatitude;
 
     private long rawLongitude;
@@ -66,7 +66,7 @@ public class AisPosition {
      * @return
      */
     public Position getGeoLocation() {
-    	double lat = getLatitude() / resolution / 60.0;
+        double lat = getLatitude() / resolution / 60.0;
         double lon = getLongitude() / resolution / 60.0;
         if (Position.isValid(lat, lon)) {
             return Position.create(lat, lon);

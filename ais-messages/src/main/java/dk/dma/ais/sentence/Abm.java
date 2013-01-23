@@ -35,7 +35,7 @@ public class Abm extends SendSentence {
     }
 
     public static boolean isAbm(String line) {
-        return (line.indexOf("!AIABM") >= 0 || line.indexOf("!BSABM") >= 0);
+        return line.indexOf("!AIABM") >= 0 || line.indexOf("!BSABM") >= 0;
     }
 
     /**

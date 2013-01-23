@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +49,7 @@ public class AisClassAStatic extends AisVesselStatic {
         if (this.destination.length() == 0) {
             this.destination = null;
         }
-        this.draught = (msg5.getDraught() == 0 ? null : msg5.getDraught() / 10.0);
+        this.draught = msg5.getDraught() == 0 ? null : msg5.getDraught() / 10.0;
         this.eta = msg5.getEtaDate();
         this.posType = (byte) msg5.getPosType();
         this.version = (byte) msg5.getVersion();

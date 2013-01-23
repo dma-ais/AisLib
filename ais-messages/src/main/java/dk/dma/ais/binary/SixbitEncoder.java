@@ -28,7 +28,7 @@ public class SixbitEncoder {
     /**
      * The number of padding bits
      */
-    private int padBits = 0;
+    private int padBits;
 
     public SixbitEncoder() {}
 

@@ -28,10 +28,10 @@ public class AisMessage12 extends AisMessage {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
-    private int seqNum = 0; // 2 bits: sequence number
+    private int seqNum; // 2 bits: sequence number
     private long destination; // 30 bits: Destination MMSI
-    private int retransmit = 0; // 1 bit: Retransmit flag
-    private int spare = 0; // 1 bit: Spare
+    private int retransmit; // 1 bit: Retransmit flag
+    private int spare; // 1 bit: Spare
     private String message; // Max 936 bit - 156 characters
 
     public AisMessage12() {

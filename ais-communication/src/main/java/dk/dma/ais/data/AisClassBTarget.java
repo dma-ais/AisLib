@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,7 @@ public class AisClassBTarget extends AisVesselTarget {
      * @return
      */
     public static boolean isClassBPosOrStatic(AisMessage aisMessage) {
-        return (aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24);
+        return aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24;
     }
 
 }

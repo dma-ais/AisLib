@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,12 +34,12 @@ public class MessageSourceFilter extends GenericFilter {
     /**
      * Initialize allowed filter names
      */
-    public static final Set<String> filterNames;
+    public static final Set<String> FILTER_NAMES;
     static {
         String[] filterNamesStr = { "basestation", "region", "targetCountry", "country" };
-        filterNames = new HashSet<>();
+        FILTER_NAMES = new HashSet<>();
         for (String filterName : filterNamesStr) {
-            filterNames.add(filterName);
+            FILTER_NAMES.add(filterName);
         }
     }
 
@@ -97,7 +97,7 @@ public class MessageSourceFilter extends GenericFilter {
     }
 
     public void addFilterValue(String filterName, String value) {
-        if (!filterNames.contains(filterName)) {
+        if (!FILTER_NAMES.contains(filterName)) {
             throw new IllegalArgumentException("Unknown filter: " + filterName);
         }
 

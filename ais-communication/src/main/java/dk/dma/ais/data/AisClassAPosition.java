@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,11 +30,9 @@ public class AisClassAPosition extends AisVesselPosition {
     private byte specialManIndicator;
 
     public AisClassAPosition() {
-        super();
     }
 
     public AisClassAPosition(AisPositionMessage posMessage) {
-        super();
         update(posMessage);
     }
 
@@ -44,7 +42,7 @@ public class AisClassAPosition extends AisVesselPosition {
      * @param posMessage
      */
     public void update(AisPositionMessage posMessage) {
-        rot = (posMessage.isRotValid() ? (double) posMessage.getRot() : null);
+        rot = posMessage.isRotValid() ? (double) posMessage.getRot() : null;
         navStatus = (byte) posMessage.getNavStatus();
         specialManIndicator = (byte) posMessage.getSpecialManIndicator();
         super.update((IVesselPositionMessage) posMessage);

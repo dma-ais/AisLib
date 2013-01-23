@@ -68,7 +68,7 @@ public class Abk extends ParametricSentence {
     }
 
     public static boolean isAbk(String line) {
-        return (line.indexOf("$AIABK") >= 0);
+        return line.indexOf("$AIABK") >= 0;
     }
 
     /**
@@ -121,7 +121,7 @@ public class Abk extends ParametricSentence {
         super.encode();
         encodedFields.set(0, "$AIABK");
         encodedFields.add(destination == 0 ? "" : Integer.toString(destination));
-        encodedFields.add((channel == null) ? "" : Character.toString(channel));
+        encodedFields.add(channel == null ? "" : Character.toString(channel));
         encodedFields.add(Integer.toString(msgId));
         encodedFields.add(Integer.toString(sequence));
         encodedFields.add(Integer.toString(result.getRes()));
@@ -134,7 +134,7 @@ public class Abk extends ParametricSentence {
      * @return success
      */
     public boolean isSuccess() {
-        return (getResult() == Result.ADDRESSED_SUCCESS || getResult() == Result.BROADCAST_SENT);
+        return getResult() == Result.ADDRESSED_SUCCESS || getResult() == Result.BROADCAST_SENT;
     }
 
     public int getDestination() {

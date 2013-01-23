@@ -24,8 +24,8 @@ public class BinArray extends BitSet {
 
     private static final long serialVersionUID = 1L;
 
-    private int length = 0;
-    private int readPtr = 0;
+    private int length;
+    private int readPtr;
 
     public BinArray() {
         super();

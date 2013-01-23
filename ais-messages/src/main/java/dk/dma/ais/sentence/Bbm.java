@@ -33,7 +33,7 @@ public class Bbm extends SendSentence {
     }
 
     public static boolean isBbm(String line) {
-        return (line.indexOf("!AIBBM") >= 0 || line.indexOf("!BSBBM") >= 0);
+        return line.indexOf("!AIBBM") >= 0 || line.indexOf("!BSBBM") >= 0;
     }
 
     /**

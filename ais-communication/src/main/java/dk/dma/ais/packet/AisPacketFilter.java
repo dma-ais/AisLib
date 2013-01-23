@@ -40,7 +40,7 @@ public class AisPacketFilter extends Predicate<AisPacket> {
     @Parameter(names = "-messagetype", description = "[Filter] The Ais message type")
     private final List<Integer> messageTypes = new CopyOnWriteArrayList<>();
 
-    private boolean onlyValidMessages = false;
+    private boolean onlyValidMessages;
 
     String countryList;
 

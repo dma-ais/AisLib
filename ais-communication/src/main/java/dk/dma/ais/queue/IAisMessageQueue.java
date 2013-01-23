@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,20 +32,20 @@ public interface IAisMessageQueue {
      * @throws AisMessageQueueOverflowException
      *             when capacity limit has been reached
      */
-    public int push(AisMessage aisMessage) throws AisMessageQueueOverflowException;
+    int push(AisMessage aisMessage) throws AisMessageQueueOverflowException;
 
     /**
      * Pull message from the queue. This must be implemented as a blocking call.
      * 
      * @return AisMessageQueueEntry
      */
-    public AisMessageQueueEntry pull();
+    AisMessageQueueEntry pull();
 
     /**
      * Pull all current message on the queue. This is not a blocking call.
      * 
      * @return
      */
-    public List<AisMessageQueueEntry> pullAll();
+    List<AisMessageQueueEntry> pullAll();
 
 }

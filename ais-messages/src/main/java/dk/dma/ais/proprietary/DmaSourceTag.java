@@ -39,7 +39,7 @@ public class DmaSourceTag extends Sentence implements IProprietaryTag {
 
     protected String sourceName;
     protected Date timestamp = new Date(0);
-    private String sentence = null;
+    private String sentence;
 
     public DmaSourceTag() {
         talker = "P";

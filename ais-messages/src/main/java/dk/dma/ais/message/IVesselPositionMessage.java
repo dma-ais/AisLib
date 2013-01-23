@@ -25,60 +25,60 @@ public interface IVesselPositionMessage extends IPositionMessage {
      * 
      * @return
      */
-    public int getSog();
+    int getSog();
 
     /**
      * Course over ground
      */
-    public int getCog();
+    int getCog();
 
     /**
      * True heading
      * 
      * @return
      */
-    public int getTrueHeading();
+    int getTrueHeading();
 
     /**
      * UTC sec
      * 
      * @return
      */
-    public int getUtcSec();
+    int getUtcSec();
 
     /**
      * Determine if position is valid
      * 
      * @return
      */
-    public boolean isPositionValid();
+    boolean isPositionValid();
 
     /**
      * Course over ground valid
      * 
      * @return
      */
-    public boolean isCogValid();
+    boolean isCogValid();
 
     /**
      * Speed over ground valid
      * 
      * @return
      */
-    public boolean isSogValid();
+    boolean isSogValid();
 
     /**
      * Heading valid
      * 
      * @return
      */
-    public boolean isHeadingValid();
+    boolean isHeadingValid();
 
     /**
      * Get raim
      * 
      * @return
      */
-    public int getRaim();
+    int getRaim();
 
 }

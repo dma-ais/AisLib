@@ -25,13 +25,13 @@ public interface IPositionMessage {
      * 
      * @return
      */
-    public AisPosition getPos();
+    AisPosition getPos();
 
     /**
      * Position accuracy
      * 
      * @return
      */
-    public int getPosAcc();
+    int getPosAcc();
 
 }

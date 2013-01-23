@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@ public class CommentBlock {
 
     private int totalLines = -1;
     private int lastLine = -1;
-    private String lastGroupId = null;
+    private String lastGroupId;
 
     /**
      * Add line containing comment block

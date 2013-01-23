@@ -31,7 +31,7 @@ public class AisMessage7 extends AisMessage {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
-    private int spare = 0; // 2 bits: Not used. Should be set to zero. Reserved
+    private int spare; // 2 bits: Not used. Should be set to zero. Reserved
                            // for future use
     private long dest1; // 30 bits: MMSI number of first destination of this ACK
     private int seq1; // 2 bits: Sequence number of message to be acknowledged;

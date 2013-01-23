@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,50 +27,46 @@ import dk.dma.enav.model.geometry.Position;
  */
 public class PastTrackSortedSet implements IPastTrack, Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private TreeSet<PastTrackPoint> points = new TreeSet<>();
+    private TreeSet<PastTrackPoint> points = new TreeSet<>();
 
-	public PastTrackSortedSet() {
+    public void addPosition(AisVesselPosition vesselPosition, int minDist) {
+        if (vesselPosition == null || vesselPosition.getPos() == null) {
+            return;
+        }
 
-	}
+        // Get the timestamp of this message
+        if (vesselPosition.getSourceTimestamp() == null) {
+            // Will not allow generating past track for reports without
+            // timestamp
+            return;
+        }
 
-	public void addPosition(AisVesselPosition vesselPosition, int minDist) {
-		if (vesselPosition == null || vesselPosition.getPos() == null) {
-			return;
-		}
+        // Create new point
+        PastTrackPoint newPoint = new PastTrackPoint(vesselPosition);
+        points.add(newPoint);
 
-		// Get the timestamp of this message
-		if (vesselPosition.getSourceTimestamp() == null) {
-			// Will not allow generating past track for reports without
-			// timestamp
-			return;
-		}
+        // Get the previous neighbor
+        PastTrackPoint lastPoint = points.lower(newPoint);
+        if (lastPoint != null) {
+            // Downsample on distance
+            Position lastPos = Position.create(lastPoint.getLat(), lastPoint.getLon());
+            Position newPos = Position.create(newPoint.getLat(), newPoint.getLon());
+            if (newPos.rhumbLineDistanceTo(lastPos) < minDist) {
+                points.remove(lastPoint);
+            }
+        }
+    }
 
-		// Create new point
-		PastTrackPoint newPoint = new PastTrackPoint(vesselPosition);
-		points.add(newPoint);
-		
-		// Get the previous neighbor
-		PastTrackPoint lastPoint = points.lower(newPoint);
-		if (lastPoint != null) {
-			// Downsample on distance
-			Position lastPos = Position.create(lastPoint.getLat(), lastPoint.getLon());
-			Position newPos = Position.create(newPoint.getLat(), newPoint.getLon());
-			if (newPos.rhumbLineDistanceTo(lastPos) < minDist) {
-				points.remove(lastPoint);
-			}
-		}
-	}
+    public void cleanup(int ttl) {
+        while (points.size() > 0 && points.first().isDead(ttl)) {
+            points.pollFirst();
+        }
+    }
 
-	public void cleanup(int ttl) {
-		while (points.size() > 0 && points.first().isDead(ttl)) {
-			points.pollFirst();
-		}
-	}
-
-	public List<PastTrackPoint> getPoints() {
-		return new ArrayList<>(points);
-	}
+    public List<PastTrackPoint> getPoints() {
+        return new ArrayList<>(points);
+    }
 
 }

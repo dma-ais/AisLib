@@ -104,14 +104,14 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
      * 
      * NOTE: This field is added in ITU-R M1371-4
      */
-    protected int specialManIndicator = 0; // 2 bits
+    protected int specialManIndicator; // 2 bits
 
     /**
      * Not used. Should be set to zero. Reserved for future use.
      * 
      * NOTE: In ITU-R M1371-4 this field is 3 bits compared to 1 previously
      */
-    protected int spare = 0; // 3 bits
+    protected int spare; // 3 bits
 
     /**
      * RAIM-flag: Receiver autonomous integrity monitoring (RAIM) flag of electronic position fixing device; 0 = RAIM
@@ -325,7 +325,7 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
 
     public boolean isPositionValid() {
         Position geo = pos.getGeoLocation();
-        return (geo != null);
+        return geo != null;
     }
 
     public boolean isCogValid() {

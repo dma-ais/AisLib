@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,12 +25,6 @@ public class AisBsTarget extends AisTarget {
 
     private static final long serialVersionUID = 1L;
 
-    // TODO
-
-    public AisBsTarget() {
-
-    }
-
     @Override
     public void update(AisMessage aisMessage) {
         // Throw error if message is from other type of target
@@ -52,7 +46,7 @@ public class AisBsTarget extends AisTarget {
      * @return
      */
     public static boolean isBsReport(AisMessage aisMessage) {
-        return (aisMessage instanceof AisMessage4);
+        return aisMessage instanceof AisMessage4;
     }
 
 }

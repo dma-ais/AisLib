@@ -43,7 +43,7 @@ public abstract class Sentence {
     protected List<String> orgLines = new ArrayList<>();
     protected LinkedList<String> encodedFields;
     protected CommentBlock commentBlock;
-    protected LinkedList<IProprietaryTag> tags = null; // Possible proprietary source tags for the message
+    protected LinkedList<IProprietaryTag> tags; // Possible proprietary source tags for the message
 
     public Sentence() {
         talker = "AI";
@@ -82,15 +82,15 @@ public abstract class Sentence {
 
         // Split into prefix and sentence
         splitLine(line);
-        
+
         // Check for comment block
         if (prefix.length() > 0 && CommentBlock.hasCommentBlock(prefix)) {
-        	addCommentBlock(prefix);
+            addCommentBlock(prefix);
         }
-        
+
         // Calculate checksum
         calculateChecksum();
-        
+
         // Check checksum
         checkChecksum();
 
@@ -107,22 +107,22 @@ public abstract class Sentence {
         talker = fields[0].substring(1, 3);
         formatter = fields[0].substring(3, 6);
     }
-    
-	public void addSingleCommentBlock(String line) throws SentenceException {
-		this.orgLines.add(line);
-		addCommentBlock(line);		
-	}
-    
-	private void addCommentBlock(String line) throws SentenceException {
-		if (commentBlock == null) {
-			commentBlock = new CommentBlock();
-		}
-		try {
-			commentBlock.addLine(line);
-		} catch (CommentBlockException e) {
-			throw new SentenceException("CommentBlockException: " + e.getMessage());
-		}
-	}
+
+    public void addSingleCommentBlock(String line) throws SentenceException {
+        this.orgLines.add(line);
+        addCommentBlock(line);
+    }
+
+    private void addCommentBlock(String line) throws SentenceException {
+        if (commentBlock == null) {
+            commentBlock = new CommentBlock();
+        }
+        try {
+            commentBlock.addLine(line);
+        } catch (CommentBlockException e) {
+            throw new SentenceException("CommentBlockException: " + e.getMessage());
+        }
+    }
 
     /**
      * The top most encode method
@@ -206,36 +206,36 @@ public abstract class Sentence {
         }
         return checksum;
     }
-    
+
     /**
      * Try to get the proprietary MSSIS timestamp appended to the NMEA sentence
      * @return
      */
     public Date getMssisTimestamp() {
-    	int i = this.msg.indexOf('*');
-    	if (i < 0 || i + 4 > this.msg.length()) {
-    		return null;
-    	}
-    	String postfix = this.msg.substring(i + 4).trim();
-    	String[] stamps = StringUtils.split(postfix, ',');
-    	if (stamps.length == 0) {
-    		return null;
-    	}
-    	for (String stamp : stamps) {
-			try {
-				return new Date(Long.parseLong(stamp) * 1000);
-			} catch (NumberFormatException e) { }
-		}    	
-    	return null;
+        int i = this.msg.indexOf('*');
+        if (i < 0 || i + 4 > this.msg.length()) {
+            return null;
+        }
+        String postfix = this.msg.substring(i + 4).trim();
+        String[] stamps = StringUtils.split(postfix, ',');
+        if (stamps.length == 0) {
+            return null;
+        }
+        for (String stamp : stamps) {
+            try {
+                return new Date(Long.parseLong(stamp) * 1000);
+            } catch (NumberFormatException e) { }
+        }
+        return null;
     }
-    
+
     /**
      * Try to get timestamp in this order:
      * Comment block timestamp, proprietary tag timestamp and MSSIS timestamp
      * @return
      */
     public Date getTimestamp() {
-    	// Try comment block first
+        // Try comment block first
         CommentBlock cb = getCommentBlock();
         if (cb != null) {
             Long ts = cb.getTimestamp();
@@ -254,7 +254,7 @@ public abstract class Sentence {
                 }
             }
         }
-        // Try to get proprietary MSSIS timestamp        
+        // Try to get proprietary MSSIS timestamp
         return getMssisTimestamp();
     }
 
@@ -347,15 +347,15 @@ public abstract class Sentence {
     public void setFormatter(String formatter) {
         this.formatter = formatter;
     }
-    
+
     /**
      * Get possible comment block
      * @return
      */
     public CommentBlock getCommentBlock() {
-		return commentBlock;
-	}
-    
+        return commentBlock;
+    }
+
     /**
      * Get all tags
      * 
@@ -364,11 +364,11 @@ public abstract class Sentence {
     public LinkedList<IProprietaryTag> getTags() {
         return tags;
     }
-    
+
     public void setTags(LinkedList<IProprietaryTag> tags) {
         this.tags = tags;
     }
-    
+
     /**
      * Return the LAST source tag (closest to AIS sentence)
      * 

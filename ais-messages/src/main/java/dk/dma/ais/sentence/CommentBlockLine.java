@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,9 +27,9 @@ import org.apache.commons.lang.StringUtils;
 public class CommentBlockLine {
 
     private Map<String, String> parameterMap;
-    private Integer totalLines = null;
-    private Integer lineNumber = null;
-    private String groupId = null;
+    private Integer totalLines;
+    private Integer lineNumber;
+    private String groupId;
     private int checksum;
 
     public CommentBlockLine() {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -108,15 +108,15 @@ public abstract class AisTarget implements Serializable {
                 // TODO This mapping should come from a tag in the future
                 if (sourceRegion.equals("802") || sourceRegion.equals("804")) {
                     sourceType = "SAT";
-                }                
+                }
                 if (sourceRegion.equals("808")) {
-                	CommentBlock cb = aisMessage.getVdm().getCommentBlock();
-                	if (cb != null) {
-                		String source = cb.getString("s");
-                		if (source != null && source.contains("ORBCOMM999")) {
-                			sourceType = "SAT";
-                		}
-                	}                	
+                    CommentBlock cb = aisMessage.getVdm().getCommentBlock();
+                    if (cb != null) {
+                        String source = cb.getString("s");
+                        if (source != null && source.contains("ORBCOMM999")) {
+                            sourceType = "SAT";
+                        }
+                    }
                 }
             }
         }

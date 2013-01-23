@@ -26,15 +26,15 @@ import dk.dma.ais.message.AisMessage;
 public abstract class EncapsulatedSentence extends Sentence {
 
     protected int msgId;
-    protected int total = 0;
-    protected Integer sequence = null;
+    protected int total;
+    protected Integer sequence;
     private int lastSeq = -1;
-    protected int num = 0;
+    protected int num;
     protected Character channel;
     protected BinArray binArray = new BinArray();
-    protected boolean completePacket = false;
+    protected boolean completePacket;
     protected String sixbitString = "";
-    protected int padBits = 0;
+    protected int padBits;
 
     public EncapsulatedSentence() {
         super();
@@ -63,28 +63,28 @@ public abstract class EncapsulatedSentence extends Sentence {
         } catch (SentenceException e) {
             // null sequence is not fatal
         }
-        
+
         if (lastSeq < 0) {
-        	// New group of sentences
-        	total = thisTotal;
-        	num = thisNum;
-        	sequence = thisSeq;
-        	lastSeq = thisSeq;
-        	if (num != 1 || num > total) {
-        		throw new SentenceException("Out of sequence sentence: " + line);
-        	}
+            // New group of sentences
+            total = thisTotal;
+            num = thisNum;
+            sequence = thisSeq;
+            lastSeq = thisSeq;
+            if (num != 1 || num > total) {
+                throw new SentenceException("Out of sequence sentence: " + line);
+            }
         } else {
-        	// Sentence part of existing group
-        	if (total != thisTotal || thisNum != num + 1 || thisSeq != lastSeq) {
-        		throw new SentenceException("Out of sequence sentence: " + line);
-        	}
-        	num = thisNum;
+            // Sentence part of existing group
+            if (total != thisTotal || thisNum != num + 1 || thisSeq != lastSeq) {
+                throw new SentenceException("Out of sequence sentence: " + line);
+            }
+            num = thisNum;
         }
-        
+
         // Are we done
         if (num == total) {
-        	completePacket = true;
-        	lastSeq = -1;        	
+            completePacket = true;
+            lastSeq = -1;
         }
 
     }
@@ -96,9 +96,9 @@ public abstract class EncapsulatedSentence extends Sentence {
         super.encode();
         encodedFields.add(Integer.toString(total));
         encodedFields.add(Integer.toString(num));
-        String seq = (sequence == null) ? "" : Integer.toString(sequence);
+        String seq = sequence == null ? "" : Integer.toString(sequence);
         encodedFields.add(seq);
-        encodedFields.add((channel != null) ? Character.toString(channel) : "");
+        encodedFields.add(channel != null ? Character.toString(channel) : "");
         encodedFields.add(sixbitString);
         encodedFields.add(Integer.toString(padBits));
     }
