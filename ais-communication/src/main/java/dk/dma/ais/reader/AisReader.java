@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +40,8 @@ import dk.dma.ais.queue.IAisMessageQueue;
 import dk.dma.ais.queue.IAisQueueEntryHandler;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.commons.management.ManagedAttribute;
+import dk.dma.commons.util.io.CountingInputStream;
 import dk.dma.enav.messaging.MaritimeMessageHandler;
 
 /**
@@ -55,30 +58,45 @@ public abstract class AisReader extends Thread {
         CONNECTED, DISCONNECTED
     };
 
-    /**
-     * Reader to parse lines and deliver complete AIS packets
-     */
-    protected AisPacketReader packetReader = new AisPacketReader();
+    /** Reader to parse lines and deliver complete AIS packets. */
+    protected final AisPacketReader packetReader = new AisPacketReader();
 
-    /**
-     * List receivers for the AIS messages
-     */
-    protected List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
+    /** List receivers for the AIS messages. */
+    protected final List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
 
-    /**
-     * List of receiver queues
-     */
-    protected List<IAisMessageQueue> messageQueues = new ArrayList<>();
+    /** List of receiver queues. */
+    protected final List<IAisMessageQueue> messageQueues = new ArrayList<>();
 
-    /**
-     * List of packet handlers
-     */
-    protected List<IAisPacketHandler> packetHandlers = new ArrayList<>();
+    /** List of packet handlers. */
+    protected final List<IAisPacketHandler> packetHandlers = new ArrayList<>();
 
-    /**
-     * A pool of sending threads. A sending thread handles the sending and reception of ABK message.
-     */
-    protected SendThreadPool sendThreadPool = new SendThreadPool();
+    /** A pool of sending threads. A sending thread handles the sending and reception of ABK message. */
+    protected final SendThreadPool sendThreadPool = new SendThreadPool();
+
+    /** The number of bytes read by this reader. */
+    private final AtomicLong bytesRead = new AtomicLong();
+
+    /** The number of bytes written by this reader. */
+    private final AtomicLong bytesWritten = new AtomicLong();
+
+    /** The number of lines read by this reader. */
+    private final AtomicLong linesRead = new AtomicLong();
+
+    @ManagedAttribute
+    public long getNumberOfBytesWritten() {
+        return bytesWritten.get();
+    }
+
+    @ManagedAttribute
+    public long getNumberOfBytesRead() {
+        return bytesRead.get();
+    }
+
+    @ManagedAttribute
+    public long getNumberOfLinesRead() {
+        return linesRead.get();
+    }
+
 
     /**
      * Add an AIS handler
@@ -195,7 +213,9 @@ public abstract class AisReader extends Thread {
         String str = StringUtils.join(sentences, "\r\n") + "\r\n";
         LOG.debug("Sending:\n" + str);
         try {
-            out.write(str.getBytes());
+            byte[] bytes = str.getBytes();
+            out.write(bytes);
+            bytesWritten.addAndGet(bytes.length);
         } catch (IOException e) {
             throw new SendException("Could not send AIS message: " + e.getMessage());
         }
@@ -210,6 +230,7 @@ public abstract class AisReader extends Thread {
      * @param line
      */
     protected void handleLine(String line) {
+        linesRead.incrementAndGet();
         // Check for ABK
         if (Abk.isAbk(line)) {
             LOG.debug("Received ABK: " + line);
@@ -287,13 +308,12 @@ public abstract class AisReader extends Thread {
      * @throws IOException
      */
     protected void readLoop(InputStream stream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        String line;
-
-        while ((line = reader.readLine()) != null) {
-            handleLine(line);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new CountingInputStream(stream, bytesRead)))) {
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                handleLine(line);
+            }
         }
-
     }
 
     public boolean isAddDmaTag() {
@@ -311,5 +331,4 @@ public abstract class AisReader extends Thread {
     public void setSourceName(String sourceName) {
         packetReader.setSourceName(sourceName);
     }
-
 }
