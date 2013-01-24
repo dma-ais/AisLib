@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import dk.dma.app.io.OutputStreamSink;
+import dk.dma.commons.util.io.OutputStreamSink;
 
 /**
  * 

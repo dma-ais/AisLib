@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.beust.jcommander.Parameter;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.app.util.function.Predicate;
+import dk.dma.commons.util.function.Predicate;
 
 /**
  * This class provides common functionality for filtering {@link AisPacket AIS packets}.
@@ -40,7 +40,7 @@ public class AisPacketFilter extends Predicate<AisPacket> {
     @Parameter(names = "-messagetype", description = "[Filter] The Ais message type")
     private final List<Integer> messageTypes = new CopyOnWriteArrayList<>();
 
-    private boolean onlyValidMessages = false;
+    private boolean onlyValidMessages;
 
     String countryList;
 

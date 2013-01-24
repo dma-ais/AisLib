@@ -32,16 +32,16 @@ import dk.dma.enav.messaging.MaritimeMessageHandler;
 
 public class MessageHandler implements MaritimeMessageHandler<AisMessage> {
 
-    private volatile boolean stop = false;
+    private volatile boolean stop;
 
     private PrintStream out;
     private FilterSettings filter;
-    private boolean dumpParsed = false;
-    private long start = 0;
-    private long end = 0;
-    private long msgCount = 0;
-    private long bytes = 0;
-    private boolean replayTag = false;
+    private boolean dumpParsed;
+    private long start;
+    private long end;
+    private long msgCount;
+    private long bytes;
+    private boolean replayTag;
 
     public MessageHandler(FilterSettings filter, PrintStream out) {
         this.filter = filter;

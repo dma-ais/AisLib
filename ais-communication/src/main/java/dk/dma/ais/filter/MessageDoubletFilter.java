@@ -32,47 +32,6 @@ import dk.dma.ais.message.AisMessage;
 public class MessageDoubletFilter extends GenericFilter {
 
     /**
-     * An entry class with sixbit string and reception date
-     */
-    public class DoubletEntry implements Comparable<DoubletEntry> {
-
-        private String sixbit;
-        private long received;
-
-        public DoubletEntry(String sixbit, long received) {
-            this.sixbit = sixbit;
-            this.received = received;
-        }
-
-        /**
-         * Comparison is done only on six bit string
-         */
-        @Override
-        public int compareTo(DoubletEntry doubletEntry) {
-            return sixbit.compareTo(doubletEntry.sixbit);
-        }
-
-        public long getReceived() {
-            return received;
-        }
-
-        public String getSixbit() {
-            return sixbit;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return sixbit.equals(((DoubletEntry) obj).sixbit);
-        }
-
-        @Override
-        public int hashCode() {
-            return sixbit.hashCode();
-        }
-
-    }
-
-    /**
      * Number of message receptions between cleanups
      */
     private static final long MAX_CLEANUP_AGE = 10000;
@@ -91,7 +50,7 @@ public class MessageDoubletFilter extends GenericFilter {
     /**
      * Number of message receptions since last cleanup
      */
-    private long cleanupAge = 0;
+    private long cleanupAge;
 
     public MessageDoubletFilter() {}
 
@@ -166,4 +125,45 @@ public class MessageDoubletFilter extends GenericFilter {
         this.windowSize = windowSize;
     }
 
+
+    /**
+     * An entry class with sixbit string and reception date
+     */
+    public class DoubletEntry implements Comparable<DoubletEntry> {
+
+        private String sixbit;
+        private long received;
+
+        public DoubletEntry(String sixbit, long received) {
+            this.sixbit = sixbit;
+            this.received = received;
+        }
+
+        /**
+         * Comparison is done only on six bit string
+         */
+        @Override
+        public int compareTo(DoubletEntry doubletEntry) {
+            return sixbit.compareTo(doubletEntry.sixbit);
+        }
+
+        public long getReceived() {
+            return received;
+        }
+
+        public String getSixbit() {
+            return sixbit;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return sixbit.equals(((DoubletEntry) obj).sixbit);
+        }
+
+        @Override
+        public int hashCode() {
+            return sixbit.hashCode();
+        }
+
+    }
 }

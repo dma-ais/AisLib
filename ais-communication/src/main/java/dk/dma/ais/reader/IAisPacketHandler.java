@@ -19,15 +19,15 @@ import dk.dma.ais.packet.AisPacket;
 
 
 /**
- * Interface to implement to register as an AisPacket receiver on an 
- * AisReader 
+ * Interface to implement to register as an AisPacket receiver on an
+ * AisReader
  */
 public interface IAisPacketHandler {
-	
-	/**
-	 * Method delivered and AisPacket
-	 * @param aisPacket
-	 */
-	void receivePacket(AisPacket aisPacket);
+
+    /**
+     * Method delivered and AisPacket
+     * @param aisPacket
+     */
+    void receivePacket(AisPacket aisPacket);
 
 }

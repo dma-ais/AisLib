@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +43,7 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
         if (ts == null) {
             this.time = vesselPosition.received;
         } else {
-        	this.time = ts;
+            this.time = ts;
         }
     }
 

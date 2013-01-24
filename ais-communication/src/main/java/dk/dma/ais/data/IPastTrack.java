@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,27 +18,30 @@ package dk.dma.ais.data;
 import java.util.List;
 
 /**
- * Interface for past track implementations 
+ * Interface for past track implementations
  */
 public interface IPastTrack {
 
-	/**
-	 * Add position to past track if it is more than minimum distance from last position
-	 * @param vesselPosition
-	 * @param minDist
-	 */
-	void addPosition(AisVesselPosition vesselPosition, int minDist);
-	
-	/**
-	 * Remove points in past track older than ttl
-	 * @param ttl
-	 */
-	void cleanup(int ttl);
-	
-	/**
-	 * Get past track points
-	 * @return
-	 */
-	List<PastTrackPoint> getPoints();
-	
+    /**
+     * Add position to past track if it is more than minimum distance from last position
+     * 
+     * @param vesselPosition
+     * @param minDist
+     */
+    void addPosition(AisVesselPosition vesselPosition, int minDist);
+
+    /**
+     * Remove points in past track older than ttl
+     * 
+     * @param ttl
+     */
+    void cleanup(int ttl);
+
+    /**
+     * Get past track points
+     * 
+     * @return
+     */
+    List<PastTrackPoint> getPoints();
+
 }

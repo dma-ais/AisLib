@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Danish Maritime Authority
+/* Copyright (c) 2011 Danish Maritime Authority
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,10 +31,10 @@ public class AisMessage17 extends AisMessage {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
-    private int spare1 = 0; // 2 bits: Spare. Should be set to zero. Reserved for future use
+    private int spare1; // 2 bits: Spare. Should be set to zero. Reserved for future use
     private int lon; // 18 bits: Surveyed longitude
     private int lat; // 17 bits Surveyed latitude
-    private int spare2 = 0; // 5 bits: Not used. Should be set to zero. Reserved for future use
+    private int spare2; // 5 bits: Not used. Should be set to zero. Reserved for future use
     private int messageType; // 6 bits: Recommendation ITU-R M.823
     private int stationId; // 10 bits: Recommendation ITU-R M.823 station identifier
     private int zCount; // 13 bits: Time value in 0.6 s (0-3 599.4)
@@ -72,11 +72,11 @@ public class AisMessage17 extends AisMessage {
         this.seqNum = (int) sixbit.getVal(3);
         this.dataWordCount = (int) sixbit.getVal(5);
         this.health = (int) sixbit.getVal(3);
-        
+
         // How many datawords are actually in the remaining part
         // How to handle if length - 120 does not match the
         // indicated data word count
-        
+
         this.dataWords = new int[this.dataWordCount];
         for (int i = 0; i < this.dataWordCount && sixbit.hasMoreBits(); i++) {
             this.dataWords[i] = (int) sixbit.getVal(24);

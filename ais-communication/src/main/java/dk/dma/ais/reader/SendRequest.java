@@ -37,7 +37,7 @@ public class SendRequest {
     private List<String> prefixSentences = new ArrayList<>();
     private int sequence;
     private int destination;
-    private String talker = null;
+    private String talker;
 
     public SendRequest(AisMessage aisMessage, int sequence, int destination) {
         this.aisMessage = aisMessage;

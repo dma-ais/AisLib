@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +40,8 @@ import dk.dma.ais.queue.IAisMessageQueue;
 import dk.dma.ais.queue.IAisQueueEntryHandler;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.commons.management.ManagedAttribute;
+import dk.dma.commons.util.io.CountingInputStream;
 import dk.dma.enav.messaging.MaritimeMessageHandler;
 
 /**
@@ -46,271 +49,286 @@ import dk.dma.enav.messaging.MaritimeMessageHandler;
  */
 public abstract class AisReader extends Thread {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
 
-	// Temporary hack to allow the insertion of the DMA tag to indicate source
-	private boolean addDmaTag = false;
+    // Temporary hack to allow the insertion of the DMA tag to indicate source
+    private boolean addDmaTag;
 
-	public enum Status {
-		CONNECTED, DISCONNECTED
-	};
+    public enum Status {
+        CONNECTED, DISCONNECTED
+    };
 
-	/**
-	 * Reader to parse lines and deliver complete AIS packets
-	 */
-	protected AisPacketReader packetReader = new AisPacketReader();
+    /** Reader to parse lines and deliver complete AIS packets. */
+    protected final AisPacketReader packetReader = new AisPacketReader();
 
-	/**
-	 * List receivers for the AIS messages
-	 */
-	protected List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
+    /** List receivers for the AIS messages. */
+    protected final List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
 
-	/**
-	 * List of receiver queues
-	 */
-	protected List<IAisMessageQueue> messageQueues = new ArrayList<>();
+    /** List of receiver queues. */
+    protected final List<IAisMessageQueue> messageQueues = new ArrayList<>();
 
-	/**
-	 * List of packet handlers
-	 */
-	protected List<IAisPacketHandler> packetHandlers = new ArrayList<>();
+    /** List of packet handlers. */
+    protected final List<IAisPacketHandler> packetHandlers = new ArrayList<>();
 
-	/**
-	 * A pool of sending threads. A sending thread handles the sending and reception of ABK message.
-	 */
-	protected SendThreadPool sendThreadPool = new SendThreadPool();
+    /** A pool of sending threads. A sending thread handles the sending and reception of ABK message. */
+    protected final SendThreadPool sendThreadPool = new SendThreadPool();
 
-	/**
-	 * Add an AIS handler
-	 * 
-	 * @param aisHandler
-	 */
-	public void registerHandler(MaritimeMessageHandler<AisMessage> aisHandler) {
-		handlers.add(aisHandler);
-	}
+    /** The number of bytes read by this reader. */
+    private final AtomicLong bytesRead = new AtomicLong();
 
-	/**
-	 * Add a packet handler
-	 * 
-	 * @param packetHandler
-	 */
-	public void registerPacketHandler(IAisPacketHandler packetHandler) {
-		packetHandlers.add(packetHandler);
-	}
+    /** The number of bytes written by this reader. */
+    private final AtomicLong bytesWritten = new AtomicLong();
 
-	/**
-	 * Add a queue for receiving messages
-	 * 
-	 * @param queue
-	 */
-	public void registerQueue(IAisMessageQueue queue) {
-		messageQueues.add(queue);
-	}
+    /** The number of lines read by this reader. */
+    private final AtomicLong linesRead = new AtomicLong();
 
-	/**
-	 * Make a new queue and reader for the queue. Start and attach to to given handler.
-	 * 
-	 * @param handler
-	 */
-	public void registerQueueHandler(IAisQueueEntryHandler handler) {
-		AisMessageQueueReader queueReader = new AisMessageQueueReader(handler, new AisMessageQueue());
-		registerQueue(queueReader.getQueue());
-		queueReader.start();
-	}
+    @ManagedAttribute
+    public long getNumberOfBytesWritten() {
+        return bytesWritten.get();
+    }
 
-	/**
-	 * Method to send addressed or broadcast AIS messages (ABM or BBM).
-	 * 
-	 * @param sendRequest
-	 * @param resultListener
-	 *            A class to handle the result when it is ready.
-	 */
-	public abstract void send(SendRequest sendRequest, ISendResultListener resultListener) throws SendException;
+    @ManagedAttribute
+    public long getNumberOfBytesRead() {
+        return bytesRead.get();
+    }
 
-	/**
-	 * Blocking method to send message in an easy way
-	 * 
-	 * @param aisMessage
-	 * @param sequence
-	 * @param destination
-	 * @param timeout
-	 * @return
-	 * @throws InterruptedException
-	 * @throws SendException
-	 */
-	public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException,
-			InterruptedException {
-		SendRequest sendRequest = new SendRequest(aisMessage, sequence, destination);
-		ClientSendThread clientSendThread = new ClientSendThread(this, sendRequest);
-		return clientSendThread.send();
-	}
+    @ManagedAttribute
+    public long getNumberOfLinesRead() {
+        return linesRead.get();
+    }
 
-	/**
-	 * Sending with 60 sec default timeout
-	 * 
-	 * @param aisMessage
-	 * @param sequence
-	 * @param destination
-	 * @return
-	 * @throws SendException
-	 * @throws InterruptedException
-	 */
-	public Abk send(AisMessage aisMessage, int sequence, int destination) throws SendException, InterruptedException {
-		return send(aisMessage, sequence, destination, 60000);
-	}
 
-	/**
-	 * Get the status of the connection, either connected or disconnected
-	 * 
-	 * @return status
-	 */
-	public abstract Status getStatus();
+    /**
+     * Add an AIS handler
+     * 
+     * @param aisHandler
+     */
+    public void registerHandler(MaritimeMessageHandler<AisMessage> aisHandler) {
+        handlers.add(aisHandler);
+    }
 
-	/**
-	 * Stop the reading thread
-	 */
-	public abstract void stopReader();
+    /**
+     * Add a packet handler
+     * 
+     * @param packetHandler
+     */
+    public void registerPacketHandler(IAisPacketHandler packetHandler) {
+        packetHandlers.add(packetHandler);
+    }
 
-	/**
-	 * The method to do the actual sending
-	 * 
-	 * @param sendRequest
-	 * @param resultListener
-	 * @param out
-	 * @throws SendException
-	 */
-	protected void doSend(SendRequest sendRequest, ISendResultListener resultListener, OutputStream out)
-			throws SendException {
-		if (out == null) {
-			throw new SendException("Not connected");
-		}
+    /**
+     * Add a queue for receiving messages
+     * 
+     * @param queue
+     */
+    public void registerQueue(IAisMessageQueue queue) {
+        messageQueues.add(queue);
+    }
 
-		// Get sentences
-		String[] sentences = sendRequest.createSentences();
+    /**
+     * Make a new queue and reader for the queue. Start and attach to to given handler.
+     * 
+     * @param handler
+     */
+    public void registerQueueHandler(IAisQueueEntryHandler handler) {
+        AisMessageQueueReader queueReader = new AisMessageQueueReader(handler, new AisMessageQueue());
+        registerQueue(queueReader.getQueue());
+        queueReader.start();
+    }
 
-		// Create and start thread
-		SendThread sendThread = sendThreadPool.createSendThread(sendRequest, resultListener);
+    /**
+     * Method to send addressed or broadcast AIS messages (ABM or BBM).
+     * 
+     * @param sendRequest
+     * @param resultListener
+     *            A class to handle the result when it is ready.
+     */
+    public abstract void send(SendRequest sendRequest, ISendResultListener resultListener) throws SendException;
 
-		// Write to out
-		String str = StringUtils.join(sentences, "\r\n") + "\r\n";
-		LOG.debug("Sending:\n" + str);
-		try {
-			out.write(str.getBytes());
-		} catch (IOException e) {
-			throw new SendException("Could not send AIS message: " + e.getMessage());
-		}
+    /**
+     * Blocking method to send message in an easy way
+     * 
+     * @param aisMessage
+     * @param sequence
+     * @param destination
+     * @param timeout
+     * @return
+     * @throws InterruptedException
+     * @throws SendException
+     */
+    public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException,
+    InterruptedException {
+        SendRequest sendRequest = new SendRequest(aisMessage, sequence, destination);
+        ClientSendThread clientSendThread = new ClientSendThread(this, sendRequest);
+        return clientSendThread.send();
+    }
 
-		// Start send thread
-		sendThread.start();
-	}
+    /**
+     * Sending with 60 sec default timeout
+     * 
+     * @param aisMessage
+     * @param sequence
+     * @param destination
+     * @return
+     * @throws SendException
+     * @throws InterruptedException
+     */
+    public Abk send(AisMessage aisMessage, int sequence, int destination) throws SendException, InterruptedException {
+        return send(aisMessage, sequence, destination, 60000);
+    }
 
-	/**
-	 * Handle a received line
-	 * 
-	 * @param line
-	 */
-	protected void handleLine(String line) {
-		// Check for ABK
-		if (Abk.isAbk(line)) {
-			LOG.debug("Received ABK: " + line);
-			Abk abk = new Abk();
-			try {
-				abk.parse(line);
-				sendThreadPool.handleAbk(abk);
-			} catch (Exception e) {
-				LOG.error("Failed to parse ABK: " + line + ": " + e.getMessage());
-			}
-			packetReader.newVdm();
-			return;
-		}
+    /**
+     * Get the status of the connection, either connected or disconnected
+     * 
+     * @return status
+     */
+    public abstract Status getStatus();
 
-		AisPacket packet;
-		try {
-			packet = packetReader.readLine(line);
-		} catch (SentenceException se) {
-			LOG.info("Sentence error: " + se.getMessage() + " line: " + line);
-			return;
-		}
-		
-		// No complete packet yet
-		if (packet == null) {
-			return;
-		}
-		
-		// Maybe add temporary DMA tag
-		if (addDmaTag && packetReader.getSourceName() != null) {
-			DmaSourceTag dmaSourceTag = new DmaSourceTag();
-			dmaSourceTag.setSourceName(packetReader.getSourceName());
-			packet.getVdm().setTag(dmaSourceTag);
-		}
+    /**
+     * Stop the reading thread
+     */
+    public abstract void stopReader();
 
-		
-		// Distribute packet
-		for (IAisPacketHandler packetHandler : packetHandlers) {
-			packetHandler.receivePacket(packet);
-		}
+    /**
+     * The method to do the actual sending
+     * 
+     * @param sendRequest
+     * @param resultListener
+     * @param out
+     * @throws SendException
+     */
+    protected void doSend(SendRequest sendRequest, ISendResultListener resultListener, OutputStream out)
+            throws SendException {
+        if (out == null) {
+            throw new SendException("Not connected");
+        }
 
-		 // Distribute AIS message
-		if (handlers.size() > 0 || messageQueues.size() > 0) {
-			AisMessage message = null;
-			// Parse AIS message
-			try {
-				message = AisMessage.getInstance(packet.getVdm());
-			} catch (AisMessageException me) {
-				LOG.info("AIS message exception: " + me.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
-			} catch (SixbitException se) {
-				LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
-			}			
-			if (message == null) {
-				return;
-			}
-						
-			// Distribute message
-			for (MaritimeMessageHandler<AisMessage> aisHandler : handlers) {
-				aisHandler.handle(message);
-			}
-			for (IAisMessageQueue queue : messageQueues) {
-				try {
-					queue.push(message);
-				} catch (AisMessageQueueOverflowException e) {
-					LOG.error("Message queue overflow, dropping message: " + e.getMessage());
-				}
-			}
-		}
+        // Get sentences
+        String[] sentences = sendRequest.createSentences();
 
-	}
+        // Create and start thread
+        SendThread sendThread = sendThreadPool.createSendThread(sendRequest, resultListener);
 
-	/**
-	 * The main read loop
-	 * 
-	 * @param stream
-	 *            the generic input stream to read from
-	 * @throws IOException
-	 */
-	protected void readLoop(InputStream stream) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-		String line;
+        // Write to out
+        String str = StringUtils.join(sentences, "\r\n") + "\r\n";
+        LOG.debug("Sending:\n" + str);
+        try {
+            byte[] bytes = str.getBytes();
+            out.write(bytes);
+            bytesWritten.addAndGet(bytes.length);
+        } catch (IOException e) {
+            throw new SendException("Could not send AIS message: " + e.getMessage());
+        }
 
-		while ((line = reader.readLine()) != null) {
-			handleLine(line);
-		}
+        // Start send thread
+        sendThread.start();
+    }
 
-	}
+    /**
+     * Handle a received line
+     * 
+     * @param line
+     */
+    protected void handleLine(String line) {
+        linesRead.incrementAndGet();
+        // Check for ABK
+        if (Abk.isAbk(line)) {
+            LOG.debug("Received ABK: " + line);
+            Abk abk = new Abk();
+            try {
+                abk.parse(line);
+                sendThreadPool.handleAbk(abk);
+            } catch (Exception e) {
+                LOG.error("Failed to parse ABK: " + line + ": " + e.getMessage());
+            }
+            packetReader.newVdm();
+            return;
+        }
 
-	public boolean isAddDmaTag() {
-		return addDmaTag;
-	}
+        AisPacket packet;
+        try {
+            packet = packetReader.readLine(line);
+        } catch (SentenceException se) {
+            LOG.info("Sentence error: " + se.getMessage() + " line: " + line);
+            return;
+        }
 
-	public void setAddDmaTag(boolean addDmaTag) {
-		this.addDmaTag = addDmaTag;
-	}
+        // No complete packet yet
+        if (packet == null) {
+            return;
+        }
 
-	public String getSourceName() {
-		return packetReader.getSourceName();
-	}
+        // Maybe add temporary DMA tag
+        if (addDmaTag && packetReader.getSourceName() != null) {
+            DmaSourceTag dmaSourceTag = new DmaSourceTag();
+            dmaSourceTag.setSourceName(packetReader.getSourceName());
+            packet.getVdm().setTag(dmaSourceTag);
+        }
 
-	public void setSourceName(String sourceName) {
-		packetReader.setSourceName(sourceName);
-	}
+        // Distribute packet
+        for (IAisPacketHandler packetHandler : packetHandlers) {
+            packetHandler.receivePacket(packet);
+        }
 
+        // Distribute AIS message
+        if (handlers.size() > 0 || messageQueues.size() > 0) {
+            AisMessage message = null;
+            // Parse AIS message
+            try {
+                message = AisMessage.getInstance(packet.getVdm());
+            } catch (AisMessageException me) {
+                LOG.info("AIS message exception: " + me.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
+            } catch (SixbitException se) {
+                LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
+            }
+            if (message == null) {
+                return;
+            }
+
+            // Distribute message
+            for (MaritimeMessageHandler<AisMessage> aisHandler : handlers) {
+                aisHandler.handle(message);
+            }
+            for (IAisMessageQueue queue : messageQueues) {
+                try {
+                    queue.push(message);
+                } catch (AisMessageQueueOverflowException e) {
+                    LOG.error("Message queue overflow, dropping message: " + e.getMessage());
+                }
+            }
+        }
+
+    }
+
+    /**
+     * The main read loop
+     * 
+     * @param stream
+     *            the generic input stream to read from
+     * @throws IOException
+     */
+    protected void readLoop(InputStream stream) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new CountingInputStream(stream, bytesRead)))) {
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                handleLine(line);
+            }
+        }
+    }
+
+    public boolean isAddDmaTag() {
+        return addDmaTag;
+    }
+
+    public void setAddDmaTag(boolean addDmaTag) {
+        this.addDmaTag = addDmaTag;
+    }
+
+    public String getSourceName() {
+        return packetReader.getSourceName();
+    }
+
+    public void setSourceName(String sourceName) {
+        packetReader.setSourceName(sourceName);
+    }
 }

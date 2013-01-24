@@ -21,32 +21,15 @@
     </dependency>
 
     <dependency>
-      <groupId>com.beust</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>1.30</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>dk.dma.app</groupId>
-      <artifactId>dma-app</artifactId>
+      <groupId>dk.dma.commons</groupId>
+      <artifactId>dma-commons-util</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
-    
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>13.0</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.6</version>
+      <scope>test</scope>
     </dependency>
-    		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.6</version>
-			<scope>test</scope>
-		</dependency>
   </dependencies>
 </project>

@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.sentence;
 
 import java.util.Date;
@@ -118,8 +133,8 @@ public class MessageTest {
         System.out.println("length of data: " + msg.getData().getLength());
         System.out.println("bits index    : " + msg.getData().getReadPtr());
 
-        System.out.println("pos: " + (metHyd.getPos().getLatitude() / 1000.0 / 60.0) + " "
-                + (metHyd.getPos().getLongitude() / 1000.0 / 60.0));
+        System.out.println("pos: " + metHyd.getPos().getLatitude() / 1000.0 / 60.0 + " "
+                + metHyd.getPos().getLongitude() / 1000.0 / 60.0);
 
         System.out.println(metHyd);
 
@@ -170,49 +185,49 @@ public class MessageTest {
         AisMessage msg = AisMessage.getInstance(vdm);
         Assert.assertEquals("Not msg 24", msg.getMsgId(), 24);
     }
-    
-	@Test
-	public void decodeMssisTimestamp() throws SentenceException {
-		String sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E,1357134218\r\n";
-		Vdm vdm = new Vdm();
+
+    @Test
+    public void decodeMssisTimestamp() throws SentenceException {
+        String sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E,1357134218\r\n";
+        Vdm vdm = new Vdm();
         int result = vdm.parse(sentence);
         Assert.assertEquals("Failed to parse", result, 0);
         Date timestamp = vdm.getMssisTimestamp();
         Assert.assertEquals(1357134218000L, timestamp.getTime());
-        
+
         sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E";
         vdm = new Vdm();
         result = vdm.parse(sentence);
         Assert.assertEquals("Failed to parse", result, 0);
         timestamp = vdm.getMssisTimestamp();
         Assert.assertTrue(timestamp == null);
-        
+
         sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E,1357134218,1357134220,1357134222";
         vdm = new Vdm();
         result = vdm.parse(sentence);
         Assert.assertEquals("Failed to parse", result, 0);
         timestamp = vdm.getMssisTimestamp();
         Assert.assertEquals(1357134218000L, timestamp.getTime());
-	}
-	
-	@Test
-	public void decodeMsg17() throws SentenceException, AisMessageException, SixbitException {
-		String sentence = "!AIVDM,1,1,,,A0476C1=qHWw82JrVgH`4?mmsRL1,0*09";
-		Vdm vdm = new Vdm();
-		int result = vdm.parse(sentence);
-		Assert.assertEquals("Failed to parse", result, 0);
-		AisMessage msg = AisMessage.getInstance(vdm);
-		System.out.println("msg: " + msg);
-	}
-	
-	@Test
-	public void decodeMsg19() throws SentenceException, AisMessageException, SixbitException {
-		String sentence = "!AIVDM,1,1,,A,C6:`MUh00:;5umTN;<UIM7v0jc0hBM0@bOSQkWf00000S3P62R0P,0*05";
-		Vdm vdm = new Vdm();
-		int result = vdm.parse(sentence);
-		Assert.assertEquals("Failed to parse", result, 0);
-		AisMessage msg = AisMessage.getInstance(vdm);
-		System.out.println("msg: " + msg);		
-	}
+    }
+
+    @Test
+    public void decodeMsg17() throws SentenceException, AisMessageException, SixbitException {
+        String sentence = "!AIVDM,1,1,,,A0476C1=qHWw82JrVgH`4?mmsRL1,0*09";
+        Vdm vdm = new Vdm();
+        int result = vdm.parse(sentence);
+        Assert.assertEquals("Failed to parse", result, 0);
+        AisMessage msg = AisMessage.getInstance(vdm);
+        System.out.println("msg: " + msg);
+    }
+
+    @Test
+    public void decodeMsg19() throws SentenceException, AisMessageException, SixbitException {
+        String sentence = "!AIVDM,1,1,,A,C6:`MUh00:;5umTN;<UIM7v0jc0hBM0@bOSQkWf00000S3P62R0P,0*05";
+        Vdm vdm = new Vdm();
+        int result = vdm.parse(sentence);
+        Assert.assertEquals("Failed to parse", result, 0);
+        AisMessage msg = AisMessage.getInstance(vdm);
+        System.out.println("msg: " + msg);
+    }
 
 }

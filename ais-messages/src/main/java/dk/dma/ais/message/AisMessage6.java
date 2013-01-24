@@ -31,9 +31,9 @@ public class AisMessage6 extends AisBinaryMessage {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
-    private int seqNum = 0; // 2 bits: sequence number
+    private int seqNum; // 2 bits: sequence number
     private long destination; // 30 bits: Destination MMSI
-    private int retransmit = 0; // 1 bit: Retransmit flag
+    private int retransmit; // 1 bit: Retransmit flag
 
     public AisMessage6() {
         super(6);
