@@ -1,8 +1,6 @@
 AisLib
 ======
 
-#### Java library for handling AIS messages ####
-
 *Previously DaMSA/AisLib*
 
 ## Introduction ##
