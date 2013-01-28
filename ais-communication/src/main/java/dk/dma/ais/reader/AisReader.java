@@ -20,8 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.StringUtils;
@@ -42,7 +41,7 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.util.io.CountingInputStream;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.
@@ -62,13 +61,13 @@ public abstract class AisReader extends Thread {
     protected final AisPacketReader packetReader = new AisPacketReader();
 
     /** List receivers for the AIS messages. */
-    protected final List<MaritimeMessageHandler<AisMessage>> handlers = new ArrayList<>();
+    protected final CopyOnWriteArrayList<Consumer<AisMessage>> handlers = new CopyOnWriteArrayList<>();
 
     /** List of receiver queues. */
-    protected final List<IAisMessageQueue> messageQueues = new ArrayList<>();
+    protected final CopyOnWriteArrayList<IAisMessageQueue> messageQueues = new CopyOnWriteArrayList<>();
 
     /** List of packet handlers. */
-    protected final List<IAisPacketHandler> packetHandlers = new ArrayList<>();
+    protected final CopyOnWriteArrayList<Consumer<? super AisPacket>> packetHandlers = new CopyOnWriteArrayList<>();
 
     /** A pool of sending threads. A sending thread handles the sending and reception of ABK message. */
     protected final SendThreadPool sendThreadPool = new SendThreadPool();
@@ -103,7 +102,7 @@ public abstract class AisReader extends Thread {
      * 
      * @param aisHandler
      */
-    public void registerHandler(MaritimeMessageHandler<AisMessage> aisHandler) {
+    public void registerHandler(Consumer<AisMessage> aisHandler) {
         handlers.add(aisHandler);
     }
 
@@ -112,8 +111,8 @@ public abstract class AisReader extends Thread {
      * 
      * @param packetHandler
      */
-    public void registerPacketHandler(IAisPacketHandler packetHandler) {
-        packetHandlers.add(packetHandler);
+    public void registerPacketHandler(Consumer<? super AisPacket> packetConsumer) {
+        packetHandlers.add(packetConsumer);
     }
 
     /**
@@ -143,7 +142,7 @@ public abstract class AisReader extends Thread {
      * @param resultListener
      *            A class to handle the result when it is ready.
      */
-    public abstract void send(SendRequest sendRequest, ISendResultListener resultListener) throws SendException;
+    public abstract void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException;
 
     /**
      * Blocking method to send message in an easy way
@@ -197,7 +196,7 @@ public abstract class AisReader extends Thread {
      * @param out
      * @throws SendException
      */
-    protected void doSend(SendRequest sendRequest, ISendResultListener resultListener, OutputStream out)
+    protected void doSend(SendRequest sendRequest, Consumer<Abk> resultListener, OutputStream out)
             throws SendException {
         if (out == null) {
             throw new SendException("Not connected");
@@ -266,8 +265,8 @@ public abstract class AisReader extends Thread {
         }
 
         // Distribute packet
-        for (IAisPacketHandler packetHandler : packetHandlers) {
-            packetHandler.receivePacket(packet);
+        for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
+            packetHandler.accept(packet);
         }
 
         // Distribute AIS message
@@ -286,8 +285,8 @@ public abstract class AisReader extends Thread {
             }
 
             // Distribute message
-            for (MaritimeMessageHandler<AisMessage> aisHandler : handlers) {
-                aisHandler.handle(message);
+            for (Consumer<AisMessage> aisHandler : handlers) {
+                aisHandler.accept(message);
             }
             for (IAisMessageQueue queue : messageQueues) {
                 try {

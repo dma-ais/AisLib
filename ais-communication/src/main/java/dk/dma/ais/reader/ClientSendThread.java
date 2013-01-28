@@ -16,6 +16,7 @@
 package dk.dma.ais.reader;
 
 import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Thread for clients to use for sending. E.g.
@@ -29,7 +30,7 @@ import dk.dma.ais.sentence.Abk;
  * client.isSuccess();
  * 
  */
-public class ClientSendThread extends Thread implements ISendResultListener {
+public class ClientSendThread extends Thread implements Consumer<Abk> {
 
     protected AisReader aisReader;
     protected SendRequest sendRequest;
@@ -87,7 +88,7 @@ public class ClientSendThread extends Thread implements ISendResultListener {
     }
 
     @Override
-    public void sendResult(Abk abk) {
+    public void accept(Abk abk) {
         synchronized (abkReceived) {
             this.abk = abk;
             this.abkReceived = true;

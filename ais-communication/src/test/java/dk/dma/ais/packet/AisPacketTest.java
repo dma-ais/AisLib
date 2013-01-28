@@ -29,8 +29,8 @@ import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.reader.AisStreamReader;
-import dk.dma.ais.reader.IAisPacketHandler;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.enav.util.function.Consumer;
 
 public class AisPacketTest {
 
@@ -47,9 +47,9 @@ public class AisPacketTest {
         // Set the source name
         aisReader.setSourceName("some_file_dump");
 
-        aisReader.registerPacketHandler(new IAisPacketHandler() {
+        aisReader.registerPacketHandler(new Consumer<AisPacket>() {
             @Override
-            public void receivePacket(AisPacket aisPacket) {
+            public void accept(AisPacket aisPacket) {
                 System.out.println("--\npacket received:\n" + aisPacket.getStringMessage());
 
                 // Try to get timestamp

@@ -21,12 +21,12 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.message.AisMessage12;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisTcpReader;
-import dk.dma.ais.reader.ISendResultListener;
 import dk.dma.ais.reader.SendException;
 import dk.dma.ais.reader.SendRequest;
 import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
 
-public final class SrmSend implements ISendResultListener {
+public final class SrmSend implements Consumer<Abk> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SrmSend.class);
 
@@ -43,7 +43,7 @@ public final class SrmSend implements ISendResultListener {
     /**
      * Receive the ABK result
      */
-    public void sendResult(Abk abk) {
+    public void accept(Abk abk) {
         synchronized (abkReceived) {
             this.abk = abk;
             this.abkReceived = true;

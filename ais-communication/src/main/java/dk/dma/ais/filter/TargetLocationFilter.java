@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.util.function.Predicate;
 
 /**
  * Simple filtering based on the location of targets. Filtered on a list of geometries.
@@ -37,10 +38,10 @@ public class TargetLocationFilter extends GenericFilter {
     /**
      * List of geometries
      */
-    private List<FilterGeometry> geomtries = new ArrayList<>();
+    private List<Predicate<Position>> geomtries = new ArrayList<>();
 
     @Override
-    public void handle(AisMessage aisMessage) {
+    public void accept(AisMessage aisMessage) {
         if (geomtries.size() == 0) {
             sendMessage(aisMessage);
             return;
@@ -61,8 +62,8 @@ public class TargetLocationFilter extends GenericFilter {
             return;
         }
 
-        for (FilterGeometry geometry : geomtries) {
-            if (geometry.isWithin(loc)) {
+        for (Predicate<Position> geometry : geomtries) {
+            if (geometry.test(loc)) {
                 sendMessage(aisMessage);
                 return;
             }
@@ -76,7 +77,7 @@ public class TargetLocationFilter extends GenericFilter {
         return;
     }
 
-    public void addFilterGeometry(FilterGeometry geometry) {
+    public void addFilterGeometry(Predicate<Position> geometry) {
         geomtries.add(geometry);
     }
 

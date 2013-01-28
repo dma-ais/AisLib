@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.beust.jcommander.Parameter;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.commons.util.function.Predicate;
+import dk.dma.enav.util.function.Predicate;
 
 /**
  * This class provides common functionality for filtering {@link AisPacket AIS packets}.

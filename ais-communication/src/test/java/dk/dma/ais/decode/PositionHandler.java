@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.util.function.Consumer;
 
-public class PositionHandler implements MaritimeMessageHandler<AisMessage> {
+public class PositionHandler implements Consumer<AisMessage> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PositionHandler.class);
 
@@ -31,7 +31,7 @@ public class PositionHandler implements MaritimeMessageHandler<AisMessage> {
      * 
      * For debug out adjust log4j.xml level
      */
-    public void handle(AisMessage aisMessage) {
+    public void accept(AisMessage aisMessage) {
         // Ignore everything but position reports
         if (aisMessage.getMsgId() > 3) {
             return;

@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Example AIS message handler that saves MMSI for the base stations observed
@@ -34,14 +34,14 @@ import dk.dma.enav.messaging.MaritimeMessageHandler;
  * @author obo
  * 
  */
-public class BaseReportHandler implements MaritimeMessageHandler<AisMessage> {
+public class BaseReportHandler implements Consumer<AisMessage> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseReportHandler.class);
 
     private Set<Integer> baseStations = new HashSet<>();
     private Set<Integer> baseStationOrigins = new HashSet<>();
 
-    public void handle(AisMessage aisMessage) {
+    public void accept(AisMessage aisMessage) {
         // Try to get proprietary source tag and evaluate base station origin
         IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
         if (sourceTag != null) {

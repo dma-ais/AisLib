@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * A thread class that handles the sending and the wait for an acknowledge.
@@ -37,7 +38,7 @@ public class SendThread extends Thread {
     /**
      * The result listener wanting reply
      */
-    private ISendResultListener resultListener;
+    private Consumer<Abk> resultListener;
     /**
      * The pool of send threads that this send thread is member of
      */
@@ -47,7 +48,7 @@ public class SendThread extends Thread {
      */
     private Abk abk;
 
-    public SendThread(String hash, ISendResultListener resultListener, SendThreadPool sendThreadPool) {
+    public SendThread(String hash, Consumer<Abk> resultListener, SendThreadPool sendThreadPool) {
         setDaemon(true);
         this.hash = hash;
         this.resultListener = resultListener;
@@ -79,7 +80,7 @@ public class SendThread extends Thread {
 
         // Notify result listener
         LOG.debug("Notifying listeners of ABK: " + abk);
-        resultListener.sendResult(abk);
+        resultListener.accept(abk);
 
         return true;
     }
@@ -105,7 +106,7 @@ public class SendThread extends Thread {
 
         // Check for timeout
         if (elapsed >= TIMEOUT) {
-            resultListener.sendResult(null);
+            resultListener.accept(null);
         }
 
         // Remove from pool

@@ -25,6 +25,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
+
 /**
  * Thread class for reading AIS messages from a TCP stream.
  * 
@@ -182,7 +185,7 @@ public class AisTcpReader extends AisReader {
      * @throws SendException
      */
     @Override
-    public void send(SendRequest sendRequest, ISendResultListener resultListener) throws SendException {
+    public void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException {
         doSend(sendRequest, resultListener, outputStream);
     }
 

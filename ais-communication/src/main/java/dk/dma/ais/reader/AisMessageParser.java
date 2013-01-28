@@ -18,7 +18,8 @@ package dk.dma.ais.reader;
 import java.util.concurrent.atomic.AtomicReference;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Move this to AisMessage#tryParse(String) when cleaned up
@@ -38,10 +39,10 @@ public class AisMessageParser {
         if (string != null && string.length() > 0) {
             DummyReader dummy = new DummyReader();
 
-            dummy.registerHandler(new MaritimeMessageHandler<AisMessage>() {
+            dummy.registerHandler(new Consumer<AisMessage>() {
 
                 @Override
-                public void handle(AisMessage aisMessage) {
+                public void accept(AisMessage aisMessage) {
                     ref.set(aisMessage);
                 }
             });
@@ -62,7 +63,7 @@ public class AisMessageParser {
         }
 
         @Override
-        public void send(SendRequest sendRequest, ISendResultListener resultListener) throws SendException {}
+        public void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException {}
 
         @Override
         public Status getStatus() {

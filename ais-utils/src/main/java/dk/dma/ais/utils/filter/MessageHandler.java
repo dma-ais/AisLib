@@ -28,9 +28,9 @@ import dk.dma.ais.message.binary.AisApplicationMessage;
 import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.util.function.Consumer;
 
-public class MessageHandler implements MaritimeMessageHandler<AisMessage> {
+public class MessageHandler implements Consumer<AisMessage> {
 
     private volatile boolean stop;
 
@@ -49,7 +49,7 @@ public class MessageHandler implements MaritimeMessageHandler<AisMessage> {
     }
 
     @Override
-    public void handle(AisMessage aisMessage) {
+    public void accept(AisMessage aisMessage) {
 
         end = System.currentTimeMillis();
         if (start == 0) {

@@ -38,7 +38,7 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.util.function.Consumer;
 
 public class DecodeTest {
 
@@ -184,9 +184,9 @@ public class DecodeTest {
 
         // Make AIS reader instance
         AisStreamReader aisReader = new AisStreamReader(inputStream);
-        aisReader.registerHandler(new MaritimeMessageHandler<AisMessage>() {
+        aisReader.registerHandler(new Consumer<AisMessage>() {
             @Override
-            public void handle(AisMessage message) {
+            public void accept(AisMessage message) {
                 System.out.println(message.getVdm().getCommentBlock());
             }
         });

@@ -27,7 +27,7 @@ import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.reader.RoundRobinAisTcpReader;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Simple application to filter AIS messages based on various filters
@@ -135,7 +135,7 @@ public class AisFilter {
         MessageHandler messageHandler = new MessageHandler(filterSettings, out);
         messageHandler.setDumpParsed(dumpParsed);
         messageHandler.setReplayTag(replayTag);
-        MaritimeMessageHandler<AisMessage> handler = messageHandler;
+        Consumer<AisMessage> handler = messageHandler;
 
         // Maybe insert downsampling filter
         if (downsampleRate > 0) {

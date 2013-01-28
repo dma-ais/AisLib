@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Class to hold a pool of send threads.
@@ -44,7 +45,7 @@ public class SendThreadPool {
      * @param resultListener
      * @return
      */
-    public synchronized SendThread createSendThread(SendRequest sendRequest, ISendResultListener resultListener) {
+    public synchronized SendThread createSendThread(SendRequest sendRequest, Consumer<Abk> resultListener) {
         // Generate hash value that uniquely defines message
         String hash = sendHash(sendRequest);
 

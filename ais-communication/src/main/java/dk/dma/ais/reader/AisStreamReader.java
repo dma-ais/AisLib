@@ -15,11 +15,16 @@
  */
 package dk.dma.ais.reader;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Thread class for reading any InputStream for AIS messages
@@ -41,7 +46,7 @@ public class AisStreamReader extends AisReader {
     private InputStream stream;
 
     public AisStreamReader(InputStream stream) {
-        this.stream = stream;
+        this.stream = requireNonNull(stream);
     }
 
     @Override
@@ -55,9 +60,9 @@ public class AisStreamReader extends AisReader {
     }
 
     @Override
-    public void send(SendRequest sendRequest, ISendResultListener resultListener) {
+    public void send(SendRequest sendRequest, Consumer<Abk> resultListener) {
         // Cannot send
-        resultListener.sendResult(null);
+        resultListener.accept(null);
     }
 
     @Override

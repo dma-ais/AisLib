@@ -15,11 +15,10 @@
  */
 package dk.dma.ais.filter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.enav.messaging.MaritimeMessageHandler;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * An abstract base class for filters to extend
@@ -28,19 +27,19 @@ import dk.dma.enav.messaging.MaritimeMessageHandler;
  * be put between an AIS source and handlers.
  * 
  */
-public abstract class GenericFilter implements MaritimeMessageHandler<AisMessage> {
+public abstract class GenericFilter implements Consumer<AisMessage> {
 
     /**
      * Set of receivers from the filter
      */
-    private Set<MaritimeMessageHandler<AisMessage>> receivers = new HashSet<>();
+    private CopyOnWriteArraySet<Consumer<? super AisMessage>> receivers = new CopyOnWriteArraySet<>();
 
     /**
      * Register a receiver of filtered messages
      * 
      * @param receiver
      */
-    public void registerReceiver(MaritimeMessageHandler<AisMessage> receiver) {
+    public void registerReceiver(Consumer<? super AisMessage> receiver) {
         receivers.add(receiver);
     }
 
@@ -49,7 +48,7 @@ public abstract class GenericFilter implements MaritimeMessageHandler<AisMessage
      * 
      * @param receiver
      */
-    public void removeReceiver(MaritimeMessageHandler<AisMessage> receiver) {
+    public void removeReceiver(Consumer<? super AisMessage> receiver) {
         receivers.remove(receiver);
     }
 
@@ -59,8 +58,8 @@ public abstract class GenericFilter implements MaritimeMessageHandler<AisMessage
      * @param aisMessage
      */
     protected void sendMessage(AisMessage aisMessage) {
-        for (MaritimeMessageHandler<AisMessage> receiver : receivers) {
-            receiver.handle(aisMessage);
+        for (Consumer<? super AisMessage> receiver : receivers) {
+            receiver.accept(aisMessage);
         }
     }
 

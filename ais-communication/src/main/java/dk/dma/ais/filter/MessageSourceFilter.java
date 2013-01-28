@@ -53,7 +53,7 @@ public class MessageSourceFilter extends GenericFilter {
     }
 
     @Override
-    public void handle(AisMessage aisMessage) {
+    public void accept(AisMessage aisMessage) {
         if (isEmpty()) {
             sendMessage(aisMessage);
             return;
