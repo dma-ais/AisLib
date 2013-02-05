@@ -38,7 +38,7 @@ public class TargetLocationFilter extends GenericFilter {
     /**
      * List of geometries
      */
-    private List<Predicate<Position>> geomtries = new ArrayList<>();
+    private List<Predicate<? super Position>> geomtries = new ArrayList<>();
 
     @Override
     public void accept(AisMessage aisMessage) {
@@ -62,7 +62,7 @@ public class TargetLocationFilter extends GenericFilter {
             return;
         }
 
-        for (Predicate<Position> geometry : geomtries) {
+        for (Predicate<? super Position> geometry : geomtries) {
             if (geometry.test(loc)) {
                 sendMessage(aisMessage);
                 return;
@@ -77,7 +77,7 @@ public class TargetLocationFilter extends GenericFilter {
         return;
     }
 
-    public void addFilterGeometry(Predicate<Position> geometry) {
+    public void addFilterGeometry(Predicate<? super Position> geometry) {
         geomtries.add(geometry);
     }
 
