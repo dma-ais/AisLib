@@ -20,8 +20,9 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.Date;
 
-import dk.dma.ais.filter.MessageDoubletFilter;
-import dk.dma.ais.filter.MessageDownSample;
+import dk.dma.ais.filter.DownSampleFilter;
+import dk.dma.ais.filter.DuplicateFilter;
+import dk.dma.ais.filter.MessageHandlerFilter;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
@@ -139,14 +140,14 @@ public class AisFilter {
 
         // Maybe insert downsampling filter
         if (downsampleRate > 0) {
-            MessageDownSample downsample = new MessageDownSample(downsampleRate);
+        	MessageHandlerFilter downsample = new MessageHandlerFilter(new DownSampleFilter(downsampleRate));  
             downsample.registerReceiver(messageHandler);
             handler = downsample;
         }
 
         // Maybe insert doublet filtering
         if (doubletFiltering) {
-            MessageDoubletFilter doubletFilter = new MessageDoubletFilter();
+        	MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilter());
             doubletFilter.registerReceiver(handler);
             handler = doubletFilter;
         }

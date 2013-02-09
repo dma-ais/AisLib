@@ -61,9 +61,9 @@ are read from a file.
 
 ```java
 AisReader reader = new AisStreamReader(new FileInputStream("sentences.txt"));
-reader.registerHandler(new IAisHandler() {			
+reader.registerHandler(new Consumer<AisMessage>() {			
 	@Override
-	public void receive(AisMessage aisMessage) {
+	public void accept(AisMessage aisMessage) {
 		System.out.println("message id: " + aisMessage.getMsgId());	
 	}
 });
@@ -75,9 +75,9 @@ Reading using a TCP connection is just as easy
 
 ```java
 AisTcpReader reader = new AisTcpReader("localhost", 4001);
-reader.registerHandler(new IAisHandler() {			
+reader.registerHandler(new Consumer<AisMessage>() {			
 	@Override
-	public void receive(AisMessage aisMessage) {
+	public void accept(AisMessage aisMessage) {
 		System.out.println("message id: " + aisMessage.getMsgId());		
 	}
 });
@@ -101,9 +101,9 @@ with unparsed raw message packets (proprietary tags, comment blocks and VDM's).
 
 ```java
 AisTcpReader reader = new AisTcpReader("localhost", 4001);
-reader.registerPacketHandler(new IAisPacketHandler() {			
+reader.registerPacketHandler(new Consumer<AisPacket>() {			
 	@Override
-	public void receivePacket(AisPacket aisPacket) {
+	public void accept(AisPacket aisPacket) {
 		
 	}
 });
@@ -120,7 +120,7 @@ related messages shares parents.
 
 ```java
 @Override
-public void receive(AisMessage aisMessage) {
+public void accept(AisMessage aisMessage) {
 	// Handle AtoN message
 	if (aisMessage instanceof AisMessage21) {
 		AisMessage21 msg21 = (AisMessage21) aisMessage;
@@ -151,9 +151,9 @@ handler.
 
 ```java
 // Make a handler
-IAisHandler handler = new IAisHandler() {			
+IAisHandler handler = new Consumer<AisMessage>() {			
 	@Override
-	public void receive(AisMessage aisMessage) {
+	public void accept(AisMessage aisMessage) {
 		System.out.println("aisMessage: " + aisMessage);				
 	}
 };
@@ -180,9 +180,9 @@ RoundRobinAisTcpReader reader = new RoundRobinAisTcpReader();
 reader.addHostPort("host1:4001");
 reader.addHostPort("host2:4001");
 reader.addHostPort("host3:4001");
-reader.registerHandler(new IAisHandler() {			
+reader.registerHandler(new Consumer<AisMessage>() {			
 	@Override
-	public void receive(AisMessage aisMessage) {
+	public void accept(AisMessage aisMessage) {
 		System.out.println("message id: " + aisMessage.getMsgId());		
 	}
 });
@@ -192,27 +192,50 @@ reader.join();
 
 ### Message filtering ###
 
-Filters are message handlers that can be put in between readers
+Message filters implement a single method
+
+     boolean rejectedByFilter(AisMessage message);
+
+Down sample example:
+
+```java
+RoundRobinAisTcpReader reader = new RoundRobinAisTcpReader();
+reader.setCommaseparatedHostPort("ais163.sealan.dk:4712");
+reader.registerHandler(new Consumer<AisMessage>() {			
+	DownSampleFilter downSampleFilter = new DownSampleFilter(60);
+	@Override
+	public void accept(AisMessage aisMessage) {
+		if (downSampleFilter.rejectedFilter(aisMessage)) {
+			return;
+		}
+		// Handle message
+	}
+});
+reader.start();
+reader.join();		
+```
+
+A MessageHandlerFilter can be used to put in between readers
 and handlers. In the example below two filters are used. A doublet
 filter and a down sampling filter.
 
 ```java
-IAisHandler handler = new IAisHandler() {
+IAisHandler handler = new Consumer<AisMessage>() {
 	@Override
-	public void receive(AisMessage aisMessage) {
+	public void accept(AisMessage aisMessage) {
 		// Handle doublet filtered down sampled messages
 	}
 };
 
 // Make down sampling filter with sampling rate 1 min and
 // make handler the recipient of down sampled messages
-MessageDownSample downsampleFilter = new MessageDownSample(60);
+MessageHandlerFilter downsampleFilter = new MessageHandlerFilter(new DownSampleFilter());
 downsampleFilter.registerReceiver(handler);
 
 // Make doublet filter with default window of 10 secs.
 // Set down sample filter as recipient of doublet filered messages
-MessageDoubletFilter doubletFilter = new MessageDoubletFilter();
-doubletFilter.registerReceiver(downsampleFilter);
+MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilter());
+doubletFilter.registerReceiver(doubletFilter);
 
 // Make reader
 AisReader reader = new AisTcpReader(host, port);
@@ -232,9 +255,9 @@ Proprietary factories are defined in the file
 
 ```java
 AisReader reader = new AisStreamReader(new FileInputStream("sentences.txt"));
-reader.registerHandler(new IAisHandler() {
+reader.registerHandler(new Consumer<AisMessage>() {
 	@Override
-	public void receive(AisMessage aisMessage) {
+	public void accept(AisMessage aisMessage) {
 		if (aisMessage.getSourceTag() != null) {
 			IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
 			System.out.println("timestamp: " + sourceTag.getTimestamp());
