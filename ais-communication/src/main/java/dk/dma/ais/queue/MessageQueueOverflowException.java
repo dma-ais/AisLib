@@ -15,43 +15,15 @@
  */
 package dk.dma.ais.queue;
 
-import java.io.Serializable;
-
-import dk.dma.ais.message.AisMessage;
-
 /**
- * A message queue entry. Contains AisMessage and timestamp for insertion.
+ * Exception thrown when IMessageQueue is overflowing
  */
-public class AisMessageQueueEntry implements Serializable {
+public class MessageQueueOverflowException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    private long timestamp;
-    private AisMessage aisMessage;
-
-    public AisMessageQueueEntry() {
-        this.timestamp = System.currentTimeMillis();
-    }
-
-    public AisMessageQueueEntry(AisMessage aisMessage) {
-        this();
-        this.aisMessage = aisMessage;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public AisMessage getAisMessage() {
-        return aisMessage;
-    }
-
-    public void setAisMessage(AisMessage aisMessage) {
-        this.aisMessage = aisMessage;
+    public MessageQueueOverflowException() {
+        super();
     }
 
 }

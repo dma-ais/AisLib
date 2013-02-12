@@ -15,16 +15,26 @@
  */
 package dk.dma.ais.queue;
 
-/**
- * Interface to implement for classes wanting to handle AIS messages from an AisMessageQueue
- */
-public interface IAisQueueEntryHandler {
+import java.util.List;
 
-    /**
-     * Method which to be called when delivering queue entry
-     * 
-     * @param queueEntry
-     */
-    void receive(AisMessageQueueEntry queueEntry);
+import junit.framework.Assert;
+
+import org.junit.Test;
+
+public class QueueTest {
+
+	@Test
+	public void testPushPull() throws MessageQueueOverflowException {
+		IMessageQueue<Integer> q = new BlockingMessageQueue<>();
+		for (int i = 0; i < 1000; i++) {
+			q.push(i);
+		}
+		List<Integer> list = q.pull(100);
+		Assert.assertEquals(list.size(), 100);
+		
+		list = q.pull(1);
+		Assert.assertEquals(list.size(), 1);
+		
+	}
 
 }

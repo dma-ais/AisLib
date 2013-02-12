@@ -32,11 +32,11 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.DmaSourceTag;
-import dk.dma.ais.queue.AisMessageQueue;
-import dk.dma.ais.queue.AisMessageQueueOverflowException;
-import dk.dma.ais.queue.AisMessageQueueReader;
-import dk.dma.ais.queue.IAisMessageQueue;
-import dk.dma.ais.queue.IAisQueueEntryHandler;
+import dk.dma.ais.queue.BlockingMessageQueue;
+import dk.dma.ais.queue.MessageQueueOverflowException;
+import dk.dma.ais.queue.MessageQueueReader;
+import dk.dma.ais.queue.IMessageQueue;
+import dk.dma.ais.queue.IQueueEntryHandler;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.commons.management.ManagedAttribute;
@@ -64,7 +64,7 @@ public abstract class AisReader extends Thread {
     protected final CopyOnWriteArrayList<Consumer<AisMessage>> handlers = new CopyOnWriteArrayList<>();
 
     /** List of receiver queues. */
-    protected final CopyOnWriteArrayList<IAisMessageQueue> messageQueues = new CopyOnWriteArrayList<>();
+    protected final CopyOnWriteArrayList<IMessageQueue<AisMessage>> messageQueues = new CopyOnWriteArrayList<>();
 
     /** List of packet handlers. */
     protected final CopyOnWriteArrayList<Consumer<? super AisPacket>> packetHandlers = new CopyOnWriteArrayList<>();
@@ -120,7 +120,7 @@ public abstract class AisReader extends Thread {
      * 
      * @param queue
      */
-    public void registerQueue(IAisMessageQueue queue) {
+    public void registerQueue(IMessageQueue<AisMessage> queue) {
         messageQueues.add(queue);
     }
 
@@ -129,8 +129,8 @@ public abstract class AisReader extends Thread {
      * 
      * @param handler
      */
-    public void registerQueueHandler(IAisQueueEntryHandler handler) {
-        AisMessageQueueReader queueReader = new AisMessageQueueReader(handler, new AisMessageQueue());
+    public void registerQueueHandler(IQueueEntryHandler<AisMessage> handler) {
+        MessageQueueReader<AisMessage> queueReader = new MessageQueueReader<AisMessage>(handler, new BlockingMessageQueue<AisMessage>());
         registerQueue(queueReader.getQueue());
         queueReader.start();
     }
@@ -288,10 +288,10 @@ public abstract class AisReader extends Thread {
             for (Consumer<AisMessage> aisHandler : handlers) {
                 aisHandler.accept(message);
             }
-            for (IAisMessageQueue queue : messageQueues) {
+            for (IMessageQueue<AisMessage> queue : messageQueues) {
                 try {
                     queue.push(message);
-                } catch (AisMessageQueueOverflowException e) {
+                } catch (MessageQueueOverflowException e) {
                     LOG.error("Message queue overflow, dropping message: " + e.getMessage());
                 }
             }

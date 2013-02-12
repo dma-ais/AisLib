@@ -16,28 +16,15 @@
 package dk.dma.ais.queue;
 
 /**
- * Thread class to read from a message queue and delegating to and IAisHandler
+ * Interface to implement for classes wanting to handle messages from a MessageQueue
  */
-public class AisMessageQueueReader extends Thread {
+public interface IQueueEntryHandler<T> {
 
-    private IAisQueueEntryHandler aisHandler;
-    private IAisMessageQueue queue;
-
-    public AisMessageQueueReader(IAisQueueEntryHandler aisHandler, IAisMessageQueue queue) {
-        this.aisHandler = aisHandler;
-        this.queue = queue;
-    }
-
-    @Override
-    public void run() {
-        // Read loop
-        while (true) {
-            aisHandler.receive(queue.pull());
-        }
-    }
-
-    public IAisMessageQueue getQueue() {
-        return queue;
-    }
+    /**
+     * Method which to be called when delivering queue entry
+     * 
+     * @param queueEntry
+     */
+    void receive(T queueEntry);
 
 }

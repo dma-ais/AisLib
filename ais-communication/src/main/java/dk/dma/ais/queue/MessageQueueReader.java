@@ -16,14 +16,28 @@
 package dk.dma.ais.queue;
 
 /**
- * Exception thrown when IAisMessageQueue is full
+ * Thread class to read from a message queue and delegating to a handler
  */
-public class AisMessageQueueOverflowException extends Exception {
+public class MessageQueueReader<T> extends Thread {
 
-    private static final long serialVersionUID = 1L;
+    private IQueueEntryHandler<T> handler;
+    private IMessageQueue<T> queue;
 
-    public AisMessageQueueOverflowException() {
-        super();
+    public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue) {
+        this.handler = handler;
+        this.queue = queue;
+    }
+
+    @Override
+    public void run() {
+        // Read loop
+        while (true) {
+            handler.receive(queue.pull());
+        }
+    }
+
+    public IMessageQueue<T> getQueue() {
+        return queue;
     }
 
 }
