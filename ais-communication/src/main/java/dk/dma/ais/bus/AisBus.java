@@ -18,13 +18,12 @@ package dk.dma.ais.bus;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.filter.PacketFilterCollection;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.MessageQueueOverflowException;
+import dk.dma.ais.queue.MessageQueueReader;
 
-@ThreadSafe
 public class AisBus extends Thread {
 
     /**
@@ -38,44 +37,66 @@ public class AisBus extends Thread {
     private final IMessageQueue<AisBusEntry> busQueue;
 
     /**
-     * Collection of consumers of messages from the bus
+     * Collection of consumer threads
      */
-    private final List<AisBusConsumer> consumers = new ArrayList<>();
+    private final List<MessageQueueReader<AisBusEntry>> consumerThreads = new ArrayList<>();
 
-    /**
-     * The maximum number of entries to distribute in one batch
-     */
-    private final int readBatchSize = 1000;
+    // Some configuration that should come from somewhere else (conf class)
+    private final int busPullMaxElements = 100;
+    private final int consumerPullMaxElements = 100;
+    private final int busQueueSize = 5000;
+    private final int consumerQueueSize = 5000;
 
     public AisBus() {
         // TODO size from where
         // maybe configuration as argument
+        
+        // Filters from somewhere
 
-        busQueue = new BlockingMessageQueue<>();
+        // Create the bus
+        busQueue = new BlockingMessageQueue<>(busQueueSize);
     }
 
     /**
-     * Push entry onto the bus. Throws exception if the bus is overflowing
+     * Push entry onto the bus. Returns false if the bus is overflowing
      * 
      * @param entry
-     * @throws MessageQueueOverflowException
+     * @return if pushing was a success
      */
-    public void push(AisBusEntry entry) throws MessageQueueOverflowException {
+    public boolean push(AisBusEntry entry) {
         // Filter messages in this thread (the client thread)
         if (filters.rejectedByFilter(entry.getPacket())) {
-            return;
+            return true;
         }
         // Push to the bus
-        busQueue.push(entry);
+        try {
+            busQueue.push(entry);
+        } catch (MessageQueueOverflowException e) {
+            System.err.println("Overflow when pushing to bus");
+            // TODO handle overflow
+            return false;
+        }
+        return true;
     }
 
     public void registerConsumer(AisBusConsumer consumer) {
-        // Make MessageQueueReader instance and put on list
+        // Make consumer queue
+        IMessageQueue<AisBusEntry> consumerQueue = new BlockingMessageQueue<>(consumerQueueSize);
+        // Make consumer thread
+        MessageQueueReader<AisBusEntry> consumerThread = new MessageQueueReader<>(consumer, consumerQueue, consumerPullMaxElements);
+        // Add consumer thread to list
+        consumerThreads.add(consumerThread);
 
         // TODO where to handle queueing
         // How to handle overflow when queing is happening in ais bus
         // otherwise consumer could be called and handle queing itself
         //
+    }
+    
+    
+    public void shutdown() {
+        // TODO
+        // Investigate what this would require
     }
 
     /**
@@ -84,17 +105,27 @@ public class AisBus extends Thread {
     @Override
     public void run() {
         // Start all consumer threads
-        // TODO
+        for (MessageQueueReader<AisBusEntry> consumerThread : consumerThreads) {            
+            consumerThread.start();
+        }
 
         while (true) {
             // Consume from bus queue
-            List<AisBusEntry> entries = busQueue.pull(readBatchSize);
-            // Iterate through entries
-            for (AisBusEntry entry : entries) {
-
-                // Distribute to consumers
-                // TODO
-            }
+            List<AisBusEntry> entries = busQueue.pull(busPullMaxElements);
+            // Iterate through consumers
+            for (MessageQueueReader<AisBusEntry> consumerThread : consumerThreads) {            
+                // Distribute entries
+                for (AisBusEntry entry : entries) {
+                    try {
+                        consumerThread.getQueue().push(entry);
+                    } catch (MessageQueueOverflowException e) {
+                        // TODO handle overflow
+                        // Maybe call method on consumer
+                        // Do some kind of central overflow event down sampling somewhere
+                        System.err.println("Overflow when pushing to consumer queue");
+                    }
+                }
+            }            
         }
 
     }

@@ -24,23 +24,23 @@ public class MessageQueueReader<T> extends Thread {
 
     private final IQueueEntryHandler<T> handler;
     private final IMessageQueue<T> queue;
-    private final int bathSize;
+    private final int pullMaxElements;
 
     public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue) {
         this(handler, queue, 1);
     }
 
-    public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue, int batchSize) {
+    public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue, int pullMaxElements) {
         this.handler = handler;
         this.queue = queue;
-        this.bathSize = batchSize;
+        this.pullMaxElements = pullMaxElements;
     }
 
     @Override
     public void run() {
         // Read loop
         while (true) {
-            List<T> list = queue.pull(bathSize);
+            List<T> list = queue.pull(pullMaxElements);
             for (T entry : list) {
                 handler.receive(entry);
             }
@@ -49,6 +49,10 @@ public class MessageQueueReader<T> extends Thread {
 
     public IMessageQueue<T> getQueue() {
         return queue;
+    }
+    
+    public IQueueEntryHandler<T> getHandler() {
+        return handler;
     }
 
 }

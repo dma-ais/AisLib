@@ -15,19 +15,32 @@
  */
 package dk.dma.ais.bus;
 
-import dk.dma.ais.filter.PacketFilterCollection;
+import org.junit.Test;
 
-public abstract class AisBusSocket {
-
-    private final AisBus aisBus;
-
-    /**
-     * Filters to apply to packets either incoming or outgoing
-     */
-    private PacketFilterCollection filters = new PacketFilterCollection();
-
-    public AisBusSocket(AisBus aisBus) {
-        this.aisBus = aisBus;
+public class AisBusTest {
+    
+    @Test
+    public void tcpConsumer() {
+        // Make ais bus configuration
+        // TODO
+        
+        // Make ais bus
+        AisBus aisBus = new AisBus();
+        
+        // Make consumer
+        
+        // Make provider
+        
+        
+        aisBus.start();
+        try {
+            aisBus.join();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
     }
+    
 
 }
