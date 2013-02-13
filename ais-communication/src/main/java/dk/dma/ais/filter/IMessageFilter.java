@@ -22,6 +22,6 @@ import dk.dma.ais.message.AisMessage;
  */
 public interface IMessageFilter {
 
-	boolean rejectedByFilter(AisMessage message);
+    boolean rejectedByFilter(AisMessage message);
 
 }

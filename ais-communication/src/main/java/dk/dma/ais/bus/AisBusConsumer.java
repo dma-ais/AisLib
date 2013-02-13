@@ -1,9 +1,11 @@
 package dk.dma.ais.bus;
 
-public abstract class AisBusConsumer extends AisBusSocket {
+import dk.dma.ais.queue.IQueueEntryHandler;
 
-	public AisBusConsumer(AisBus aisBus) {
-		super(aisBus);
-	}
+public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusEntry> {
+
+    public AisBusConsumer(AisBus aisBus) {
+        super(aisBus);
+    }
 
 }

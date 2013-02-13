@@ -96,7 +96,6 @@ public abstract class AisReader extends Thread {
         return linesRead.get();
     }
 
-
     /**
      * Add an AIS handler
      * 
@@ -130,7 +129,8 @@ public abstract class AisReader extends Thread {
      * @param handler
      */
     public void registerQueueHandler(IQueueEntryHandler<AisMessage> handler) {
-        MessageQueueReader<AisMessage> queueReader = new MessageQueueReader<AisMessage>(handler, new BlockingMessageQueue<AisMessage>());
+        MessageQueueReader<AisMessage> queueReader = new MessageQueueReader<AisMessage>(handler,
+                new BlockingMessageQueue<AisMessage>());
         registerQueue(queueReader.getQueue());
         queueReader.start();
     }
@@ -155,8 +155,7 @@ public abstract class AisReader extends Thread {
      * @throws InterruptedException
      * @throws SendException
      */
-    public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException,
-    InterruptedException {
+    public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException, InterruptedException {
         SendRequest sendRequest = new SendRequest(aisMessage, sequence, destination);
         ClientSendThread clientSendThread = new ClientSendThread(this, sendRequest);
         return clientSendThread.send();
@@ -196,8 +195,7 @@ public abstract class AisReader extends Thread {
      * @param out
      * @throws SendException
      */
-    protected void doSend(SendRequest sendRequest, Consumer<Abk> resultListener, OutputStream out)
-            throws SendException {
+    protected void doSend(SendRequest sendRequest, Consumer<Abk> resultListener, OutputStream out) throws SendException {
         if (out == null) {
             throw new SendException("Not connected");
         }
@@ -307,8 +305,7 @@ public abstract class AisReader extends Thread {
      * @throws IOException
      */
     protected void readLoop(InputStream stream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                new CountingInputStream(stream, bytesRead)))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new CountingInputStream(stream, bytesRead)))) {
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 handleLine(line);
             }

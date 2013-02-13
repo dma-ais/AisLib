@@ -21,7 +21,7 @@ import dk.dma.ais.packet.AisPacket;
  * Interface to implement for packet filters
  */
 public interface IPacketFilter {
-	
-	boolean rejectedByFilter(AisPacket packet);
+
+    boolean rejectedByFilter(AisPacket packet);
 
 }

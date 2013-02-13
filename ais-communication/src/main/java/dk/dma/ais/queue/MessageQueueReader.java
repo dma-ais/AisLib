@@ -15,24 +15,35 @@
  */
 package dk.dma.ais.queue;
 
+import java.util.List;
+
 /**
  * Thread class to read from a message queue and delegating to a handler
  */
 public class MessageQueueReader<T> extends Thread {
 
-    private IQueueEntryHandler<T> handler;
-    private IMessageQueue<T> queue;
+    private final IQueueEntryHandler<T> handler;
+    private final IMessageQueue<T> queue;
+    private final int bathSize;
 
     public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue) {
+        this(handler, queue, 1);
+    }
+
+    public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue, int batchSize) {
         this.handler = handler;
         this.queue = queue;
+        this.bathSize = batchSize;
     }
 
     @Override
     public void run() {
         // Read loop
         while (true) {
-            handler.receive(queue.pull());
+            List<T> list = queue.pull(bathSize);
+            for (T entry : list) {
+                handler.receive(entry);
+            }
         }
     }
 

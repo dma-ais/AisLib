@@ -24,62 +24,62 @@ import java.util.concurrent.BlockingQueue;
  * Implementation of a IMessageQueue using a Java ArrayBlockingQueue
  */
 public class BlockingMessageQueue<T> implements IMessageQueue<T> {
-	
-	private static final int DEFAULT_MAX_SIZE = 1000;
 
-	private int limit;
-	private BlockingQueue<T> queue;
+    private static final int DEFAULT_MAX_SIZE = 1000;
 
-	public BlockingMessageQueue() {
-		this(DEFAULT_MAX_SIZE);
-	}
+    private int limit;
+    private BlockingQueue<T> queue;
 
-	public BlockingMessageQueue(int limit) {
-		this.limit = limit;
-		this.queue = new ArrayBlockingQueue<>(limit);
-	}
+    public BlockingMessageQueue() {
+        this(DEFAULT_MAX_SIZE);
+    }
 
-	@Override
-	public int push(T content) throws MessageQueueOverflowException {
-		if (!queue.offer(content)) {
-			throw new MessageQueueOverflowException();
-		}
-		return queue.size();
-	}
+    public BlockingMessageQueue(int limit) {
+        this.limit = limit;
+        this.queue = new ArrayBlockingQueue<>(limit);
+    }
 
-	@Override
-	public T pull() {
-		T entry = null;
-		do {
-			try {
-				entry = queue.take();
-			} catch (InterruptedException e) {
-			}
-		} while (entry == null);
-		return entry;
-	}
-	
-	@Override
-	public List<T> pull(int maxElements) {
-		List<T> list = new ArrayList<>();
-		// Wait for element to become available
-		try {
-			list.add(queue.take());
-		} catch (InterruptedException e) {
-			return list;
-		}
-		// Get up to maxElements - 1 more
-		queue.drainTo(list, maxElements - 1);
-		return list;
-	}
+    @Override
+    public int push(T content) throws MessageQueueOverflowException {
+        if (!queue.offer(content)) {
+            throw new MessageQueueOverflowException();
+        }
+        return queue.size();
+    }
 
-	@Override
-	public List<T> pullAll() {
-		return pull(Integer.MAX_VALUE);
-	}
+    @Override
+    public T pull() {
+        T entry = null;
+        do {
+            try {
+                entry = queue.take();
+            } catch (InterruptedException e) {
+            }
+        } while (entry == null);
+        return entry;
+    }
 
-	public int getLimit() {
-		return limit;
-	}
+    @Override
+    public List<T> pull(int maxElements) {
+        List<T> list = new ArrayList<>();
+        // Wait for element to become available
+        try {
+            list.add(queue.take());
+        } catch (InterruptedException e) {
+            return list;
+        }
+        // Get up to maxElements - 1 more
+        queue.drainTo(list, maxElements - 1);
+        return list;
+    }
+
+    @Override
+    public List<T> pullAll() {
+        return pull(Integer.MAX_VALUE);
+    }
+
+    public int getLimit() {
+        return limit;
+    }
 
 }

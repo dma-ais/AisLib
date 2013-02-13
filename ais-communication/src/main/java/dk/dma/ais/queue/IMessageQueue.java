@@ -38,9 +38,10 @@ public interface IMessageQueue<T> {
      * @return AisMessageQueueEntry
      */
     T pull();
-    
+
     /**
      * Pull up to maxElements from queue. This must be a blocking call.
+     * 
      * @param maxElements
      * @return
      */

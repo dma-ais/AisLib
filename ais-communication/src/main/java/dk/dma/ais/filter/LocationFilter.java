@@ -30,46 +30,46 @@ import dk.dma.enav.util.function.Predicate;
  */
 public class LocationFilter extends MessageFilterBase {
 
-	/**
-	 * Map from MMSI to position
-	 */
-	private Map<Integer, Position> posMap = new ConcurrentHashMap<>();
+    /**
+     * Map from MMSI to position
+     */
+    private Map<Integer, Position> posMap = new ConcurrentHashMap<>();
 
-	/**
-	 * List of geometries
-	 */
-	private List<Predicate<? super Position>> geomtries = new ArrayList<>();
+    /**
+     * List of geometries
+     */
+    private List<Predicate<? super Position>> geomtries = new ArrayList<>();
 
-	@Override
-	public synchronized boolean rejectedByFilter(AisMessage message) {
-		if (geomtries.size() == 0) {
-			return false;
-		}
+    @Override
+    public synchronized boolean rejectedByFilter(AisMessage message) {
+        if (geomtries.size() == 0) {
+            return false;
+        }
 
-		if (message instanceof IPositionMessage) {
-			Position pos = ((IPositionMessage) message).getPos().getGeoLocation();
-			if (pos != null) {
-				posMap.put(message.getUserId(), pos);
-			}
-		}
+        if (message instanceof IPositionMessage) {
+            Position pos = ((IPositionMessage) message).getPos().getGeoLocation();
+            if (pos != null) {
+                posMap.put(message.getUserId(), pos);
+            }
+        }
 
-		// Get location
-		Position loc = posMap.get(message.getUserId());
-		if (loc == null) {
-			return true;
-		}
+        // Get location
+        Position loc = posMap.get(message.getUserId());
+        if (loc == null) {
+            return true;
+        }
 
-		for (Predicate<? super Position> geometry : geomtries) {
-			if (geometry.test(loc)) {
-				return false;
-			}
-		}
+        for (Predicate<? super Position> geometry : geomtries) {
+            if (geometry.test(loc)) {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public synchronized void addFilterGeometry(Predicate<? super Position> geometry) {
-		geomtries.add(geometry);
-	}
+    public synchronized void addFilterGeometry(Predicate<? super Position> geometry) {
+        geomtries.add(geometry);
+    }
 
 }

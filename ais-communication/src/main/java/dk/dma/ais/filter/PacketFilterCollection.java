@@ -25,36 +25,36 @@ import dk.dma.ais.packet.AisPacket;
  */
 public class PacketFilterCollection implements IPacketFilter {
 
-	private final List<IPacketFilter> packetFilters = new ArrayList<>();
+    private final List<IPacketFilter> packetFilters = new ArrayList<>();
 
-	public PacketFilterCollection() {
+    public PacketFilterCollection() {
 
-	}
+    }
 
-	/**
-	 * Check against all filters
-	 */
-	@Override
-	public boolean rejectedByFilter(AisPacket packet) {
-		synchronized (packetFilters) {
-			for (IPacketFilter filter : packetFilters) {
-				if (filter.rejectedByFilter(packet)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    /**
+     * Check against all filters
+     */
+    @Override
+    public boolean rejectedByFilter(AisPacket packet) {
+        synchronized (packetFilters) {
+            for (IPacketFilter filter : packetFilters) {
+                if (filter.rejectedByFilter(packet)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * Add a filter
-	 * 
-	 * @param filter
-	 */
-	public void addFilter(IPacketFilter filter) {
-		synchronized (packetFilters) {
-			packetFilters.add(filter);
-		}
-	}
+    /**
+     * Add a filter
+     * 
+     * @param filter
+     */
+    public void addFilter(IPacketFilter filter) {
+        synchronized (packetFilters) {
+            packetFilters.add(filter);
+        }
+    }
 
 }

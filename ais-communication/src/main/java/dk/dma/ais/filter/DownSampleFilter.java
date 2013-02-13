@@ -33,105 +33,105 @@ import dk.dma.ais.message.AisMessage;
  */
 public class DownSampleFilter extends MessageFilterBase {
 
-	/**
-	 * Sample rate in seconds
-	 */
-	private long samplingRate = 60;
+    /**
+     * Sample rate in seconds
+     */
+    private long samplingRate = 60;
 
-	/**
-	 * Map from MMSI to last time a pos report was received
-	 */
-	private Map<Integer, Long> posReceived = new HashMap<>();
+    /**
+     * Map from MMSI to last time a pos report was received
+     */
+    private Map<Integer, Long> posReceived = new HashMap<>();
 
-	/**
-	 * Map from MMSI to last time a static report was received
-	 */
-	private Map<Integer, Long> statReceived = new HashMap<>();
+    /**
+     * Map from MMSI to last time a static report was received
+     */
+    private Map<Integer, Long> statReceived = new HashMap<>();
 
-	/**
-	 * Empty contructor
-	 */
-	public DownSampleFilter() {
-	}
+    /**
+     * Empty contructor
+     */
+    public DownSampleFilter() {
+    }
 
-	/**
-	 * Constructor given sampling rate in seconds
-	 * 
-	 * @param samplingRate
-	 */
-	public DownSampleFilter(long samplingRate) {
-		this.samplingRate = samplingRate;
-	}
+    /**
+     * Constructor given sampling rate in seconds
+     * 
+     * @param samplingRate
+     */
+    public DownSampleFilter(long samplingRate) {
+        this.samplingRate = samplingRate;
+    }
 
-	@Override
-	public synchronized boolean rejectedByFilter(AisMessage message) {
-		// If not sampling always accept
-		if (samplingRate == 0) {
-			return false;
-		}
+    @Override
+    public synchronized boolean rejectedByFilter(AisMessage message) {
+        // If not sampling always accept
+        if (samplingRate == 0) {
+            return false;
+        }
 
-		boolean posReport = false;
+        boolean posReport = false;
 
-		switch (message.getMsgId()) {
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 18:
-			// Pos reports
-			posReport = true;
-			break;
-		case 5:
-		case 24:
-			// Stat report
-			break;
-		default:
-			// All other are not filterted
-			return false;
-		}
+        switch (message.getMsgId()) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 18:
+            // Pos reports
+            posReport = true;
+            break;
+        case 5:
+        case 24:
+            // Stat report
+            break;
+        default:
+            // All other are not filterted
+            return false;
+        }
 
-		Long now = System.currentTimeMillis();
-		Long lastReceived = null;
+        Long now = System.currentTimeMillis();
+        Long lastReceived = null;
 
-		// Get last received
-		Map<Integer, Long> receiveSet = posReport ? posReceived : statReceived;
-		lastReceived = receiveSet.get(message.getUserId());
-		if (lastReceived == null) {
-			lastReceived = 0L;
-		}
+        // Get last received
+        Map<Integer, Long> receiveSet = posReport ? posReceived : statReceived;
+        lastReceived = receiveSet.get(message.getUserId());
+        if (lastReceived == null) {
+            lastReceived = 0L;
+        }
 
-		// Elapsed in seconds
-		double elapsed = (now - lastReceived) / 1000.0;
+        // Elapsed in seconds
+        double elapsed = (now - lastReceived) / 1000.0;
 
-		// Sample message
-		if (elapsed < samplingRate) {
-			return true;
-		}
+        // Sample message
+        if (elapsed < samplingRate) {
+            return true;
+        }
 
-		// Mark new received time
-		receiveSet.put(message.getUserId(), now);
+        // Mark new received time
+        receiveSet.put(message.getUserId(), now);
 
-		// Do not filter
-		return false;
-	}
+        // Do not filter
+        return false;
+    }
 
-	/**
-	 * Get sampling rate in seconds
-	 * 
-	 * @return
-	 */
-	public long getSamplingRate() {
-		return samplingRate;
-	}
+    /**
+     * Get sampling rate in seconds
+     * 
+     * @return
+     */
+    public long getSamplingRate() {
+        return samplingRate;
+    }
 
-	/**
-	 * Set sampling rate in seconds
-	 * 
-	 * @param samplingRate
-	 */
+    /**
+     * Set sampling rate in seconds
+     * 
+     * @param samplingRate
+     */
 
-	public void setSamplingRate(long samplingRate) {
-		this.samplingRate = samplingRate;
-	}
+    public void setSamplingRate(long samplingRate) {
+        this.samplingRate = samplingRate;
+    }
 
 }

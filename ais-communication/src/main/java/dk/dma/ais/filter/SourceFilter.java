@@ -31,80 +31,80 @@ import dk.dma.enav.model.Country;
  */
 public class SourceFilter extends MessageFilterBase {
 
-	/**
-	 * Initialize allowed filter names
-	 */
-	public static final Set<String> FILTER_NAMES;
-	static {
-		String[] filterNamesStr = { "basestation", "region", "targetCountry", "country" };
-		FILTER_NAMES = new HashSet<>();
-		for (String filterName : filterNamesStr) {
-			FILTER_NAMES.add(filterName);
-		}
-	}
+    /**
+     * Initialize allowed filter names
+     */
+    public static final Set<String> FILTER_NAMES;
+    static {
+        String[] filterNamesStr = { "basestation", "region", "targetCountry", "country" };
+        FILTER_NAMES = new HashSet<>();
+        for (String filterName : filterNamesStr) {
+            FILTER_NAMES.add(filterName);
+        }
+    }
 
-	/**
-	 * Map from filter name to set of accepted values
-	 */
-	private Map<String, HashSet<String>> filter = new HashMap<>();
+    /**
+     * Map from filter name to set of accepted values
+     */
+    private Map<String, HashSet<String>> filter = new HashMap<>();
 
-	public SourceFilter() {
+    public SourceFilter() {
 
-	}
+    }
 
-	@Override
-	public synchronized boolean rejectedByFilter(AisMessage message) {
-		if (isEmpty()) {
-			return false;
-		}
+    @Override
+    public synchronized boolean rejectedByFilter(AisMessage message) {
+        if (isEmpty()) {
+            return false;
+        }
 
-		// Get tag
-		IProprietarySourceTag tag = message.getSourceTag();
-		if (tag == null) {
-			return true;
-		}
-		HashMap<String, String> tagMap = new HashMap<>();
-		if (tag.getBaseMmsi() != null) {
-			tagMap.put("basestation", Integer.toString(tag.getBaseMmsi()));
-		}
-		if (tag.getRegion() != null) {
-			tagMap.put("region", tag.getRegion());
-		}
-		if (tag.getCountry() != null) {
-			tagMap.put("country", tag.getCountry().getThreeLetter());
-		}
-		Country cntr = Country.getCountryForMmsi(message.getUserId());
-		if (cntr != null) {
-			tagMap.put("targetCountry", cntr.getThreeLetter());
-		}
+        // Get tag
+        IProprietarySourceTag tag = message.getSourceTag();
+        if (tag == null) {
+            return true;
+        }
+        HashMap<String, String> tagMap = new HashMap<>();
+        if (tag.getBaseMmsi() != null) {
+            tagMap.put("basestation", Integer.toString(tag.getBaseMmsi()));
+        }
+        if (tag.getRegion() != null) {
+            tagMap.put("region", tag.getRegion());
+        }
+        if (tag.getCountry() != null) {
+            tagMap.put("country", tag.getCountry().getThreeLetter());
+        }
+        Country cntr = Country.getCountryForMmsi(message.getUserId());
+        if (cntr != null) {
+            tagMap.put("targetCountry", cntr.getThreeLetter());
+        }
 
-		for (String filterName : filter.keySet()) {
-			HashSet<String> values = filter.get(filterName);
-			// Get tag value
-			String tagValue = tagMap.get(filterName);
-			if (tagValue == null || !values.contains(tagValue)) {
-				return true;
-			}
-		}
+        for (String filterName : filter.keySet()) {
+            HashSet<String> values = filter.get(filterName);
+            // Get tag value
+            String tagValue = tagMap.get(filterName);
+            if (tagValue == null || !values.contains(tagValue)) {
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	public boolean isEmpty() {
-		return filter.size() == 0;
-	}
+    public boolean isEmpty() {
+        return filter.size() == 0;
+    }
 
-	public void addFilterValue(String filterName, String value) {
-		if (!FILTER_NAMES.contains(filterName)) {
-			throw new IllegalArgumentException("Unknown filter: " + filterName);
-		}
+    public void addFilterValue(String filterName, String value) {
+        if (!FILTER_NAMES.contains(filterName)) {
+            throw new IllegalArgumentException("Unknown filter: " + filterName);
+        }
 
-		HashSet<String> filterValues = filter.get(filterName);
-		if (filterValues == null) {
-			filterValues = new HashSet<>();
-			filter.put(filterName, filterValues);
-		}
-		filterValues.add(value);
-	}
+        HashSet<String> filterValues = filter.get(filterName);
+        if (filterValues == null) {
+            filterValues = new HashSet<>();
+            filter.put(filterName, filterValues);
+        }
+        filterValues.add(value);
+    }
 
 }

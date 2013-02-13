@@ -19,21 +19,20 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 
 /**
- * Abstract base class for message filters that allows both ais messages
- * and ais packets as argument.
+ * Abstract base class for message filters that allows both ais messages and ais packets as argument.
  */
 public abstract class MessageFilterBase implements IMessageFilter, IPacketFilter {
 
-	/**
-	 * Helper method to extract message from packet and do test 
-	 */
-	@Override
-	public synchronized boolean rejectedByFilter(AisPacket packet) {
-		AisMessage message = packet.tryGetAisMessage();
-		if (message != null) {
-			return this.rejectedByFilter(message);
-		}
-		return false;
-	}
+    /**
+     * Helper method to extract message from packet and do test
+     */
+    @Override
+    public synchronized boolean rejectedByFilter(AisPacket packet) {
+        AisMessage message = packet.tryGetAisMessage();
+        if (message != null) {
+            return this.rejectedByFilter(message);
+        }
+        return false;
+    }
 
 }

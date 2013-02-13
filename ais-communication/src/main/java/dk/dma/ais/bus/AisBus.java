@@ -18,75 +18,85 @@ package dk.dma.ais.bus;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.filter.PacketFilterCollection;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.MessageQueueOverflowException;
 
+@ThreadSafe
 public class AisBus extends Thread {
-	
-	/**
-	 * Filters to apply to received packets
-	 */
-	private final PacketFilterCollection filters = new PacketFilterCollection();
-	
-	/**
-	 * Queue to represent the bus
-	 */
-	private final IMessageQueue<AisBusEntry> busQueue;
-	
-	/**
-	 * Collection of consumers of messages from the bus
-	 */
-	private final List<AisBusConsumer> consumers = new ArrayList<>();
-	
-	/**
-	 * The maximum number of entries to distribute in one batch
-	 */
-	private final int readBatchSize = 1000; 
 
-	public AisBus() {
-		// TODO size from where
-		// maybe configuration as argument
-		
-		busQueue = new BlockingMessageQueue<>();
-	}
-	
-	/**
-	 * Push entry onto the bus. Throws exception if the bus is overflowing
-	 * @param entry
-	 * @throws MessageQueueOverflowException 
-	 */
-	public void push(AisBusEntry entry) throws MessageQueueOverflowException {
-		busQueue.push(entry);
-	}
-	
-	public void registerConsumer(AisBusConsumer consumer) {
-		// TODO where to handle queueing
-		// How to handle overflow when queing is happening in ais bus
-		// otherwise consumer could be called and handle queing itself
-		// 
-	}
+    /**
+     * Filters to apply to received packets
+     */
+    private final PacketFilterCollection filters = new PacketFilterCollection();
 
-	/**
-	 * Thread method that distributes entries
-	 */
-	@Override
-	public void run() {
-		while (true) {
-			// Consume from bus queue
-			List<AisBusEntry> entries = busQueue.pull(readBatchSize);
-			// Iterate through entries
-			for (AisBusEntry entry : entries) {
-				// Filter messages
-				if (filters.rejectedByFilter(entry.getPacket())) {
-					continue;
-				}
-				// Distribute to consumers
-				// TODO
-			}
-		}
-		
-	}
-	
+    /**
+     * Queue to represent the bus
+     */
+    private final IMessageQueue<AisBusEntry> busQueue;
+
+    /**
+     * Collection of consumers of messages from the bus
+     */
+    private final List<AisBusConsumer> consumers = new ArrayList<>();
+
+    /**
+     * The maximum number of entries to distribute in one batch
+     */
+    private final int readBatchSize = 1000;
+
+    public AisBus() {
+        // TODO size from where
+        // maybe configuration as argument
+
+        busQueue = new BlockingMessageQueue<>();
+    }
+
+    /**
+     * Push entry onto the bus. Throws exception if the bus is overflowing
+     * 
+     * @param entry
+     * @throws MessageQueueOverflowException
+     */
+    public void push(AisBusEntry entry) throws MessageQueueOverflowException {
+        // Filter messages in this thread (the client thread)
+        if (filters.rejectedByFilter(entry.getPacket())) {
+            return;
+        }
+        // Push to the bus
+        busQueue.push(entry);
+    }
+
+    public void registerConsumer(AisBusConsumer consumer) {
+        // Make MessageQueueReader instance and put on list
+
+        // TODO where to handle queueing
+        // How to handle overflow when queing is happening in ais bus
+        // otherwise consumer could be called and handle queing itself
+        //
+    }
+
+    /**
+     * Thread method that distributes entries
+     */
+    @Override
+    public void run() {
+        // Start all consumer threads
+        // TODO
+
+        while (true) {
+            // Consume from bus queue
+            List<AisBusEntry> entries = busQueue.pull(readBatchSize);
+            // Iterate through entries
+            for (AisBusEntry entry : entries) {
+
+                // Distribute to consumers
+                // TODO
+            }
+        }
+
+    }
+
 }
