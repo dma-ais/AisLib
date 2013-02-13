@@ -24,10 +24,14 @@ public abstract class AisBusSocket {
     /**
      * Filters to apply to packets either incoming or outgoing
      */
-    private PacketFilterCollection filters = new PacketFilterCollection();
+    protected PacketFilterCollection filters = new PacketFilterCollection();
 
     public AisBusSocket(AisBus aisBus) {
         this.aisBus = aisBus;
+    }
+
+    protected AisBus getAisBus() {
+        return aisBus;
     }
 
 }

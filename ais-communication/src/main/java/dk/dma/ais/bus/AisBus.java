@@ -34,12 +34,12 @@ public class AisBus extends Thread {
     /**
      * Queue to represent the bus
      */
-    private final IMessageQueue<AisBusEntry> busQueue;
+    private final IMessageQueue<AisBusElement> busQueue;
 
     /**
      * Collection of consumer threads
      */
-    private final List<MessageQueueReader<AisBusEntry>> consumerThreads = new ArrayList<>();
+    private final List<MessageQueueReader<AisBusElement>> consumerThreads = new ArrayList<>();
 
     // Some configuration that should come from somewhere else (conf class)
     private final int busPullMaxElements = 100;
@@ -58,19 +58,19 @@ public class AisBus extends Thread {
     }
 
     /**
-     * Push entry onto the bus. Returns false if the bus is overflowing
+     * Push element onto the bus. Returns false if the bus is overflowing
      * 
-     * @param entry
+     * @param element
      * @return if pushing was a success
      */
-    public boolean push(AisBusEntry entry) {
+    public boolean push(AisBusElement element) {
         // Filter messages in this thread (the client thread)
-        if (filters.rejectedByFilter(entry.getPacket())) {
+        if (filters.rejectedByFilter(element.getPacket())) {
             return true;
         }
         // Push to the bus
         try {
-            busQueue.push(entry);
+            busQueue.push(element);
         } catch (MessageQueueOverflowException e) {
             System.err.println("Overflow when pushing to bus");
             // TODO handle overflow
@@ -81,9 +81,9 @@ public class AisBus extends Thread {
 
     public void registerConsumer(AisBusConsumer consumer) {
         // Make consumer queue
-        IMessageQueue<AisBusEntry> consumerQueue = new BlockingMessageQueue<>(consumerQueueSize);
+        IMessageQueue<AisBusElement> consumerQueue = new BlockingMessageQueue<>(consumerQueueSize);
         // Make consumer thread
-        MessageQueueReader<AisBusEntry> consumerThread = new MessageQueueReader<>(consumer, consumerQueue, consumerPullMaxElements);
+        MessageQueueReader<AisBusElement> consumerThread = new MessageQueueReader<>(consumer, consumerQueue, consumerPullMaxElements);
         // Add consumer thread to list
         consumerThreads.add(consumerThread);
 
@@ -100,24 +100,24 @@ public class AisBus extends Thread {
     }
 
     /**
-     * Thread method that distributes entries
+     * Thread method that distributes elements
      */
     @Override
     public void run() {
         // Start all consumer threads
-        for (MessageQueueReader<AisBusEntry> consumerThread : consumerThreads) {            
+        for (MessageQueueReader<AisBusElement> consumerThread : consumerThreads) {            
             consumerThread.start();
         }
 
         while (true) {
             // Consume from bus queue
-            List<AisBusEntry> entries = busQueue.pull(busPullMaxElements);
+            List<AisBusElement> elements = busQueue.pull(busPullMaxElements);
             // Iterate through consumers
-            for (MessageQueueReader<AisBusEntry> consumerThread : consumerThreads) {            
-                // Distribute entries
-                for (AisBusEntry entry : entries) {
+            for (MessageQueueReader<AisBusElement> consumerThread : consumerThreads) {            
+                // Distribute elements
+                for (AisBusElement element : elements) {
                     try {
-                        consumerThread.getQueue().push(entry);
+                        consumerThread.getQueue().push(element);
                     } catch (MessageQueueOverflowException e) {
                         // TODO handle overflow
                         // Maybe call method on consumer

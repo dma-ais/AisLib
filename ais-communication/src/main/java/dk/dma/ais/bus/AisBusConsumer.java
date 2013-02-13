@@ -17,10 +17,21 @@ package dk.dma.ais.bus;
 
 import dk.dma.ais.queue.IQueueEntryHandler;
 
-public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusEntry> {
+// TODO concurrency
+public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusElement> {
 
     public AisBusConsumer(AisBus aisBus) {
         super(aisBus);
     }
 
+    @Override
+    public final void receive(AisBusElement queueElement) {
+        // Do filtering
+        if (!filters.rejectedByFilter(queueElement.getPacket())) {
+            receiveFiltered(queueElement);
+        }
+    }
+
+    public abstract void receiveFiltered(AisBusElement queueElement);
+    
 }

@@ -18,15 +18,16 @@ package dk.dma.ais.bus;
 import dk.dma.ais.packet.AisPacket;
 
 /**
- * An entry on the AIS bus with possibilities for further metadata
+ * An element on the AIS bus with possibilities for further metadata
  */
 // TODO concurrency handling
-public class AisBusEntry {
+// Immutable
+public class AisBusElement {
 
     private final AisPacket packet;
     private final long timestamp;
 
-    public AisBusEntry(AisPacket packet) {
+    public AisBusElement(AisPacket packet) {
         this.packet = packet;
         this.timestamp = System.currentTimeMillis();
     }
