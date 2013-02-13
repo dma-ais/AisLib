@@ -15,10 +15,25 @@
  */
 package dk.dma.ais.bus;
 
-public class AisBusProvider extends AisBusSocket {
+import dk.dma.ais.packet.AisPacket;
+
+public abstract class AisBusProvider extends AisBusSocket {
 
     public AisBusProvider(AisBus aisBus) {
         super(aisBus);
+    }
+    
+    /**
+     * Method called to start the provider
+     */
+    public abstract void start();
+    
+    /**
+     * Helper method to push to bus
+     * @param packet
+     */
+    protected void push(AisPacket packet) {
+        getAisBus().push(new AisBusElement(packet));
     }
 
 }

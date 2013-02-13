@@ -28,8 +28,10 @@ public class AisBusTest {
         AisBus aisBus = new AisBus();
         
         // Make consumer
+        // Start consumer
         
         // Make provider
+        // Start provider
         
         
         aisBus.start();
