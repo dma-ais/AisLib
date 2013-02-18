@@ -15,14 +15,12 @@
  */
 package dk.dma.ais.bus;
 
-import org.junit.Test;
-
 import dk.dma.ais.bus.consumer.StdoutConsumer;
 import dk.dma.ais.bus.provider.RoundRobinTcpClient;
 
 public class AisBusTest {
     
-    @Test
+    //@Test
     public void tcpConsumer() {
         // Make ais bus configuration
         // TODO
