@@ -35,7 +35,7 @@ public class ClientSendThread extends Thread implements Consumer<Abk> {
     protected AisReader aisReader;
     protected SendRequest sendRequest;
     protected Abk abk;
-    protected boolean abkReceived = false;
+    protected boolean abkReceived;
     protected long timeout = 60000; // 60 sec default
 
     public ClientSendThread(AisReader aisReader, SendRequest sendRequest) {

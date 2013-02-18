@@ -22,7 +22,7 @@ import dk.dma.ais.packet.AisPacket;
  * An element on the AIS bus with possibilities for further metadata
  */
 @Immutable
-public class AisBusElement {
+public final class AisBusElement {
 
     private final AisPacket packet;
     private final long timestamp;

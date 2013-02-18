@@ -24,7 +24,7 @@ import dk.dma.ais.reader.RoundRobinAisTcpReader;
  * Round robin TCP client provider
  */
 @ThreadSafe
-public class RoundRobinTcpClient extends AisReaderProvider {
+public final class RoundRobinTcpClient extends AisReaderProvider {
     
     private RoundRobinTcpClient(AisBus aisBus, AisReader aisReader) {
         super(aisBus, aisReader);

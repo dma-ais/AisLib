@@ -31,27 +31,28 @@ public class DoubletFilterTest {
 
     }
 
-    //@Test
+    // @Test
     public void doubletFilterTest() throws InterruptedException {
         MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilter());
-        
-        doubletFilter.registerReceiver(new Consumer<AisMessage>() {        	
-        	private long lastReceived = 0;
-        	@Override
-        	public void accept(AisMessage msg) {        		
-        		if (msg instanceof AisMessage4 && msg.getUserId() == 2190047) {
-        			System.out.println("BS message");
-        			// Message 4 from BS 2190047
-        			long now = System.currentTimeMillis();
-        			long elapsed = now - lastReceived;
-        			if (elapsed < 3000) {
-        				Assert.fail("Duplicate filter fail");
-        			}
-        			lastReceived = now;
-        		}
-        		
-        	}
-		});
+
+        doubletFilter.registerReceiver(new Consumer<AisMessage>() {
+            private long lastReceived;
+
+            @Override
+            public void accept(AisMessage msg) {
+                if (msg instanceof AisMessage4 && msg.getUserId() == 2190047) {
+                    System.out.println("BS message");
+                    // Message 4 from BS 2190047
+                    long now = System.currentTimeMillis();
+                    long elapsed = now - lastReceived;
+                    if (elapsed < 3000) {
+                        Assert.fail("Duplicate filter fail");
+                    }
+                    lastReceived = now;
+                }
+
+            }
+        });
 
         // Connect to unfiltered sources
         RoundRobinAisTcpReader reader1 = new RoundRobinAisTcpReader();
@@ -67,28 +68,29 @@ public class DoubletFilterTest {
 
         reader2.join();
     }
-    
-    //@Test
+
+    // @Test
     public void downsampleTest() throws InterruptedException {
         MessageHandlerFilter filter = new MessageHandlerFilter(new DownSampleFilter());
-        
-        filter.registerReceiver(new Consumer<AisMessage>() {        	
-        	private long lastReceived = 0;
-        	@Override
-        	public void accept(AisMessage msg) {        		
-        		if (msg instanceof AisMessage4 && msg.getUserId() == 2190047) {
-        			System.out.println("BS message");
-        			// Message 4 from BS 2190047
-        			long now = System.currentTimeMillis();
-        			long elapsed = now - lastReceived;
-        			if (elapsed < 60000) {
-        				Assert.fail("Duplicate filter fail");
-        			}
-        			lastReceived = now;
-        		}
-        		
-        	}
-		});
+
+        filter.registerReceiver(new Consumer<AisMessage>() {
+            private long lastReceived;
+
+            @Override
+            public void accept(AisMessage msg) {
+                if (msg instanceof AisMessage4 && msg.getUserId() == 2190047) {
+                    System.out.println("BS message");
+                    // Message 4 from BS 2190047
+                    long now = System.currentTimeMillis();
+                    long elapsed = now - lastReceived;
+                    if (elapsed < 60000) {
+                        Assert.fail("Duplicate filter fail");
+                    }
+                    lastReceived = now;
+                }
+
+            }
+        });
 
         // Connect to unfiltered sources
         RoundRobinAisTcpReader reader1 = new RoundRobinAisTcpReader();
@@ -98,6 +100,5 @@ public class DoubletFilterTest {
         reader1.start();
         reader1.join();
     }
-    
 
 }
