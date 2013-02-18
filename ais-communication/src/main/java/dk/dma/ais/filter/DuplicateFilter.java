@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.message.AisMessage;
 
 /**
@@ -29,6 +31,7 @@ import dk.dma.ais.message.AisMessage;
  * used as unique identifier.
  * 
  */
+@ThreadSafe
 public class DuplicateFilter extends MessageFilterBase {
 
     /**
@@ -40,16 +43,19 @@ public class DuplicateFilter extends MessageFilterBase {
      * A TreeMap is used with raw six bit string as key. compareTo is used which is rather effective for differing messages. Using
      * HashMap can result in wrong filtering as two strings can produce the same hash code.
      */
-    private Map<DoubletEntry, Long> sixbitReceived = new TreeMap<>();
+    @GuardedBy("this")
+    private final Map<DoubletEntry, Long> sixbitReceived = new TreeMap<>();
 
     /**
      * A default window size of 10 seconds is used
      */
+    @GuardedBy("this")
     private long windowSize = 10000;
 
     /**
      * Number of message receptions since last cleanup
      */
+    @GuardedBy("this")
     private long cleanupAge;
 
     public DuplicateFilter() {
@@ -114,11 +120,11 @@ public class DuplicateFilter extends MessageFilterBase {
         return false;
     }
 
-    public long getWindowSize() {
+    public synchronized long getWindowSize() {
         return windowSize;
     }
 
-    public void setWindowSize(long windowSize) {
+    public synchronized void setWindowSize(long windowSize) {
         this.windowSize = windowSize;
     }
 
@@ -153,6 +159,10 @@ public class DuplicateFilter extends MessageFilterBase {
 
         @Override
         public boolean equals(Object obj) {
+            DoubletEntry e = (DoubletEntry)obj;
+            if (e == null || e.sixbit == null) {
+                return false;
+            }
             return sixbit.equals(((DoubletEntry) obj).sixbit);
         }
 

@@ -17,6 +17,9 @@ package dk.dma.ais.bus;
 
 import org.junit.Test;
 
+import dk.dma.ais.bus.consumer.StdoutConsumer;
+import dk.dma.ais.bus.provider.RoundRobinTcpClient;
+
 public class AisBusTest {
     
     @Test
@@ -26,15 +29,23 @@ public class AisBusTest {
         
         // Make ais bus
         AisBus aisBus = new AisBus();
+        // Start AisBus
+        aisBus.start();
         
         // Make consumer
+        AisBusConsumer consumer = new StdoutConsumer(aisBus);
         // Start consumer
+        // TODO necessary?
+        // Register consumer
+        aisBus.registerConsumer(consumer);
         
         // Make provider
+        AisBusProvider provider = RoundRobinTcpClient.create(aisBus, "ais163.sealan.dk:4712", 10, 10);
         // Start provider
+        provider.start();
         
         
-        aisBus.start();
+        
         try {
             aisBus.join();
         } catch (InterruptedException e) {

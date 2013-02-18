@@ -15,17 +15,20 @@
  */
 package dk.dma.ais.filter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 
 /**
  * Filter that holds a collection of packet filers and checks against all filters
+ * 
+ * Thread safe by delegation
  */
+@ThreadSafe
 public class PacketFilterCollection implements IPacketFilter {
 
-    private final List<IPacketFilter> packetFilters = new ArrayList<>();
+    private final CopyOnWriteArrayList<IPacketFilter> packetFilters = new CopyOnWriteArrayList<>();
 
     public PacketFilterCollection() {
 
@@ -36,11 +39,9 @@ public class PacketFilterCollection implements IPacketFilter {
      */
     @Override
     public boolean rejectedByFilter(AisPacket packet) {
-        synchronized (packetFilters) {
-            for (IPacketFilter filter : packetFilters) {
-                if (filter.rejectedByFilter(packet)) {
-                    return true;
-                }
+        for (IPacketFilter filter : packetFilters) {
+            if (filter.rejectedByFilter(packet)) {
+                return true;
             }
         }
         return false;
@@ -52,9 +53,7 @@ public class PacketFilterCollection implements IPacketFilter {
      * @param filter
      */
     public void addFilter(IPacketFilter filter) {
-        synchronized (packetFilters) {
-            packetFilters.add(filter);
-        }
+           packetFilters.add(filter);
     }
 
 }

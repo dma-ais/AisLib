@@ -15,11 +15,13 @@
  */
 package dk.dma.ais.filter;
 
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.message.AisMessage;
 
 /**
  * Interface to implement for message filters
  */
+@ThreadSafe
 public interface IMessageFilter {
 
     boolean rejectedByFilter(AisMessage message);

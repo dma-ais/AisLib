@@ -15,11 +15,15 @@
  */
 package dk.dma.ais.queue;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import net.jcip.annotations.ThreadSafe;
 
 /**
  * Thread class to read from a message queue and delegating to a handler
  */
+@ThreadSafe
 public class MessageQueueReader<T> extends Thread {
 
     private final IQueueEntryHandler<T> handler;
@@ -38,12 +42,14 @@ public class MessageQueueReader<T> extends Thread {
 
     @Override
     public void run() {
+        List<T> list = new ArrayList<>();
         // Read loop
         while (true) {
-            List<T> list = queue.pull(pullMaxElements);
+            queue.pull(list, pullMaxElements);
             for (T entry : list) {
                 handler.receive(entry);
             }
+            list.clear();
         }
     }
 

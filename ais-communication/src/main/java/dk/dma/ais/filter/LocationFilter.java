@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.enav.model.geometry.Position;
@@ -28,6 +31,7 @@ import dk.dma.enav.util.function.Predicate;
 /**
  * Simple filtering based on the location of targets. Filtered on a list of geometries.
  */
+@ThreadSafe
 public class LocationFilter extends MessageFilterBase {
 
     /**
@@ -38,6 +42,7 @@ public class LocationFilter extends MessageFilterBase {
     /**
      * List of geometries
      */
+    @GuardedBy("this")
     private List<Predicate<? super Position>> geomtries = new ArrayList<>();
 
     @Override

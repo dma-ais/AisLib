@@ -15,8 +15,13 @@
  */
 package dk.dma.ais.bus;
 
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.filter.PacketFilterCollection;
 
+/**
+ * Base class for consumers and providers connected to the bus
+ */
+@ThreadSafe
 public abstract class AisBusSocket {
 
     private final AisBus aisBus;
@@ -24,7 +29,7 @@ public abstract class AisBusSocket {
     /**
      * Filters to apply to packets either incoming or outgoing
      */
-    protected PacketFilterCollection filters = new PacketFilterCollection();
+    protected final PacketFilterCollection filters = new PacketFilterCollection();
 
     public AisBusSocket(AisBus aisBus) {
         this.aisBus = aisBus;
@@ -33,5 +38,5 @@ public abstract class AisBusSocket {
     protected AisBus getAisBus() {
         return aisBus;
     }
-
+    
 }

@@ -15,12 +15,14 @@
  */
 package dk.dma.ais.filter;
 
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 
 /**
  * Abstract base class for message filters that allows both ais messages and ais packets as argument.
  */
+@ThreadSafe
 public abstract class MessageFilterBase implements IMessageFilter, IPacketFilter {
 
     /**

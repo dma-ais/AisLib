@@ -17,6 +17,8 @@ package dk.dma.ais.filter;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import net.jcip.annotations.ThreadSafe;
+
 import dk.dma.ais.message.AisMessage;
 import dk.dma.enav.util.function.Consumer;
 
@@ -26,10 +28,16 @@ import dk.dma.enav.util.function.Consumer;
  * A filter receives AIS messages, do some manipulation, and delivers messages to a list of receivers. Hence filters can be put
  * between an AIS source and handlers.
  * 
+ * Thread safe by delegation
+ * 
  */
+@ThreadSafe
 public class MessageHandlerFilter implements Consumer<AisMessage> {
 
-    private IMessageFilter messageFilter;
+    /**
+     * The actual message filter
+     */
+    private final IMessageFilter messageFilter;
 
     /**
      * Set of receivers from the filter

@@ -191,7 +191,7 @@ public class AisTcpReader extends AisReader {
 
     public Status getStatus() {
         synchronized (clientSocket) {
-            if (clientSocket != null && clientSocket.isConnected()) {
+            if (clientSocket.isConnected()) {
                 return Status.CONNECTED;
             }
             return Status.DISCONNECTED;

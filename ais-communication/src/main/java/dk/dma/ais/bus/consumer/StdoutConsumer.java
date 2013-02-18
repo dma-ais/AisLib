@@ -13,26 +13,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus;
+package dk.dma.ais.bus.consumer;
 
 import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.queue.IQueueEntryHandler;
+import dk.dma.ais.bus.AisBus;
+import dk.dma.ais.bus.AisBusConsumer;
+import dk.dma.ais.bus.AisBusElement;
 
+/**
+ * Simple consumer that outputs to stdout
+ */
 @ThreadSafe
-public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusElement> {
+public class StdoutConsumer extends AisBusConsumer {
 
-    public AisBusConsumer(AisBus aisBus) {
+    public StdoutConsumer(AisBus aisBus) {
         super(aisBus);
     }
 
     @Override
-    public final void receive(AisBusElement queueElement) {
-        // Do filtering
-        if (!filters.rejectedByFilter(queueElement.getPacket())) {
-            receiveFiltered(queueElement);
-        }
+    public void receiveFiltered(AisBusElement queueElement) {
+        System.out.println(queueElement.getPacket().getStringMessage());        
     }
 
-    public abstract void receiveFiltered(AisBusElement queueElement);
-    
 }

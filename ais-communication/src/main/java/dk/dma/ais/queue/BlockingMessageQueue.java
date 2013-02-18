@@ -15,20 +15,22 @@
  */
 package dk.dma.ais.queue;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import net.jcip.annotations.ThreadSafe;
+
 /**
  * Implementation of a IMessageQueue using a Java ArrayBlockingQueue
  */
+@ThreadSafe
 public class BlockingMessageQueue<T> implements IMessageQueue<T> {
 
     private static final int DEFAULT_MAX_SIZE = 1000;
 
-    private int limit;
-    private BlockingQueue<T> queue;
+    private final int limit;
+    private final BlockingQueue<T> queue;
 
     public BlockingMessageQueue() {
         this(DEFAULT_MAX_SIZE);
@@ -60,22 +62,21 @@ public class BlockingMessageQueue<T> implements IMessageQueue<T> {
     }
 
     @Override
-    public List<T> pull(int maxElements) {
-        List<T> list = new ArrayList<>();
+    public List<T> pull(List<T> l, int maxElements) {
         // Wait for element to become available
         try {
-            list.add(queue.take());
+            l.add(queue.take());
         } catch (InterruptedException e) {
-            return list;
+            return l;
         }
         // Get up to maxElements - 1 more
-        queue.drainTo(list, maxElements - 1);
-        return list;
+        queue.drainTo(l, maxElements - 1);
+        return l;
     }
 
     @Override
-    public List<T> pullAll() {
-        return pull(Integer.MAX_VALUE);
+    public List<T> pullAll(List<T> l) {        
+        return pull(l, Integer.MAX_VALUE);
     }
 
     public int getLimit() {

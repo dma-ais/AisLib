@@ -15,8 +15,10 @@
  */
 package dk.dma.ais.bus;
 
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 
+@ThreadSafe
 public abstract class AisBusProvider extends AisBusSocket {
 
     public AisBusProvider(AisBus aisBus) {

@@ -20,6 +20,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.Country;
@@ -29,6 +32,7 @@ import dk.dma.enav.model.Country;
  * 
  * @see dk.dma.ais.data.AisTargetSourceData
  */
+@ThreadSafe
 public class SourceFilter extends MessageFilterBase {
 
     /**
@@ -46,7 +50,8 @@ public class SourceFilter extends MessageFilterBase {
     /**
      * Map from filter name to set of accepted values
      */
-    private Map<String, HashSet<String>> filter = new HashMap<>();
+    @GuardedBy("this")
+    private final Map<String, HashSet<String>> filter = new HashMap<>();
 
     public SourceFilter() {
 

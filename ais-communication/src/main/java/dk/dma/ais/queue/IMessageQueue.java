@@ -17,9 +17,12 @@ package dk.dma.ais.queue;
 
 import java.util.List;
 
+import net.jcip.annotations.ThreadSafe;
+
 /**
  * Queue for transporting various data. Suited for AIS use.
  */
+@ThreadSafe
 public interface IMessageQueue<T> {
 
     /**
@@ -42,16 +45,18 @@ public interface IMessageQueue<T> {
     /**
      * Pull up to maxElements from queue. This must be a blocking call.
      * 
+     * @param l list to add elements to 
      * @param maxElements
-     * @return
+     * @return list with added elements
      */
-    List<T> pull(int maxElements);
+    List<T> pull(List<T> l, int maxElements);
 
     /**
      * Pull all current message on the queue. This must be a blocking call.
      * 
-     * @return
+     * @param l list to add elements to 
+     * @return list with added elements
      */
-    List<T> pullAll();
+    List<T> pullAll(List<T> c);
 
 }

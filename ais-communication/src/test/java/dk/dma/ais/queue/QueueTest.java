@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.queue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -29,10 +30,12 @@ public class QueueTest {
         for (int i = 0; i < 1000; i++) {
             q.push(i);
         }
-        List<Integer> list = q.pull(100);
+        List<Integer> list = new ArrayList<>();
+        list = q.pull(list, 100);
         Assert.assertEquals(list.size(), 100);
 
-        list = q.pull(1);
+        list.clear();
+        list = q.pull(list, 1);
         Assert.assertEquals(list.size(), 1);
 
     }

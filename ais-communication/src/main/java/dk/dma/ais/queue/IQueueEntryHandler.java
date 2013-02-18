@@ -15,9 +15,12 @@
  */
 package dk.dma.ais.queue;
 
+import net.jcip.annotations.ThreadSafe;
+
 /**
  * Interface to implement for classes wanting to handle messages from a MessageQueue
  */
+@ThreadSafe
 public interface IQueueEntryHandler<T> {
 
     /**

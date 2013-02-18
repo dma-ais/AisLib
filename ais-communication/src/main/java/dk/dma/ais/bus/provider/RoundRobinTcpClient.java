@@ -17,43 +17,26 @@ package dk.dma.ais.bus.provider;
 
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.bus.AisBus;
-import dk.dma.ais.bus.AisBusProvider;
-import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.enav.util.function.Consumer;
+import dk.dma.ais.reader.RoundRobinAisTcpReader;
 
 /**
- * Provider class that uses an AisReader to provide AIS packets
+ * Round robin TCP client provider
  */
 @ThreadSafe
-public class AisReaderProvider extends AisBusProvider implements Consumer<AisPacket> {
+public class RoundRobinTcpClient extends AisReaderProvider {
     
-    /**
-     * The AIS reader to provide packets
-     */
-    private final AisReader aisReader;
-    
-    public AisReaderProvider(AisBus aisBus, AisReader aisReader) {
-        super(aisBus);
-        this.aisReader = aisReader;        
-        // Register self as handler of packets
-        aisReader.registerPacketHandler(this);
+    private RoundRobinTcpClient(AisBus aisBus, AisReader aisReader) {
+        super(aisBus, aisReader);
     }
     
-    /**
-     * Receive packet from reader
-     */
-    @Override
-    public void accept(AisPacket packet) {
-        // Push to bus
-        push(packet);        
-    }
-
-    
-    @Override
-    public void start() {
-        // Start the reader
-        aisReader.start();
+    // TODO config should come from configuration class
+    public static RoundRobinTcpClient create(AisBus aisBus, String hostPorts, int interval, int timeout) {
+        RoundRobinAisTcpReader rrReader = new RoundRobinAisTcpReader();
+        rrReader.setCommaseparatedHostPort(hostPorts);
+        rrReader.setTimeout(timeout);
+        rrReader.setReconnectInterval(interval);             
+        return new RoundRobinTcpClient(aisBus, rrReader);
     }
 
 }

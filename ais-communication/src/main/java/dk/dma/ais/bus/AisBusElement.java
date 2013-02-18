@@ -15,13 +15,13 @@
  */
 package dk.dma.ais.bus;
 
+import net.jcip.annotations.Immutable;
 import dk.dma.ais.packet.AisPacket;
 
 /**
  * An element on the AIS bus with possibilities for further metadata
  */
-// TODO concurrency handling
-// Immutable
+@Immutable
 public class AisBusElement {
 
     private final AisPacket packet;
