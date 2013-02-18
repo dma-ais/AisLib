@@ -31,7 +31,7 @@ public final class SrmSend implements Consumer<Abk> {
     private static final Logger LOG = LoggerFactory.getLogger(SrmSend.class);
 
     private Abk abk;
-    private boolean abkReceived = false;
+    private boolean abkReceived;
     private AisReader aisReader;
 
     private SrmSend(String hostPort) {
