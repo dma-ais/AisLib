@@ -13,26 +13,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.consumer;
+package dk.dma.ais.bus.configuration;
 
-import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.bus.AisBus;
-import dk.dma.ais.bus.AisBusConsumer;
-import dk.dma.ais.bus.AisBusElement;
+public class AisBusConfiguration {
 
-/**
- * Simple consumer that outputs to stdout
- */
-@ThreadSafe
-public class StdoutConsumer extends AisBusConsumer {
+    private int busQueueSize = 10000;
 
-    public StdoutConsumer(AisBus aisBus) {
-        super(aisBus);
+    public AisBusConfiguration() {
+
     }
 
-    @Override
-    public void receiveFiltered(AisBusElement queueElement) {
-        //System.out.println(queueElement.getPacket().getStringMessage());
+    public int getBusQueueSize() {
+        return busQueueSize;
+    }
+
+    public void setBusQueueSize(int busQueueSize) {
+        this.busQueueSize = busQueueSize;
     }
 
 }

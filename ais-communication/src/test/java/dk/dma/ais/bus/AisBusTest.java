@@ -19,39 +19,43 @@ import dk.dma.ais.bus.consumer.StdoutConsumer;
 import dk.dma.ais.bus.provider.RoundRobinTcpClient;
 
 public class AisBusTest {
-    
+
     //@Test
     public void tcpConsumer() {
         // Make ais bus configuration
         // TODO
-        
+
         // Make ais bus
         AisBus aisBus = new AisBus();
         // Start AisBus
         aisBus.start();
-        
+
         // Make consumer
         AisBusConsumer consumer = new StdoutConsumer(aisBus);
         // Start consumer
         // TODO necessary?
         // Register consumer
         aisBus.registerConsumer(consumer);
-        
-        // Make provider
-        AisBusProvider provider = RoundRobinTcpClient.create(aisBus, "ais163.sealan.dk:4712", 10, 10);
-        // Start provider
-        provider.start();
-        
-        
-        
+
+        // Make providers
+        AisBusProvider provider1 = RoundRobinTcpClient.create(aisBus, "ais163.sealan.dk:65262", 10, 10);
+        AisBusProvider provider2 = RoundRobinTcpClient.create(aisBus, "iala63.sealan.dk:4712,iala68.sealan.dk:4712", 10, 10);
+        AisBusProvider provider3 = RoundRobinTcpClient.create(aisBus, "10.10.5.124:25251", 10, 10);
+        AisBusProvider provider4 = RoundRobinTcpClient.create(aisBus, "10.10.5.144:65061", 10, 10);
+
+        // Start providers
+        provider1.start();
+        provider2.start();
+        provider3.start();
+        provider4.start();
+
         try {
             aisBus.join();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
     }
-    
 
 }
