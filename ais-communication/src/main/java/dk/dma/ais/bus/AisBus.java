@@ -15,10 +15,130 @@
  */
 package dk.dma.ais.bus;
 
-public class AisBus {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-	public AisBus() {
+import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.filter.PacketFilterCollection;
+import dk.dma.ais.queue.BlockingMessageQueue;
+import dk.dma.ais.queue.IMessageQueue;
+import dk.dma.ais.queue.MessageQueueOverflowException;
+import dk.dma.ais.queue.MessageQueueReader;
 
-	}
+/**
+ * Bus for exchanging AIS packets
+ * 
+ * Thread safety by delegation
+ */
+@ThreadSafe
+public class AisBus extends Thread {
+
+    /**
+     * Filters to apply to received packets
+     */
+    private final PacketFilterCollection filters = new PacketFilterCollection();
+
+    /**
+     * Queue to represent the bus
+     */
+    private final IMessageQueue<AisBusElement> busQueue;
+
+    /**
+     * Collection of consumer threads
+     */
+    private final CopyOnWriteArrayList<MessageQueueReader<AisBusElement>> consumerThreads = new CopyOnWriteArrayList<>();
+
+    // Some configuration that should come from somewhere else (conf class)
+    private final int busPullMaxElements = 1000;
+    private final int consumerPullMaxElements = 1000;
+    private final int busQueueSize = 10000;
+    private final int consumerQueueSize = 10000;
+
+    public AisBus() {
+        // TODO size from where
+        // maybe configuration as argument
+
+        // Filters from somewhere
+
+        // Create the bus
+        busQueue = new BlockingMessageQueue<>(busQueueSize);
+    }
+
+    // TODO maybe private constructor and method to create
+
+    /**
+     * Push element onto the bus. Returns false if the bus is overflowing
+     * 
+     * @param element
+     * @return if pushing was a success
+     */
+    public boolean push(AisBusElement element) {        
+        // Filter messages in this thread (the client thread)
+        if (filters.rejectedByFilter(element.getPacket())) {
+            return true;
+        }
+
+        // TODO do transformation
+
+        // TODO do tagging
+
+        // TODO update statistics
+
+        // Push to the bus
+        try {
+            busQueue.push(element);
+        } catch (MessageQueueOverflowException e) {
+            System.err.println("Overflow when pushing to bus");
+            // TODO handle overflow
+            return false;
+        }
+        return true;
+    }
+
+    public void registerConsumer(AisBusConsumer consumer) {
+        // Make consumer queue
+        IMessageQueue<AisBusElement> consumerQueue = new BlockingMessageQueue<>(consumerQueueSize);
+        // Make consumer thread
+        MessageQueueReader<AisBusElement> consumerThread = new MessageQueueReader<>(consumer, consumerQueue,
+                consumerPullMaxElements);
+        // Add consumer thread to list
+        consumerThreads.add(consumerThread);
+        // Start consumer thread
+        consumerThread.start();
+    }
+
+    public void shutdown() {
+        // TODO
+        // Investigate what this would require
+    }
+
+    /**
+     * Thread method that distributes elements
+     */
+    @Override
+    public void run() {
+        List<AisBusElement> elements = new ArrayList<>();
+        while (true) {
+            elements.clear();
+            // Consume from bus queue
+            busQueue.pull(elements, busPullMaxElements);
+            // Iterate through consumers
+            for (MessageQueueReader<AisBusElement> consumerThread : consumerThreads) {
+                // Distribute elements
+                for (AisBusElement element : elements) {                    
+                    try {
+                        consumerThread.getQueue().push(element);
+                    } catch (MessageQueueOverflowException e) {
+                        // TODO handle overflow
+                        // Maybe call method on consumer
+                        // Do some kind of central overflow event down sampling somewhere
+                        System.err.println("Overflow when pushing to consumer queue");
+                    }
+                }
+            }
+        }
+
+    }
 
 }

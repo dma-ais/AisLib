@@ -15,26 +15,45 @@
  */
 package dk.dma.ais.filter;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 
 /**
- * Abstract base class for message filters that allows both ais messages and ais packets as argument.
+ * Filter that holds a collection of packet filers and checks against all filters
+ * 
+ * Thread safe by delegation
  */
 @ThreadSafe
-public abstract class MessageFilterBase implements IMessageFilter, IPacketFilter {
+public class PacketFilterCollection implements IPacketFilter {
+
+    private final CopyOnWriteArrayList<IPacketFilter> packetFilters = new CopyOnWriteArrayList<>();
+
+    public PacketFilterCollection() {
+
+    }
 
     /**
-     * Helper method to extract message from packet and do test
+     * Check against all filters
      */
     @Override
-    public synchronized boolean rejectedByFilter(AisPacket packet) {
-        AisMessage message = packet.tryGetAisMessage();
-        if (message != null) {
-            return this.rejectedByFilter(message);
+    public boolean rejectedByFilter(AisPacket packet) {
+        for (IPacketFilter filter : packetFilters) {
+            if (filter.rejectedByFilter(packet)) {
+                return true;
+            }
         }
         return false;
+    }
+
+    /**
+     * Add a filter
+     * 
+     * @param filter
+     */
+    public void addFilter(IPacketFilter filter) {
+           packetFilters.add(filter);
     }
 
 }

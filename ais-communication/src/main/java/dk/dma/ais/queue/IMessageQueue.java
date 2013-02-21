@@ -17,35 +17,46 @@ package dk.dma.ais.queue;
 
 import java.util.List;
 
-import dk.dma.ais.message.AisMessage;
+import net.jcip.annotations.ThreadSafe;
 
 /**
- * Blocking queue as transportation medium of AisMessages.
+ * Queue for transporting various data. Suited for AIS use.
  */
-public interface IAisMessageQueue {
+@ThreadSafe
+public interface IMessageQueue<T> {
 
     /**
      * Push AisMessage onto the queue
      * 
      * @param aisMessage
      * @return the number of elements on the queue after the insertion
-     * @throws AisMessageQueueOverflowException
+     * @throws MessageQueueOverflowException
      *             when capacity limit has been reached
      */
-    int push(AisMessage aisMessage) throws AisMessageQueueOverflowException;
+    int push(T content) throws MessageQueueOverflowException;
 
     /**
      * Pull message from the queue. This must be implemented as a blocking call.
      * 
      * @return AisMessageQueueEntry
      */
-    AisMessageQueueEntry pull();
+    T pull();
 
     /**
-     * Pull all current message on the queue. This is not a blocking call.
+     * Pull up to maxElements from queue. This must be a blocking call.
      * 
-     * @return
+     * @param l list to add elements to 
+     * @param maxElements
+     * @return list with added elements
      */
-    List<AisMessageQueueEntry> pullAll();
+    List<T> pull(List<T> l, int maxElements);
+
+    /**
+     * Pull all current message on the queue. This must be a blocking call.
+     * 
+     * @param l list to add elements to 
+     * @return list with added elements
+     */
+    List<T> pullAll(List<T> c);
 
 }

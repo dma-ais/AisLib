@@ -13,18 +13,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.queue;
+package dk.dma.ais.bus;
 
-/**
- * Interface to implement for classes wanting to handle AIS messages from an AisMessageQueue
- */
-public interface IAisQueueEntryHandler {
+import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.queue.IQueueEntryHandler;
 
-    /**
-     * Method which to be called when delivering queue entry
-     * 
-     * @param queueEntry
-     */
-    void receive(AisMessageQueueEntry queueEntry);
+@ThreadSafe
+public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusElement> {
 
+    public AisBusConsumer(AisBus aisBus) {
+        super(aisBus);
+    }
+
+    @Override
+    public final void receive(AisBusElement queueElement) {
+        // Do filtering
+        if (!filters.rejectedByFilter(queueElement.getPacket())) {
+            receiveFiltered(queueElement);
+        }
+    }
+
+    public abstract void receiveFiltered(AisBusElement queueElement);
+    
 }

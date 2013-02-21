@@ -24,8 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A extended AisTcpReader with added possibility of doing round robin connect attempt to list of AIS TCP sources.
- * 
+ * An extended AisTcpReader with added possibility of doing round robin connect attempt to list of AIS TCP sources.
  */
 public class RoundRobinAisTcpReader extends AisTcpReader {
 

@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class FilterSettings {
 
-    private final Set<Long> baseStations = new HashSet<>();
+    private final Set<Integer> baseStations = new HashSet<>();
     private final Set<String> countries = new HashSet<>();
     private final Set<String> regions = new HashSet<>();
     private Date startDate;
@@ -33,7 +33,7 @@ public class FilterSettings {
 
     }
 
-    public void addBaseStation(long baseMmsi) {
+    public void addBaseStation(int baseMmsi) {
         baseStations.add(baseMmsi);
     }
 
@@ -41,7 +41,7 @@ public class FilterSettings {
         countries.add(country);
     }
 
-    public Set<Long> getBaseStations() {
+    public Set<Integer> getBaseStations() {
         return baseStations;
     }
 
@@ -63,7 +63,7 @@ public class FilterSettings {
         }
         String[] stationsAr = str.split(",");
         for (String station : stationsAr) {
-            baseStations.add(Long.parseLong(station));
+            baseStations.add(Integer.parseInt(station));
 
         }
     }

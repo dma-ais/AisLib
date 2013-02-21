@@ -31,7 +31,7 @@ public final class SrmSend implements Consumer<Abk> {
     private static final Logger LOG = LoggerFactory.getLogger(SrmSend.class);
 
     private Abk abk;
-    private Boolean abkReceived = false;
+    private boolean abkReceived;
     private AisReader aisReader;
 
     private SrmSend(String hostPort) {
@@ -44,7 +44,7 @@ public final class SrmSend implements Consumer<Abk> {
      * Receive the ABK result
      */
     public void accept(Abk abk) {
-        synchronized (abkReceived) {
+        synchronized (this) {
             this.abk = abk;
             this.abkReceived = true;
         }
@@ -83,7 +83,7 @@ public final class SrmSend implements Consumer<Abk> {
                 e.printStackTrace();
             }
 
-            synchronized (abkReceived) {
+            synchronized (this) {
                 if (abkReceived) {
                     break;
                 }

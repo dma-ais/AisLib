@@ -15,13 +15,15 @@
  */
 package dk.dma.ais.filter;
 
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 
 /**
  * Interface to implement for packet filters
  */
+@ThreadSafe
 public interface IPacketFilter {
-	
-	boolean rejectedByFilter(AisPacket packet);
+
+    boolean rejectedByFilter(AisPacket packet);
 
 }

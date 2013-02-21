@@ -15,29 +15,29 @@
  */
 package dk.dma.ais.queue;
 
-/**
- * Thread class to read from a message queue and delegating to and IAisHandler
- */
-public class AisMessageQueueReader extends Thread {
+import java.util.ArrayList;
+import java.util.List;
 
-    private IAisQueueEntryHandler aisHandler;
-    private IAisMessageQueue queue;
+import junit.framework.Assert;
 
-    public AisMessageQueueReader(IAisQueueEntryHandler aisHandler, IAisMessageQueue queue) {
-        this.aisHandler = aisHandler;
-        this.queue = queue;
-    }
+import org.junit.Test;
 
-    @Override
-    public void run() {
-        // Read loop
-        while (true) {
-            aisHandler.receive(queue.pull());
+public class QueueTest {
+
+    @Test
+    public void testPushPull() throws MessageQueueOverflowException {
+        IMessageQueue<Integer> q = new BlockingMessageQueue<>();
+        for (int i = 0; i < 1000; i++) {
+            q.push(i);
         }
-    }
+        List<Integer> list = new ArrayList<>();
+        list = q.pull(list, 100);
+        Assert.assertEquals(list.size(), 100);
 
-    public IAisMessageQueue getQueue() {
-        return queue;
+        list.clear();
+        list = q.pull(list, 1);
+        Assert.assertEquals(list.size(), 1);
+
     }
 
 }

@@ -35,7 +35,7 @@ public class ClientSendThread extends Thread implements Consumer<Abk> {
     protected AisReader aisReader;
     protected SendRequest sendRequest;
     protected Abk abk;
-    protected Boolean abkReceived = false;
+    protected boolean abkReceived;
     protected long timeout = 60000; // 60 sec default
 
     public ClientSendThread(AisReader aisReader, SendRequest sendRequest) {
@@ -71,7 +71,7 @@ public class ClientSendThread extends Thread implements Consumer<Abk> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            synchronized (abkReceived) {
+            synchronized (this) {
                 if (abkReceived) {
                     break;
                 }
@@ -89,7 +89,7 @@ public class ClientSendThread extends Thread implements Consumer<Abk> {
 
     @Override
     public void accept(Abk abk) {
-        synchronized (abkReceived) {
+        synchronized (this) {
             this.abk = abk;
             this.abkReceived = true;
         }
@@ -108,7 +108,7 @@ public class ClientSendThread extends Thread implements Consumer<Abk> {
     }
 
     public Abk.Result getAbkResult() {
-        synchronized (abkReceived) {
+        synchronized (this) {
             if (abkReceived) {
                 return abk.getResult();
             }
@@ -117,7 +117,7 @@ public class ClientSendThread extends Thread implements Consumer<Abk> {
     }
 
     public boolean isSuccess() {
-        synchronized (abkReceived) {
+        synchronized (this) {
             if (!abkReceived) {
                 return false;
             }

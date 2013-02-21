@@ -140,14 +140,14 @@ public class AisFilter {
 
         // Maybe insert downsampling filter
         if (downsampleRate > 0) {
-        	MessageHandlerFilter downsample = new MessageHandlerFilter(new DownSampleFilter(downsampleRate));  
+            MessageHandlerFilter downsample = new MessageHandlerFilter(new DownSampleFilter(downsampleRate));
             downsample.registerReceiver(messageHandler);
             handler = downsample;
         }
 
         // Maybe insert doublet filtering
         if (doubletFiltering) {
-        	MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilter());
+            MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilter());
             doubletFilter.registerReceiver(handler);
             handler = doubletFilter;
         }

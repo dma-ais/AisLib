@@ -13,28 +13,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.filter;
+package dk.dma.ais.bus;
 
 import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 
-/**
- * Abstract base class for message filters that allows both ais messages and ais packets as argument.
- */
 @ThreadSafe
-public abstract class MessageFilterBase implements IMessageFilter, IPacketFilter {
+public abstract class AisBusProvider extends AisBusSocket {
 
+    public AisBusProvider(AisBus aisBus) {
+        super(aisBus);
+    }
+    
     /**
-     * Helper method to extract message from packet and do test
+     * Method called to start the provider
      */
-    @Override
-    public synchronized boolean rejectedByFilter(AisPacket packet) {
-        AisMessage message = packet.tryGetAisMessage();
-        if (message != null) {
-            return this.rejectedByFilter(message);
-        }
-        return false;
+    public abstract void start();
+    
+    /**
+     * Helper method to push to bus
+     * @param packet
+     */
+    protected void push(AisPacket packet) {
+        getAisBus().push(new AisBusElement(packet));
     }
 
 }

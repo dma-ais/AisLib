@@ -13,45 +13,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.queue;
+package dk.dma.ais.bus;
 
-import java.io.Serializable;
-
-import dk.dma.ais.message.AisMessage;
+import net.jcip.annotations.Immutable;
+import dk.dma.ais.packet.AisPacket;
 
 /**
- * A message queue entry. Contains AisMessage and timestamp for insertion.
+ * An element on the AIS bus with possibilities for further metadata
  */
-public class AisMessageQueueEntry implements Serializable {
+@Immutable
+public final class AisBusElement {
 
-    private static final long serialVersionUID = 1L;
+    private final AisPacket packet;
+    private final long timestamp;
 
-    private long timestamp;
-    private AisMessage aisMessage;
-
-    public AisMessageQueueEntry() {
+    public AisBusElement(AisPacket packet) {
+        this.packet = packet;
         this.timestamp = System.currentTimeMillis();
     }
 
-    public AisMessageQueueEntry(AisMessage aisMessage) {
-        this();
-        this.aisMessage = aisMessage;
+    public AisPacket getPacket() {
+        return packet;
     }
-
+    
     public long getTimestamp() {
         return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public AisMessage getAisMessage() {
-        return aisMessage;
-    }
-
-    public void setAisMessage(AisMessage aisMessage) {
-        this.aisMessage = aisMessage;
     }
 
 }

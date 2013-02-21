@@ -15,54 +15,68 @@
  */
 package dk.dma.ais.queue;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import dk.dma.ais.message.AisMessage;
+import net.jcip.annotations.ThreadSafe;
 
 /**
- * Implementation of an AisMessageQueue using a Java ArrayBlockingQueue
+ * Implementation of a IMessageQueue using a Java ArrayBlockingQueue
  */
-public class AisMessageQueue implements IAisMessageQueue {
+@ThreadSafe
+public class BlockingMessageQueue<T> implements IMessageQueue<T> {
 
-    private int limit;
-    private BlockingQueue<AisMessageQueueEntry> queue;
+    private static final int DEFAULT_MAX_SIZE = 1000;
 
-    public AisMessageQueue() {
-        this(1000);
+    private final int limit;
+    private final BlockingQueue<T> queue;
+
+    public BlockingMessageQueue() {
+        this(DEFAULT_MAX_SIZE);
     }
 
-    public AisMessageQueue(int limit) {
+    public BlockingMessageQueue(int limit) {
         this.limit = limit;
         this.queue = new ArrayBlockingQueue<>(limit);
     }
 
     @Override
-    public int push(AisMessage aisMessage) throws AisMessageQueueOverflowException {
-        if (!queue.offer(new AisMessageQueueEntry(aisMessage))) {
-            throw new AisMessageQueueOverflowException();
+    public int push(T content) throws MessageQueueOverflowException {
+        if (!queue.offer(content)) {
+            throw new MessageQueueOverflowException();
         }
         return queue.size();
     }
 
     @Override
-    public AisMessageQueueEntry pull() {
-        AisMessageQueueEntry entry = null;
+    public T pull() {
+        T entry = null;
         do {
             try {
                 entry = queue.take();
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
         } while (entry == null);
         return entry;
     }
 
     @Override
-    public List<AisMessageQueueEntry> pullAll() {
-        List<AisMessageQueueEntry> list = new ArrayList<>();
-        queue.drainTo(list);
-        return list;
+    public List<T> pull(List<T> l, int maxElements) {
+        // Wait for element to become available
+        try {
+            l.add(queue.take());
+        } catch (InterruptedException e) {
+            return l;
+        }
+        // Get up to maxElements - 1 more
+        queue.drainTo(l, maxElements - 1);
+        return l;
+    }
+
+    @Override
+    public List<T> pullAll(List<T> l) {        
+        return pull(l, Integer.MAX_VALUE);
     }
 
     public int getLimit() {
