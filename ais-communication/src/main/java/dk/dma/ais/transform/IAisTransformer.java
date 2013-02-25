@@ -13,26 +13,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.consumer;
+package dk.dma.ais.transform;
 
 import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.bus.AisBus;
-import dk.dma.ais.bus.AisBusConsumer;
-import dk.dma.ais.bus.AisBusElement;
 
 /**
- * Simple consumer that outputs to stdout
+ * Interface for transformers that take one instance and returns another
  */
 @ThreadSafe
-public class StdoutConsumer extends AisBusConsumer {
-
-    public StdoutConsumer(AisBus aisBus) {
-        super(aisBus);
-    }
-
-    @Override
-    public void receiveFiltered(AisBusElement queueElement) {
-        System.out.println(queueElement.getPacket().getStringMessage());
-    }
+public interface IAisTransformer<T> {
+    
+    /**
+     * Transform element 
+     * @param element
+     * @return transformed element
+     */
+    T transform(T element);
 
 }

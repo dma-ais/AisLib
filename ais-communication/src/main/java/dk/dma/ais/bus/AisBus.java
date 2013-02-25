@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.filter.PacketFilterCollection;
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.MessageQueueOverflowException;
@@ -32,12 +32,7 @@ import dk.dma.ais.queue.MessageQueueReader;
  * Thread safety by delegation
  */
 @ThreadSafe
-public class AisBus extends Thread {
-
-    /**
-     * Filters to apply to received packets
-     */
-    private final PacketFilterCollection filters = new PacketFilterCollection();
+public class AisBus extends AisBusComponent implements Runnable {
 
     /**
      * Queue to represent the bus
@@ -65,29 +60,35 @@ public class AisBus extends Thread {
         busQueue = new BlockingMessageQueue<>(busQueueSize);
     }
 
+    /**
+     * Start AisBus thread
+     * 
+     * @return thread
+     */
+    public Thread start() {
+        Thread t = new Thread(this);
+        t.start();
+        return t;
+    }
+
     // TODO maybe private constructor and method to create
 
     /**
      * Push element onto the bus. Returns false if the bus is overflowing
      * 
-     * @param element
+     * @param packet
      * @return if pushing was a success
      */
-    public boolean push(AisBusElement element) {        
-        // Filter messages in this thread (the client thread)
-        if (filters.rejectedByFilter(element.getPacket())) {
+    public boolean push(AisPacket packet) {
+        // Do filtering, transformation and filtering (the client thread)
+        packet = handleReceived(packet);
+        if (packet == null) {
             return true;
         }
 
-        // TODO do transformation
-
-        // TODO do tagging
-
-        // TODO update statistics
-
         // Push to the bus
         try {
-            busQueue.push(element);
+            busQueue.push(new AisBusElement(packet));
         } catch (MessageQueueOverflowException e) {
             System.err.println("Overflow when pushing to bus");
             // TODO handle overflow
@@ -126,7 +127,7 @@ public class AisBus extends Thread {
             // Iterate through consumers
             for (MessageQueueReader<AisBusElement> consumerThread : consumerThreads) {
                 // Distribute elements
-                for (AisBusElement element : elements) {                    
+                for (AisBusElement element : elements) {
                     try {
                         consumerThread.getQueue().push(element);
                     } catch (MessageQueueOverflowException e) {

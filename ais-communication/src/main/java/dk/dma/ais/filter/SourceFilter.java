@@ -95,11 +95,11 @@ public class SourceFilter extends MessageFilterBase {
         return false;
     }
 
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return filter.size() == 0;
     }
 
-    public void addFilterValue(String filterName, String value) {
+    public synchronized void addFilterValue(String filterName, String value) {
         if (!FILTER_NAMES.contains(filterName)) {
             throw new IllegalArgumentException("Unknown filter: " + filterName);
         }

@@ -15,17 +15,15 @@
  */
 package dk.dma.ais.bus;
 
-import net.jcip.annotations.Immutable;
 import dk.dma.ais.packet.AisPacket;
 
 /**
  * An element on the AIS bus with possibilities for further metadata
  */
-@Immutable
 public final class AisBusElement {
 
-    private final AisPacket packet;
     private final long timestamp;
+    private AisPacket packet;    
 
     public AisBusElement(AisPacket packet) {
         this.packet = packet;
@@ -34,6 +32,10 @@ public final class AisBusElement {
 
     public AisPacket getPacket() {
         return packet;
+    }
+    
+    public void setPacket(AisPacket packet) {
+        this.packet = packet;
     }
     
     public long getTimestamp() {

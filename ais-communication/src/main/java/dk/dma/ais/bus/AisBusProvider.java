@@ -35,7 +35,14 @@ public abstract class AisBusProvider extends AisBusSocket {
      * @param packet
      */
     protected void push(AisPacket packet) {
-        getAisBus().push(new AisBusElement(packet));
+        // Do filtering, transformation and filtering
+        packet = handleReceived(packet);
+        if (packet == null) {
+            return;
+        }
+        
+        // Push to the bus
+        getAisBus().push(packet);
     }
 
 }

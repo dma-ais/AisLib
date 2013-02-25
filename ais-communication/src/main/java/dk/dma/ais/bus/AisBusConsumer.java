@@ -16,6 +16,7 @@
 package dk.dma.ais.bus;
 
 import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.queue.IQueueEntryHandler;
 
 @ThreadSafe
@@ -27,12 +28,15 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
 
     @Override
     public final void receive(AisBusElement queueElement) {
-        // Do filtering
-        if (!filters.rejectedByFilter(queueElement.getPacket())) {
-            receiveFiltered(queueElement);
+        // Do filtering, transformation and filtering
+        AisPacket packet = handleReceived(queueElement.getPacket());
+        if (packet == null) {
+            return;
         }
+        queueElement.setPacket(packet);
+        receiveFiltered(queueElement);
     }
 
     public abstract void receiveFiltered(AisBusElement queueElement);
-    
+
 }

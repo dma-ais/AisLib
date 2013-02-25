@@ -27,11 +27,16 @@ public class AisBusTest {
 
         // Make ais bus
         AisBus aisBus = new AisBus();
+                
         // Start AisBus
-        aisBus.start();
+        Thread aisBusThread = aisBus.start();
 
         // Make consumer
         AisBusConsumer consumer = new StdoutConsumer(aisBus);
+//        SourceFilter filter = new SourceFilter();
+//        filter.addFilterValue("region", "9");
+//        consumer.getFilters().addFilter(filter);
+
         // Start consumer
         // TODO necessary?
         // Register consumer
@@ -50,7 +55,7 @@ public class AisBusTest {
         provider4.start();
 
         try {
-            aisBus.join();
+            aisBusThread.join();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
