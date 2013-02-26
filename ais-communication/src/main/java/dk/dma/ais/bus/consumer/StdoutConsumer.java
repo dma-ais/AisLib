@@ -16,7 +16,6 @@
 package dk.dma.ais.bus.consumer;
 
 import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.bus.AisBus;
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.AisBusElement;
 
@@ -26,8 +25,8 @@ import dk.dma.ais.bus.AisBusElement;
 @ThreadSafe
 public class StdoutConsumer extends AisBusConsumer {
 
-    public StdoutConsumer(AisBus aisBus) {
-        super(aisBus);
+    public StdoutConsumer() {
+        super();
     }
 
     @Override

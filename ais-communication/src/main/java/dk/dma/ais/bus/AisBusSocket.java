@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.bus;
 
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 /**
@@ -23,14 +24,42 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public abstract class AisBusSocket extends AisBusComponent {
 
-    private final AisBus aisBus;
+    @GuardedBy("this")
+    private AisBus aisBus;
+    @GuardedBy("this")
+    private String name;
+    @GuardedBy("this")
+    private String description;
+    
+    public AisBusSocket() {
+        super();
+    }
 
-    public AisBusSocket(AisBus aisBus) {
+    public synchronized AisBus getAisBus() {
+        return aisBus;
+    }
+    
+    public synchronized void setAisBus(AisBus aisBus) {
+        if (this.aisBus != null) {
+            throw new IllegalStateException("AisBus already defined");
+        }
         this.aisBus = aisBus;
     }
 
-    protected AisBus getAisBus() {
-        return aisBus;
+    public synchronized String getName() {
+        return name;
+    }
+
+    public synchronized void setName(String name) {
+        this.name = name;
+    }
+
+    public synchronized String getDescription() {
+        return description;
+    }
+
+    public synchronized void setDescription(String description) {
+        this.description = description;
     }
     
 }

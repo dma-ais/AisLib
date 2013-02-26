@@ -16,7 +16,6 @@
 package dk.dma.ais.bus.provider;
 
 import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.bus.AisBus;
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisReader;
@@ -31,13 +30,14 @@ public class AisReaderProvider extends AisBusProvider implements Consumer<AisPac
     /**
      * The AIS reader to provide packets
      */
-    private final AisReader aisReader;
+    private AisReader aisReader = null;
     
-    public AisReaderProvider(AisBus aisBus, AisReader aisReader) {
-        super(aisBus);
-        this.aisReader = aisReader;        
-        // Register self as handler of packets
-        aisReader.registerPacketHandler(this);
+    public AisReaderProvider() {
+        super();
+    }
+    
+    public AisReaderProvider(AisReader aisReader) {
+        setAisReader(aisReader);
     }
     
     /**
@@ -54,6 +54,15 @@ public class AisReaderProvider extends AisBusProvider implements Consumer<AisPac
     public void start() {
         // Start the reader
         aisReader.start();
+    }
+    
+    public void setAisReader(AisReader aisReader) {
+        if (this.aisReader != null) {
+            throw new IllegalStateException("AisReader already defined");
+        }
+        this.aisReader = aisReader;
+        // Register self as handler of packets
+        aisReader.registerPacketHandler(this);
     }
 
 }

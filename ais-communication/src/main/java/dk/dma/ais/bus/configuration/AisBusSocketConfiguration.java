@@ -13,24 +13,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.provider;
+package dk.dma.ais.bus.configuration;
 
-import net.jcip.annotations.ThreadSafe;
-import dk.dma.ais.reader.RoundRobinAisTcpReader;
+public class AisBusSocketConfiguration extends AisBusComponentConfiguration {
 
-/**
- * Round robin TCP client provider
- */
-@ThreadSafe
-public final class RoundRobinTcpClient extends AisReaderProvider {
-    
-    public RoundRobinTcpClient(String hostPorts, int interval, int timeout) {
-        super();
-        RoundRobinAisTcpReader rrReader = new RoundRobinAisTcpReader();
-        rrReader.setCommaseparatedHostPort(hostPorts);
-        rrReader.setTimeout(timeout);
-        rrReader.setReconnectInterval(interval);
-        setAisReader(rrReader);
+    private String name;
+    private String description;
+
+    public AisBusSocketConfiguration() {
+
     }
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 }

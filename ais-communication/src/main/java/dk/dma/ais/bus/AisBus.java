@@ -17,8 +17,9 @@ package dk.dma.ais.bus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.queue.BlockingMessageQueue;
@@ -37,18 +38,29 @@ public class AisBus extends AisBusComponent implements Runnable {
     /**
      * Queue to represent the bus
      */
-    private final IMessageQueue<AisBusElement> busQueue;
+    private IMessageQueue<AisBusElement> busQueue;
 
     /**
      * Collection of consumer threads
      */
-    private final CopyOnWriteArrayList<MessageQueueReader<AisBusElement>> consumerThreads = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArraySet<MessageQueueReader<AisBusElement>> consumerThreads = new CopyOnWriteArraySet<>();
+
+    /**
+     * Collection of providers
+     */
+    private final CopyOnWriteArraySet<AisBusProvider> providers = new CopyOnWriteArraySet<>();
 
     // Some configuration that should come from somewhere else (conf class)
-    private final int busPullMaxElements = 1000;
-    private final int consumerPullMaxElements = 1000;
-    private final int busQueueSize = 10000;
-    private final int consumerQueueSize = 10000;
+    @GuardedBy("this")
+    private int busPullMaxElements = 1000;
+    @GuardedBy("this")
+    private int consumerPullMaxElements = 1000;
+    @GuardedBy("this")
+    private int busQueueSize = 10000;
+    @GuardedBy("this")
+    private int consumerQueueSize = 10000;
+    @GuardedBy("this")
+    private Thread thread;
 
     public AisBus() {
         // TODO size from where
@@ -56,22 +68,30 @@ public class AisBus extends AisBusComponent implements Runnable {
 
         // Filters from somewhere
 
-        // Create the bus
-        busQueue = new BlockingMessageQueue<>(busQueueSize);
     }
-
+    
     /**
      * Start AisBus thread
      * 
      * @return thread
      */
-    public Thread start() {
-        Thread t = new Thread(this);
-        t.start();
-        return t;
+    public synchronized Thread start() {
+        // Create the bus
+        busQueue = new BlockingMessageQueue<>(busQueueSize);
+        // Start thread
+        thread = new Thread(this);
+        thread.start();
+        // Return the thread
+        return thread;
     }
-
-    // TODO maybe private constructor and method to create
+    
+    /**
+     * Get the thread running the 
+     * @return
+     */
+    public synchronized Thread getThread() {
+        return thread;
+    }
 
     /**
      * Push element onto the bus. Returns false if the bus is overflowing
@@ -97,7 +117,13 @@ public class AisBus extends AisBusComponent implements Runnable {
         return true;
     }
 
+    /**
+     * Register a consumer and start sending
+     * @param consumer
+     */
     public void registerConsumer(AisBusConsumer consumer) {
+        // Tie aisbus to consumer
+        consumer.setAisBus(this);
         // Make consumer queue
         IMessageQueue<AisBusElement> consumerQueue = new BlockingMessageQueue<>(consumerQueueSize);
         // Make consumer thread
@@ -107,6 +133,19 @@ public class AisBus extends AisBusComponent implements Runnable {
         consumerThreads.add(consumerThread);
         // Start consumer thread
         consumerThread.start();
+    }
+
+    /**
+     * Register and start provider.
+     * @param provider
+     */
+    public void registerProvider(AisBusProvider provider) {
+        // Tie aisbus to provider
+        provider.setAisBus(this);
+        // Add to set of providers
+        providers.add(provider);
+        // Start provider
+        provider.start();
     }
 
     public void shutdown() {
@@ -141,5 +180,21 @@ public class AisBus extends AisBusComponent implements Runnable {
         }
 
     }
-
+    
+    public synchronized void setBusPullMaxElements(int busPullMaxElements) {
+        this.busPullMaxElements = busPullMaxElements;
+    }
+    
+    public synchronized void setBusQueueSize(int busQueueSize) {
+        this.busQueueSize = busQueueSize;
+    }
+    
+    public synchronized void setConsumerPullMaxElements(int consumerPullMaxElements) {
+        this.consumerPullMaxElements = consumerPullMaxElements;
+    }
+    
+    public synchronized void setConsumerQueueSize(int consumerQueueSize) {
+        this.consumerQueueSize = consumerQueueSize;
+    }
+    
 }

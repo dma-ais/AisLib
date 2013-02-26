@@ -21,8 +21,8 @@ import dk.dma.ais.packet.AisPacket;
 @ThreadSafe
 public abstract class AisBusProvider extends AisBusSocket {
 
-    public AisBusProvider(AisBus aisBus) {
-        super(aisBus);
+    public AisBusProvider() {
+        super();
     }
     
     /**

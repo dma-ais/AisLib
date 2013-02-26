@@ -22,8 +22,8 @@ import dk.dma.ais.queue.IQueueEntryHandler;
 @ThreadSafe
 public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusElement> {
 
-    public AisBusConsumer(AisBus aisBus) {
-        super(aisBus);
+    public AisBusConsumer() {
+        super();
     }
 
     @Override
