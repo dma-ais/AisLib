@@ -76,7 +76,6 @@ public abstract class AisBusComponent {
         if (status != STATUS_INITIALIZED) {
             throw new IllegalStateException("Component must be in state CREATED to be initialized");
         }
-        System.out.println("this.class: " + this.getClass());
         status = STATUS_STARTED;
     }
     

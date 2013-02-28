@@ -15,7 +15,6 @@
  */
 package dk.dma.ais.bus.provider;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.reader.RoundRobinAisTcpReader;
 
@@ -25,11 +24,8 @@ import dk.dma.ais.reader.RoundRobinAisTcpReader;
 @ThreadSafe
 public final class TcpClientProvider extends AisReaderProvider {
 
-    @GuardedBy("this")
     private String hostsPorts;
-    @GuardedBy("this")
     private int interval = 10;
-    @GuardedBy("this")
     private int timeout = 10;
 
     private final RoundRobinAisTcpReader rrReader = new RoundRobinAisTcpReader();    
@@ -50,16 +46,16 @@ public final class TcpClientProvider extends AisReaderProvider {
         this.hostsPorts = hostsPorts;
     }
 
-    public synchronized void setTimeout(int timeout) {
+    public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
-    public synchronized void setInterval(int interval) {
+    public void setInterval(int interval) {
         this.interval = interval;
     }
     
     @Override
-    public synchronized void init() {
+    public void init() {
         rrReader.setCommaseparatedHostPort(hostsPorts);
         rrReader.setTimeout(timeout);
         rrReader.setReconnectInterval(interval);

@@ -8,12 +8,16 @@
     </filter>
     <busPullMaxElements>1000</busPullMaxElements>
     <busQueueSize>10000</busQueueSize>
-    <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
-        <filter xsi:type="downSampleFilterConfiguration">
-            <samplingRate>600</samplingRate>
-        </filter>
-        <consumerPullMaxElements>1</consumerPullMaxElements>
-        <consumerQueueSize>10000</consumerQueueSize>
+<!--     <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration"> -->
+<!--         <filter xsi:type="downSampleFilterConfiguration"> -->
+<!--             <samplingRate>600</samplingRate> -->
+<!--         </filter> -->
+<!--         <consumerPullMaxElements>1</consumerPullMaxElements> -->
+<!--         <consumerQueueSize>10000</consumerQueueSize> -->
+<!--     </consumer> -->
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpWriterConsumerConfiguration">
+        <host>localhost</host>
+        <port>8089</port>
     </consumer>
     <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
         <filter xsi:type="downSampleFilterConfiguration">

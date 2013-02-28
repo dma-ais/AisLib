@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.queue.BlockingMessageQueue;
@@ -50,10 +49,8 @@ public class AisBus extends AisBusComponent implements Runnable {
     private final CopyOnWriteArraySet<AisBusProvider> providers = new CopyOnWriteArraySet<>();
 
     // Some configuration that should come from somewhere else (conf class)
-    @GuardedBy("this")
-    private int busPullMaxElements = 1000;
-    @GuardedBy("this")
-    private int busQueueSize = 10000;
+    private volatile int busPullMaxElements = 1000;
+    private volatile int busQueueSize = 10000;
 
     public AisBus() {
 
@@ -168,11 +165,11 @@ public class AisBus extends AisBusComponent implements Runnable {
         }
     }
 
-    public synchronized void setBusPullMaxElements(int busPullMaxElements) {
+    public void setBusPullMaxElements(int busPullMaxElements) {
         this.busPullMaxElements = busPullMaxElements;
     }
 
-    public synchronized void setBusQueueSize(int busQueueSize) {
+    public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
 

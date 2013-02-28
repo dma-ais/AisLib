@@ -24,12 +24,14 @@ import dk.dma.ais.bus.configuration.AisBusConfiguration;
 import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
 import dk.dma.ais.bus.configuration.consumer.AisBusConsumerConfiguration;
 import dk.dma.ais.bus.configuration.consumer.StdoutConsumerConfiguration;
+import dk.dma.ais.bus.configuration.consumer.TcpWriterConsumerConfiguration;
 import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.provider.AisBusProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.consumer.StdoutConsumer;
+import dk.dma.ais.bus.consumer.TcpWriterConsumer;
 import dk.dma.ais.bus.provider.TcpClientProvider;
 import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.DuplicateFilter;
@@ -59,6 +61,15 @@ public class AisBusFactory {
             // Specific configurations
             if (consumerConf instanceof StdoutConsumerConfiguration) {
                 consumer = new StdoutConsumer();
+            } else if (consumerConf instanceof TcpWriterConsumerConfiguration) {
+                TcpWriterConsumerConfiguration tcpwConf = (TcpWriterConsumerConfiguration) consumerConf;
+                TcpWriterConsumer tcpw = new TcpWriterConsumer();
+                tcpw.setPort(tcpwConf.getPort());
+                tcpw.setHost(tcpwConf.getHost());
+                tcpw.setGzipBufferSize(tcpwConf.getGzipBufferSize());
+                tcpw.setGzipCompress(tcpwConf.isGzipCompress());
+                tcpw.setReconnectInterval(tcpwConf.getReconnectInterval());
+                consumer = tcpw;
             } else {
                 throw new IllegalArgumentException("Unknown consumer: " + consumerConf.getClass());
             }
@@ -80,7 +91,7 @@ public class AisBusFactory {
             AisBusProvider provider;
             // Specific configurations
             if (providerConf instanceof TcpClientProviderConfiguration) {
-                TcpClientProviderConfiguration rrConf = (TcpClientProviderConfiguration)providerConf;
+                TcpClientProviderConfiguration rrConf = (TcpClientProviderConfiguration) providerConf;
                 TcpClientProvider rrClient = new TcpClientProvider();
                 rrClient.setHostsPorts(StringUtils.join(rrConf.getHostPort(), ","));
                 rrClient.setTimeout(rrConf.getTimeout());
@@ -98,8 +109,8 @@ public class AisBusFactory {
             // Add to ais bus
             aisBus.registerProvider(provider);
         }
-        
-        return aisBus; 
+
+        return aisBus;
     }
 
     private static void socketConfigure(AisBusSocket socket, AisBusSocketConfiguration conf) {
@@ -111,11 +122,11 @@ public class AisBusFactory {
         // Add filters
         for (FilterConfiguration filterConf : conf.getFilters()) {
             IPacketFilter filter;
-            if (filterConf instanceof DownSampleFilterConfiguration) {                
-                DownSampleFilterConfiguration dsFilterConf = (DownSampleFilterConfiguration)filterConf;
-                filter = new DownSampleFilter(dsFilterConf.getSamplingRate());                
+            if (filterConf instanceof DownSampleFilterConfiguration) {
+                DownSampleFilterConfiguration dsFilterConf = (DownSampleFilterConfiguration) filterConf;
+                filter = new DownSampleFilter(dsFilterConf.getSamplingRate());
             } else if (filterConf instanceof DuplicateFilterConfiguration) {
-                DuplicateFilterConfiguration dupFilterConf = (DuplicateFilterConfiguration)filterConf;
+                DuplicateFilterConfiguration dupFilterConf = (DuplicateFilterConfiguration) filterConf;
                 filter = new DuplicateFilter(dupFilterConf.getWindowSize());
             } else {
                 throw new IllegalArgumentException("Unknown filter: " + filterConf.getClass());

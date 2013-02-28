@@ -35,22 +35,19 @@ import dk.dma.ais.bus.AisBusElement;
 
 /**
  * TCP client that connects to host/port and sends data. Will reconnect on connection error.
+ * 
  */
 @ThreadSafe
 public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpWriterConsumer.class);
-
-    @GuardedBy("this")
-    private int port;
-    @GuardedBy("this")
+    
+    private volatile boolean gzipCompress = false;
+    private volatile int gzipBufferSize = 2048;
+    private volatile int reconnectInterval = 20000;
+    private volatile int port;
     private String host;
-    @GuardedBy("this")
-    private boolean gzipCompress = false;
-    @GuardedBy("this")
-    private int gzipBufferSize = 2048;
-    @GuardedBy("this")
-    private int reconnectInterval = 20000;
+    
     @GuardedBy("this")
     private PrintWriter writer;
 
@@ -60,11 +57,12 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
 
     @Override
     public void receiveFiltered(AisBusElement queueElement) {
-        PrintWriter out = getWriter();
-        if (out == null) {
-            return;
+        synchronized (this) {
+            if (writer == null) {
+                return;
+            }
+            writer.println(queueElement.getPacket().getStringMessage());
         }
-        out.print(queueElement.getPacket().getStringMessage());
     }
 
     /**
@@ -94,10 +92,10 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
                 while (in.readLine() != null) {
                     
                 }
-                socket.close();                
+                throw new IOException("Lost connection");                
 
             } catch (IOException e) {
-                LOG.info("TcpWriterConsumer lost connection");                
+                LOG.info("Connection error");                
             } finally {
                 try {
                     socket.close();
@@ -108,6 +106,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
             setWriter(null);
 
             try {
+                LOG.info("Waiting to reconnect");
                 Thread.sleep(reconnectInterval);
             } catch (InterruptedException e) {
                 // TODO handle interuption
@@ -125,51 +124,47 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
         super.start();
     }
 
-    private synchronized PrintWriter getWriter() {
-        return writer;
-    }
-
-    public synchronized void setWriter(PrintWriter writer) {
+    private synchronized void setWriter(PrintWriter writer) {
         this.writer = writer;
     }
 
-    public synchronized int getPort() {
+    public int getPort() {
         return port;
     }
 
-    public synchronized void setPort(int port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
-    public synchronized String getHost() {
+    public String getHost() {
         return host;
     }
 
-    public synchronized void setHost(String host) {
+    public void setHost(String host) {
         this.host = host;
     }
 
-    public synchronized boolean isGzipCompress() {
+    public boolean isGzipCompress() {
         return gzipCompress;
     }
 
-    public synchronized void setGzipCompress(boolean gzipCompress) {
+    public void setGzipCompress(boolean gzipCompress) {
         this.gzipCompress = gzipCompress;
     }
 
-    public synchronized int getGzipBufferSize() {
+    public int getGzipBufferSize() {
         return gzipBufferSize;
     }
 
-    public synchronized void setGzipBufferSize(int gzipBufferSize) {
+    public void setGzipBufferSize(int gzipBufferSize) {
         this.gzipBufferSize = gzipBufferSize;
     }
 
-    public synchronized int getReconnectInterval() {
+    public int getReconnectInterval() {
         return reconnectInterval;
     }
 
-    public synchronized void setReconnectInterval(int reconnectInterval) {
+    public void setReconnectInterval(int reconnectInterval) {
         this.reconnectInterval = reconnectInterval;
     }
 
