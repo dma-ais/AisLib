@@ -33,9 +33,7 @@ import dk.dma.ais.bus.configuration.provider.AisBusProviderConfiguration;
 public class AisBusConfiguration extends AisBusComponentConfiguration {
 
     private int busPullMaxElements = 1000;
-    private int consumerPullMaxElements = 1000;
     private int busQueueSize = 10000;
-    private int consumerQueueSize = 10000;
     
     private List<AisBusProviderConfiguration> providers = new ArrayList<>();
     private List<AisBusConsumerConfiguration> consumers = new ArrayList<>();
@@ -52,28 +50,12 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
         this.busPullMaxElements = busPullMaxElements;
     }
 
-    public int getConsumerPullMaxElements() {
-        return consumerPullMaxElements;
-    }
-
-    public void setConsumerPullMaxElements(int consumerPullMaxElements) {
-        this.consumerPullMaxElements = consumerPullMaxElements;
-    }
-
     public int getBusQueueSize() {
         return busQueueSize;
     }
 
     public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
-    }
-
-    public int getConsumerQueueSize() {
-        return consumerQueueSize;
-    }
-
-    public void setConsumerQueueSize(int consumerQueueSize) {
-        this.consumerQueueSize = consumerQueueSize;
     }
     
     @XmlElement(name = "provider")

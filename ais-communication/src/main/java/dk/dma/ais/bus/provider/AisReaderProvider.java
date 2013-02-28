@@ -54,6 +54,7 @@ public class AisReaderProvider extends AisBusProvider implements Consumer<AisPac
     public void start() {
         // Start the reader
         aisReader.start();
+        setThread(aisReader);
     }
     
     public void setAisReader(AisReader aisReader) {

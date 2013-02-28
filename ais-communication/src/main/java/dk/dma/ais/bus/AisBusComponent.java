@@ -17,6 +17,7 @@ package dk.dma.ais.bus;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.filter.PacketFilterCollection;
 import dk.dma.ais.packet.AisPacket;
@@ -28,6 +29,22 @@ import dk.dma.ais.transform.IAisTransformer;
  */
 @ThreadSafe
 public abstract class AisBusComponent {
+    
+    public static final int STATUS_CREATED = 0;
+    public static final int STATUS_INITIALIZED = 1;
+    public static final int STATUS_STARTED = 2;
+    
+    /**
+     * The status of the component
+     */
+    @GuardedBy("this")
+    private int status = STATUS_CREATED;
+    
+    /**
+     * Thread for this component
+     */
+    @GuardedBy("this")
+    private Thread thread;
 
     /**
      * Filters to apply to received packets
@@ -40,6 +57,43 @@ public abstract class AisBusComponent {
     protected final CopyOnWriteArrayList<IAisTransformer<AisPacket>> packetTransformers = new CopyOnWriteArrayList<>();
 
     public AisBusComponent() {
+    }
+    
+    /**
+     * Initialize the component after configuration. Must be called be starting the component.
+     */
+    public synchronized void init() {
+        if (status != STATUS_CREATED) {
+            throw new IllegalStateException("Component must be in state CREATED to be initialized");
+        }
+        status = STATUS_INITIALIZED;
+    }
+    
+    /**
+     * Start the component. Must be called after init().
+     */
+    public synchronized void start() {
+        if (status != STATUS_INITIALIZED) {
+            throw new IllegalStateException("Component must be in state CREATED to be initialized");
+        }
+        System.out.println("this.class: " + this.getClass());
+        status = STATUS_STARTED;
+    }
+    
+    /**
+     * Set component thread
+     * @param thread
+     */
+    protected synchronized void setThread(Thread thread) {
+        this.thread = thread;
+    }
+    
+    /**
+     * Get component thread
+     * @return
+     */
+    public synchronized Thread getThread() {
+        return thread;
     }
 
     /**
@@ -84,5 +138,5 @@ public abstract class AisBusComponent {
     public CopyOnWriteArrayList<IAisTransformer<AisPacket>> getPacketTransformers() {
         return packetTransformers;
     }
-
+        
 }

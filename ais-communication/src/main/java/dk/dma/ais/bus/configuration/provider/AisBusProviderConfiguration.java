@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
 
-@XmlSeeAlso({ RoundRobinTcpClientConfiguration.class })
+@XmlSeeAlso({ TcpClientProviderConfiguration.class })
 public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
 
     public AisBusProviderConfiguration() {

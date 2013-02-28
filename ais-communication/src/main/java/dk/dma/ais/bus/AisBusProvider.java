@@ -25,11 +25,16 @@ public abstract class AisBusProvider extends AisBusSocket {
         super();
     }
     
-    /**
-     * Method called to start the provider
-     */
-    public abstract void start();
+    @Override
+    public synchronized void init() {
+        super.init();
+    }
     
+    @Override
+    public synchronized void start() {
+        super.start();
+    }
+        
     /**
      * Helper method to push to bus
      * @param packet

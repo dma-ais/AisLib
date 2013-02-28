@@ -17,6 +17,8 @@ package dk.dma.ais.bus;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
+
 import dk.dma.ais.bus.configuration.AisBusComponentConfiguration;
 import dk.dma.ais.bus.configuration.AisBusConfiguration;
 import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
@@ -26,9 +28,9 @@ import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.provider.AisBusProviderConfiguration;
-import dk.dma.ais.bus.configuration.provider.RoundRobinTcpClientConfiguration;
+import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.consumer.StdoutConsumer;
-import dk.dma.ais.bus.provider.RoundRobinTcpClient;
+import dk.dma.ais.bus.provider.TcpClientProvider;
 import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.DuplicateFilter;
 import dk.dma.ais.filter.IPacketFilter;
@@ -46,13 +48,10 @@ public class AisBusFactory {
         // Configure AisBus
         aisBus.setBusQueueSize(conf.getBusQueueSize());
         aisBus.setBusPullMaxElements(conf.getBusPullMaxElements());
-        aisBus.setConsumerPullMaxElements(conf.getConsumerPullMaxElements());
-        aisBus.setConsumerQueueSize(conf.getConsumerQueueSize());
         // Configure component parts of AisBus
         componentConfigure(aisBus, conf);
-
-        // Start aisbus
-        aisBus.start();
+        // Initialize
+        aisBus.init();
 
         // Make and configure consumers
         for (AisBusConsumerConfiguration consumerConf : conf.getConsumers()) {
@@ -63,10 +62,15 @@ public class AisBusFactory {
             } else {
                 throw new IllegalArgumentException("Unknown consumer: " + consumerConf.getClass());
             }
+            // Do consumer configuration
+            consumer.setConsumerPullMaxElements(consumerConf.getConsumerPullMaxElements());
+            consumer.setConsumerQueueSize(consumerConf.getConsumerQueueSize());
             // Do component configuration
             componentConfigure(consumer, consumerConf);
             // Do socket configuration
             socketConfigure(consumer, consumerConf);
+            // Initialize
+            consumer.init();
             // Add to ais bus
             aisBus.registerConsumer(consumer);
         }
@@ -75,10 +79,12 @@ public class AisBusFactory {
         for (AisBusProviderConfiguration providerConf : conf.getProviders()) {
             AisBusProvider provider;
             // Specific configurations
-            if (providerConf instanceof RoundRobinTcpClientConfiguration) {
-                RoundRobinTcpClientConfiguration rrConf = (RoundRobinTcpClientConfiguration)providerConf;
-                RoundRobinTcpClient rrClient = new RoundRobinTcpClient(rrConf.getHostsPorts(),
-                        rrConf.getInterval(), rrConf.getTimeout());
+            if (providerConf instanceof TcpClientProviderConfiguration) {
+                TcpClientProviderConfiguration rrConf = (TcpClientProviderConfiguration)providerConf;
+                TcpClientProvider rrClient = new TcpClientProvider();
+                rrClient.setHostsPorts(StringUtils.join(rrConf.getHostPort(), ","));
+                rrClient.setTimeout(rrConf.getTimeout());
+                rrClient.setInterval(rrConf.getInterval());
                 provider = rrClient;
             } else {
                 throw new IllegalArgumentException("Unknown provider: " + providerConf.getClass());
@@ -87,12 +93,13 @@ public class AisBusFactory {
             componentConfigure(provider, providerConf);
             // Do socket configuration
             socketConfigure(provider, providerConf);
+            // Initialize
+            provider.init();
             // Add to ais bus
             aisBus.registerProvider(provider);
         }
-
         
-        return aisBus;
+        return aisBus; 
     }
 
     private static void socketConfigure(AisBusSocket socket, AisBusSocketConfiguration conf) {

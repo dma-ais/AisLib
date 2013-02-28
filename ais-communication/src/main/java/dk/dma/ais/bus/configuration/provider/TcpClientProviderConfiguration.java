@@ -15,25 +15,28 @@
  */
 package dk.dma.ais.bus.configuration.provider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class RoundRobinTcpClientConfiguration extends AisBusProviderConfiguration {
-
-    private String hostsPorts;
+public class TcpClientProviderConfiguration extends AisBusProviderConfiguration {
+    
+    private List<String> hostPort = new ArrayList<>();
     private int interval = 10;
     private int timeout = 10;
 
-    public RoundRobinTcpClientConfiguration() {
+    public TcpClientProviderConfiguration() {
 
-    }
-
-    public String getHostsPorts() {
-        return hostsPorts;
     }
     
-    public void setHostsPorts(String hostsPorts) {
-        this.hostsPorts = hostsPorts;
+    public List<String> getHostPort() {
+        return hostPort;
+    }
+    
+    public void setHostPort(List<String> hostPort) {
+        this.hostPort = hostPort;
     }
 
     public int getInterval() {

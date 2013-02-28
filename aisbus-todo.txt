@@ -1,0 +1,11 @@
++ Do not start immediately
+	construct -> configure -> init -> start
+
++ Status on all components
+
++ Thread handling. Maybe each component must implement a getThread and component provide 
+  protected setThread.
+
++ Overflow handling
+
++ Statistics / Status object on components

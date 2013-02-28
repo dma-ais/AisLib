@@ -33,5 +33,5 @@ public class StdoutConsumer extends AisBusConsumer {
     public void receiveFiltered(AisBusElement queueElement) {
         System.out.println(queueElement.getPacket().getStringMessage());
     }
-
+    
 }

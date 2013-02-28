@@ -25,7 +25,6 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.MessageQueueOverflowException;
-import dk.dma.ais.queue.MessageQueueReader;
 
 /**
  * Bus for exchanging AIS packets
@@ -43,7 +42,7 @@ public class AisBus extends AisBusComponent implements Runnable {
     /**
      * Collection of consumer threads
      */
-    private final CopyOnWriteArraySet<MessageQueueReader<AisBusElement>> consumerThreads = new CopyOnWriteArraySet<>();
+    private final CopyOnWriteArraySet<AisBusConsumer> consumers = new CopyOnWriteArraySet<>();
 
     /**
      * Collection of providers
@@ -54,45 +53,53 @@ public class AisBus extends AisBusComponent implements Runnable {
     @GuardedBy("this")
     private int busPullMaxElements = 1000;
     @GuardedBy("this")
-    private int consumerPullMaxElements = 1000;
-    @GuardedBy("this")
     private int busQueueSize = 10000;
-    @GuardedBy("this")
-    private int consumerQueueSize = 10000;
-    @GuardedBy("this")
-    private Thread thread;
 
     public AisBus() {
-        // TODO size from where
-        // maybe configuration as argument
-
-        // Filters from somewhere
 
     }
     
+    /**
+     * Initialize AisBus
+     */
+    @Override
+    public synchronized void init() {
+        // Create the bus
+        busQueue = new BlockingMessageQueue<>(busQueueSize);
+        super.init();
+    }
+
     /**
      * Start AisBus thread
      * 
      * @return thread
      */
-    public synchronized Thread start() {
-        // Create the bus
-        busQueue = new BlockingMessageQueue<>(busQueueSize);
+    public synchronized void start() {       
         // Start thread
-        thread = new Thread(this);
+        Thread thread = new Thread(this);
+        setThread(thread);
         thread.start();
-        // Return the thread
-        return thread;
+        super.start();
+    }
+
+    /**
+     * Start all consumers
+     */
+    public void startConsumers() {
+        for (AisBusConsumer consumer : consumers) {
+            consumer.start();
+        }
     }
     
     /**
-     * Get the thread running the 
-     * @return
+     * Start all providers
      */
-    public synchronized Thread getThread() {
-        return thread;
+    public void startProviders() {
+        for (AisBusProvider provider : providers) {
+            provider.start();
+        }
     }
-
+    
     /**
      * Push element onto the bus. Returns false if the bus is overflowing
      * 
@@ -118,25 +125,20 @@ public class AisBus extends AisBusComponent implements Runnable {
     }
 
     /**
-     * Register a consumer and start sending
+     * Register a consumer
+     * 
      * @param consumer
      */
     public void registerConsumer(AisBusConsumer consumer) {
         // Tie aisbus to consumer
         consumer.setAisBus(this);
         // Make consumer queue
-        IMessageQueue<AisBusElement> consumerQueue = new BlockingMessageQueue<>(consumerQueueSize);
-        // Make consumer thread
-        MessageQueueReader<AisBusElement> consumerThread = new MessageQueueReader<>(consumer, consumerQueue,
-                consumerPullMaxElements);
-        // Add consumer thread to list
-        consumerThreads.add(consumerThread);
-        // Start consumer thread
-        consumerThread.start();
+        consumers.add(consumer);
     }
 
     /**
-     * Register and start provider.
+     * Register a provider
+     * 
      * @param provider
      */
     public void registerProvider(AisBusProvider provider) {
@@ -144,13 +146,6 @@ public class AisBus extends AisBusComponent implements Runnable {
         provider.setAisBus(this);
         // Add to set of providers
         providers.add(provider);
-        // Start provider
-        provider.start();
-    }
-
-    public void shutdown() {
-        // TODO
-        // Investigate what this would require
     }
 
     /**
@@ -164,37 +159,21 @@ public class AisBus extends AisBusComponent implements Runnable {
             // Consume from bus queue
             busQueue.pull(elements, busPullMaxElements);
             // Iterate through consumers
-            for (MessageQueueReader<AisBusElement> consumerThread : consumerThreads) {
+            for (AisBusConsumer consumer : consumers) {
                 // Distribute elements
                 for (AisBusElement element : elements) {
-                    try {
-                        consumerThread.getQueue().push(element);
-                    } catch (MessageQueueOverflowException e) {
-                        // TODO handle overflow
-                        // Maybe call method on consumer
-                        // Do some kind of central overflow event down sampling somewhere
-                        System.err.println("Overflow when pushing to consumer queue");
-                    }
+                    consumer.push(element);
                 }
             }
         }
-
     }
-    
+
     public synchronized void setBusPullMaxElements(int busPullMaxElements) {
         this.busPullMaxElements = busPullMaxElements;
     }
-    
+
     public synchronized void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
-    
-    public synchronized void setConsumerPullMaxElements(int consumerPullMaxElements) {
-        this.consumerPullMaxElements = consumerPullMaxElements;
-    }
-    
-    public synchronized void setConsumerQueueSize(int consumerQueueSize) {
-        this.consumerQueueSize = consumerQueueSize;
-    }
-    
+
 }

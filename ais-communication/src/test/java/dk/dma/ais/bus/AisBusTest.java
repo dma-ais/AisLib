@@ -27,51 +27,10 @@ import dk.dma.ais.bus.configuration.consumer.StdoutConsumerConfiguration;
 import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
-import dk.dma.ais.bus.configuration.provider.RoundRobinTcpClientConfiguration;
-import dk.dma.ais.bus.consumer.StdoutConsumer;
-import dk.dma.ais.bus.provider.RoundRobinTcpClient;
+import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 
 public class AisBusTest {
 
-    //@Test
-    public void tcpConsumer() {
-        // Make ais bus configuration
-        // TODO
-
-        // Make ais bus
-        AisBus aisBus = new AisBus();
-        
-        // Start AisBus
-        aisBus.start();       
-               
-        // Make consumer
-        AisBusConsumer consumer = new StdoutConsumer();
-//        SourceFilter filter = new SourceFilter();
-//        filter.addFilterValue("region", "9");
-//        consumer.getFilters().addFilter(filter);
-        // Register consumer
-        aisBus.registerConsumer(consumer);
-
-        // Make providers
-        AisBusProvider provider1 = new RoundRobinTcpClient("ais163.sealan.dk:65262", 10, 10);
-        AisBusProvider provider2 = new RoundRobinTcpClient("iala63.sealan.dk:4712,iala68.sealan.dk:4712", 10, 10);
-        AisBusProvider provider3 = new RoundRobinTcpClient("10.10.5.124:25251", 10, 10);
-        AisBusProvider provider4 = new RoundRobinTcpClient("10.10.5.144:65061", 10, 10);
-        
-        aisBus.registerProvider(provider1);
-        aisBus.registerProvider(provider2);
-        aisBus.registerProvider(provider3);
-        aisBus.registerProvider(provider4);
-
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
-    
     @Test
     public void confTest() throws JAXBException {
         AisBusConfiguration conf = new AisBusConfiguration();
@@ -79,13 +38,14 @@ public class AisBusTest {
         conf.getFilters().add(new DownSampleFilterConfiguration());
         conf.getFilters().add(new DuplicateFilterConfiguration());
         // Provider
-        RoundRobinTcpClientConfiguration rrReader = new RoundRobinTcpClientConfiguration();
-        rrReader.setHostsPorts("ais163.sealan.dk:65262");
+        TcpClientProviderConfiguration rrReader = new TcpClientProviderConfiguration();
+        rrReader.getHostPort().add("ais163.sealan.dk:65262");
         rrReader.getFilters().add(new DownSampleFilterConfiguration(300));
         conf.getProviders().add(rrReader);        
         // Consumer
         StdoutConsumerConfiguration stdoutConsumer = new StdoutConsumerConfiguration();
         stdoutConsumer.getFilters().add(new DownSampleFilterConfiguration(600));
+        stdoutConsumer.setConsumerPullMaxElements(1);        
         conf.getConsumers().add(stdoutConsumer);
         
         // Save
@@ -93,7 +53,8 @@ public class AisBusTest {
         
         // Load
         conf = AisBusConfiguration.load("aisbus.xml");      
-        Assert.assertEquals(conf.getBusQueueSize(), 10000);
+        Assert.assertEquals(conf.getBusQueueSize(), 10000);        
+        
     }
     
     @Test
@@ -112,13 +73,23 @@ public class AisBusTest {
                 Assert.fail();
             }
         }
+        StdoutConsumerConfiguration consumerConf = (StdoutConsumerConfiguration)conf.getConsumers().get(0);
+        Assert.assertEquals(consumerConf.getConsumerPullMaxElements(), 1);
     }
     
-    //@Test
+    @Test
     public void factoryTest() throws JAXBException, InterruptedException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-example.xml");
+        aisBus.start();
+        aisBus.startConsumers();
+        aisBus.startProviders();
         
-        aisBus.getThread().join();
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         
     }
 
