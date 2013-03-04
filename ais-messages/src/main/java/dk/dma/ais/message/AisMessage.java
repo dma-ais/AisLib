@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.message;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -24,12 +25,11 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.Vdm;
-import dk.dma.enav.messaging.MaritimeMessage;
 
 /**
  * Abstract base class for all AIS messages
  */
-public abstract class AisMessage extends MaritimeMessage {
+public abstract class AisMessage implements Serializable {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
