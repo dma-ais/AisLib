@@ -18,49 +18,32 @@ package dk.dma.ais.bus.configuration.consumer;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
+import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
 
 @XmlRootElement
-public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration {
-    
-    private String host;
-    private int port;
-    private int reconnectInterval = 20000;
+public class TcpServerConsumerConfiguration extends AisBusConsumerConfiguration {
+
     private ClientConfiguration clientConf;
+    private ServerConfiguration serverConf;
 
-    public TcpWriterConsumerConfiguration() {
+    public TcpServerConsumerConfiguration() {
 
     }
 
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getReconnectInterval() {
-        return reconnectInterval;
-    }
-
-    public void setReconnectInterval(int reconnectInterval) {
-        this.reconnectInterval = reconnectInterval;
-    }
-    
     public ClientConfiguration getClientConf() {
         return clientConf;
     }
-    
+
     public void setClientConf(ClientConfiguration clientConf) {
         this.clientConf = clientConf;
+    }
+
+    public ServerConfiguration getServerConf() {
+        return serverConf;
+    }
+
+    public void setServerConf(ServerConfiguration serverConf) {
+        this.serverConf = serverConf;
     }
 
 }

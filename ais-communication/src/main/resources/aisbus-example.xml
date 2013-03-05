@@ -1,30 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <aisBusConfiguration>
-    <filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="downSampleFilterConfiguration">
-        <samplingRate>60</samplingRate>
-    </filter>
-    <filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="duplicateFilterConfiguration">
-        <windowSize>10000</windowSize>
-    </filter>
-    <busPullMaxElements>1000</busPullMaxElements>
-    <busQueueSize>10000</busQueueSize>
-<!--     <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration"> -->
-<!--         <filter xsi:type="downSampleFilterConfiguration"> -->
-<!--             <samplingRate>600</samplingRate> -->
-<!--         </filter> -->
-<!--         <consumerPullMaxElements>1</consumerPullMaxElements> -->
-<!--         <consumerQueueSize>10000</consumerQueueSize> -->
-<!--     </consumer> -->
-	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpWriterConsumerConfiguration">
-        <host>localhost</host>
-        <port>8089</port>
-    </consumer>
-    <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
-        <filter xsi:type="downSampleFilterConfiguration">
-            <samplingRate>300</samplingRate>
-        </filter>
-        <hostPort>ais163.sealan.dk:65262</hostPort>
-        <interval>10</interval>
-        <timeout>10</timeout>
-    </provider>
+	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:type="duplicateFilterConfiguration">
+		<windowSize>10000</windowSize>
+	</filter>
+	<busPullMaxElements>1000</busPullMaxElements>
+	<busQueueSize>10000</busQueueSize>
+	<!-- <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration"> -->
+	<!-- <filter xsi:type="downSampleFilterConfiguration"> -->
+	<!-- <samplingRate>600</samplingRate> -->
+	<!-- </filter> -->
+	<!-- <consumerPullMaxElements>1</consumerPullMaxElements> -->
+	<!-- <consumerQueueSize>10000</consumerQueueSize> -->
+	<!-- </consumer> -->
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:type="tcpWriterConsumerConfiguration">
+		<host>localhost</host>
+		<port>8089</port>
+	</consumer>
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:type="tcpServerConsumerConfiguration">
+		<consumerPullMaxElements>1000</consumerPullMaxElements>
+		<consumerQueueSize>10000</consumerQueueSize>
+		<serverConf>
+			<maxClients>2</maxClients>
+			<port>9999</port>
+		</serverConf>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:type="downSampleFilterConfiguration">
+			<samplingRate>600</samplingRate>
+		</filter>
+	</consumer>
+	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:type="tcpClientProviderConfiguration">
+		<filter xsi:type="downSampleFilterConfiguration">
+			<samplingRate>300</samplingRate>
+		</filter>
+		<hostPort>ais163.sealan.dk:65262</hostPort>
+		<interval>10</interval>
+		<timeout>10</timeout>
+	</provider>
 </aisBusConfiguration>

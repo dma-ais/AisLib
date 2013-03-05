@@ -13,32 +13,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.configuration.filter;
+package dk.dma.ais.bus.tcp;
 
-import javax.xml.bind.annotation.XmlRootElement;
+/**
+ * TCP server configuration
+ */
+public class TcpServerConf {
 
-@XmlRootElement
-public class DownSampleFilterConfiguration extends FilterConfiguration {
+    private int port = 8090;
+    private int maxClients = 1000;
 
-    /**
-     * Sampling rate in seconds
-     */
-    private long samplingRate = 60;
-
-    public DownSampleFilterConfiguration() {
+    public TcpServerConf() {
 
     }
 
-    public DownSampleFilterConfiguration(long samplingRate) {
-        this.samplingRate = samplingRate;
+    public int getPort() {
+        return port;
     }
 
-    public long getSamplingRate() {
-        return samplingRate;
+    public void setPort(int port) {
+        this.port = port;
     }
 
-    public void setSamplingRate(long samplingRate) {
-        this.samplingRate = samplingRate;
+    public int getMaxClients() {
+        return maxClients;
+    }
+
+    public void setMaxClients(int maxClients) {
+        this.maxClients = maxClients;
     }
 
 }

@@ -1,11 +1,21 @@
-+ Do not start immediately
-	construct -> configure -> init -> start
++ Remaining consumers and providers
+	TcpServerProvider
+	TcpServerConsumer
 
 + Status on all components
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.
 
++ Handle interruption
+
 + Overflow handling
 
 + Statistics / Status object on components
+
++ Remaining filters configurations
+
++ AisBusLauncher that takes conf file as argument
+
++ Search for all TODO's
+

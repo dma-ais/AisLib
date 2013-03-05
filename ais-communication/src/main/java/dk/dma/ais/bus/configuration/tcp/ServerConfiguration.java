@@ -13,21 +13,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.configuration.consumer;
+package dk.dma.ais.bus.configuration.tcp;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
-
 @XmlRootElement
-public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration {
-    
-    private String host;
-    private int port;
-    private int reconnectInterval = 20000;
-    private ClientConfiguration clientConf;
+public class ServerConfiguration {
 
-    public TcpWriterConsumerConfiguration() {
+    private int port = 8090;
+    private int maxClients = 1000;
+
+    public ServerConfiguration() {
 
     }
 
@@ -39,28 +35,12 @@ public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration 
         this.port = port;
     }
 
-    public String getHost() {
-        return host;
+    public int getMaxClients() {
+        return maxClients;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getReconnectInterval() {
-        return reconnectInterval;
-    }
-
-    public void setReconnectInterval(int reconnectInterval) {
-        this.reconnectInterval = reconnectInterval;
-    }
-    
-    public ClientConfiguration getClientConf() {
-        return clientConf;
-    }
-    
-    public void setClientConf(ClientConfiguration clientConf) {
-        this.clientConf = clientConf;
+    public void setMaxClients(int maxClients) {
+        this.maxClients = maxClients;
     }
 
 }

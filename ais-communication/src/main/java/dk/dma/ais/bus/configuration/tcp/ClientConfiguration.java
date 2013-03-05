@@ -13,32 +13,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.configuration.filter;
+package dk.dma.ais.bus.configuration.tcp;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class DownSampleFilterConfiguration extends FilterConfiguration {
+public class ClientConfiguration {
 
-    /**
-     * Sampling rate in seconds
-     */
-    private long samplingRate = 60;
+    private boolean gzipCompress;
+    private int gzipBufferSize = 2048;
+    private int bufferSize = 2048;
 
-    public DownSampleFilterConfiguration() {
+    public ClientConfiguration() {
 
     }
 
-    public DownSampleFilterConfiguration(long samplingRate) {
-        this.samplingRate = samplingRate;
+    public boolean isGzipCompress() {
+        return gzipCompress;
     }
 
-    public long getSamplingRate() {
-        return samplingRate;
+    public void setGzipCompress(boolean gzipCompress) {
+        this.gzipCompress = gzipCompress;
     }
 
-    public void setSamplingRate(long samplingRate) {
-        this.samplingRate = samplingRate;
+    public int getGzipBufferSize() {
+        return gzipBufferSize;
+    }
+
+    public void setGzipBufferSize(int gzipBufferSize) {
+        this.gzipBufferSize = gzipBufferSize;
+    }
+
+    public int getBufferSize() {
+        return bufferSize;
+    }
+
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
     }
 
 }

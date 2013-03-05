@@ -13,32 +13,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.configuration.filter;
+package dk.dma.ais.bus.tcp;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import java.net.Socket;
 
-@XmlRootElement
-public class DownSampleFilterConfiguration extends FilterConfiguration {
+/**
+ * TCP server for writing clients
+ */
+public class TcpWriteServer extends TcpServer {
+
+    public TcpWriteServer() {
+        super();
+    }
+
+    @Override
+    protected TcpWriteClient newClient(Socket socket) {
+        return new TcpWriteClient(this, socket, clientConf);
+    }
 
     /**
-     * Sampling rate in seconds
+     * Send message to all clients
+     * 
+     * @param msg
      */
-    private long samplingRate = 60;
-
-    public DownSampleFilterConfiguration() {
-
-    }
-
-    public DownSampleFilterConfiguration(long samplingRate) {
-        this.samplingRate = samplingRate;
-    }
-
-    public long getSamplingRate() {
-        return samplingRate;
-    }
-
-    public void setSamplingRate(long samplingRate) {
-        this.samplingRate = samplingRate;
+    public void send(String msg) {
+        for (TcpClient client : clients) {
+            ((TcpWriteClient) client).send(msg);
+        }
     }
 
 }

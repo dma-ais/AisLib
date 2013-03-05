@@ -15,14 +15,9 @@
  */
 package dk.dma.ais.bus.consumer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.zip.GZIPOutputStream;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -32,24 +27,26 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.AisBusElement;
+import dk.dma.ais.bus.tcp.IClientStoppedListener;
+import dk.dma.ais.bus.tcp.TcpClient;
+import dk.dma.ais.bus.tcp.TcpClientConf;
+import dk.dma.ais.bus.tcp.TcpWriteClient;
 
 /**
  * TCP client that connects to host/port and sends data. Will reconnect on connection error.
- * 
  */
 @ThreadSafe
-public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
+public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClientStoppedListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpWriterConsumer.class);
-    
-    private volatile boolean gzipCompress = false;
-    private volatile int gzipBufferSize = 2048;
-    private volatile int reconnectInterval = 20000;
-    private volatile int port;
-    private String host;
-    
+
     @GuardedBy("this")
-    private PrintWriter writer;
+    private TcpWriteClient writeClient;
+    
+    private TcpClientConf clientConf = new TcpClientConf();
+    private int reconnectInterval = 20000;
+    private String host;
+    private int port;
 
     public TcpWriterConsumer() {
         // TODO TcpConsumer ??
@@ -58,11 +55,11 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
     @Override
     public void receiveFiltered(AisBusElement queueElement) {
         synchronized (this) {
-            if (writer == null) {
-                return;
+            if (writeClient != null) {
+                writeClient.send(queueElement.getPacket().getStringMessage());
             }
-            writer.println(queueElement.getPacket().getStringMessage());
         }
+
     }
 
     /**
@@ -73,37 +70,36 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
         while (true) {
             Socket socket = new Socket();
             try {
+                // Connect
                 InetSocketAddress address = new InetSocketAddress(host, port);
                 LOG.info("Connecting to " + host + ":" + port + " ...");
                 socket.connect(address);
                 socket.setKeepAlive(true);
 
-                OutputStream outputStream;
-                if (isGzipCompress()) {
-                    outputStream = new GZIPOutputStream(socket.getOutputStream(), gzipBufferSize);
-                } else {
-                    outputStream = socket.getOutputStream();
+                // Start client
+                synchronized (this) {
+                    writeClient = new TcpWriteClient(this, socket, clientConf);
                 }
-                setWriter(new PrintWriter(outputStream));
-                LOG.info("Connected.");
+                writeClient.start();
 
-                // Block with reading
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                while (in.readLine() != null) {
-                    
+                // Wait for client to loose connection
+                writeClient.join();
+
+                synchronized (this) {
+                    writeClient = null;
                 }
-                throw new IOException("Lost connection");                
 
             } catch (IOException e) {
-                LOG.info("Connection error");                
+                LOG.info("Connection error");
+            } catch (InterruptedException e) {
+                // TODO handle
+                e.printStackTrace();
             } finally {
                 try {
                     socket.close();
                 } catch (IOException e) {
                 }
             }
-            
-            setWriter(null);
 
             try {
                 LOG.info("Waiting to reconnect");
@@ -124,10 +120,6 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
         super.start();
     }
 
-    private synchronized void setWriter(PrintWriter writer) {
-        this.writer = writer;
-    }
-
     public int getPort() {
         return port;
     }
@@ -144,28 +136,25 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable {
         this.host = host;
     }
 
-    public boolean isGzipCompress() {
-        return gzipCompress;
-    }
-
-    public void setGzipCompress(boolean gzipCompress) {
-        this.gzipCompress = gzipCompress;
-    }
-
-    public int getGzipBufferSize() {
-        return gzipBufferSize;
-    }
-
-    public void setGzipBufferSize(int gzipBufferSize) {
-        this.gzipBufferSize = gzipBufferSize;
-    }
-
     public int getReconnectInterval() {
         return reconnectInterval;
     }
 
     public void setReconnectInterval(int reconnectInterval) {
         this.reconnectInterval = reconnectInterval;
+    }
+
+    public TcpClientConf getClientConf() {
+        return clientConf;
+    }
+
+    public void setClientConf(TcpClientConf clientConf) {
+        this.clientConf = clientConf;
+    }
+
+    @Override
+    public void clientStopped(TcpClient client) {
+
     }
 
 }

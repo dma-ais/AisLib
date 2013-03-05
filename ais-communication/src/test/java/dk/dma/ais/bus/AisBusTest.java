@@ -24,11 +24,14 @@ import org.junit.Test;
 
 import dk.dma.ais.bus.configuration.AisBusConfiguration;
 import dk.dma.ais.bus.configuration.consumer.StdoutConsumerConfiguration;
+import dk.dma.ais.bus.configuration.consumer.TcpServerConsumerConfiguration;
 import dk.dma.ais.bus.configuration.consumer.TcpWriterConsumerConfiguration;
 import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
+import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
+import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
 
 public class AisBusTest {
 
@@ -52,9 +55,23 @@ public class AisBusTest {
         
         // Consumer
         TcpWriterConsumerConfiguration tcpWriter = new TcpWriterConsumerConfiguration();
+        ClientConfiguration clc1 = new ClientConfiguration();
+        clc1.setBufferSize(1);
+        tcpWriter.setClientConf(clc1);
         tcpWriter.setPort(8089);
         tcpWriter.setHost("localhost");
         conf.getConsumers().add(tcpWriter);
+        
+        // Consumer
+        TcpServerConsumerConfiguration tcpServer = new TcpServerConsumerConfiguration();
+        ClientConfiguration clc2 = new ClientConfiguration();
+        clc2.setGzipCompress(true);
+        ServerConfiguration serverConf = new ServerConfiguration();
+        serverConf.setPort(9999);
+        tcpServer.setClientConf(clc2);
+        tcpServer.setServerConf(serverConf);
+        conf.getConsumers().add(tcpServer);
+        
         
         // Save
         AisBusConfiguration.save("aisbus.xml", conf);
@@ -93,7 +110,7 @@ public class AisBusTest {
         aisBus.startProviders();
         
         try {
-            Thread.sleep(100000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

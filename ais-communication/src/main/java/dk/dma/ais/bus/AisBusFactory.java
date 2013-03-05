@@ -24,15 +24,21 @@ import dk.dma.ais.bus.configuration.AisBusConfiguration;
 import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
 import dk.dma.ais.bus.configuration.consumer.AisBusConsumerConfiguration;
 import dk.dma.ais.bus.configuration.consumer.StdoutConsumerConfiguration;
+import dk.dma.ais.bus.configuration.consumer.TcpServerConsumerConfiguration;
 import dk.dma.ais.bus.configuration.consumer.TcpWriterConsumerConfiguration;
 import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.provider.AisBusProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
+import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
+import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
 import dk.dma.ais.bus.consumer.StdoutConsumer;
+import dk.dma.ais.bus.consumer.TcpServerConsumer;
 import dk.dma.ais.bus.consumer.TcpWriterConsumer;
 import dk.dma.ais.bus.provider.TcpClientProvider;
+import dk.dma.ais.bus.tcp.TcpClientConf;
+import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.DuplicateFilter;
 import dk.dma.ais.filter.IPacketFilter;
@@ -61,13 +67,18 @@ public class AisBusFactory {
             // Specific configurations
             if (consumerConf instanceof StdoutConsumerConfiguration) {
                 consumer = new StdoutConsumer();
+            } else if (consumerConf instanceof TcpServerConsumerConfiguration) {
+                TcpServerConsumerConfiguration serverConf = (TcpServerConsumerConfiguration) consumerConf;
+                TcpServerConsumer server = new TcpServerConsumer();
+                server.setClientConf(getClientConf(serverConf.getClientConf()));
+                server.setServerConf(getServerConf(serverConf.getServerConf()));
+                consumer = server;
             } else if (consumerConf instanceof TcpWriterConsumerConfiguration) {
                 TcpWriterConsumerConfiguration tcpwConf = (TcpWriterConsumerConfiguration) consumerConf;
                 TcpWriterConsumer tcpw = new TcpWriterConsumer();
                 tcpw.setPort(tcpwConf.getPort());
                 tcpw.setHost(tcpwConf.getHost());
-                tcpw.setGzipBufferSize(tcpwConf.getGzipBufferSize());
-                tcpw.setGzipCompress(tcpwConf.isGzipCompress());
+                tcpw.setClientConf(getClientConf(tcpwConf.getClientConf()));
                 tcpw.setReconnectInterval(tcpwConf.getReconnectInterval());
                 consumer = tcpw;
             } else {
@@ -111,6 +122,25 @@ public class AisBusFactory {
         }
 
         return aisBus;
+    }
+
+    private static TcpServerConf getServerConf(ServerConfiguration conf) {
+        TcpServerConf serverConf = new TcpServerConf();
+        if (conf != null) {
+            serverConf.setPort(conf.getPort());
+            serverConf.setMaxClients(conf.getMaxClients());
+        }
+        return serverConf;
+    }
+
+    private static TcpClientConf getClientConf(ClientConfiguration conf) {
+        TcpClientConf clientConf = new TcpClientConf();
+        if (conf != null) {
+            clientConf.setBufferSize(conf.getBufferSize());
+            clientConf.setGzipBufferSize(conf.getGzipBufferSize());
+            clientConf.setGzipCompress(conf.isGzipCompress());
+        }
+        return clientConf;
     }
 
     private static void socketConfigure(AisBusSocket socket, AisBusSocketConfiguration conf) {

@@ -27,6 +27,7 @@ public final class TcpClientProvider extends AisReaderProvider {
     private String hostsPorts;
     private int interval = 10;
     private int timeout = 10;
+    // TODO gzip compression
 
     private final RoundRobinAisTcpReader rrReader = new RoundRobinAisTcpReader();    
 
@@ -58,7 +59,7 @@ public final class TcpClientProvider extends AisReaderProvider {
     public void init() {
         rrReader.setCommaseparatedHostPort(hostsPorts);
         rrReader.setTimeout(timeout);
-        rrReader.setReconnectInterval(interval);
+        rrReader.setReconnectInterval(interval * 1000);
         super.init();
     }
 

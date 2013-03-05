@@ -17,23 +17,22 @@ package dk.dma.ais.bus.configuration.filter;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-
 @XmlRootElement
 public class DuplicateFilterConfiguration extends FilterConfiguration {
-    
+
     /**
      * Window size in milliseconds
      */
     private long windowSize = 10000;
-    
+
     public DuplicateFilterConfiguration() {
-        
+
     }
-    
+
     public long getWindowSize() {
         return windowSize;
     }
-    
+
     public void setWindowSize(long windowSize) {
         this.windowSize = windowSize;
     }
