@@ -16,7 +16,7 @@
   <dependencies>
     <dependency>
       <groupId>dk.dma.enav</groupId>
-      <artifactId>enav-messaging</artifactId>
+      <artifactId>enav-model</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
