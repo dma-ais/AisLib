@@ -41,6 +41,7 @@ public abstract class Sentence {
     protected String msg;
     protected String prefix;
     protected List<String> orgLines = new ArrayList<>();
+    protected List<String> rawSentences = new ArrayList<>();
     protected LinkedList<String> encodedFields;
     protected CommentBlock commentBlock;
     protected LinkedList<IProprietaryTag> tags; // Possible proprietary source tags for the message
@@ -82,6 +83,9 @@ public abstract class Sentence {
 
         // Split into prefix and sentence
         splitLine(line);
+        
+        // Save raw sentence
+        rawSentences.add(this.msg);
 
         // Check for comment block
         if (prefix.length() > 0 && CommentBlock.hasCommentBlock(prefix)) {
@@ -311,14 +315,30 @@ public abstract class Sentence {
     public List<String> getOrgLines() {
         return orgLines;
     }
-
+    
     /**
-     * Get original lines joined by carrige return line feed
+     * Get original lines joined by carriage return line feed
      * 
      * @return
      */
     public String getOrgLinesJoined() {
         return StringUtils.join(orgLines.iterator(), "\r\n");
+    }
+    
+    /**
+     * Get original raw sentences without any prefix
+     * @return
+     */
+    public List<String> getRawSentences() {
+        return rawSentences;
+    }
+
+    /**
+     * Get original raw sentences without any prefix joined by carriage return line feed 
+     * @return
+     */
+    public String getRawSentencesJoined() {
+        return StringUtils.join(rawSentences.iterator(), "\r\n");
     }
 
     /**
