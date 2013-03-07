@@ -1,8 +1,5 @@
 + Remaining consumers and providers
 	TcpServerProvider
-	TcpServerConsumer
-
-+ Status on all components
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.
@@ -12,6 +9,9 @@
 + Overflow handling
 
 + Statistics / Status object on components
+
++ Tagging solution
+	Tagging strategies
 
 + Remaining filters configurations
 

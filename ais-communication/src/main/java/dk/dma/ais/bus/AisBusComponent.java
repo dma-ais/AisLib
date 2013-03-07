@@ -21,7 +21,7 @@ import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.filter.PacketFilterCollection;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.transform.IAisTransformer;
+import dk.dma.ais.transform.IAisPacketTransformer;
 
 /**
  * Base class for all AisBus components receiving and handing of AIS packets. All components are able to filter, transform and tag
@@ -54,7 +54,7 @@ public abstract class AisBusComponent {
     /**
      * Transformers to apply
      */
-    protected final CopyOnWriteArrayList<IAisTransformer<AisPacket>> packetTransformers = new CopyOnWriteArrayList<>();
+    protected final CopyOnWriteArrayList<IAisPacketTransformer<AisPacket>> packetTransformers = new CopyOnWriteArrayList<>();
 
     public AisBusComponent() {
     }
@@ -108,7 +108,7 @@ public abstract class AisBusComponent {
         }
         
         // Transform packet
-        for (IAisTransformer<AisPacket> transformer :packetTransformers) {
+        for (IAisPacketTransformer<AisPacket> transformer :packetTransformers) {
             packet = transformer.transform(packet);
         }
         
@@ -134,7 +134,7 @@ public abstract class AisBusComponent {
      * 
      * @return
      */
-    public CopyOnWriteArrayList<IAisTransformer<AisPacket>> getPacketTransformers() {
+    public CopyOnWriteArrayList<IAisPacketTransformer<AisPacket>> getPacketTransformers() {
         return packetTransformers;
     }
         

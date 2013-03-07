@@ -15,19 +15,17 @@
  */
 package dk.dma.ais.transform;
 
-import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.packet.AisPacket;
 
 /**
- * Interface for transformers that take one instance and returns another
+ * Transformer that strips everything from the packet except the raw VDM sentences 
  */
-@ThreadSafe
-public interface IAisTransformer<T> {
-    
-    /**
-     * Transform element 
-     * @param element
-     * @return transformed element
-     */
-    T transform(T element);
+public class CropVdmTransformer implements IAisPacketTransformer {
 
+    @Override
+    public AisPacket transform(AisPacket packet) {
+        // TODO
+        return packet;
+    }
+    
 }
