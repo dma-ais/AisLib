@@ -16,12 +16,6 @@
 package dk.dma.ais.bus.tcp;
 
 import java.net.Socket;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -31,39 +25,16 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public abstract class TcpClient extends Thread {
     
-    private static final Logger LOG = LoggerFactory.getLogger(TcpClient.class);
-    
     protected final TcpClientConf conf;
     protected final Socket socket;        
-    private final IClientStoppedListener stopListener;
-    private final BlockingQueue<String> buffer;    
+    private final IClientStoppedListener stopListener;    
     
     public TcpClient(IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {        
         this.stopListener = stopListener;
         this.socket = socket;
         this.conf = conf;
-        this.buffer = new ArrayBlockingQueue<>(conf.getBufferSize());
     }
-    
-    /**
-     * Pull at least one element from buffer. Will clear list before pulling.
-     * @param list
-     * @return
-     * @throws InterruptedException 
-     */
-    protected int pull(List<String> list) throws InterruptedException {
-        list.clear();
-        list.add(buffer.take());
-        return buffer.drainTo(list);
-    }
-    
-    protected void push(String msg) {
-        if (!buffer.offer(msg)) {
-            // TOOD
-            LOG.error("TcpClient overflow");
-        }
-    }
-    
+        
     /**
      * Method must be called before the thread stops
      */

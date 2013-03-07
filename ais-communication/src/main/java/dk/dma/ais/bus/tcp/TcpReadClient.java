@@ -15,15 +15,51 @@
  */
 package dk.dma.ais.bus.tcp;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
+import java.util.zip.GZIPInputStream;
+
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * A reading TCP client
  */
 public class TcpReadClient extends TcpClient {
 
-    public TcpReadClient(IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
+    private Consumer<AisPacket> packetConsumer;
+
+    public TcpReadClient(Consumer<AisPacket> packetConsumer, IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
         super(stopListener, socket, conf);
+        this.packetConsumer = packetConsumer;
+    }
+
+    @Override
+    public void run() {
+        // Read from socket
+        try {
+            InputStream inputStream;
+            if (conf.isGzipCompress()) {
+                inputStream = new GZIPInputStream(socket.getInputStream(), conf.getGzipBufferSize());
+            } else {
+                inputStream = socket.getInputStream();
+            }
+            AisStreamReader reader = new AisStreamReader(inputStream);
+            reader.registerPacketHandler(packetConsumer);
+            reader.start();
+            reader.join();
+        } catch (IOException e) {
+        } catch (InterruptedException e) {
+        }
+
+        try {
+            socket.close();
+        } catch (IOException e) {
+        }
+
+        stopping();
     }
 
 }

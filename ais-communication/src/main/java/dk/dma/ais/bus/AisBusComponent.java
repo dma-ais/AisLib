@@ -29,17 +29,17 @@ import dk.dma.ais.transform.IAisPacketTransformer;
  */
 @ThreadSafe
 public abstract class AisBusComponent {
-    
+
     public static final int STATUS_CREATED = 0;
     public static final int STATUS_INITIALIZED = 1;
     public static final int STATUS_STARTED = 2;
-    
+
     /**
      * The status of the component
      */
     @GuardedBy("this")
     private int status = STATUS_CREATED;
-    
+
     /**
      * Thread for this component
      */
@@ -54,11 +54,11 @@ public abstract class AisBusComponent {
     /**
      * Transformers to apply
      */
-    protected final CopyOnWriteArrayList<IAisPacketTransformer<AisPacket>> packetTransformers = new CopyOnWriteArrayList<>();
+    protected final CopyOnWriteArrayList<IAisPacketTransformer> packetTransformers = new CopyOnWriteArrayList<>();
 
     public AisBusComponent() {
     }
-    
+
     /**
      * Initialize the component after configuration. Must be called be starting the component.
      */
@@ -68,7 +68,7 @@ public abstract class AisBusComponent {
         }
         status = STATUS_INITIALIZED;
     }
-    
+
     /**
      * Start the component. Must be called after init().
      */
@@ -78,17 +78,19 @@ public abstract class AisBusComponent {
         }
         status = STATUS_STARTED;
     }
-    
+
     /**
      * Set component thread
+     * 
      * @param thread
      */
     protected synchronized void setThread(Thread thread) {
         this.thread = thread;
     }
-    
+
     /**
      * Get component thread
+     * 
      * @return
      */
     public synchronized Thread getThread() {
@@ -106,15 +108,15 @@ public abstract class AisBusComponent {
         if (filters.rejectedByFilter(packet)) {
             return null;
         }
-        
+
         // Transform packet
-        for (IAisPacketTransformer<AisPacket> transformer :packetTransformers) {
+        for (IAisPacketTransformer transformer : packetTransformers) {
             packet = transformer.transform(packet);
         }
-        
+
         // Do tagging
         // TODO
-        
+
         // TODO update statistics
 
         return packet;
@@ -134,8 +136,8 @@ public abstract class AisBusComponent {
      * 
      * @return
      */
-    public CopyOnWriteArrayList<IAisPacketTransformer<AisPacket>> getPacketTransformers() {
+    public CopyOnWriteArrayList<IAisPacketTransformer> getPacketTransformers() {
         return packetTransformers;
     }
-        
+
 }

@@ -17,18 +17,24 @@ package dk.dma.ais.bus.tcp;
 
 import java.net.Socket;
 
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.enav.util.function.Consumer;
+
 /**
  * TCP server for reading clients
  */
 public class TcpReadServer extends TcpServer {
     
-    public TcpReadServer() {
+    private final Consumer<AisPacket> packetConsumer;
+    
+    public TcpReadServer(Consumer<AisPacket> packetConsumer) {
         super();
+        this.packetConsumer = packetConsumer;
     }
 
     @Override
     protected TcpReadClient newClient(Socket socket) {
-        return new TcpReadClient(this, socket, clientConf);
+        return new TcpReadClient(packetConsumer, this, socket, clientConf);
     }
 
 }

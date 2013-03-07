@@ -1,5 +1,5 @@
 + Remaining consumers and providers
-	TcpServerProvider
+	Make TcpClientProvider use existing client instead of round robin
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.

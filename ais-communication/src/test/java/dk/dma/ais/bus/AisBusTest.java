@@ -30,6 +30,7 @@ import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
+import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
 
@@ -41,11 +42,22 @@ public class AisBusTest {
         // Bus Filters
         conf.getFilters().add(new DownSampleFilterConfiguration());
         conf.getFilters().add(new DuplicateFilterConfiguration());
+        
         // Provider
         TcpClientProviderConfiguration rrReader = new TcpClientProviderConfiguration();
         rrReader.getHostPort().add("ais163.sealan.dk:65262");
         rrReader.getFilters().add(new DownSampleFilterConfiguration(300));
-        conf.getProviders().add(rrReader);              
+        conf.getProviders().add(rrReader);
+        
+        // Provider
+        TcpServerProviderConfiguration spConf = new TcpServerProviderConfiguration();
+        ServerConfiguration spServerConf = new ServerConfiguration();
+        spServerConf.setPort(9998);
+        spConf.setServerConf(spServerConf) ;
+        ClientConfiguration spClientConf = new ClientConfiguration();
+        spClientConf.setGzipCompress(true);
+        spConf.setClientConf(spClientConf);
+        conf.getProviders().add(spConf);        
         
         // Consumer
         StdoutConsumerConfiguration stdoutConsumer = new StdoutConsumerConfiguration();
@@ -110,7 +122,7 @@ public class AisBusTest {
         aisBus.startProviders();
         
         try {
-            Thread.sleep(10000);
+            Thread.sleep(100000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

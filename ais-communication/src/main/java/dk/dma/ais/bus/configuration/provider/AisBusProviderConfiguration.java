@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
 
-@XmlSeeAlso({ TcpClientProviderConfiguration.class })
+@XmlSeeAlso({ TcpClientProviderConfiguration.class, TcpServerProviderConfiguration.class })
 public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
 
     public AisBusProviderConfiguration() {

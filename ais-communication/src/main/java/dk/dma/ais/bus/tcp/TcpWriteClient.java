@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPOutputStream;
 
 import net.jcip.annotations.ThreadSafe;
@@ -36,8 +38,23 @@ public class TcpWriteClient extends TcpClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpWriteClient.class);
 
+    private final BlockingQueue<String> buffer;
+
     public TcpWriteClient(IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
         super(stopListener, socket, conf);
+        this.buffer = new ArrayBlockingQueue<>(conf.getBufferSize());
+    }
+
+    /**
+     * Send message
+     * 
+     * @param msg
+     */
+    public void send(String msg) {
+        if (!buffer.offer(msg)) {
+            // TOOD
+            LOG.error("TcpClient overflow");
+        }
     }
 
     @Override
@@ -56,36 +73,28 @@ public class TcpWriteClient extends TcpClient {
             // Pull-write loop
             while (true) {
                 // Pull from queue
-                pull(list);
+                list.clear();
+                list.add(buffer.take());
+                buffer.drainTo(list);
                 // Write to client
                 for (String str : list) {
-                    writer.println(str);                   
+                    writer.println(str);
                 }
                 if (writer.checkError()) {
                     throw new IOException("Connection to client lost");
                 }
             }
         } catch (IOException e) {
-            LOG.info("Connection lost to client");
+
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            // TODO
-        } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-            }
+
         }
-
+        try {
+            socket.close();
+        } catch (IOException e) {
+        }
+        
         stopping();
-    }
-
-    /**
-     * Send message
-     * @param msg
-     */
-    public void send(String msg) {
-        push(msg);
     }
 
 }

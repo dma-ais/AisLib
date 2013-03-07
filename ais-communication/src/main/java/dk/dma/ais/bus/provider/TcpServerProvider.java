@@ -16,14 +16,49 @@
 package dk.dma.ais.bus.provider;
 
 import dk.dma.ais.bus.AisBusProvider;
+import dk.dma.ais.bus.tcp.TcpClientConf;
+import dk.dma.ais.bus.tcp.TcpReadServer;
+import dk.dma.ais.bus.tcp.TcpServerConf;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Server providing TCP connections for receiving date
  */
-public class TcpServerProvider extends AisBusProvider {
-    
-    //private final TcpReaderS
-    
-    
+public class TcpServerProvider extends AisBusProvider implements Consumer<AisPacket> {
+
+    private final TcpReadServer server;
+
+    public TcpServerProvider() {
+        server = new TcpReadServer(this);
+    }
+
+    /**
+     * Get AisPacket from clients
+     */
+    @Override
+    public void accept(AisPacket packet) {
+        push(packet);
+    }
+
+    @Override
+    public synchronized void init() {
+        super.init();
+    }
+
+    @Override
+    public synchronized void start() {
+        setThread(server);
+        server.start();
+        super.start();
+    }
+
+    public void setClientConf(TcpClientConf clientConf) {
+        server.setClientConf(clientConf);
+    }
+
+    public void setServerConf(TcpServerConf serverConf) {
+        server.setServerConf(serverConf);
+    }
 
 }

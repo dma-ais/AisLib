@@ -31,12 +31,14 @@ import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.provider.AisBusProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
+import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
 import dk.dma.ais.bus.consumer.StdoutConsumer;
 import dk.dma.ais.bus.consumer.TcpServerConsumer;
 import dk.dma.ais.bus.consumer.TcpWriterConsumer;
 import dk.dma.ais.bus.provider.TcpClientProvider;
+import dk.dma.ais.bus.provider.TcpServerProvider;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.filter.DownSampleFilter;
@@ -108,6 +110,12 @@ public class AisBusFactory {
                 rrClient.setTimeout(rrConf.getTimeout());
                 rrClient.setInterval(rrConf.getInterval());
                 provider = rrClient;
+            } else if (providerConf instanceof TcpServerProviderConfiguration) {
+                TcpServerProviderConfiguration serverConf = (TcpServerProviderConfiguration)providerConf;
+                TcpServerProvider server = new TcpServerProvider();
+                server.setClientConf(getClientConf(serverConf.getClientConf()));
+                server.setServerConf(getServerConf(serverConf.getServerConf()));
+                provider = server;
             } else {
                 throw new IllegalArgumentException("Unknown provider: " + providerConf.getClass());
             }
