@@ -18,16 +18,24 @@ package dk.dma.ais.packet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import dk.dma.commons.util.io.OutputStreamSink;
 
 /**
- * 
+ * Common utility methods for {@link AisPacket}.
  * @author Kasper Nielsen
  */
 public class AisPackets {
+
+    /** A thread local with a default text format.  */
+    static final ThreadLocal<SimpleDateFormat> DEFAULT_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        }
+    };
 
     /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_TEXT = new OutputStreamSink<AisPacket>() {
@@ -35,6 +43,23 @@ public class AisPackets {
         public void process(OutputStream stream, AisPacket message) throws IOException {
             stream.write(message.getStringMessage().getBytes(StandardCharsets.US_ASCII));
             stream.write('\n');
+        }
+    };
+
+    /** A sink that writes an ais packet to an output stream. Printing only the actual sentence . */
+    public static final OutputStreamSink<AisPacket> OUTPUT_PREFIXED_SENTENCES = new OutputStreamSink<AisPacket>() {
+
+        @Override
+        public void process(OutputStream stream, AisPacket message) throws IOException {
+            List<String> rawSentences = message.getVdm().getRawSentences();
+            String dateTimeStr = DEFAULT_DATE_FORMAT.get().format(message.getVdm().getTimestamp());
+            byte[] b = dateTimeStr.getBytes(StandardCharsets.US_ASCII);
+            for (String sentence : rawSentences) {
+                stream.write(b);
+                stream.write(',');
+                stream.write(sentence.getBytes(StandardCharsets.US_ASCII));
+                stream.write('\n');
+            }
         }
     };
 
