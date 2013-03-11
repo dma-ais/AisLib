@@ -15,6 +15,8 @@
  */
 package dk.dma.ais.reader;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,14 +35,15 @@ import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.queue.BlockingMessageQueue;
-import dk.dma.ais.queue.MessageQueueOverflowException;
-import dk.dma.ais.queue.MessageQueueReader;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.IQueueEntryHandler;
+import dk.dma.ais.queue.MessageQueueOverflowException;
+import dk.dma.ais.queue.MessageQueueReader;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.util.io.CountingInputStream;
+import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Consumer;
 
 /**
@@ -48,7 +51,7 @@ import dk.dma.enav.util.function.Consumer;
  */
 public abstract class AisReader extends Thread {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
+    static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
 
     // Temporary hack to allow the insertion of the DMA tag to indicate source
     private boolean addDmaTag;
@@ -110,6 +113,25 @@ public abstract class AisReader extends Thread {
      * 
      * @param packetHandler
      */
+    public void registerOutputStreamSink(final OutputStreamSink<AisPacket> oss, final OutputStream output) {
+        requireNonNull(oss);
+        requireNonNull(output);
+        packetHandlers.add(new Consumer<AisPacket>() {
+            @Override
+            public void accept(AisPacket t) {
+                try {
+                    oss.process(output, t);
+                } catch (IOException e) {
+                    LOG.error("Error processing packet:" + t.getStringMessage(), e);
+                }
+            }});
+    }
+
+    /**
+     * Add a packet handler
+     * 
+     * @param packetHandler
+     */
     public void registerPacketHandler(Consumer<? super AisPacket> packetConsumer) {
         packetHandlers.add(packetConsumer);
     }
@@ -129,7 +151,7 @@ public abstract class AisReader extends Thread {
      * @param handler
      */
     public void registerQueueHandler(IQueueEntryHandler<AisMessage> handler) {
-        MessageQueueReader<AisMessage> queueReader = new MessageQueueReader<AisMessage>(handler,
+        MessageQueueReader<AisMessage> queueReader = new MessageQueueReader<>(handler,
                 new BlockingMessageQueue<AisMessage>());
         registerQueue(queueReader.getQueue());
         queueReader.start();
