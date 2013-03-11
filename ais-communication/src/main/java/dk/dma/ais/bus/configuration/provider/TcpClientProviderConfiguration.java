@@ -20,31 +20,42 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
+
 @XmlRootElement
 public class TcpClientProviderConfiguration extends AisBusProviderConfiguration {
-    
+
     private List<String> hostPort = new ArrayList<>();
-    private int interval = 10;
+    private ClientConfiguration clientConf = new ClientConfiguration();
+    private int reconnectInterval = 10;
     private int timeout = 10;
 
     public TcpClientProviderConfiguration() {
 
     }
-    
+
     public List<String> getHostPort() {
         return hostPort;
     }
-    
+
     public void setHostPort(List<String> hostPort) {
         this.hostPort = hostPort;
     }
 
-    public int getInterval() {
-        return interval;
+    public ClientConfiguration getClientConf() {
+        return clientConf;
     }
 
-    public void setInterval(int interval) {
-        this.interval = interval;
+    public void setClientConf(ClientConfiguration clientConf) {
+        this.clientConf = clientConf;
+    }
+
+    public int getReconnectInterval() {
+        return reconnectInterval;
+    }
+
+    public void setReconnectInterval(int reconnectInterval) {
+        this.reconnectInterval = reconnectInterval;
     }
 
     public int getTimeout() {

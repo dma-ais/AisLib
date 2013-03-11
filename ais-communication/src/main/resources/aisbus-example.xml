@@ -48,7 +48,8 @@
         </serverConf>
 		<clientConf>
             <gzipCompress>true</gzipCompress>
-        </clientConf>        
+        </clientConf>
+        
     </provider>
 	
 </aisBusConfiguration>

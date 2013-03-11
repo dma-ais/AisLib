@@ -24,7 +24,7 @@ public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration 
     
     private String host;
     private int port;
-    private int reconnectInterval = 20000;
+    private int reconnectInterval = 10;
     private ClientConfiguration clientConf;
 
     public TcpWriterConsumerConfiguration() {

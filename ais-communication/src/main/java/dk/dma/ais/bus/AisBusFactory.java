@@ -17,8 +17,6 @@ package dk.dma.ais.bus;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.lang.StringUtils;
-
 import dk.dma.ais.bus.configuration.AisBusComponentConfiguration;
 import dk.dma.ais.bus.configuration.AisBusConfiguration;
 import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
@@ -104,12 +102,13 @@ public class AisBusFactory {
             AisBusProvider provider;
             // Specific configurations
             if (providerConf instanceof TcpClientProviderConfiguration) {
-                TcpClientProviderConfiguration rrConf = (TcpClientProviderConfiguration) providerConf;
-                TcpClientProvider rrClient = new TcpClientProvider();
-                rrClient.setHostsPorts(StringUtils.join(rrConf.getHostPort(), ","));
-                rrClient.setTimeout(rrConf.getTimeout());
-                rrClient.setInterval(rrConf.getInterval());
-                provider = rrClient;
+                TcpClientProviderConfiguration cpConf = (TcpClientProviderConfiguration) providerConf;
+                TcpClientProvider clientProvider = new TcpClientProvider();
+                clientProvider.setHostsPorts(cpConf.getHostPort());
+                clientProvider.setTimeout(cpConf.getTimeout());
+                clientProvider.setReconnectInterval(cpConf.getReconnectInterval());
+                clientProvider.setClientConf(getClientConf(cpConf.getClientConf()));                
+                provider = clientProvider;
             } else if (providerConf instanceof TcpServerProviderConfiguration) {
                 TcpServerProviderConfiguration serverConf = (TcpServerProviderConfiguration)providerConf;
                 TcpServerProvider server = new TcpServerProvider();

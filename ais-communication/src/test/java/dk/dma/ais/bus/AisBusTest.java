@@ -47,6 +47,8 @@ public class AisBusTest {
         TcpClientProviderConfiguration rrReader = new TcpClientProviderConfiguration();
         rrReader.getHostPort().add("ais163.sealan.dk:65262");
         rrReader.getFilters().add(new DownSampleFilterConfiguration(300));
+        ClientConfiguration rrReaderConf = new ClientConfiguration();
+        rrReader.setClientConf(rrReaderConf);        
         conf.getProviders().add(rrReader);
         
         // Provider

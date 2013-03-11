@@ -44,12 +44,12 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
     private TcpWriteClient writeClient;
     
     private TcpClientConf clientConf = new TcpClientConf();
-    private int reconnectInterval = 20000;
+    private int reconnectInterval = 10;
     private String host;
     private int port;
 
     public TcpWriterConsumer() {
-        // TODO TcpConsumer ??
+
     }
 
     @Override
@@ -103,7 +103,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
 
             try {
                 LOG.info("Waiting to reconnect");
-                Thread.sleep(reconnectInterval);
+                Thread.sleep(reconnectInterval * 1000);
             } catch (InterruptedException e) {
                 // TODO handle interuption
                 e.printStackTrace();

@@ -1,5 +1,7 @@
 + Remaining consumers and providers
 	Make TcpClientProvider use existing client instead of round robin
+	
++ Logging
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.
@@ -18,4 +20,6 @@
 + AisBusLauncher that takes conf file as argument
 
 + Search for all TODO's
+
++ Testing
 
