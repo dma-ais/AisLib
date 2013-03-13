@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 import org.slf4j.Logger;
@@ -40,9 +39,8 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpWriterConsumer.class);
 
-    @GuardedBy("this")
     private TcpWriteClient writeClient;
-    
+
     private TcpClientConf clientConf = new TcpClientConf();
     private int reconnectInterval = 10;
     private String host;
@@ -54,12 +52,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
 
     @Override
     public void receiveFiltered(AisBusElement queueElement) {
-        synchronized (this) {
-            if (writeClient != null) {
-                writeClient.send(queueElement.getPacket().getStringMessage());
-            }
-        }
-
+        writeClient.send(queueElement.getPacket().getStringMessage());
     }
 
     /**
@@ -77,17 +70,10 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 socket.setKeepAlive(true);
 
                 // Start client
-                synchronized (this) {
-                    writeClient = new TcpWriteClient(this, socket, clientConf);
-                }
+                writeClient = new TcpWriteClient(this, socket, clientConf);
                 writeClient.start();
-
                 // Wait for client to loose connection
                 writeClient.join();
-
-                synchronized (this) {
-                    writeClient = null;
-                }
 
             } catch (IOException e) {
                 LOG.info("Connection error");

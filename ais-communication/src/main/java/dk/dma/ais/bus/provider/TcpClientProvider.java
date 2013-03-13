@@ -21,7 +21,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 import org.apache.commons.lang.StringUtils;
@@ -44,7 +43,6 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpClientProvider.class);
 
-    @GuardedBy("this")
     private TcpReadClient readClient;
 
     private TcpClientConf clientConf = new TcpClientConf();
@@ -81,17 +79,10 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
                 }
 
                 // Start client
-                synchronized (this) {
-                    readClient = new TcpReadClient(this, this, socket, clientConf);
-                }
+                readClient = new TcpReadClient(this, this, socket, clientConf);
                 readClient.start();
-
                 // Wait for client to loose connection
                 readClient.join();
-
-                synchronized (this) {
-                    readClient = null;
-                }
 
             } catch (IOException e) {
                 LOG.info("Connection error: " + e.getMessage());

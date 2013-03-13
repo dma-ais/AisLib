@@ -41,8 +41,9 @@ public class AisPacketTagging {
     public enum SourceType {
         TERRESTRIAL, SATELLITE;
         public static SourceType fromString(String st) {
-            if (st == null)
+            if (st == null) {
                 return null;
+            }
             if (st.equalsIgnoreCase("LIVE")) {
                 return TERRESTRIAL;
             } else if (st.equalsIgnoreCase("SAT")) {
@@ -64,23 +65,23 @@ public class AisPacketTagging {
     /**
      * Timestamp (comment block key: 'c', value: seconds since 1970)
      */
-    private Date timestamp = null;
+    private Date timestamp;
     /**
      * Source identifier (comment block key: 'si')
      */
-    private String sourceId = null;
+    private String sourceId;
     /**
      * Source base station MMSI (comment block key: 'sb')
      */
-    private Integer sourceBs = null;
+    private Integer sourceBs;
     /**
      * Source country in ISO 3166 three letter code (comment block key: 'sc')
      */
-    private Country sourceCountry = null;
+    private Country sourceCountry;
     /**
      * Source type (comment block key: 'st', value: SAT | LIVE)
      */
-    private SourceType sourceType = null;
+    private SourceType sourceType;
 
     public AisPacketTagging() {
 

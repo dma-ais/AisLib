@@ -30,7 +30,7 @@ public class AisReaderProvider extends AisBusProvider implements Consumer<AisPac
     /**
      * The AIS reader to provide packets
      */
-    private AisReader aisReader = null;
+    private AisReader aisReader;
     
     public AisReaderProvider() {
         super();
