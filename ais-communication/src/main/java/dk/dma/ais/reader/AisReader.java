@@ -33,7 +33,6 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.IQueueEntryHandler;
@@ -277,13 +276,6 @@ public abstract class AisReader extends Thread {
             return;
         }
 
-        // Maybe add temporary DMA tag
-        if (addDmaTag && packetReader.getSourceName() != null) {
-            DmaSourceTag dmaSourceTag = new DmaSourceTag();
-            dmaSourceTag.setSourceName(packetReader.getSourceName());
-            packet.getVdm().setTag(dmaSourceTag);
-        }
-
         // Distribute packet
         for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
             packetHandler.accept(packet);
@@ -342,11 +334,11 @@ public abstract class AisReader extends Thread {
         this.addDmaTag = addDmaTag;
     }
 
-    public String getSourceName() {
-        return packetReader.getSourceName();
+    public String getSourceId() {
+        return packetReader.getSourceId();
     }
 
-    public void setSourceName(String sourceName) {
-        packetReader.setSourceName(sourceName);
+    public void setSourceId(String sourceId) {
+        packetReader.setSourceId(sourceId);
     }
 }

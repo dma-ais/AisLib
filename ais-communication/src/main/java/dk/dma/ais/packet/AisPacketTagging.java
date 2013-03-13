@@ -32,6 +32,11 @@ import dk.dma.enav.model.Country;
  */
 @NotThreadSafe
 public class AisPacketTagging {
+    
+    public static final String SOURCE_ID_KEY = "si";    
+    public static final String SOURCE_BS_KEY = "sb";
+    public static final String SOURCE_COUNTRY_KEY = "sc";
+    public static final String SOURCE_TYPE_KEY = "st";
 
     public enum SourceType {
         TERRESTRIAL, SATELLITE;
@@ -42,6 +47,15 @@ public class AisPacketTagging {
                 return TERRESTRIAL;
             } else if (st.equalsIgnoreCase("SAT")) {
                 return SATELLITE;
+            }
+            return null;
+        }
+        public String encode() {
+            switch (this) {
+            case TERRESTRIAL:
+                return "LIVE";
+            case SATELLITE:
+                return "SAT";
             }
             return null;
         }
@@ -70,6 +84,15 @@ public class AisPacketTagging {
 
     public AisPacketTagging() {
 
+    }
+
+    /**
+     * Determine if any tag is non null
+     * 
+     * @return
+     */
+    public boolean isEmpty() {
+        return (timestamp == null && sourceId == null && sourceBs == null && sourceCountry == null && sourceType == null);
     }
 
     public Date getTimestamp() {
@@ -111,6 +134,53 @@ public class AisPacketTagging {
     public SourceType getSourceType() {
         return sourceType;
     }
+    
+    /**
+     * Make comment block with tags
+     * @return
+     */
+    public CommentBlock getCommentBlock() {
+        CommentBlock cb = new CommentBlock();
+        if (timestamp != null) {
+            cb.addTimestamp(timestamp);
+        }
+        if (sourceId != null) {
+            cb.addString(SOURCE_ID_KEY, sourceId);
+        }
+        if (sourceBs != null) {
+            cb.addInt(SOURCE_BS_KEY, sourceBs);
+        }
+        if (sourceCountry != null) {
+            cb.addString(SOURCE_COUNTRY_KEY, sourceCountry.getThreeLetter());
+        }
+        if (sourceType != null) {
+            cb.addString(SOURCE_TYPE_KEY, sourceType.encode());
+        }        
+        return cb;
+    }
+
+    /**
+     * Get new tagging with tags in proposed tagging not already in the current tag
+     * 
+     * @param tagging
+     * @return
+     */
+    public AisPacketTagging mergeMissing(AisPacketTagging proposed) {
+        AisPacketTagging addedTagging = new AisPacketTagging();
+        if (getSourceId() == null && proposed.getSourceId() != null) {
+            addedTagging.setSourceId(proposed.getSourceId());
+        }
+        if (getSourceBs() == null && proposed.getSourceBs() != null) {
+            addedTagging.setSourceBs(proposed.getSourceBs());
+        }
+        if (getSourceCountry() == null && proposed.getSourceCountry() != null) {
+            addedTagging.setSourceCountry(proposed.getSourceCountry());
+        }
+        if (getSourceType() == null && proposed.getSourceType() != null) {
+            addedTagging.setSourceType(proposed.getSourceType());
+        }
+        return addedTagging;
+    }
 
     /**
      * Parse tags from AisPacket. Uses comment block with first priority and fall back to proprietary tags.
@@ -129,13 +199,13 @@ public class AisPacketTagging {
         CommentBlock cb = (vdm != null) ? vdm.getCommentBlock() : null;
         // Get from comment block
         if (cb != null) {
-            tags.setSourceId(cb.getString("si"));
-            tags.setSourceBs(cb.getInt("sb"));
-            String cc = cb.getString("sc");
+            tags.setSourceId(cb.getString(SOURCE_ID_KEY));
+            tags.setSourceBs(cb.getInt(SOURCE_BS_KEY));
+            String cc = cb.getString(SOURCE_COUNTRY_KEY);
             if (cc != null) {
                 tags.setSourceCountry(Country.getByCode(cc));
             }
-            tags.setSourceType(SourceType.fromString(cb.getString("st")));
+            tags.setSourceType(SourceType.fromString(cb.getString(SOURCE_TYPE_KEY)));
         }
 
         // Go through proprietary tags to set missing fields

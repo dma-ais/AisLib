@@ -25,12 +25,15 @@ import org.apache.commons.lang.StringUtils;
 
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.proprietary.ProprietaryFactory;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.ais.transform.AisPacketTaggingTransformer;
+import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 
 /**
  * Class to parse lines in a stream containing VDM sentences.
@@ -42,9 +45,9 @@ public class AisPacketReader {
     private static final int SENTENCE_TRACE_COUNT = 20;
 
     /**
-     * The name of the source
+     * The id of the source
      */
-    private String sourceName;
+    private String sourceId;
 
     /**
      * A received VDO/VDM
@@ -149,8 +152,17 @@ public class AisPacketReader {
         if (tags.size() > 0) {
             vdm.setTags(new LinkedList<>(tags));
         }
-
-        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis(), sourceName);
+        
+        // Make packet 
+        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis());
+        
+        // Maybe add source id
+        if (sourceId != null) {
+            AisPacketTagging tagging = new AisPacketTagging();
+            tagging.setSourceId(sourceId);
+            AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
+            packet = tranformer.transform(packet);
+        }
 
         newVdm();
 
@@ -163,12 +175,12 @@ public class AisPacketReader {
         packetLines.clear();
     }
 
-    public String getSourceName() {
-        return sourceName;
+    public String getSourceId() {
+        return sourceId;
     }
 
-    public void setSourceName(String sourceName) {
-        this.sourceName = sourceName;
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
     }
 
     /**
@@ -190,7 +202,5 @@ public class AisPacketReader {
         }
         return null;
     }
-
-
 
 }

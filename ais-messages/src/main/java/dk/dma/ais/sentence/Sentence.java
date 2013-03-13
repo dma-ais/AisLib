@@ -151,15 +151,12 @@ public abstract class Sentence {
         } catch (SentenceException e) {
             e.printStackTrace();
         }
-        msgChecksum = Integer.toString(checksum, 16).toUpperCase();
-        if (msgChecksum.length() < 2) {
-            msgChecksum = "0" + msgChecksum;
-        }
+        msgChecksum = getStringChecksum(checksum);
         encoded += "*" + msgChecksum;
 
         return encoded;
     }
-
+    
     /**
      * Split line into prefix and message part. Message will start at first ! or $ character
      * 
@@ -210,6 +207,20 @@ public abstract class Sentence {
         }
         return checksum;
     }
+
+    /**
+     * Get checksum string representation
+     * @param checksum
+     * @return
+     */
+    public static String getStringChecksum(int checksum) {
+        String strChecksum = Integer.toString(checksum, 16).toUpperCase();
+        if (strChecksum.length() < 2) {
+            strChecksum = "0" + strChecksum;
+        }
+        return strChecksum;
+    }
+
 
     /**
      * Try to get the proprietary MSSIS timestamp appended to the NMEA sentence

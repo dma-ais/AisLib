@@ -46,7 +46,7 @@ public class AisPacketTest {
         // Make AIS reader instance
         AisStreamReader aisReader = new AisStreamReader(inputStream);
         // Set the source name
-        aisReader.setSourceName("some_file_dump");
+        aisReader.setSourceId("some_file_dump");
 
         aisReader.registerPacketHandler(new Consumer<AisPacket>() {
             @Override
@@ -57,9 +57,12 @@ public class AisPacketTest {
                 Date timestamp = aisPacket.getTimestamp();
                 System.out.println("timestamp: " + timestamp);
                 Assert.assertNotNull(timestamp);
+                
+                // Get tagging
+                AisPacketTagging tagging = AisPacketTagging.parse(aisPacket);
+                Assert.assertEquals(tagging.getSourceId(), "some_file_dump");
 
                 // Try to get AIS message
-
                 try {
                     AisMessage message = aisPacket.getAisMessage();
                     if (message instanceof IPositionMessage) {

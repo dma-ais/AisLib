@@ -42,20 +42,18 @@ import dk.dma.enav.model.geometry.PositionTime;
  */
 public class AisPacket implements Comparable<AisPacket> {
 
-    private final transient long insertTimestamp;
+    private final transient long receiveTimestamp;
     private final String rawMessage;
-    private final String sourceName;
     private transient Vdm vdm;
     private AisMessage message;
 
-    public AisPacket(String stringMessage, long receiveTimestamp, String sourceName) {
+    public AisPacket(String stringMessage, long receiveTimestamp) {
         this.rawMessage = requireNonNull(stringMessage);
-        this.insertTimestamp = receiveTimestamp;
-        this.sourceName = sourceName;
+        this.receiveTimestamp = receiveTimestamp;
     }
 
-    public AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp, String sourceName) {
-        this(stringMessage, receiveTimestamp, sourceName);
+    public AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp) {
+        this(stringMessage, receiveTimestamp);
         this.vdm = vdm;
     }
 
@@ -65,12 +63,12 @@ public class AisPacket implements Comparable<AisPacket> {
      * @return a 128 hash on the received package
      */
     public byte[] calculateHash128() {
-        return Hashing.murmur3_128().hashString(rawMessage + (sourceName != null ? sourceName : "")).asBytes();
+        return Hashing.murmur3_128().hashString(rawMessage).asBytes();
     }
 
     public static AisPacket fromByteArray(byte[] array) {
         byte[] b = Arrays.copyOfRange(array, 1, array.length);
-        return from(new String(b, StandardCharsets.US_ASCII), -1, null);
+        return from(new String(b, StandardCharsets.US_ASCII), -1);
     }
 
     public byte[] toByteArray() {
@@ -79,11 +77,11 @@ public class AisPacket implements Comparable<AisPacket> {
 
     public long getBestTimestamp() {
         Date date = getTimestamp();
-        return date == null ? insertTimestamp : date.getTime();
+        return date == null ? receiveTimestamp : date.getTime();
     }
 
     public long getReceiveTimestamp() {
-        return insertTimestamp;
+        return receiveTimestamp;
     }
 
     public String getStringMessage() {
@@ -164,8 +162,8 @@ public class AisPacket implements Comparable<AisPacket> {
         return null;
 
     }
-    public static AisPacket from(String stringMessage, long receiveTimestamp, String sourceName) {
-        return new AisPacket(stringMessage, receiveTimestamp, sourceName);
+    public static AisPacket from(String stringMessage, long receiveTimestamp) {
+        return new AisPacket(stringMessage, receiveTimestamp);
     }
 
     /** {@inheritDoc} */

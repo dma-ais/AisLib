@@ -15,12 +15,21 @@
  */
 package dk.dma.ais.sentence;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.commons.lang.StringUtils;
+
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * Class to hold a comment block
  */
+@NotThreadSafe
 public class CommentBlock {
 
     private Map<String, String> parameterMap = new HashMap<>();
@@ -29,8 +38,13 @@ public class CommentBlock {
     private int lastLine = -1;
     private String lastGroupId;
 
+    public CommentBlock() {
+
+    }
+
     /**
      * Add line containing comment block
+     * 
      * @param line
      */
     public void addLine(String line) throws CommentBlockException {
@@ -47,7 +61,8 @@ public class CommentBlock {
                 lastLine = cbLine.getLineNumber();
             } else {
                 // Part of existing group
-                if (cbLine.getTotalLines() != totalLines || cbLine.getLineNumber() != lastLine + 1 || !cbLine.getGroupId().equals(lastGroupId)) {
+                if (cbLine.getTotalLines() != totalLines || cbLine.getLineNumber() != lastLine + 1
+                        || !cbLine.getGroupId().equals(lastGroupId)) {
                     throw new CommentBlockException("Invalid comment block grouping");
                 }
                 lastLine = cbLine.getLineNumber();
@@ -71,6 +86,7 @@ public class CommentBlock {
 
     /**
      * Get string value for parameter code
+     * 
      * @param parameter
      * @return
      */
@@ -79,7 +95,37 @@ public class CommentBlock {
     }
 
     /**
+     * Add key value pair with string value
+     * 
+     * @param parameter
+     * @param value
+     */
+    public void addString(String parameter, String value) {
+        parameterMap.put(parameter, value);
+    }
+
+    /**
+     * Add integer value
+     * 
+     * @param parameter
+     * @param value
+     */
+    public void addInt(String parameter, int value) {
+        parameterMap.put(parameter, Integer.toString(value));
+    }
+
+    /**
+     * Add timestamp
+     * 
+     * @param timestamp
+     */
+    public void addTimestamp(Date timestamp) {
+        parameterMap.put("c", Long.toString(timestamp.getTime() / 1000));
+    }
+
+    /**
      * Get integer value of parameter code
+     * 
      * @param parameter
      * @return
      */
@@ -94,6 +140,7 @@ public class CommentBlock {
 
     /**
      * Get long value of parameter code
+     * 
      * @param parameter
      * @return
      */
@@ -108,6 +155,7 @@ public class CommentBlock {
 
     /**
      * Get timestamp in tag
+     * 
      * @return
      */
     public Long getTimestamp() {
@@ -116,6 +164,7 @@ public class CommentBlock {
 
     /**
      * Determine if a line contains comment block
+     * 
      * @param line
      * @return
      */
@@ -125,6 +174,7 @@ public class CommentBlock {
 
     /**
      * Determine if comment block is completed. That is no unfinished groups.
+     * 
      * @return
      */
     public boolean isFinished() {
@@ -133,6 +183,7 @@ public class CommentBlock {
 
     /**
      * Get id of last group
+     * 
      * @return
      */
     public String getLastGroupId() {
@@ -141,10 +192,85 @@ public class CommentBlock {
 
     /**
      * Get total number of lines in last group
+     * 
      * @return
      */
     public int getTotalLines() {
         return totalLines;
+    }
+
+    /**
+     * Determine if comment block contains any key value pairs
+     * 
+     * @return
+     */
+    public boolean isEmpty() {
+        return (parameterMap.size() == 0);
+    }
+
+    /**
+     * Encode comment block in a single line
+     * 
+     * @return
+     */
+    public String encode() {
+        return encode(Integer.MAX_VALUE);
+    }
+
+    /**
+     * Encode comment block in a number of lines
+     * 
+     * @param maxLen
+     *            Maximum line length
+     * @return
+     */
+    public String encode(int maxLen) {
+        // Get all pairs
+        List<String> pairs = new ArrayList<>();
+        for (Entry<String, String> pair : parameterMap.entrySet()) {
+            pairs.add(pair.getKey() + ":" + pair.getValue());
+        }
+
+        // List of lines
+        List<List<String>> lines = new ArrayList<>();
+        
+        // Max len when accommodating for wrapping
+        int actualMaxLen = maxLen - 5; 
+
+        List<String> currentLine = new ArrayList<>();
+        lines.add(currentLine);
+        int currentRemaining = actualMaxLen;
+
+        // Less than optimal way to separate into lines
+        for (String pair : pairs) {
+            if (pair.length() > actualMaxLen) {
+                throw new IllegalArgumentException("maxLen to small to accomodate pair: " + pair);
+            }
+            if (pair.length() > currentRemaining) {
+                currentLine = new ArrayList<>();
+                lines.add(currentLine);
+                currentLine.add(pair);
+                currentRemaining = actualMaxLen - pair.length();
+            } else {
+                currentLine.add(pair);
+                currentRemaining -= pair.length();
+            }
+        }
+
+        return wrapLines(lines);        
+    }
+    
+    private String wrapLines(List<List<String>> lines) {
+        List<String> strLines = new ArrayList<>();
+        for (List<String> line : lines) {
+            String lineStr = StringUtils.join(line, ",");            
+            int checksum = 0;
+            for (int i = 0; i < lineStr.length(); i++) {
+                checksum ^= lineStr.charAt(i);
+            }
+            strLines.add("\\" + lineStr + "*" + Sentence.getStringChecksum(checksum) + "\\");
+        }
+        return StringUtils.join(strLines, "\r\n");
     }
 
     @Override
