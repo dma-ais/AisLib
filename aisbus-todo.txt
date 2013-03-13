@@ -1,25 +1,38 @@
-+ Remaining consumers and providers
-	Make TcpClientProvider use existing client instead of round robin
-	
++ Tagging solution
+	Tagging strategies
+	How to handle GH tag (parse into metadata, or do preprocessing)
+
++ Filter refactor
+	- Specific GH tag filter
+	- Target country filter
+	- Metadata filter
+
 + Logging
+
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.
 
 + Handle interruption
 
+
 + Overflow handling
 
 + Statistics / Status object on components
 
-+ Tagging solution
-	Tagging strategies
 
 + Remaining filters configurations
 
+
 + AisBusLauncher that takes conf file as argument
+
 
 + Search for all TODO's
 
+
 + Testing
+
++ Findbugs and checkstyle
+
++ Refacor current AisBus/AisView setup (also use new tagging)
 

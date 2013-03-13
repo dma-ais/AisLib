@@ -116,7 +116,7 @@ public class AisBusTest {
 //        Assert.assertEquals(consumerConf.getConsumerPullMaxElements(), 1);
     }
     
-    @Test
+    //@Test
     public void factoryTest() throws JAXBException, InterruptedException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-example.xml");
         aisBus.start();
@@ -124,7 +124,7 @@ public class AisBusTest {
         aisBus.startProviders();
         
         try {
-            Thread.sleep(100000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

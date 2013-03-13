@@ -17,18 +17,21 @@ package dk.dma.ais.proprietary;
 
 import java.util.Date;
 
+import net.jcip.annotations.Immutable;
+
 import dk.dma.enav.model.Country;
 
 /**
  * An implementation of a IProprietarySourceTag for Gatehouse source tag
  */
+@Immutable
 public class GatehouseSourceTag implements IProprietarySourceTag {
 
-    private Integer baseMmsi;
-    private Country country;
-    private String region;
-    private Date timestamp;
-    private String orgSentence;
+    private final Integer baseMmsi;
+    private final Country country;
+    private final String region;
+    private final Date timestamp;
+    private final String orgSentence;
 
     public GatehouseSourceTag(Integer baseMmsi, Country country, String region, Date timestamp, String orgSentence) {
         this.baseMmsi = baseMmsi;

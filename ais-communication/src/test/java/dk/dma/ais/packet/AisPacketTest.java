@@ -27,6 +27,7 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.IPositionMessage;
+import dk.dma.ais.packet.AisPacketTagging.SourceType;
 import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.sentence.SentenceException;
@@ -82,14 +83,53 @@ public class AisPacketTest {
     public void packetFromStringTest() throws SentenceException, AisMessageException, SixbitException {
         String msg;
         msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
-        msg += "\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
-        msg += "\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
+        msg += "\\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
+        msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
         AisPacket packet = AisPacketReader.from(msg);
         Assert.assertNotNull(packet);
         Assert.assertNotNull(packet.getVdm());
         Assert.assertNotNull(packet.getVdm().getTags());
         AisMessage aisMessage = AisMessage.getInstance(packet.getVdm());
         Assert.assertEquals(aisMessage.getMsgId(), 5);
+    }
+
+    @Test
+    public void packetTaggingTest() throws SentenceException {
+        String msg;
+        msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
+        msg += "\\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
+        msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
+        AisPacket packet = AisPacketReader.from(msg);
+        AisPacketTagging tags = AisPacketTagging.parse(packet);
+        Assert.assertEquals(tags.getSourceId(), null);
+        Assert.assertEquals(tags.getSourceCountry().getThreeLetter(), "NLD");
+        Assert.assertEquals(tags.getTimestamp().getTime(), 1354719387000L);
+        Assert.assertEquals(tags.getSourceBs(), null);
+        Assert.assertEquals(tags.getSourceType(), null);
+
+        msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
+        msg += "\\si:AISD*3F\\\r\n";
+        msg += "\\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
+        msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
+        packet = AisPacketReader.from(msg);
+        tags = AisPacketTagging.parse(packet);
+        Assert.assertEquals(tags.getSourceId(), "AISD");
+        Assert.assertEquals(tags.getSourceCountry().getThreeLetter(), "NLD");
+        Assert.assertEquals(tags.getTimestamp().getTime(), 1354719387000L);
+        Assert.assertEquals(tags.getSourceBs(), null);
+        Assert.assertEquals(tags.getSourceType(), null);
+
+        msg = "$PGHP,1,2013,3,13,10,39,18,375,219,,2190047,1,4A*57\r\n";
+        msg += "\\si:AISD,sb:2190048,sc:SWE,st:SAT*1E\\\r\n";
+        msg += "\\g:1-2-0136,c:1354725824*22\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
+        msg += "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
+        packet = AisPacketReader.from(msg);
+        tags = AisPacketTagging.parse(packet);
+        Assert.assertEquals(tags.getSourceId(), "AISD");
+        Assert.assertEquals(tags.getSourceCountry().getThreeLetter(), "SWE");
+        Assert.assertEquals(tags.getTimestamp().getTime(), 1354725824000L);
+        Assert.assertEquals(tags.getSourceBs().intValue(), 2190048);
+        Assert.assertEquals(tags.getSourceType(), SourceType.SATELLITE);
     }
 
 }

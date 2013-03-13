@@ -66,13 +66,15 @@ public class CommentBlockLine {
 
         // Check checksum
         try {
-            if (checksum != Integer.parseInt(line.substring(end + 1, end + 3), 16)) {
-                throw new CommentBlockException("Wrong checksum");
+            String given = line.substring(end + 1, end + 3);
+            String calculated = Integer.toString(checksum, 16).toUpperCase();
+            if (checksum != Integer.parseInt(given, 16)) {
+                throw new CommentBlockException("Wrong checksum " + given + " calculated " + calculated);
             }
         } catch (IndexOutOfBoundsException e) {
             throw new CommentBlockException("Missing checksum in comment block");
         } catch (NumberFormatException e) {
-            throw new CommentBlockException("Invalid cehcksum");
+            throw new CommentBlockException("Invalid checksum");
         }
 
         // Split into fields
