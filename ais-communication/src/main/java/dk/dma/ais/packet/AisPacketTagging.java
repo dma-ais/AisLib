@@ -32,8 +32,8 @@ import dk.dma.enav.model.Country;
  */
 @NotThreadSafe
 public class AisPacketTagging {
-    
-    public static final String SOURCE_ID_KEY = "si";    
+
+    public static final String SOURCE_ID_KEY = "si";
     public static final String SOURCE_BS_KEY = "sb";
     public static final String SOURCE_COUNTRY_KEY = "sc";
     public static final String SOURCE_TYPE_KEY = "st";
@@ -51,6 +51,7 @@ public class AisPacketTagging {
             }
             return null;
         }
+
         public String encode() {
             switch (this) {
             case TERRESTRIAL:
@@ -85,6 +86,20 @@ public class AisPacketTagging {
 
     public AisPacketTagging() {
 
+    }
+
+    /**
+     * Copy constructor
+     * 
+     * @param t
+     */
+    public AisPacketTagging(AisPacketTagging t) {
+        if (t.timestamp != null) {
+            this.timestamp = (Date) t.timestamp.clone();
+        }
+        this.sourceId = t.sourceId;
+        this.sourceBs = t.sourceBs;
+        this.sourceCountry = t.sourceCountry;
     }
 
     /**
@@ -135,13 +150,22 @@ public class AisPacketTagging {
     public SourceType getSourceType() {
         return sourceType;
     }
-    
+
     /**
      * Make comment block with tags
+     * 
      * @return
      */
     public CommentBlock getCommentBlock() {
-        CommentBlock cb = new CommentBlock();
+        return getCommentBlock(new CommentBlock());
+    }
+    
+    /**
+     * Supplement given comment block with tags (overriding) 
+     * @param cb
+     * @return
+     */
+    public CommentBlock getCommentBlock(CommentBlock cb) {
         if (timestamp != null) {
             cb.addTimestamp(timestamp);
         }
@@ -156,10 +180,34 @@ public class AisPacketTagging {
         }
         if (sourceType != null) {
             cb.addString(SOURCE_TYPE_KEY, sourceType.encode());
-        }        
+        }
         return cb;
     }
-
+    
+    /**
+     * Supplement given comment block with tags (not overriding) 
+     * @param cb
+     * @return
+     */
+    public CommentBlock getCommentBlockPreserve(CommentBlock cb) {
+        if (timestamp != null && !cb.contains("c")) {
+            cb.addTimestamp(timestamp);
+        }
+        if (sourceId != null && !cb.contains(SOURCE_ID_KEY)) {
+            cb.addString(SOURCE_ID_KEY, sourceId);
+        }
+        if (sourceBs != null && !cb.contains(SOURCE_BS_KEY)) {
+            cb.addInt(SOURCE_BS_KEY, sourceBs);
+        }
+        if (sourceCountry != null && !cb.contains(SOURCE_COUNTRY_KEY)) {
+            cb.addString(SOURCE_COUNTRY_KEY, sourceCountry.getThreeLetter());
+        }
+        if (sourceType != null && !cb.contains(SOURCE_TYPE_KEY)) {
+            cb.addString(SOURCE_TYPE_KEY, sourceType.encode());
+        }
+        return cb;
+    }
+    
     /**
      * Get new tagging with tags in proposed tagging not already in the current tag
      * 

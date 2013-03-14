@@ -15,12 +15,18 @@
  */
 package dk.dma.ais.transform;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
+
+import org.apache.commons.lang.StringUtils;
+
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.sentence.CommentBlock;
+import dk.dma.ais.sentence.Vdm;
 
 /**
  * Transformer that given a tagging instance and a policy transforms the tagging of an AisPacket
@@ -71,11 +77,58 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         switch (policy) {
         case PREPEND_MISSING:
             return prependTransform(packet);
+        case REPLACE:
+            return replaceTransform(packet);
+        case MERGE_OVERRIDE:
+            return mergeOverrideTransform(packet);
+        case MERGE_PRESERVE:
+            return mergePreserveTransform(packet);
         default:
             throw new IllegalArgumentException("Policy not implemented yet");
         }
     }
+    
+    private AisPacket mergePreserveTransform(AisPacket packet) {
+        Vdm vdm = packet.getVdm();
+        if (vdm == null) {
+            return null;
+        }
+        CommentBlock cb = vdm.getCommentBlock();
+        if (cb == null) {
+            cb = new CommentBlock();
+        }
+        tagging.getCommentBlockPreserve(cb);
+        
+        String cbStr = cb.encode();
+        String sentences = StringUtils.join(cropSentences(packet.getStringMessageLines(), false), "\r\n");
+        return newPacket(packet, cbStr + "\r\n" + sentences);
+    }
 
+    private AisPacket mergeOverrideTransform(AisPacket packet) {
+        Vdm vdm = packet.getVdm();
+        if (vdm == null) {
+            return null;
+        }
+        CommentBlock cb = vdm.getCommentBlock();
+        if (cb == null) {
+            cb = new CommentBlock();
+        }
+        tagging.getCommentBlock(cb);
+        
+        String cbStr = cb.encode();
+        String sentences = StringUtils.join(cropSentences(packet.getStringMessageLines(), false), "\r\n");
+        return newPacket(packet, cbStr + "\r\n" + sentences);
+    }
+
+    private AisPacket replaceTransform(AisPacket packet) {
+        AisPacketTagging newTagging = new AisPacketTagging(tagging);
+        newTagging.setTimestamp(packet.getTimestamp());
+        
+        String cb = newTagging.getCommentBlock().encode();
+        String sentences = StringUtils.join(cropSentences(packet.getStringMessageLines(), true), "\r\n");        
+        return newPacket(packet, cb + "\r\n" + sentences);
+    }
+    
     private AisPacket prependTransform(AisPacket packet) {
         // What is missing
         AisPacketTagging addedTagging = AisPacketTagging.parse(packet).mergeMissing(tagging);
@@ -85,6 +138,42 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         CommentBlock cb = addedTagging.getCommentBlock();
         String newCb = cb.encode();
         return newPacket(packet, newCb + "\r\n" + packet.getStringMessage());
+    }
+    
+    
+    /**
+     * Remove any thing else than sentences (and proprietary is chosen)
+     * @param rawPacket
+     * @param removeProprietary
+     * @return
+     */
+    public static List<String> cropSentences(List<String> rawLines, boolean removeProprietary) {
+        List<String> croppedLines = new ArrayList<>();
+        for (String line : rawLines) {
+            int start = line.indexOf('!');
+            if (start < 0) {
+                if (removeProprietary) {
+                    continue;
+                }
+                start = line.indexOf('$');
+            }
+            if (start < 0) {
+                // Not a sentence line
+                continue;
+            }
+            int end = line.indexOf('*', start);
+            if (end < 0) {
+                // Not a valid sentence line
+                continue;
+            }
+            end += 3;
+            if (end > line.length()) {
+                // Not a valid sentence line
+                continue;
+            }
+            croppedLines.add(line.substring(start, end));
+        }
+        return croppedLines;
     }
     
     private AisPacket newPacket(AisPacket oldPacket, String newRawMessage) {

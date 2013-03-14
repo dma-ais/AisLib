@@ -161,6 +161,15 @@ public class CommentBlock {
     public Long getTimestamp() {
         return getLong("c");
     }
+    
+    /**
+     * Determine if parameter exists in comment block
+     * @param parameter
+     * @return
+     */
+    public boolean contains(String parameter) {
+        return parameterMap.containsKey(parameter);
+    }
 
     /**
      * Determine if a line contains comment block
@@ -207,14 +216,14 @@ public class CommentBlock {
     public boolean isEmpty() {
         return (parameterMap.size() == 0);
     }
-
+    
     /**
-     * Encode comment block in a single line
+     * Encode comment block in 80 character lines
      * 
      * @return
      */
     public String encode() {
-        return encode(Integer.MAX_VALUE);
+        return encode(80);
     }
 
     /**
@@ -228,7 +237,10 @@ public class CommentBlock {
         // Get all pairs
         List<String> pairs = new ArrayList<>();
         for (Entry<String, String> pair : parameterMap.entrySet()) {
-            pairs.add(pair.getKey() + ":" + pair.getValue());
+            // Skip grouping tags 
+            if (!pair.getKey().equals("g") && !pair.getKey().matches("\\d+G\\d+")) {  
+                pairs.add(pair.getKey() + ":" + pair.getValue());
+            }
         }
 
         // List of lines

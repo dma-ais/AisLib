@@ -1,6 +1,6 @@
 + Tagging solution
+	Implement the rest of the taggings in AisPacketTaggingTransformer + test
 	AisBus handle tagging and configuration
-	Implement the rest of the taggings in AisPacketTaggingTransformer
 
 + Filter refactor
 	- Specific GH tag filter
@@ -34,7 +34,7 @@
 
 + Findbugs and checkstyle
 
-+ AisReader source name handling by transformer
+DONE + AisReader source name handling by transformer
 
 + AisPacket/AisStore and source name. Use tranformer and policy PREPEND_MISSING
 

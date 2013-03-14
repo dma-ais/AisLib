@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Bytes;
@@ -86,6 +87,10 @@ public class AisPacket implements Comparable<AisPacket> {
 
     public String getStringMessage() {
         return rawMessage;
+    }
+    
+    public List<String> getStringMessageLines() {
+        return Arrays.asList(rawMessage.split("\\r?\\n"));
     }
 
     /**
