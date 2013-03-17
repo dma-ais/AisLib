@@ -115,7 +115,7 @@ public abstract class AisBusComponent {
         }
 
         // Do tagging
-        // TODO
+        // TODO as a transformation
 
         // TODO update statistics
 

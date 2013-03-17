@@ -16,7 +16,10 @@
 package dk.dma.ais.transform;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
@@ -58,6 +61,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
 
     private final Policy policy;
     private final AisPacketTagging tagging;
+    private final Map<String, String> extraTags = new HashMap<>(); 
 
     /**
      * Constructor taking policy and the tagging to be used
@@ -71,7 +75,15 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         this.policy = policy;
         this.tagging = tagging;
     }
-
+    
+    /**
+     * Get map of optional extra tags to be included in the tagging
+     * @return map
+     */
+    public Map<String, String> getExtraTags() {
+        return extraTags;
+    }
+    
     @Override
     public AisPacket transform(AisPacket packet) {
         switch (policy) {
@@ -98,10 +110,13 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
             cb = new CommentBlock();
         }
         tagging.getCommentBlockPreserve(cb);
-        
-        String cbStr = cb.encode();
+        // Add extra tags
+        addExtraTags(cb, packet, false);
         String sentences = StringUtils.join(cropSentences(packet.getStringMessageLines(), false), "\r\n");
-        return newPacket(packet, cbStr + "\r\n" + sentences);
+        if (!cb.isEmpty()) {
+            sentences = cb.encode() + "\r\n" + sentences;
+        }
+        return newPacket(packet, sentences);
     }
 
     private AisPacket mergeOverrideTransform(AisPacket packet) {
@@ -114,32 +129,59 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
             cb = new CommentBlock();
         }
         tagging.getCommentBlock(cb);
-        
-        String cbStr = cb.encode();
+        // Add extra tags
+        addExtraTags(cb, packet, true);
         String sentences = StringUtils.join(cropSentences(packet.getStringMessageLines(), false), "\r\n");
-        return newPacket(packet, cbStr + "\r\n" + sentences);
+        if (!cb.isEmpty()) {
+            sentences = cb.encode() + "\r\n" + sentences;
+        }
+        return newPacket(packet, sentences);
     }
 
     private AisPacket replaceTransform(AisPacket packet) {
         AisPacketTagging newTagging = new AisPacketTagging(tagging);
         newTagging.setTimestamp(packet.getTimestamp());
-        
-        String cb = newTagging.getCommentBlock().encode();
-        String sentences = StringUtils.join(cropSentences(packet.getStringMessageLines(), true), "\r\n");        
-        return newPacket(packet, cb + "\r\n" + sentences);
+        CommentBlock cb = newTagging.getCommentBlock();
+        // Add extra tags
+        addExtraTags(cb, packet, true);
+        String sentences = StringUtils.join(cropSentences(packet.getStringMessageLines(), true), "\r\n");
+        if (!cb.isEmpty()) {
+            sentences = cb.encode() + "\r\n" + sentences;
+        }
+        return newPacket(packet, sentences);
     }
     
     private AisPacket prependTransform(AisPacket packet) {
         // What is missing
         AisPacketTagging addedTagging = AisPacketTagging.parse(packet).mergeMissing(tagging);
-        if (addedTagging.isEmpty()) {
+        CommentBlock cb = addedTagging.getCommentBlock();
+        // Add extra tags
+        addExtraTags(cb, packet, false);
+        // Only make new packet if comment block to prepend
+        if (cb.isEmpty()) {
             return packet;
         }
-        CommentBlock cb = addedTagging.getCommentBlock();
         String newCb = cb.encode();
         return newPacket(packet, newCb + "\r\n" + packet.getStringMessage());
     }
     
+    /**
+     * Add extra tags to comment block
+     * @param cb
+     * @param override existing
+     */
+    private void addExtraTags(CommentBlock cb, AisPacket packet, boolean override) {
+        CommentBlock currentCb = null;
+        Vdm vdm = packet.getVdm();
+        if (vdm != null) {
+            currentCb = vdm.getCommentBlock();
+        }        
+        for (Entry<String, String> entry : extraTags.entrySet()) {
+            if (override || currentCb == null || !currentCb.contains(entry.getKey())) {            
+                cb.addString(entry.getKey(), entry.getValue());
+            }
+        }
+    }    
     
     /**
      * Remove any thing else than sentences (and proprietary is chosen)
@@ -152,10 +194,10 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         for (String line : rawLines) {
             int start = line.indexOf('!');
             if (start < 0) {
-                if (removeProprietary) {
+                start = line.indexOf('$');
+                if (removeProprietary && start >= 0 && line.indexOf("$P") >= 0) {
                     continue;
                 }
-                start = line.indexOf('$');
             }
             if (start < 0) {
                 // Not a sentence line

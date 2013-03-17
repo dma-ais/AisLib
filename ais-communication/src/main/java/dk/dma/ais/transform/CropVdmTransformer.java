@@ -15,7 +15,13 @@
  */
 package dk.dma.ais.transform;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.sentence.Vdm;
 
 /**
  * Transformer that strips everything from the packet except the raw VDM sentences 
@@ -24,8 +30,14 @@ public class CropVdmTransformer implements IAisPacketTransformer {
 
     @Override
     public AisPacket transform(AisPacket packet) {
-        // TODO
-        return packet;
+        List<String> newLines = new ArrayList<>();
+        List<String> orgLines = AisPacketTaggingTransformer.cropSentences(packet.getStringMessageLines(), true);
+        for (String line : orgLines) {
+            if (Vdm.isVdm(line)) {
+                newLines.add(line);
+            }
+        }
+        return new AisPacket(StringUtils.join(newLines, "\r\n"), packet.getReceiveTimestamp());
     }
     
 }

@@ -32,6 +32,8 @@ import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
+import dk.dma.ais.bus.configuration.transform.CropVdmTransformerConfiguration;
+import dk.dma.ais.bus.configuration.transform.TransformerConfiguration;
 import dk.dma.ais.bus.consumer.StdoutConsumer;
 import dk.dma.ais.bus.consumer.TcpServerConsumer;
 import dk.dma.ais.bus.consumer.TcpWriterConsumer;
@@ -42,6 +44,8 @@ import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.DuplicateFilter;
 import dk.dma.ais.filter.IPacketFilter;
+import dk.dma.ais.transform.CropVdmTransformer;
+import dk.dma.ais.transform.IAisPacketTransformer;
 
 public class AisBusFactory {
 
@@ -170,6 +174,17 @@ public class AisBusFactory {
             }
             // Add to filters
             comp.getFilters().addFilter(filter);
+        }
+        // Add transformers
+        for (TransformerConfiguration transConf : conf.getTransformers()) {
+            IAisPacketTransformer transformer;
+            if (transConf instanceof CropVdmTransformerConfiguration) {
+                transformer = new CropVdmTransformer();
+            } else {
+                throw new IllegalArgumentException("Unknown packet transformer: " + transConf.getClass());
+            }
+            // Add to transformers
+            comp.getPacketTransformers().add(transformer);
         }
     }
 

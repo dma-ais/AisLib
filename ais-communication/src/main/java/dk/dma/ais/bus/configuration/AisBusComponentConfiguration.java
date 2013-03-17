@@ -21,10 +21,13 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
+import dk.dma.ais.bus.configuration.transform.TransformerConfiguration;
 
 public abstract class AisBusComponentConfiguration {
 
     private List<FilterConfiguration> filters = new ArrayList<>();
+    
+    private List<TransformerConfiguration> transformers = new ArrayList<>();
 
     public AisBusComponentConfiguration() {
 
@@ -37,6 +40,15 @@ public abstract class AisBusComponentConfiguration {
 
     public void setFilters(List<FilterConfiguration> filters) {
         this.filters = filters;
+    }
+    
+    @XmlElement(name = "transformer")
+    public List<TransformerConfiguration> getTransformers() {
+        return transformers;
+    }
+    
+    public void setTransformers(List<TransformerConfiguration> transformers) {
+        this.transformers = transformers;
     }
 
 }

@@ -19,7 +19,9 @@
 		<port>8089</port>
 	</consumer>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:type="stdoutConsumerConfiguration" />
+		xsi:type="stdoutConsumerConfiguration">
+		<transformer xsi:type="cropVdmTransformerConfiguration" />
+	</consumer>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:type="tcpServerConsumerConfiguration">
 		<consumerPullMaxElements>1000</consumerPullMaxElements>
@@ -42,14 +44,15 @@
 		<interval>10</interval>
 		<timeout>10</timeout>
 	</provider>
-	    <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerProviderConfiguration">
-        <serverConf>
-            <port>9998</port>
-        </serverConf>
+	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:type="tcpServerProviderConfiguration">
+		<serverConf>
+			<port>9998</port>
+		</serverConf>
 		<clientConf>
-            <gzipCompress>true</gzipCompress>
-        </clientConf>
-        
-    </provider>
-	
+			<gzipCompress>true</gzipCompress>
+		</clientConf>
+
+	</provider>
+
 </aisBusConfiguration>

@@ -33,6 +33,7 @@ import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
 import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
+import dk.dma.ais.bus.configuration.transform.CropVdmTransformerConfiguration;
 
 public class AisBusTest {
 
@@ -64,7 +65,8 @@ public class AisBusTest {
         // Consumer
         StdoutConsumerConfiguration stdoutConsumer = new StdoutConsumerConfiguration();
         stdoutConsumer.getFilters().add(new DownSampleFilterConfiguration(600));
-        stdoutConsumer.setConsumerPullMaxElements(1);        
+        stdoutConsumer.getTransformers().add(new CropVdmTransformerConfiguration());
+        stdoutConsumer.setConsumerPullMaxElements(1);
         conf.getConsumers().add(stdoutConsumer);
         
         // Consumer

@@ -1,31 +1,33 @@
-+ Tagging solution
-	Implement the rest of the taggings in AisPacketTaggingTransformer + test
++ Tagging solution	
 	AisBus handle tagging and configuration
+	
++ AisPacketReader retry 
+	
++ AisBusLauncher in utils that takes conf file as argument
+
++ ais-utils single jar, shell scripts and log4j xml   
 
 + Filter refactor
 	- Specific GH tag filter
 	- Target country filter
 	- Metadata filter
+	
++ Filter configurations
+	
++ Replay file provider (or implement as a filter or transformer)
 
 + Logging
-
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.
 
 + Handle interruption
 
++ Remove consumer/provider
 
 + Overflow handling
 
 + Statistics / Status object on components
-
-
-+ Remaining filters configurations
-
-
-+ AisBusLauncher that takes conf file as argument
-
 
 + Search for all TODO's
 

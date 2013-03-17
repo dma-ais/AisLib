@@ -42,14 +42,29 @@ public class AisTaggingTest {
         tagging.setSourceId("AISD");
         tagging.setSourceBs(999999999);
         tagging.setSourceCountry(Country.getByCode("SWE"));
-        AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
-        AisPacket newPacket = tranformer.transform(packet);
+        AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
+        AisPacket newPacket = transformer.transform(packet);
         AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
 
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
         Assert.assertEquals(newTagging.getSourceId(), "AISD");
         Assert.assertEquals(newTagging.getSourceBs().intValue(), 2190047);
         Assert.assertEquals(newTagging.getSourceCountry().getThreeLetter(), "DNK");
+        System.out.println("NEW packet:\n" + newPacket.getStringMessage());
+                
+        packet = AisPacketReader.from("\\key:oldval*51\\\r\n" + msg);
+        tagging = new AisPacketTagging();
+        transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
+        transformer.getExtraTags().put("somekey", "someval");
+        transformer.getExtraTags().put("key", "newval");
+        newPacket = transformer.transform(packet);
+        newTagging = AisPacketTagging.parse(newPacket);
+        Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
+        Assert.assertEquals(newTagging.getSourceId(), null);
+        Assert.assertEquals(newTagging.getSourceBs().intValue(), 2190047);
+        Assert.assertEquals(newTagging.getSourceCountry().getThreeLetter(), "DNK");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("somekey"), "someval");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("key"), "oldval");
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
     }
 
@@ -63,8 +78,8 @@ public class AisTaggingTest {
         AisPacket packet = AisPacketReader.from(msg);
         AisPacketTagging tagging = new AisPacketTagging();
         tagging.setSourceId("AISD");
-        AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.REPLACE, tagging);
-        AisPacket newPacket = tranformer.transform(packet);
+        AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.REPLACE, tagging);
+        AisPacket newPacket = transformer.transform(packet);
         AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
 
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
@@ -72,6 +87,22 @@ public class AisTaggingTest {
         Assert.assertEquals(newTagging.getSourceBs(), null);
         Assert.assertEquals(newTagging.getSourceCountry(), null);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
+        
+        packet = AisPacketReader.from("\\key:oldval*51\\\r\n" + msg);
+        tagging = new AisPacketTagging();
+        transformer = new AisPacketTaggingTransformer(Policy.REPLACE, tagging);
+        transformer.getExtraTags().put("somekey", "someval");
+        transformer.getExtraTags().put("key", "newval");
+        newPacket = transformer.transform(packet);
+        System.out.println("NEW packet:\n" + newPacket.getStringMessage());
+        newTagging = AisPacketTagging.parse(newPacket);
+        Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
+        Assert.assertEquals(newTagging.getSourceId(), null);
+        Assert.assertEquals(newTagging.getSourceBs(), null);
+        Assert.assertEquals(newTagging.getSourceCountry(), null);
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("somekey"), "someval");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("key"), "newval");
+        
     }
     
     @Test
@@ -87,8 +118,8 @@ public class AisTaggingTest {
         tagging.setSourceId("bar");
         tagging.setSourceBs(999999999);
         
-        AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.MERGE_OVERRIDE, tagging);
-        AisPacket newPacket = tranformer.transform(packet);
+        AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.MERGE_OVERRIDE, tagging);
+        AisPacket newPacket = transformer.transform(packet);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
         AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
         CommentBlock cb = newPacket.getVdm().getCommentBlock();
@@ -98,6 +129,22 @@ public class AisTaggingTest {
         Assert.assertEquals(newTagging.getSourceBs().intValue(), 999999999);
         Assert.assertEquals(newTagging.getSourceCountry().getThreeLetter(), "DNK");
         Assert.assertEquals(cb.getString("somekey"), "somevalue");
+        
+        packet = AisPacketReader.from("\\key:oldval*51\\\r\n" + msg);
+        tagging = new AisPacketTagging();
+        transformer = new AisPacketTaggingTransformer(Policy.MERGE_OVERRIDE, tagging);
+        transformer.getExtraTags().put("somekey", "someval");
+        transformer.getExtraTags().put("key", "newval");
+        newPacket = transformer.transform(packet);
+        System.out.println("NEW packet:\n" + newPacket.getStringMessage());
+        newTagging = AisPacketTagging.parse(newPacket);
+        cb = newPacket.getVdm().getCommentBlock();
+        Assert.assertEquals(newTagging.getTimestamp().getTime(), 1354719387000L);
+        Assert.assertEquals(newTagging.getSourceId(), "foo");
+        Assert.assertEquals(newTagging.getSourceBs().intValue(), 2190047);
+        Assert.assertEquals(newTagging.getSourceCountry().getThreeLetter(), "DNK");
+        Assert.assertEquals(cb.getString("somekey"), "someval");
+        Assert.assertEquals(cb.getString("key"), "newval");        
     }
     
     @Test
@@ -115,8 +162,8 @@ public class AisTaggingTest {
         tagging.setSourceType(SourceType.SATELLITE);
         tagging.setSourceCountry(Country.getByCode("SWE"));
         
-        AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.MERGE_PRESERVE, tagging);
-        AisPacket newPacket = tranformer.transform(packet);
+        AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.MERGE_PRESERVE, tagging);
+        AisPacket newPacket = transformer.transform(packet);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
         AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
         CommentBlock cb = newPacket.getVdm().getCommentBlock();
@@ -126,7 +173,26 @@ public class AisTaggingTest {
         Assert.assertEquals(newTagging.getSourceBs().intValue(), 2190047);
         Assert.assertEquals(newTagging.getSourceCountry().getThreeLetter(), "SWE");
         Assert.assertEquals(cb.getString("somekey"), "somevalue");
+        
+        packet = AisPacketReader.from("\\key:oldval*51\\\r\n" + msg);
+        tagging = new AisPacketTagging();
+        transformer = new AisPacketTaggingTransformer(Policy.MERGE_PRESERVE, tagging);
+        transformer.getExtraTags().put("somekey", "someval");
+        transformer.getExtraTags().put("key", "newval");
+        newPacket = transformer.transform(packet);
+        System.out.println("NEW packet:\n" + newPacket.getStringMessage());
+        newTagging = AisPacketTagging.parse(newPacket);
+        cb = newPacket.getVdm().getCommentBlock();
+        
+        Assert.assertEquals(newTagging.getTimestamp().getTime(), 1354719387000L);
+        Assert.assertEquals(newTagging.getSourceId(), "foo");
+        Assert.assertEquals(newTagging.getSourceBs().intValue(), 2190047);
+        Assert.assertEquals(newTagging.getSourceCountry().getThreeLetter(), "DNK");
+        Assert.assertEquals(cb.getString("somekey"), "somevalue");
+        Assert.assertEquals(cb.getString("key"), "oldval");
+        
     }
+    
     
     
 
