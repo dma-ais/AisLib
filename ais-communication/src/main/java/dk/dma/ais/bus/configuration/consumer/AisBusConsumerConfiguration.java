@@ -17,6 +17,7 @@ package dk.dma.ais.bus.configuration.consumer;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
 
+import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
 
 @XmlSeeAlso({ StdoutConsumerConfiguration.class, TcpWriterConsumerConfiguration.class, TcpServerConsumerConfiguration.class })
@@ -43,6 +44,13 @@ public abstract class AisBusConsumerConfiguration extends AisBusSocketConfigurat
 
     public void setConsumerPullMaxElements(int consumerPullMaxElements) {
         this.consumerPullMaxElements = consumerPullMaxElements;
+    }
+    
+    protected AisBusConsumer configure(AisBusConsumer consumer) {
+        consumer.setConsumerPullMaxElements(consumerPullMaxElements);
+        consumer.setConsumerQueueSize(consumerQueueSize);
+        super.configure(consumer);
+        return consumer;
     }
 
 }

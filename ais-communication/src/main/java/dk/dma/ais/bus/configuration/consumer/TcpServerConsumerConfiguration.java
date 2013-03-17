@@ -16,34 +16,46 @@
 package dk.dma.ais.bus.configuration.consumer;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
-import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.consumer.TcpServerConsumer;
+import dk.dma.ais.bus.tcp.TcpClientConf;
+import dk.dma.ais.bus.tcp.TcpServerConf;
 
 @XmlRootElement
 public class TcpServerConsumerConfiguration extends AisBusConsumerConfiguration {
 
-    private ClientConfiguration clientConf;
-    private ServerConfiguration serverConf;
+    private TcpClientConf clientConf;
+    private TcpServerConf serverConf;
 
     public TcpServerConsumerConfiguration() {
 
     }
 
-    public ClientConfiguration getClientConf() {
+    public TcpClientConf getClientConf() {
         return clientConf;
     }
 
-    public void setClientConf(ClientConfiguration clientConf) {
+    public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
     }
 
-    public ServerConfiguration getServerConf() {
+    public TcpServerConf getServerConf() {
         return serverConf;
     }
 
-    public void setServerConf(ServerConfiguration serverConf) {
+    public void setServerConf(TcpServerConf serverConf) {
         this.serverConf = serverConf;
+    }
+    
+    @Override
+    @XmlTransient
+    public AisBusComponent getInstance() {
+        TcpServerConsumer server = new TcpServerConsumer();
+        server.setClientConf((clientConf == null) ? new TcpClientConf() : clientConf);
+        server.setServerConf((serverConf == null) ? new TcpServerConf() : serverConf);
+        return super.configure(server);
     }
 
 }

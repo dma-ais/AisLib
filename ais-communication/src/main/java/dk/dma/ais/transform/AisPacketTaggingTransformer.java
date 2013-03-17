@@ -57,6 +57,20 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
          * Make new tagging as a merge of current and given tagging, preserving duplicate tags already in the current tagging
          */
         MERGE_PRESERVE;
+        
+        public static Policy fromString(String str) {
+            if (str.equalsIgnoreCase("PREPEND_MISSING")) {
+                return PREPEND_MISSING;
+            } else if (str.equalsIgnoreCase("REPLACE")) {
+                return REPLACE;
+            } else if (str.equalsIgnoreCase("MERGE_OVERRIDE")) {
+                return MERGE_OVERRIDE;
+            } else if (str.equalsIgnoreCase("MERGE_PRESERVE")) {
+                return MERGE_PRESERVE;
+            } else {
+                throw new IllegalArgumentException("Unknow tagging policy: " + str);
+            }
+        }
     }
 
     private final Policy policy;
@@ -82,6 +96,10 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
      */
     public Map<String, String> getExtraTags() {
         return extraTags;
+    }
+    
+    public void addExtraTags(Map<String, String> tags) {
+        extraTags.putAll(tags);
     }
     
     @Override

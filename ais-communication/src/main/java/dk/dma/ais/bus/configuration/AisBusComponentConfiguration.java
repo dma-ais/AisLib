@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.transform.TransformerConfiguration;
 
@@ -49,6 +50,19 @@ public abstract class AisBusComponentConfiguration {
     
     public void setTransformers(List<TransformerConfiguration> transformers) {
         this.transformers = transformers;
+    }
+    
+    public abstract AisBusComponent getInstance();
+    
+    protected void configure(AisBusComponent comp) {
+        // Add filters
+        for (FilterConfiguration filterConf : filters) {
+            comp.getFilters().addFilter(filterConf.getInstance());
+        }
+        // Add transformers
+        for (TransformerConfiguration transConf : transformers) {
+            comp.getPacketTransformers().add(transConf.getInstance());
+        }
     }
 
 }

@@ -49,7 +49,7 @@ public class AisPacketTagging {
             } else if (st.equalsIgnoreCase("SAT")) {
                 return SATELLITE;
             }
-            return null;
+            throw new IllegalArgumentException("Unknow source type: " + st);
         }
 
         public String encode() {

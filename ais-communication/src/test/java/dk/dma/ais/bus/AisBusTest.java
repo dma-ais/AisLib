@@ -31,9 +31,11 @@ import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
-import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
-import dk.dma.ais.bus.configuration.tcp.ServerConfiguration;
 import dk.dma.ais.bus.configuration.transform.CropVdmTransformerConfiguration;
+import dk.dma.ais.bus.configuration.transform.TaggingTransformerConfiguration;
+import dk.dma.ais.bus.tcp.TcpClientConf;
+import dk.dma.ais.bus.tcp.TcpServerConf;
+import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 
 public class AisBusTest {
 
@@ -48,16 +50,23 @@ public class AisBusTest {
         TcpClientProviderConfiguration rrReader = new TcpClientProviderConfiguration();
         rrReader.getHostPort().add("ais163.sealan.dk:65262");
         rrReader.getFilters().add(new DownSampleFilterConfiguration(300));
-        ClientConfiguration rrReaderConf = new ClientConfiguration();
-        rrReader.setClientConf(rrReaderConf);        
+        TcpClientConf rrReaderConf = new TcpClientConf();
+        rrReader.setClientConf(rrReaderConf);
+        TaggingTransformerConfiguration tagConf = new TaggingTransformerConfiguration();
+        tagConf.setTagPolicy(Policy.PREPEND_MISSING);        
+        tagConf.getTagging().setSourceId("AISD");
+        tagConf.getTagging().setSourceCountry("DNK");
+        tagConf.getTagging().setSourceType("SAT");
+        tagConf.getExtraTags().put("somekey", "someval");        
+        rrReader.getTransformers().add(tagConf);
         conf.getProviders().add(rrReader);
         
         // Provider
         TcpServerProviderConfiguration spConf = new TcpServerProviderConfiguration();
-        ServerConfiguration spServerConf = new ServerConfiguration();
+        TcpServerConf spServerConf = new TcpServerConf();
         spServerConf.setPort(9998);
         spConf.setServerConf(spServerConf) ;
-        ClientConfiguration spClientConf = new ClientConfiguration();
+        TcpClientConf spClientConf = new TcpClientConf();
         spClientConf.setGzipCompress(true);
         spConf.setClientConf(spClientConf);
         conf.getProviders().add(spConf);        
@@ -71,7 +80,7 @@ public class AisBusTest {
         
         // Consumer
         TcpWriterConsumerConfiguration tcpWriter = new TcpWriterConsumerConfiguration();
-        ClientConfiguration clc1 = new ClientConfiguration();
+        TcpClientConf clc1 = new TcpClientConf();
         clc1.setBufferSize(1);
         tcpWriter.setClientConf(clc1);
         tcpWriter.setPort(8089);
@@ -80,9 +89,9 @@ public class AisBusTest {
         
         // Consumer
         TcpServerConsumerConfiguration tcpServer = new TcpServerConsumerConfiguration();
-        ClientConfiguration clc2 = new ClientConfiguration();
+        TcpClientConf clc2 = new TcpClientConf();
         clc2.setGzipCompress(true);
-        ServerConfiguration serverConf = new ServerConfiguration();
+        TcpServerConf serverConf = new TcpServerConf();
         serverConf.setPort(9999);
         tcpServer.setClientConf(clc2);
         tcpServer.setServerConf(serverConf);
@@ -118,7 +127,7 @@ public class AisBusTest {
 //        Assert.assertEquals(consumerConf.getConsumerPullMaxElements(), 1);
     }
     
-    //@Test
+    @Test
     public void factoryTest() throws JAXBException, InterruptedException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-example.xml");
         aisBus.start();

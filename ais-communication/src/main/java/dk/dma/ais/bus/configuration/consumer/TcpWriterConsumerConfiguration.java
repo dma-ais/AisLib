@@ -16,16 +16,19 @@
 package dk.dma.ais.bus.configuration.consumer;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.consumer.TcpWriterConsumer;
+import dk.dma.ais.bus.tcp.TcpClientConf;
 
 @XmlRootElement
 public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration {
-    
+
     private String host;
     private int port;
     private int reconnectInterval = 10;
-    private ClientConfiguration clientConf;
+    private TcpClientConf clientConf;
 
     public TcpWriterConsumerConfiguration() {
 
@@ -54,13 +57,24 @@ public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration 
     public void setReconnectInterval(int reconnectInterval) {
         this.reconnectInterval = reconnectInterval;
     }
-    
-    public ClientConfiguration getClientConf() {
+
+    public TcpClientConf getClientConf() {
         return clientConf;
     }
-    
-    public void setClientConf(ClientConfiguration clientConf) {
+
+    public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
+    }
+    
+    @Override
+    @XmlTransient
+    public AisBusComponent getInstance() {
+        TcpWriterConsumer tcpw = new TcpWriterConsumer();
+        tcpw.setPort(port);
+        tcpw.setHost(host);
+        tcpw.setClientConf((clientConf == null) ? new TcpClientConf() : clientConf);
+        tcpw.setReconnectInterval(reconnectInterval);
+        return super.configure(tcpw);
     }
 
 }

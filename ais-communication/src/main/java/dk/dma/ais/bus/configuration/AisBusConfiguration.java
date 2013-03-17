@@ -25,7 +25,12 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
+import dk.dma.ais.bus.AisBus;
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.AisBusConsumer;
+import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.bus.configuration.consumer.AisBusConsumerConfiguration;
 import dk.dma.ais.bus.configuration.provider.AisBusProviderConfiguration;
 
@@ -74,6 +79,27 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
     
     public void setConsumers(List<AisBusConsumerConfiguration> consumers) {
         this.consumers = consumers;
+    }
+    
+    @Override
+    @XmlTransient
+    public AisBusComponent getInstance() {
+        AisBus aisBus = new AisBus();
+        aisBus.setBusQueueSize(busQueueSize);
+        aisBus.setBusPullMaxElements(busPullMaxElements);
+        configure(aisBus);
+        aisBus.init();
+        for (AisBusConsumerConfiguration consumerConf : consumers) {
+            AisBusConsumer consumer = (AisBusConsumer)consumerConf.getInstance();
+            consumer.init();
+            aisBus.registerConsumer(consumer);            
+        }
+        for (AisBusProviderConfiguration providerConf : providers) {
+            AisBusProvider provider = (AisBusProvider)providerConf.getInstance();
+            provider.init();
+            aisBus.registerProvider(provider);
+        }
+        return aisBus;
     }
     
     public static void save(String filename, final AisBusConfiguration conf) throws JAXBException {

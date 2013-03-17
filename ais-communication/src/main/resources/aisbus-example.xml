@@ -18,10 +18,10 @@
 		<host>localhost</host>
 		<port>8089</port>
 	</consumer>
-	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:type="stdoutConsumerConfiguration">
-		<transformer xsi:type="cropVdmTransformerConfiguration" />
-	</consumer>
+	<!-- <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" -->
+	<!-- xsi:type="stdoutConsumerConfiguration"> -->
+	<!-- <transformer xsi:type="cropVdmTransformerConfiguration" /> -->
+	<!-- </consumer> -->
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:type="tcpServerConsumerConfiguration">
 		<consumerPullMaxElements>1000</consumerPullMaxElements>
@@ -43,6 +43,20 @@
 		<hostPort>ais163.sealan.dk:65262</hostPort>
 		<interval>10</interval>
 		<timeout>10</timeout>
+		<transformer xsi:type="taggingTransformerConfiguration">
+			<extraTags>
+				<entry>
+					<key>key</key>
+					<value>val</value>
+				</entry>
+			</extraTags>
+			<tagPolicy>MERGE_OVERRIDE</tagPolicy>
+			<tagging>
+				<sourceId>AISD</sourceId>
+				<sourceCountry>DNK</sourceCountry>
+				<sourceType>SAT</sourceType>
+			</tagging>
+		</transformer>
 	</provider>
 	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:type="tcpServerProviderConfiguration">

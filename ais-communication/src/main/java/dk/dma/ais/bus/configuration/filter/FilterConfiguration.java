@@ -17,7 +17,11 @@ package dk.dma.ais.bus.configuration.filter;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
 
+import dk.dma.ais.filter.IPacketFilter;
+
 @XmlSeeAlso({ DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class })
 public abstract class FilterConfiguration {
+    
+    public abstract IPacketFilter getInstance();
 
 }

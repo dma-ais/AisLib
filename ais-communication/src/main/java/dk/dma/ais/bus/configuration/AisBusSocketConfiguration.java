@@ -15,7 +15,9 @@
  */
 package dk.dma.ais.bus.configuration;
 
-public class AisBusSocketConfiguration extends AisBusComponentConfiguration {
+import dk.dma.ais.bus.AisBusSocket;
+
+public abstract class AisBusSocketConfiguration extends AisBusComponentConfiguration {
 
     private String name;
     private String description;
@@ -38,6 +40,12 @@ public class AisBusSocketConfiguration extends AisBusComponentConfiguration {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    protected void configure(AisBusSocket socket) {
+        socket.setName(name);
+        socket.setDescription(description);
+        super.configure(socket);
     }
 
 }

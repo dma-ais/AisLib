@@ -18,11 +18,15 @@ package dk.dma.ais.bus.configuration.transform;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
 
-@XmlSeeAlso({ CropVdmTransformerConfiguration.class })
+import dk.dma.ais.transform.IAisPacketTransformer;
+
+@XmlSeeAlso({ CropVdmTransformerConfiguration.class, TaggingTransformerConfiguration.class })
 public abstract class TransformerConfiguration {
 
     public TransformerConfiguration() {
 
     }
+    
+    public abstract IAisPacketTransformer getInstance();
 
 }

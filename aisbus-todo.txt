@@ -1,5 +1,13 @@
++ TaggingTransformerConfiguration
+	AisPacketTagging cannot be used without transformer
+	
++ Consider to have static method on configuration classes that creates
+  instances instead of in AisBusFactory!!!
+
 + Tagging solution	
 	AisBus handle tagging and configuration
+
++ File provider (with replay functionality)
 	
 + AisPacketReader retry 
 	

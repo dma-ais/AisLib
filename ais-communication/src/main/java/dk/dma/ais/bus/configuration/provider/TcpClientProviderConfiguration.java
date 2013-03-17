@@ -19,14 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import dk.dma.ais.bus.configuration.tcp.ClientConfiguration;
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.provider.TcpClientProvider;
+import dk.dma.ais.bus.tcp.TcpClientConf;
 
 @XmlRootElement
 public class TcpClientProviderConfiguration extends AisBusProviderConfiguration {
 
     private List<String> hostPort = new ArrayList<>();
-    private ClientConfiguration clientConf = new ClientConfiguration();
+    private TcpClientConf clientConf = new TcpClientConf();
     private int reconnectInterval = 10;
     private int timeout = 10;
 
@@ -42,11 +45,12 @@ public class TcpClientProviderConfiguration extends AisBusProviderConfiguration 
         this.hostPort = hostPort;
     }
 
-    public ClientConfiguration getClientConf() {
+
+    public TcpClientConf getClientConf() {
         return clientConf;
     }
 
-    public void setClientConf(ClientConfiguration clientConf) {
+    public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
     }
 
@@ -64,6 +68,17 @@ public class TcpClientProviderConfiguration extends AisBusProviderConfiguration 
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+    
+    @Override
+    @XmlTransient
+    public AisBusComponent getInstance() {
+        TcpClientProvider clientProvider = new TcpClientProvider();
+        clientProvider.setHostsPorts(hostPort);
+        clientProvider.setTimeout(timeout);
+        clientProvider.setReconnectInterval(reconnectInterval);
+        clientProvider.setClientConf((clientConf == null) ? new TcpClientConf() : clientConf);
+        return super.configure(clientProvider);
     }
 
 }

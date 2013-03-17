@@ -16,6 +16,10 @@
 package dk.dma.ais.bus.configuration.filter;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import dk.dma.ais.filter.DuplicateFilter;
+import dk.dma.ais.filter.IPacketFilter;
 
 @XmlRootElement
 public class DuplicateFilterConfiguration extends FilterConfiguration {
@@ -35,6 +39,12 @@ public class DuplicateFilterConfiguration extends FilterConfiguration {
 
     public void setWindowSize(long windowSize) {
         this.windowSize = windowSize;
+    }
+    
+    @Override
+    @XmlTransient
+    public IPacketFilter getInstance() {
+        return new DuplicateFilter(windowSize);
     }
 
 }

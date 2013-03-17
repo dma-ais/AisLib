@@ -16,6 +16,10 @@
 package dk.dma.ais.bus.configuration.filter;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import dk.dma.ais.filter.DownSampleFilter;
+import dk.dma.ais.filter.IPacketFilter;
 
 @XmlRootElement
 public class DownSampleFilterConfiguration extends FilterConfiguration {
@@ -39,6 +43,13 @@ public class DownSampleFilterConfiguration extends FilterConfiguration {
 
     public void setSamplingRate(long samplingRate) {
         this.samplingRate = samplingRate;
+    }
+    
+    
+    @Override
+    @XmlTransient
+    public IPacketFilter getInstance() {
+        return new DownSampleFilter(samplingRate);
     }
 
 }

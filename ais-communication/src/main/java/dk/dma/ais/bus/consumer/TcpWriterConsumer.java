@@ -46,13 +46,17 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
     private String host;
     private int port;
 
+    private volatile boolean connected = false;
+
     public TcpWriterConsumer() {
 
     }
 
     @Override
     public void receiveFiltered(AisBusElement queueElement) {
-        writeClient.send(queueElement.getPacket().getStringMessage());
+        if (connected) {
+            writeClient.send(queueElement.getPacket().getStringMessage());
+        }
     }
 
     /**
@@ -71,12 +75,13 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
 
                 // Start client
                 writeClient = new TcpWriteClient(this, socket, clientConf);
+                connected = true;
                 writeClient.start();
                 // Wait for client to loose connection
                 writeClient.join();
-
+                connected = false;
             } catch (IOException e) {
-                LOG.info("Connection error");
+                LOG.info("Connection error: " + e.getMessage());
             } catch (InterruptedException e) {
                 // TODO handle
                 e.printStackTrace();

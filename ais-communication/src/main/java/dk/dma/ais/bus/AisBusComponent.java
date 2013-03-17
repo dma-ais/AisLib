@@ -114,9 +114,6 @@ public abstract class AisBusComponent {
             packet = transformer.transform(packet);
         }
 
-        // Do tagging
-        // TODO as a transformation
-
         // TODO update statistics
 
         return packet;

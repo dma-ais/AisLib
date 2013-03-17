@@ -16,12 +16,24 @@
 package dk.dma.ais.bus.configuration.consumer;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.consumer.StdoutConsumer;
 
 @XmlRootElement
 public class StdoutConsumerConfiguration extends AisBusConsumerConfiguration {
     
     public StdoutConsumerConfiguration() {
         
+    }
+    
+    @Override
+    @XmlTransient
+    public AisBusComponent getInstance() {
+        StdoutConsumer consumer = new StdoutConsumer();
+        super.configure(consumer);
+        return consumer;
     }
 
 }

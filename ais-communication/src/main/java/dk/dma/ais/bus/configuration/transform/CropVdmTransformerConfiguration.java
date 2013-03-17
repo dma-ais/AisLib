@@ -16,12 +16,22 @@
 package dk.dma.ais.bus.configuration.transform;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import dk.dma.ais.transform.CropVdmTransformer;
+import dk.dma.ais.transform.IAisPacketTransformer;
 
 @XmlRootElement
 public class CropVdmTransformerConfiguration extends TransformerConfiguration {
 
     public CropVdmTransformerConfiguration() {
-        
+
+    }
+
+    @Override
+    @XmlTransient
+    public IAisPacketTransformer getInstance() {
+        return new CropVdmTransformer();
     }
 
 }
