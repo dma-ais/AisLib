@@ -32,8 +32,6 @@
 
 + Search for all TODO's
 
-+ Testing
-
 + Findbugs and checkstyle
 
 ====

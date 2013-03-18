@@ -5,19 +5,15 @@
 	</filter>
 	<busPullMaxElements>1000</busPullMaxElements>
 	<busQueueSize>10000</busQueueSize>
-	<!-- <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration"> -->
-	<!-- <filter xsi:type="downSampleFilterConfiguration"> -->
-	<!-- <samplingRate>600</samplingRate> -->
-	<!-- </filter> -->
-	<!-- <consumerPullMaxElements>1</consumerPullMaxElements> -->
-	<!-- <consumerQueueSize>10000</consumerQueueSize> -->
-	<!-- </consumer> -->
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
+		<filter xsi:type="downSampleFilterConfiguration">
+			<samplingRate>600</samplingRate>
+		</filter>
+		<!-- <transformer xsi:type="cropVdmTransformerConfiguration" /> -->
+	</consumer>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpWriterConsumerConfiguration">
 		<host>localhost</host>
 		<port>8089</port>
-	</consumer>
-	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
-		<!-- <transformer xsi:type="cropVdmTransformerConfiguration" /> -->
 	</consumer>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerConsumerConfiguration">
 		<consumerPullMaxElements>1000</consumerPullMaxElements>
@@ -26,32 +22,29 @@
 			<maxClients>2</maxClients>
 			<port>9999</port>
 		</serverConf>
-		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="downSampleFilterConfiguration">
-			<samplingRate>600</samplingRate>
-		</filter>
 	</consumer>
-	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
-		<filter xsi:type="downSampleFilterConfiguration">
-			<samplingRate>300</samplingRate>
-		</filter>
-		<hostPort>ais163.sealan.dk:65262</hostPort>
-		<reconnectInterval>10</reconnectInterval>
-		<timeout>10</timeout>
-		<transformer xsi:type="taggingTransformerConfiguration">
-			<extraTags>
-				<entry>
-					<key>key</key>
-					<value>val</value>
-				</entry>
-			</extraTags>
-			<tagPolicy>MERGE_OVERRIDE</tagPolicy>
-			<tagging>
-				<sourceId>AISD</sourceId>
-				<sourceCountry>DNK</sourceCountry>
-				<sourceType>SAT</sourceType>
-			</tagging>
-		</transformer>
-	</provider>
+	<!-- <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration"> -->
+	<!-- <filter xsi:type="downSampleFilterConfiguration"> -->
+	<!-- <samplingRate>300</samplingRate> -->
+	<!-- </filter> -->
+	<!-- <hostPort>ais163.sealan.dk:65262</hostPort> -->
+	<!-- <reconnectInterval>10</reconnectInterval> -->
+	<!-- <timeout>10</timeout> -->
+	<!-- <transformer xsi:type="taggingTransformerConfiguration"> -->
+	<!-- <extraTags> -->
+	<!-- <entry> -->
+	<!-- <key>key</key> -->
+	<!-- <value>val</value> -->
+	<!-- </entry> -->
+	<!-- </extraTags> -->
+	<!-- <tagPolicy>MERGE_OVERRIDE</tagPolicy> -->
+	<!-- <tagging> -->
+	<!-- <sourceId>AISD</sourceId> -->
+	<!-- <sourceCountry>DNK</sourceCountry> -->
+	<!-- <sourceType>SAT</sourceType> -->
+	<!-- </tagging> -->
+	<!-- </transformer> -->
+	<!-- </provider> -->
 	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerProviderConfiguration">
 		<serverConf>
 			<port>9998</port>
@@ -67,10 +60,15 @@
 			<speedup>10.0</speedup>
 		</transformer>
 		<transformer xsi:type="taggingTransformerConfiguration">
+			<tagPolicy>PREPEND_MISSING</tagPolicy>
+			<tagging>
+				<sourceId>replay</sourceId>
+				<sourceType>LIVE</sourceType>
+			</tagging>
 			<extraTags>
 				<entry>
 					<key>file</key>
-					<value>aisdump.txt.gz</value>
+					<value>replay_dump.txt.gz</value>
 				</entry>
 			</extraTags>
 		</transformer>
