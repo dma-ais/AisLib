@@ -40,7 +40,7 @@ public class ReplayTest {
         AisStreamReader aisReader = new AisStreamReader(inputStream);
         
         final ReplayTransformer trans = new ReplayTransformer();
-        trans.setSpeedup(5);
+        trans.setSpeedup(100);
         
         aisReader.registerPacketHandler(new Consumer<AisPacket>() {
             Long origOffset = null;            

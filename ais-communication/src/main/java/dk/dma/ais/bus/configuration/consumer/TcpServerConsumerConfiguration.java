@@ -26,8 +26,8 @@ import dk.dma.ais.bus.tcp.TcpServerConf;
 @XmlRootElement
 public class TcpServerConsumerConfiguration extends AisBusConsumerConfiguration {
 
-    private TcpClientConf clientConf;
-    private TcpServerConf serverConf;
+    private TcpClientConf clientConf = new TcpClientConf();
+    private TcpServerConf serverConf = new TcpServerConf();
 
     public TcpServerConsumerConfiguration() {
 
@@ -53,8 +53,8 @@ public class TcpServerConsumerConfiguration extends AisBusConsumerConfiguration 
     @XmlTransient
     public AisBusComponent getInstance() {
         TcpServerConsumer server = new TcpServerConsumer();
-        server.setClientConf((clientConf == null) ? new TcpClientConf() : clientConf);
-        server.setServerConf((serverConf == null) ? new TcpServerConf() : serverConf);
+        server.setClientConf(clientConf);
+        server.setServerConf(serverConf);
         return super.configure(server);
     }
 

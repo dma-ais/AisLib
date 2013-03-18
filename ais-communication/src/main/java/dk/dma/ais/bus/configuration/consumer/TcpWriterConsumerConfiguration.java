@@ -28,7 +28,7 @@ public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration 
     private String host;
     private int port;
     private int reconnectInterval = 10;
-    private TcpClientConf clientConf;
+    private TcpClientConf clientConf = new TcpClientConf();
 
     public TcpWriterConsumerConfiguration() {
 
@@ -72,7 +72,7 @@ public class TcpWriterConsumerConfiguration extends AisBusConsumerConfiguration 
         TcpWriterConsumer tcpw = new TcpWriterConsumer();
         tcpw.setPort(port);
         tcpw.setHost(host);
-        tcpw.setClientConf((clientConf == null) ? new TcpClientConf() : clientConf);
+        tcpw.setClientConf(clientConf);
         tcpw.setReconnectInterval(reconnectInterval);
         return super.configure(tcpw);
     }

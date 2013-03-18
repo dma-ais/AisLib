@@ -35,7 +35,7 @@
 			<samplingRate>300</samplingRate>
 		</filter>
 		<hostPort>ais163.sealan.dk:65262</hostPort>
-		<interval>10</interval>
+		<reconnectInterval>10</reconnectInterval>
 		<timeout>10</timeout>
 		<transformer xsi:type="taggingTransformerConfiguration">
 			<extraTags>

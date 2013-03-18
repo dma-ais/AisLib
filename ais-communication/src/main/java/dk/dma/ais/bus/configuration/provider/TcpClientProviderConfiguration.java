@@ -77,7 +77,7 @@ public class TcpClientProviderConfiguration extends AisBusProviderConfiguration 
         clientProvider.setHostsPorts(hostPort);
         clientProvider.setTimeout(timeout);
         clientProvider.setReconnectInterval(reconnectInterval);
-        clientProvider.setClientConf((clientConf == null) ? new TcpClientConf() : clientConf);
+        clientProvider.setClientConf(clientConf);
         return super.configure(clientProvider);
     }
 
