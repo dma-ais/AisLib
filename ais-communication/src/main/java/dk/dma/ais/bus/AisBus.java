@@ -32,7 +32,7 @@ import dk.dma.ais.queue.MessageQueueOverflowException;
  */
 @ThreadSafe
 public class AisBus extends AisBusComponent implements Runnable {
-
+    
     /**
      * Queue to represent the bus
      */
@@ -47,8 +47,7 @@ public class AisBus extends AisBusComponent implements Runnable {
      * Collection of providers
      */
     private final CopyOnWriteArraySet<AisBusProvider> providers = new CopyOnWriteArraySet<>();
-
-    // Some configuration that should come from somewhere else (conf class)
+    
     private volatile int busPullMaxElements = 1000;
     private volatile int busQueueSize = 10000;
 
@@ -71,7 +70,7 @@ public class AisBus extends AisBusComponent implements Runnable {
      * 
      * @return thread
      */
-    public synchronized void start() {       
+    public synchronized void start() {
         // Start thread
         Thread thread = new Thread(this);
         setThread(thread);
@@ -113,7 +112,7 @@ public class AisBus extends AisBusComponent implements Runnable {
         // Push to the bus
         try {
             busQueue.push(new AisBusElement(packet));
-        } catch (MessageQueueOverflowException e) {
+        } catch (MessageQueueOverflowException e) {            
             System.err.println("Overflow when pushing to bus");
             // TODO handle overflow
             return false;
@@ -172,5 +171,6 @@ public class AisBus extends AisBusComponent implements Runnable {
     public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
+
 
 }

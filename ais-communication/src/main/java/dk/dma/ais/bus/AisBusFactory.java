@@ -19,15 +19,13 @@ import javax.xml.bind.JAXBException;
 
 import dk.dma.ais.bus.configuration.AisBusConfiguration;
 
+/**
+ * Get AisBus instance from XML configuration file 
+ */
 public class AisBusFactory {
 
     public static AisBus get(String filename) throws JAXBException {
-        AisBusConfiguration conf = AisBusConfiguration.load(filename);
-        return get(conf);
+        return (AisBus)(AisBusConfiguration.load(filename).getInstance());
     }
 
-    public static AisBus get(AisBusConfiguration conf) {
-        return (AisBus)conf.getInstance();
-    }
-    
 }
