@@ -13,23 +13,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.configuration.provider;
+package dk.dma.ais.bus.provider;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
-import dk.dma.ais.bus.AisBusProvider;
-import dk.dma.ais.bus.configuration.AisBusSocketConfiguration;
+import net.jcip.annotations.ThreadSafe;
 
-@XmlSeeAlso({ TcpClientProviderConfiguration.class, TcpServerProviderConfiguration.class, FileReaderProviderConfiguration.class })
-public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
-
-    public AisBusProviderConfiguration() {
-
+/**
+ * Provide from file
+ */
+@ThreadSafe
+public class FileReaderProvider extends StreamReaderProvider {
+    
+    public FileReaderProvider(String filename) throws IOException {
+        this(filename, false);
     }
     
-    protected AisBusProvider configure(AisBusProvider provider) {
-        super.configure(provider);
-        return provider;
+    public FileReaderProvider(String filename, boolean gzip) throws IOException {
+        super();
+        System.out.println("GZIP: " + gzip);
+        InputStream stream = new FileInputStream(filename);
+        if (gzip) {
+            stream = new GZIPInputStream(stream);
+        }
+        setStream(stream);
     }
 
 }

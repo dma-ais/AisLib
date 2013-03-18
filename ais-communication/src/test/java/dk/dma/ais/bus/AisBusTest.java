@@ -29,6 +29,7 @@ import dk.dma.ais.bus.configuration.consumer.TcpWriterConsumerConfiguration;
 import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
+import dk.dma.ais.bus.configuration.provider.FileReaderProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.transform.CropVdmTransformerConfiguration;
@@ -69,7 +70,12 @@ public class AisBusTest {
         TcpClientConf spClientConf = new TcpClientConf();
         spClientConf.setGzipCompress(true);
         spConf.setClientConf(spClientConf);
-        conf.getProviders().add(spConf);        
+        conf.getProviders().add(spConf);
+        
+        // Provider
+        FileReaderProviderConfiguration fileConf = new FileReaderProviderConfiguration();
+        fileConf.setFilename("/tmp/aisdump.txt");
+        conf.getProviders().add(fileConf);
         
         // Consumer
         StdoutConsumerConfiguration stdoutConsumer = new StdoutConsumerConfiguration();

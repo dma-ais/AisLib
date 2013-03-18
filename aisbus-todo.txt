@@ -1,12 +1,3 @@
-+ TaggingTransformerConfiguration
-	AisPacketTagging cannot be used without transformer
-	
-+ Consider to have static method on configuration classes that creates
-  instances instead of in AisBusFactory!!!
-
-+ Tagging solution	
-	AisBus handle tagging and configuration
-
 + File provider (with replay functionality)
 	
 + AisPacketReader retry 
@@ -21,10 +12,10 @@
 	- Metadata filter
 	
 + Filter configurations
-	
-+ Replay file provider (or implement as a filter or transformer)
 
 + Logging
+
+======
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.
@@ -33,20 +24,21 @@
 
 + Remove consumer/provider
 
+=====
+
 + Overflow handling
 
 + Statistics / Status object on components
 
-+ Search for all TODO's
+====
 
++ Search for all TODO's
 
 + Testing
 
 + Findbugs and checkstyle
 
-DONE + AisReader source name handling by transformer
-
-+ AisPacket/AisStore and source name. Use tranformer and policy PREPEND_MISSING
+====
 
 + Refacor current AisBus/AisView setup (also use new tagging)
 

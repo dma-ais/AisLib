@@ -63,6 +63,12 @@ public class TaggingTransformerConfiguration extends TransformerConfiguration {
     
     @Override
     public IAisPacketTransformer getInstance() {
+        if (tagPolicy == null) {
+            tagPolicy = Policy.PREPEND_MISSING;
+        }
+        if (tagging == null) {
+            tagging = new PacketTaggingConfiguration();
+        }
         AisPacketTaggingTransformer tagTrans = new AisPacketTaggingTransformer(tagPolicy, tagging.getInstance());
         tagTrans.addExtraTags(extraTags);
         return tagTrans;

@@ -78,8 +78,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 connected = true;
                 writeClient.start();
                 // Wait for client to loose connection
-                writeClient.join();
-                connected = false;
+                writeClient.join();                
             } catch (IOException e) {
                 LOG.info("Connection error: " + e.getMessage());
             } catch (InterruptedException e) {
@@ -91,6 +90,8 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 } catch (IOException e) {
                 }
             }
+            
+            connected = false;
 
             try {
                 LOG.info("Waiting to reconnect");

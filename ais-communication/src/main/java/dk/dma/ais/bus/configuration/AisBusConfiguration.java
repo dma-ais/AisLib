@@ -39,7 +39,7 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
 
     private int busPullMaxElements = 1000;
     private int busQueueSize = 10000;
-    
+
     private List<AisBusProviderConfiguration> providers = new ArrayList<>();
     private List<AisBusConsumerConfiguration> consumers = new ArrayList<>();
 
@@ -62,25 +62,25 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
     public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
-    
+
     @XmlElement(name = "provider")
     public List<AisBusProviderConfiguration> getProviders() {
         return providers;
     }
-    
+
     public void setProviders(List<AisBusProviderConfiguration> providers) {
         this.providers = providers;
     }
-    
+
     @XmlElement(name = "consumer")
     public List<AisBusConsumerConfiguration> getConsumers() {
         return consumers;
     }
-    
+
     public void setConsumers(List<AisBusConsumerConfiguration> consumers) {
         this.consumers = consumers;
     }
-    
+
     @Override
     @XmlTransient
     public AisBusComponent getInstance() {
@@ -90,18 +90,22 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
         configure(aisBus);
         aisBus.init();
         for (AisBusConsumerConfiguration consumerConf : consumers) {
-            AisBusConsumer consumer = (AisBusConsumer)consumerConf.getInstance();
-            consumer.init();
-            aisBus.registerConsumer(consumer);            
+            AisBusConsumer consumer = (AisBusConsumer) consumerConf.getInstance();
+            if (consumer != null) {
+                consumer.init();
+                aisBus.registerConsumer(consumer);
+            }
         }
         for (AisBusProviderConfiguration providerConf : providers) {
-            AisBusProvider provider = (AisBusProvider)providerConf.getInstance();
-            provider.init();
-            aisBus.registerProvider(provider);
+            AisBusProvider provider = (AisBusProvider) providerConf.getInstance();
+            if (provider != null) {
+                provider.init();
+                aisBus.registerProvider(provider);
+            }
         }
         return aisBus;
     }
-    
+
     public static void save(String filename, final AisBusConfiguration conf) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
         Marshaller m = context.createMarshaller();
@@ -109,11 +113,11 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
         m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         m.marshal(conf, new File(filename));
     }
-    
+
     public static AisBusConfiguration load(String filename) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
         Unmarshaller um = context.createUnmarshaller();
-        return (AisBusConfiguration)um.unmarshal(new File(filename));        
+        return (AisBusConfiguration) um.unmarshal(new File(filename));
     }
 
 }
