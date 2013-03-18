@@ -33,6 +33,7 @@ import dk.dma.ais.bus.configuration.provider.FileReaderProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.transform.CropVdmTransformerConfiguration;
+import dk.dma.ais.bus.configuration.transform.ReplayTransformConfiguration;
 import dk.dma.ais.bus.configuration.transform.TaggingTransformerConfiguration;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpServerConf;
@@ -75,6 +76,8 @@ public class AisBusTest {
         // Provider
         FileReaderProviderConfiguration fileConf = new FileReaderProviderConfiguration();
         fileConf.setFilename("/tmp/aisdump.txt");
+        ReplayTransformConfiguration replayConf = new ReplayTransformConfiguration();
+        fileConf.getTransformers().add(replayConf);
         conf.getProviders().add(fileConf);
         
         // Consumer

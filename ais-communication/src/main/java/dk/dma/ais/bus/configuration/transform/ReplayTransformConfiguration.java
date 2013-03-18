@@ -15,17 +15,33 @@
  */
 package dk.dma.ais.bus.configuration.transform;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import dk.dma.ais.transform.IAisPacketTransformer;
+import dk.dma.ais.transform.ReplayTransformer;
 
-@XmlSeeAlso({ CropVdmTransformerConfiguration.class, TaggingTransformerConfiguration.class, ReplayTransformConfiguration.class })
-public abstract class TransformerConfiguration {
+@XmlRootElement
+public class ReplayTransformConfiguration extends TransformerConfiguration {
 
-    public TransformerConfiguration() {
+    private double speedup = 1;
 
+    public ReplayTransformConfiguration() {
+        super();
     }
-    
-    public abstract IAisPacketTransformer getInstance();
+
+    public double getSpeedup() {
+        return speedup;
+    }
+
+    public void setSpeedup(double speedup) {
+        this.speedup = speedup;
+    }
+
+    @Override
+    @XmlTransient
+    public IAisPacketTransformer getInstance() {
+        return new ReplayTransformer(speedup);
+    }
 
 }

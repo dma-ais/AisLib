@@ -38,7 +38,7 @@ public class ReplayTransformer implements IAisPacketTransformer {
         
     }
     
-    public ReplayTransformer(float speedup) {
+    public ReplayTransformer(double speedup) {
         this.speedup = speedup;
     }    
 

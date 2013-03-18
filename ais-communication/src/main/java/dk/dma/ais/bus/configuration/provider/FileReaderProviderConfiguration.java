@@ -18,6 +18,7 @@ package dk.dma.ais.bus.configuration.provider;
 import java.io.IOException;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ public class FileReaderProviderConfiguration extends AisBusProviderConfiguration
     }
 
     @Override
+    @XmlTransient
     public AisBusComponent getInstance() {
         try {
             FileReaderProvider provider = new FileReaderProvider(filename, gzip);
