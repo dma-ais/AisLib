@@ -1,17 +1,10 @@
-+ AisPacketReader retry 
-	
++ Logging
+
 + AisBusLauncher in utils that takes conf file as argument
 
 + ais-utils single jar, shell scripts and log4j xml   
 
-+ Filter refactor
-	- Specific GH tag filter
-	- Target country filter
-	- Metadata filter
-	
-+ Filter configurations
-
-+ Logging
++ AisPacketReader retry
 
 ======
 
@@ -36,7 +29,10 @@
 
 ====
 
++ Legacy transformer that determines source type by gatehouse region id
+
 + Refacor current AisBus/AisView setup (also use new tagging)
+	Remove region test in data classes
 
 + Why ais-communication and ais-message ? 
 

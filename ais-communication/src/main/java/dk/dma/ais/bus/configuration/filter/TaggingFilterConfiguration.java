@@ -15,14 +15,32 @@
  */
 package dk.dma.ais.bus.configuration.filter;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
 
+import dk.dma.ais.bus.configuration.transform.PacketTaggingConfiguration;
 import dk.dma.ais.filter.IPacketFilter;
+import dk.dma.ais.filter.TaggingFilter;
 
-@XmlSeeAlso({ DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class, GatehouseSourceFilterConfiguration.class,
-        TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class, LocationFilterConfiguration.class })
-public abstract class FilterConfiguration {
+@XmlRootElement
+public class TaggingFilterConfiguration extends FilterConfiguration {
+    
+    private PacketTaggingConfiguration filterTagging = new PacketTaggingConfiguration();
+    
+    public TaggingFilterConfiguration() {
+        
+    }
+    
+    public PacketTaggingConfiguration getFilterTagging() {
+        return filterTagging;
+    }
+    
+    public void setFilterTagging(PacketTaggingConfiguration filterTagging) {
+        this.filterTagging = filterTagging;
+    }
 
-    public abstract IPacketFilter getInstance();
+    @Override
+    public IPacketFilter getInstance() {
+        return new TaggingFilter(filterTagging.getInstance());
+    }
 
 }

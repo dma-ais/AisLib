@@ -29,10 +29,16 @@ import dk.dma.ais.bus.configuration.consumer.TcpWriterConsumerConfiguration;
 import dk.dma.ais.bus.configuration.filter.DownSampleFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.bus.configuration.filter.FilterConfiguration;
+import dk.dma.ais.bus.configuration.filter.GatehouseSourceFilterConfiguration;
+import dk.dma.ais.bus.configuration.filter.LocationFilterConfiguration;
+import dk.dma.ais.bus.configuration.filter.TaggingFilterConfiguration;
+import dk.dma.ais.bus.configuration.filter.TargetCountryFilterConfiguration;
+import dk.dma.ais.bus.configuration.filter.geometry.CircleGeometryConfiguration;
 import dk.dma.ais.bus.configuration.provider.FileReaderProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.transform.CropVdmTransformerConfiguration;
+import dk.dma.ais.bus.configuration.transform.PacketTaggingConfiguration;
 import dk.dma.ais.bus.configuration.transform.ReplayTransformConfiguration;
 import dk.dma.ais.bus.configuration.transform.TaggingTransformerConfiguration;
 import dk.dma.ais.bus.tcp.TcpClientConf;
@@ -78,6 +84,26 @@ public class AisBusTest {
         fileConf.setFilename("/tmp/aisdump.txt");
         ReplayTransformConfiguration replayConf = new ReplayTransformConfiguration();
         fileConf.getTransformers().add(replayConf);
+        GatehouseSourceFilterConfiguration ghFilter = new GatehouseSourceFilterConfiguration();
+        ghFilter.getFilterEntries().put("region", "8");        
+        fileConf.getFilters().add(ghFilter);
+        TargetCountryFilterConfiguration tgtFilter = new TargetCountryFilterConfiguration();
+        tgtFilter.getAllowedCountries().add("DNK");
+        tgtFilter.getAllowedCountries().add("SWE");
+        CircleGeometryConfiguration circleConf = new CircleGeometryConfiguration();
+        circleConf.setLat(55.7);
+        circleConf.setLon(12.6);
+        circleConf.setRadius(20000);
+        LocationFilterConfiguration locFilter = new LocationFilterConfiguration();
+        locFilter.getGeometries().add(circleConf);        
+        fileConf.getFilters().add(locFilter);
+        fileConf.getFilters().add(tgtFilter);
+        
+        PacketTaggingConfiguration tagging = new PacketTaggingConfiguration();
+        tagging.setSourceBs(2190048);
+        TaggingFilterConfiguration tagFilter = new TaggingFilterConfiguration();
+        tagFilter.setFilterTagging(tagging);
+        fileConf.getFilters().add(tagFilter);
         conf.getProviders().add(fileConf);
         
         // Consumer
@@ -118,7 +144,7 @@ public class AisBusTest {
     
     @Test
     public void confLoadTest() throws JAXBException {
-        AisBusConfiguration conf = AisBusConfiguration.load("src/main/resources/aisbus-example.xml");
+        AisBusConfiguration conf = AisBusConfiguration.load("src/main/resources/aisbus-test.xml");
         Assert.assertEquals(conf.getBusQueueSize(), 10000);
         List<FilterConfiguration> filters = conf.getFilters();
         for (FilterConfiguration filter : filters) {
@@ -137,7 +163,21 @@ public class AisBusTest {
     }
     
     @Test
-    public void factoryTest() throws JAXBException, InterruptedException {
+    public void aisBusTest() throws JAXBException {
+        AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-test.xml");
+        aisBus.start();
+        aisBus.startConsumers();
+        aisBus.startProviders();
+        
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    //@Test
+    public void aisBusTest2() throws JAXBException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-example.xml");
         aisBus.start();
         aisBus.startConsumers();
@@ -148,8 +188,6 @@ public class AisBusTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        
     }
 
 

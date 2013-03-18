@@ -3,37 +3,11 @@
 	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="duplicateFilterConfiguration">
 		<windowSize>10000</windowSize>
 	</filter>
-	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="gatehouseSourceFilterConfiguration">
-		<filterEntries>
-			<entry>
-				<key>basestation</key>
-				<value>2190048</value>
-			</entry>
-		</filterEntries>
-	</filter>
-	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="targetCountryFilterConfiguration">
-		<allowed>DNK</allowed>
-		<allowed>SWE</allowed>
-	</filter>
-	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="locationFilterConfiguration">
-		<geometry xsi:type="circleGeometryConfiguration">
-			<lat>55.7</lat>
-			<lon>12.6</lon>
-			<radius>200000</radius>
-		</geometry>
-	</filter>
 	<busPullMaxElements>1000</busPullMaxElements>
 	<busQueueSize>10000</busQueueSize>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
 		<filter xsi:type="downSampleFilterConfiguration">
 			<samplingRate>600</samplingRate>
-		</filter>
-		<filter xsi:type="taggingFilterConfiguration">
-			<filterTagging>
-				<sourceId>replay</sourceId>
-				<sourceType>LIVE</sourceType>
-				<sourceCountry>DNK</sourceCountry>
-			</filterTagging>
 		</filter>
 		<!-- <transformer xsi:type="cropVdmTransformerConfiguration" /> -->
 	</consumer>
@@ -82,6 +56,17 @@
 	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
 		<filename>src/test/resources/replay_dump.txt.gz</filename>
 		<gzip>true</gzip>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="targetCountryFilterConfiguration">
+			<allowed>DNK</allowed>
+			<allowed>SWE</allowed>
+		</filter>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="locationFilterConfiguration">
+			<geometry xsi:type="circleGeometryConfiguration">
+				<lat>55.7</lat>
+				<lon>12.6</lon>
+				<radius>200000</radius>
+			</geometry>
+		</filter>
 		<transformer xsi:type="replayTransformConfiguration">
 			<speedup>10.0</speedup>
 		</transformer>
@@ -90,7 +75,6 @@
 			<tagging>
 				<sourceId>replay</sourceId>
 				<sourceType>LIVE</sourceType>
-				<sourceCountry>DNK</sourceCountry>
 			</tagging>
 			<extraTags>
 				<entry>

@@ -232,6 +232,27 @@ public class AisPacketTagging {
     }
 
     /**
+     * Determine if given tagging match this tagging
+     * @param parse
+     * @return
+     */
+    public boolean filterMatch(AisPacketTagging tagging) {
+        if (sourceId != null && (tagging.getSourceId() == null || !tagging.getSourceId().equals(sourceId))) {
+            return false; 
+        }
+        if (sourceBs != null && (tagging.getSourceBs() == null || tagging.getSourceBs() != sourceBs)) {
+            return false;
+        }
+        if (sourceCountry != null && (tagging.getSourceCountry() == null || !tagging.getSourceCountry().equals(sourceCountry))) {
+            return false;
+        }
+        if (sourceType != null && (tagging.getSourceType() == null || tagging.getSourceType() != sourceType)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Parse tags from AisPacket. Uses comment block with first priority and fall back to proprietary tags.
      * 
      * @param packet

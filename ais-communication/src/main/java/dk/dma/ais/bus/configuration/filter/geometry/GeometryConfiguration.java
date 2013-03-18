@@ -13,16 +13,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.configuration.filter;
+package dk.dma.ais.bus.configuration.filter.geometry;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
 
-import dk.dma.ais.filter.IPacketFilter;
+import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.util.function.Predicate;
 
-@XmlSeeAlso({ DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class, GatehouseSourceFilterConfiguration.class,
-        TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class, LocationFilterConfiguration.class })
-public abstract class FilterConfiguration {
+@XmlSeeAlso({ CircleGeometryConfiguration.class })
+public abstract class GeometryConfiguration {
 
-    public abstract IPacketFilter getInstance();
+    public abstract Predicate<? super Position> getPredicate();
 
 }

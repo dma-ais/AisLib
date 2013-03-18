@@ -24,6 +24,7 @@ import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.proprietary.GatehouseSourceTag;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.Country;
 
@@ -33,7 +34,7 @@ import dk.dma.enav.model.Country;
  * @see dk.dma.ais.data.AisTargetSourceData
  */
 @ThreadSafe
-public class SourceFilter extends MessageFilterBase {
+public class GatehouseSourceFilter extends MessageFilterBase {
 
     /**
      * Initialize allowed filter names
@@ -53,7 +54,7 @@ public class SourceFilter extends MessageFilterBase {
     @GuardedBy("this")
     private final Map<String, HashSet<String>> filter = new HashMap<>();
 
-    public SourceFilter() {
+    public GatehouseSourceFilter() {
 
     }
 
@@ -68,6 +69,12 @@ public class SourceFilter extends MessageFilterBase {
         if (tag == null) {
             return true;
         }
+        
+        // Only use gatehouse tag
+        if (!(tag instanceof GatehouseSourceTag)) {
+            return true;
+        }
+        
         HashMap<String, String> tagMap = new HashMap<>();
         if (tag.getBaseMmsi() != null) {
             tagMap.put("basestation", Integer.toString(tag.getBaseMmsi()));

@@ -13,16 +13,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus.configuration.filter;
+package dk.dma.ais.filter;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketTagging;
 
-import dk.dma.ais.filter.IPacketFilter;
+/**
+ * Filter based on a given tagging. Non null fields in the tagging much
+ * be matched by the packet tagging.
+ */
+@ThreadSafe
+public class TaggingFilter implements IPacketFilter {
+    
+    private final AisPacketTagging filterTagging;
+    
+    public TaggingFilter(AisPacketTagging filterTagging) {
+        this.filterTagging = filterTagging;
+    }
 
-@XmlSeeAlso({ DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class, GatehouseSourceFilterConfiguration.class,
-        TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class, LocationFilterConfiguration.class })
-public abstract class FilterConfiguration {
-
-    public abstract IPacketFilter getInstance();
+    @Override
+    public boolean rejectedByFilter(AisPacket packet) {
+        return !filterTagging.filterMatch(AisPacketTagging.parse(packet));        
+    }
 
 }

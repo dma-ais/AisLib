@@ -34,7 +34,6 @@ public class FileReaderProvider extends StreamReaderProvider {
     
     public FileReaderProvider(String filename, boolean gzip) throws IOException {
         super();
-        System.out.println("GZIP: " + gzip);
         InputStream stream = new FileInputStream(filename);
         if (gzip) {
             stream = new GZIPInputStream(stream);

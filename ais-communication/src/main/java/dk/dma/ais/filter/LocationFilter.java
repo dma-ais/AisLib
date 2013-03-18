@@ -15,14 +15,12 @@
  */
 package dk.dma.ais.filter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
-
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.enav.model.geometry.Position;
@@ -42,11 +40,10 @@ public class LocationFilter extends MessageFilterBase {
     /**
      * List of geometries
      */
-    @GuardedBy("this")
-    private List<Predicate<? super Position>> geomtries = new ArrayList<>();
+    private List<Predicate<? super Position>> geomtries = new CopyOnWriteArrayList<>();
 
     @Override
-    public synchronized boolean rejectedByFilter(AisMessage message) {
+    public boolean rejectedByFilter(AisMessage message) {
         if (geomtries.size() == 0) {
             return false;
         }
@@ -73,7 +70,7 @@ public class LocationFilter extends MessageFilterBase {
         return true;
     }
 
-    public synchronized void addFilterGeometry(Predicate<? super Position> geometry) {
+    public void addFilterGeometry(Predicate<? super Position> geometry) {
         geomtries.add(geometry);
     }
 
