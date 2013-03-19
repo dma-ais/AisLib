@@ -20,6 +20,9 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.util.zip.GZIPInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.enav.util.function.Consumer;
@@ -28,6 +31,8 @@ import dk.dma.enav.util.function.Consumer;
  * A reading TCP client
  */
 public class TcpReadClient extends TcpClient {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(TcpReadClient.class);
 
     private Consumer<AisPacket> packetConsumer;
 
@@ -51,6 +56,7 @@ public class TcpReadClient extends TcpClient {
             reader.start();
             reader.join();
         } catch (IOException e) {
+            LOG.info("TCP client error: " + e.getMessage());
         } catch (InterruptedException e) {
         }
 
@@ -58,6 +64,8 @@ public class TcpReadClient extends TcpClient {
             socket.close();
         } catch (IOException e) {
         }
+        
+        LOG.info("TCP client stopping");
 
         stopping();
     }

@@ -40,7 +40,7 @@ public interface IMessageQueue<T> {
      * 
      * @return AisMessageQueueEntry
      */
-    T pull();
+    T pull() throws InterruptedException;
 
     /**
      * Pull up to maxElements from queue. This must be a blocking call.
@@ -49,7 +49,7 @@ public interface IMessageQueue<T> {
      * @param maxElements
      * @return list with added elements
      */
-    List<T> pull(List<T> l, int maxElements);
+    List<T> pull(List<T> l, int maxElements) throws InterruptedException;
 
     /**
      * Pull all current message on the queue. This must be a blocking call.
@@ -57,6 +57,6 @@ public interface IMessageQueue<T> {
      * @param l list to add elements to 
      * @return list with added elements
      */
-    List<T> pullAll(List<T> c);
+    List<T> pullAll(List<T> c) throws InterruptedException;
 
 }

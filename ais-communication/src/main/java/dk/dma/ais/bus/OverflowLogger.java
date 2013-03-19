@@ -13,31 +13,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.queue;
+package dk.dma.ais.bus;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.slf4j.Logger;
 
-import junit.framework.Assert;
+/**
+ * Class that down samples the logging of overflow
+ */
+public class OverflowLogger {
 
-import org.junit.Test;
+    private long lastLogging = 0L;
+    private final long interval;
+    private final Logger logger;
+    
+    public OverflowLogger(Logger logger) {
+        this(logger, 5000);
+    }
 
-public class QueueTest {
-
-    @Test
-    public void testPushPull() throws MessageQueueOverflowException, InterruptedException {
-        IMessageQueue<Integer> q = new BlockingMessageQueue<>();
-        for (int i = 0; i < 1000; i++) {
-            q.push(i);
+    public OverflowLogger(Logger logger, long interval) {
+        this.logger = logger;
+        this.interval = interval;
+    }
+    
+    public void log(String message) {
+        long now = System.currentTimeMillis();
+        if (now - lastLogging > interval) {
+            logger.error(message);
+            lastLogging = now;
         }
-        List<Integer> list = new ArrayList<>();
-        list = q.pull(list, 100);
-        Assert.assertEquals(list.size(), 100);
-
-        list.clear();
-        list = q.pull(list, 1);
-        Assert.assertEquals(list.size(), 1);
-
     }
 
 }

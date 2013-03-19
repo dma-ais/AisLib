@@ -46,15 +46,13 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
     private String host;
     private int port;
 
-    private volatile boolean connected = false;
-
     public TcpWriterConsumer() {
 
     }
 
     @Override
     public void receiveFiltered(AisBusElement queueElement) {
-        if (connected) {
+        if (status.isConnected()) {
             writeClient.send(queueElement.getPacket().getStringMessage());
         }
     }
@@ -64,6 +62,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
      */
     @Override
     public void run() {
+        setNotConnected();
         while (true) {
             Socket socket = new Socket();
             try {
@@ -75,7 +74,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
 
                 // Start client
                 writeClient = new TcpWriteClient(this, socket, clientConf);
-                connected = true;
+                setConnected();
                 writeClient.start();
                 // Wait for client to loose connection
                 writeClient.join();                
@@ -84,6 +83,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
             } catch (InterruptedException e) {
                 // TODO handle
                 e.printStackTrace();
+                break;
             } finally {
                 try {
                     socket.close();
@@ -91,7 +91,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 }
             }
             
-            connected = false;
+            setNotConnected();
 
             try {
                 LOG.info("Waiting to reconnect");
@@ -99,8 +99,11 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
             } catch (InterruptedException e) {
                 // TODO handle interuption
                 e.printStackTrace();
+                break;
             }
         }
+        
+        setStopped();
 
     }
 

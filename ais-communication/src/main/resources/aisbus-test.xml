@@ -6,9 +6,9 @@
 	<busPullMaxElements>1000</busPullMaxElements>
 	<busQueueSize>10000</busQueueSize>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
-		<filter xsi:type="downSampleFilterConfiguration">
-			<samplingRate>600</samplingRate>
-		</filter>
+<!-- 		<filter xsi:type="downSampleFilterConfiguration"> -->
+<!-- 			<samplingRate>600</samplingRate> -->
+<!-- 		</filter> -->
 		<!-- <transformer xsi:type="cropVdmTransformerConfiguration" /> -->
 	</consumer>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpWriterConsumerConfiguration">

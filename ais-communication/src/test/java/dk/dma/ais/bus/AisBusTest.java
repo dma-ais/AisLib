@@ -174,6 +174,14 @@ public class AisBusTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        
+        System.out.println("AisBus: " + aisBus.getStatus());
+        for (AisBusProvider provider : aisBus.getProviders()) {
+            System.out.println("Provider: " + provider.toString());
+        }
+        for (AisBusConsumer consumer : aisBus.getConsumers()) {
+            System.out.println("Consumer: " + consumer.toString());            
+        }
     }
     
     //@Test

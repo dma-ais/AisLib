@@ -26,12 +26,12 @@ public abstract class AisBusProvider extends AisBusSocket {
     }
     
     @Override
-    public synchronized void init() {
+    public void init() {
         super.init();
     }
     
     @Override
-    public synchronized void start() {
+    public void start() {
         super.start();
     }
         
@@ -47,7 +47,10 @@ public abstract class AisBusProvider extends AisBusSocket {
         }
         
         // Push to the bus
-        getAisBus().push(packet);
+        if (!getAisBus().push(packet)) {
+            status.overflow();
+        }
+        
     }
 
 }

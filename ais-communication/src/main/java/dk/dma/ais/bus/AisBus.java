@@ -16,10 +16,16 @@
 package dk.dma.ais.bus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.jcip.annotations.ThreadSafe;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
@@ -32,6 +38,9 @@ import dk.dma.ais.queue.MessageQueueOverflowException;
  */
 @ThreadSafe
 public class AisBus extends AisBusComponent implements Runnable {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(AisBus.class);
+    private final OverflowLogger overflowLogger = new OverflowLogger(LOG);
     
     /**
      * Queue to represent the bus
@@ -112,9 +121,9 @@ public class AisBus extends AisBusComponent implements Runnable {
         // Push to the bus
         try {
             busQueue.push(new AisBusElement(packet));
-        } catch (MessageQueueOverflowException e) {            
-            System.err.println("Overflow when pushing to bus");
-            // TODO handle overflow
+        } catch (MessageQueueOverflowException e) {
+            status.overflow();
+            overflowLogger.log("AisBus overflow [rate=" + status.getOverflowRate() + " packet/sec]");
             return false;
         }
         return true;
@@ -153,7 +162,11 @@ public class AisBus extends AisBusComponent implements Runnable {
         while (true) {
             elements.clear();
             // Consume from bus queue
-            busQueue.pull(elements, busPullMaxElements);
+            try {
+                busQueue.pull(elements, busPullMaxElements);
+            } catch (InterruptedException e) {                
+                break;
+            }
             // Iterate through consumers
             for (AisBusConsumer consumer : consumers) {
                 // Distribute elements
@@ -162,6 +175,14 @@ public class AisBus extends AisBusComponent implements Runnable {
                 }
             }
         }
+        
+        LOG.info("AisBus stopping");
+        
+        setStopped();
+        
+        // TODO stop consumers and providers
+        // use method on component that can be overridden
+        
     }
 
     public void setBusPullMaxElements(int busPullMaxElements) {
@@ -171,6 +192,13 @@ public class AisBus extends AisBusComponent implements Runnable {
     public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
-
+    
+    public Set<AisBusConsumer> getConsumers() {
+        return Collections.unmodifiableSet(consumers);
+    }
+    
+    public Set<AisBusProvider> getProviders() {
+        return Collections.unmodifiableSet(providers);
+    }
 
 }

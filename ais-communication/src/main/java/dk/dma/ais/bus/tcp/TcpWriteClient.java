@@ -30,6 +30,8 @@ import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.dma.ais.bus.OverflowLogger;
+
 /**
  * Writing TCP client.
  */
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class TcpWriteClient extends TcpClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpWriteClient.class);
+    private final OverflowLogger overflowLogger = new OverflowLogger(LOG);
 
     private final BlockingQueue<String> buffer;
 
@@ -52,8 +55,8 @@ public class TcpWriteClient extends TcpClient {
      */
     public void send(String msg) {
         if (!buffer.offer(msg)) {
-            // TOOD
-            LOG.error("TcpClient overflow");
+            // TOOD update some statistics
+            overflowLogger.log("TCP write client overflow");
         }
     }
 
@@ -85,7 +88,7 @@ public class TcpWriteClient extends TcpClient {
                 }
             }
         } catch (IOException e) {
-
+            LOG.info("TCP client error: " + e.getMessage());
         } catch (InterruptedException e) {
 
         }
@@ -93,6 +96,8 @@ public class TcpWriteClient extends TcpClient {
             socket.close();
         } catch (IOException e) {
         }
+        
+        LOG.info("TCP client stopping");
         
         stopping();
     }

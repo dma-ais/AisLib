@@ -59,7 +59,8 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
     }
 
     @Override
-    public void run() {
+    public void run() {        
+        setNotConnected();
         while (true) {
             Socket socket = new Socket();
 
@@ -77,6 +78,8 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
                 if (timeout > 0) {
                     socket.setSoTimeout(timeout * 1000);
                 }
+                
+                setConnected();
 
                 // Start client
                 readClient = new TcpReadClient(this, this, socket, clientConf);
@@ -86,25 +89,27 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
 
             } catch (IOException e) {
                 LOG.info("Connection error: " + e.getMessage());
-            } catch (InterruptedException e) {
-                // TODO handle
-                e.printStackTrace();
+            } catch (InterruptedException e) {                
+                break;
             } finally {
                 try {
                     socket.close();
                 } catch (IOException e) {
                 }
             }
+            
+            setNotConnected();
 
             try {
                 LOG.info("Waiting to reconnect");
                 Thread.sleep(reconnectInterval * 1000);
             } catch (InterruptedException e) {
-                // TODO handle interuption
-                e.printStackTrace();
+                break;
             }
 
         }
+        
+        setStopped();
     }
 
     @Override

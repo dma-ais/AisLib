@@ -15,6 +15,9 @@
  */
 package dk.dma.ais.bus;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
@@ -26,6 +29,9 @@ import dk.dma.ais.queue.MessageQueueReader;
 
 @ThreadSafe
 public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusElement> {
+
+    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final OverflowLogger overflowLogger = new OverflowLogger(LOG);
 
     @GuardedBy("this")
     private MessageQueueReader<AisBusElement> consumerThread;
@@ -60,10 +66,8 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
         try {
             consumerThread.getQueue().push(element);
         } catch (MessageQueueOverflowException e) {
-            // TODO handle overflow
-            // Maybe call method on consumer
-            // Do some kind of central overflow event down sampling somewhere
-            System.err.println("Overflow when pushing to consumer queue");
+            status.overflow();
+            overflowLogger.log("Consumer overflow [rate=" + status.getOverflowRate() + " packet/sec]");
         }
     }
     

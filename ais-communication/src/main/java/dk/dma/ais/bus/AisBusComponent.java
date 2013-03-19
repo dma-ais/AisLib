@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.bus.status.AisBusComponentStatus;
 import dk.dma.ais.filter.PacketFilterCollection;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.transform.IAisPacketTransformer;
@@ -30,15 +31,10 @@ import dk.dma.ais.transform.IAisPacketTransformer;
 @ThreadSafe
 public abstract class AisBusComponent {
 
-    public static final int STATUS_CREATED = 0;
-    public static final int STATUS_INITIALIZED = 1;
-    public static final int STATUS_STARTED = 2;
-
     /**
      * The status of the component
      */
-    @GuardedBy("this")
-    private int status = STATUS_CREATED;
+    protected final AisBusComponentStatus status;
 
     /**
      * Thread for this component
@@ -57,26 +53,41 @@ public abstract class AisBusComponent {
     protected final CopyOnWriteArrayList<IAisPacketTransformer> packetTransformers = new CopyOnWriteArrayList<>();
 
     public AisBusComponent() {
+        this.status = new AisBusComponentStatus();
     }
 
     /**
      * Initialize the component after configuration. Must be called be starting the component.
      */
-    public synchronized void init() {
-        if (status != STATUS_CREATED) {
-            throw new IllegalStateException("Component must be in state CREATED to be initialized");
-        }
-        status = STATUS_INITIALIZED;
+    public void init() {
+        status.setInitialized();
     }
 
     /**
      * Start the component. Must be called after init().
      */
-    public synchronized void start() {
-        if (status != STATUS_INITIALIZED) {
-            throw new IllegalStateException("Component must be in state CREATED to be initialized");
-        }
-        status = STATUS_STARTED;
+    public void start() {
+        status.setStarted();
+    }
+        
+    public void setConnected() {
+        status.setConnected();
+    }
+    
+    public void setNotConnected() {
+        status.setNotConnected();
+    }
+    
+    public void setStopped() {
+        status.setStopped();
+    }
+    
+    /**
+     * Get component status
+     * @return
+     */
+    public AisBusComponentStatus getStatus() {
+        return status;
     }
 
     /**
@@ -106,6 +117,8 @@ public abstract class AisBusComponent {
     protected AisPacket handleReceived(AisPacket packet) {
         // Filter message
         if (filters.rejectedByFilter(packet)) {
+            // Update statistics
+            status.filtered();
             return null;
         }
 
@@ -114,7 +127,12 @@ public abstract class AisBusComponent {
             packet = transformer.transform(packet);
         }
 
-        // TODO update statistics
+        // Update statistics
+        if (packet == null) {
+            status.filtered();
+        } else {
+            status.receive();
+        }
 
         return packet;
     }
@@ -136,5 +154,17 @@ public abstract class AisBusComponent {
     public CopyOnWriteArrayList<IAisPacketTransformer> getPacketTransformers() {
         return packetTransformers;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AisBusComponent [class=");
+        builder.append(this.getClass());
+        builder.append(", status=");
+        builder.append(status);
+        builder.append("]");
+        return builder.toString();
+    }
+    
 
 }

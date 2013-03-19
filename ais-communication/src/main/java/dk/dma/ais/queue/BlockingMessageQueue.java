@@ -50,32 +50,25 @@ public class BlockingMessageQueue<T> implements IMessageQueue<T> {
     }
 
     @Override
-    public T pull() {
+    public T pull() throws InterruptedException {
         T entry = null;
         do {
-            try {
-                entry = queue.take();
-            } catch (InterruptedException e) {
-            }
+            entry = queue.take();
         } while (entry == null);
         return entry;
     }
 
     @Override
-    public List<T> pull(List<T> l, int maxElements) {
+    public List<T> pull(List<T> l, int maxElements) throws InterruptedException {
         // Wait for element to become available
-        try {
-            l.add(queue.take());
-        } catch (InterruptedException e) {
-            return l;
-        }
+        l.add(queue.take());
         // Get up to maxElements - 1 more
         queue.drainTo(l, maxElements - 1);
         return l;
     }
 
     @Override
-    public List<T> pullAll(List<T> l) {        
+    public List<T> pullAll(List<T> l) throws InterruptedException {
         return pull(l, Integer.MAX_VALUE);
     }
 

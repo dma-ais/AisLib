@@ -36,12 +36,12 @@ public abstract class AisBusSocket extends AisBusComponent {
     }
     
     @Override
-    public synchronized void init() {
+    public void init() {
         super.init();
     }
     
     @Override
-    public synchronized void start() {
+    public void start() {
         super.start();
     }
 

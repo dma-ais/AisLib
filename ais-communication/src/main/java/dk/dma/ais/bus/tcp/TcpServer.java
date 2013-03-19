@@ -82,10 +82,8 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
                 // Maybe wait if max connections is exceeded
                 try {
                     semaphore.acquire();
-                } catch (InterruptedException e) {
-                    // TODO
-                    e.printStackTrace();
-                    return;
+                } catch (InterruptedException e) {                    
+                    break;
                 }
 
                 LOG.info("Waiting for connections on port " + serverConf.getPort());
@@ -109,6 +107,13 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
             clients.add(client);
             client.start();
 
+        }
+        
+        LOG.info("TCP server stopping");
+        
+        // Stop clients
+        for (TcpClient client : clients) {
+            client.interrupt();            
         }
 
     }
