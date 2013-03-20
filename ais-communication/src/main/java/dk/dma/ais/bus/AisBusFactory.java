@@ -15,6 +15,8 @@
  */
 package dk.dma.ais.bus;
 
+import java.io.FileNotFoundException;
+
 import javax.xml.bind.JAXBException;
 
 import dk.dma.ais.bus.configuration.AisBusConfiguration;
@@ -24,7 +26,7 @@ import dk.dma.ais.bus.configuration.AisBusConfiguration;
  */
 public class AisBusFactory {
 
-    public static AisBus get(String filename) throws JAXBException {
+    public static AisBus get(String filename) throws JAXBException, FileNotFoundException {
         return (AisBus)(AisBusConfiguration.load(filename).getInstance());
     }
 

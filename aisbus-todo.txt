@@ -1,11 +1,15 @@
-+ AisBusLauncher in utils that takes conf file as argument
-
-+ ais-utils single jar, shell scripts and log4j xml
-	Also service script   
-
 + AisPacketReader retry
 
+====
+
++ Refacor current AisBus/AisView setup (also use new tagging)
+	Remove region test in data classes
+
++ Legacy transformer that determines source type by gatehouse region id
+
 ======
+
++ ExecutorService to handle tasks
 
 + Thread handling. Maybe each component must implement a getThread and component provide 
   protected setThread.
@@ -14,20 +18,19 @@
 
 + Remove consumer/provider
 
++ AisBusLauncher stop AisBus
+
 =====
 
 + Search for all TODO's
 
 + Findbugs and checkstyle
 
++ Merge with master
+
 ====
 
-+ Legacy transformer that determines source type by gatehouse region id
-
 + Transformer that makes comment block out of gatehouse tag
-
-+ Refacor current AisBus/AisView setup (also use new tagging)
-	Remove region test in data classes
 
 + Why ais-communication and ais-message ?
 

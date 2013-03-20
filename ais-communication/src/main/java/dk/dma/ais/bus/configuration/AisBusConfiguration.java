@@ -16,6 +16,11 @@
 package dk.dma.ais.bus.configuration;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,18 +111,28 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
         return aisBus;
     }
 
-    public static void save(String filename, final AisBusConfiguration conf) throws JAXBException {
+    public static void save(OutputStream out, final AisBusConfiguration conf) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
         Marshaller m = context.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-        m.marshal(conf, new File(filename));
+        m.marshal(conf, out);
     }
 
-    public static AisBusConfiguration load(String filename) throws JAXBException {
+    public static AisBusConfiguration load(InputStream in) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
         Unmarshaller um = context.createUnmarshaller();
-        return (AisBusConfiguration) um.unmarshal(new File(filename));
+        return (AisBusConfiguration) um.unmarshal(in);
     }
+    
+    public static void save(String filename, final AisBusConfiguration conf) throws JAXBException, FileNotFoundException {
+        save(new FileOutputStream(new File(filename)), conf);
+    }
+    
+    public static AisBusConfiguration load(String filename) throws FileNotFoundException, JAXBException {
+        return load(new FileInputStream(new File(filename)));
+    }
+    
+    
 
 }

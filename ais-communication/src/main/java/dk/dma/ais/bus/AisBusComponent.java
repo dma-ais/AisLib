@@ -166,5 +166,9 @@ public abstract class AisBusComponent {
         return builder.toString();
     }
     
+    public String rateReport() {
+        return String.format("[packets/filtered/overflow] %4.2f / %4.2f / %4.2f  (packets/sec)", status.getPacketRate(), status.getFilteredRate(), status.getOverflowRate());
+    }
+    
 
 }

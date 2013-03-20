@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<aisBusConfiguration>
+	<!-- The main provider -->
+	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
+		<name>AISD unfiltered</name>
+		<hostPort>ais163.sealan.dk:65262</hostPort>
+		<reconnectInterval>10</reconnectInterval>
+		<timeout>10</timeout>
+		<transformer xsi:type="taggingTransformerConfiguration">
+			<extraTags>
+				<entry>
+					<key>author</key>
+					<value>DMA</value>
+				</entry>
+			</extraTags>
+			<tagPolicy>PREPEND_MISSING</tagPolicy>
+			<tagging>
+				<sourceId>AISD</sourceId>
+			</tagging>
+		</transformer>
+	</provider>
+	<!-- Unfiltered data -->
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerConsumerConfiguration">
+		<name>Unfiltered</name>
+		<serverConf>
+			<maxClients>10</maxClients>
+			<port>9999</port>
+		</serverConf>
+	</consumer>
+	<!-- Duplicate filtered data -->
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerConsumerConfiguration">
+		<name>Filtered data</name>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="duplicateFilterConfiguration" />
+		<serverConf>
+			<maxClients>10</maxClients>
+			<port>9998</port>
+		</serverConf>
+	</consumer>
+	<!-- Down sampled duplicate filtered data -->
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerConsumerConfiguration">
+		<name>Down sampled data</name>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="duplicateFilterConfiguration" />
+		<filter xsi:type="downSampleFilterConfiguration">
+			<samplingRate>300</samplingRate>
+		</filter>
+		<serverConf>
+			<maxClients>10</maxClients>
+			<port>9997</port>
+		</serverConf>
+	</consumer>
+</aisBusConfiguration>

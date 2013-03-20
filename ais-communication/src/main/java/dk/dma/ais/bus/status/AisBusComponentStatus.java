@@ -66,6 +66,11 @@ public class AisBusComponentStatus {
      * Statistics for overflow the last flowStatInterval
      */
     private final FlowStat overflowCountStat;
+    
+    /**
+     * Statistics for filtered packets last flowStatInterval
+     */
+    private final FlowStat filteredCountStat;
 
     public AisBusComponentStatus() {
         // Default one minute interval
@@ -78,6 +83,7 @@ public class AisBusComponentStatus {
         this.flowStatInterval = flowStatInterval;
         this.packetCountStat = new FlowStat(flowStatInterval);
         this.overflowCountStat = new FlowStat(flowStatInterval);
+        this.filteredCountStat = new FlowStat(flowStatInterval);
     }
 
     /**
@@ -92,6 +98,7 @@ public class AisBusComponentStatus {
      * Indicate a reception that is rejected by filter
      */
     public synchronized void filtered() {
+        filteredCountStat.received();
         filteredPacketCount++;
     }
 
@@ -148,9 +155,17 @@ public class AisBusComponentStatus {
     public synchronized long getPacketCount() {
         return packetCount;
     }
+    
+    public synchronized double getPacketRate() {
+        return packetCountStat.getRate();
+    }
 
     public synchronized long getFilteredPacketCount() {
         return filteredPacketCount;
+    }
+    
+    public synchronized double getFilteredRate() {
+        return filteredCountStat.getRate();
     }
 
     public synchronized long getOverflowCount() {

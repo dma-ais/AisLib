@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.bus;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -48,7 +49,7 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 public class AisBusTest {
 
     @Test
-    public void confTest() throws JAXBException {
+    public void confTest() throws JAXBException, FileNotFoundException {
         AisBusConfiguration conf = new AisBusConfiguration();
         // Bus Filters
         conf.getFilters().add(new DownSampleFilterConfiguration());
@@ -143,7 +144,7 @@ public class AisBusTest {
     }
     
     @Test
-    public void confLoadTest() throws JAXBException {
+    public void confLoadTest() throws JAXBException, FileNotFoundException {
         AisBusConfiguration conf = AisBusConfiguration.load("src/main/resources/aisbus-test.xml");
         Assert.assertEquals(conf.getBusQueueSize(), 10000);
         List<FilterConfiguration> filters = conf.getFilters();
@@ -163,7 +164,7 @@ public class AisBusTest {
     }
     
     @Test
-    public void aisBusTest() throws JAXBException {
+    public void aisBusTest() throws JAXBException, FileNotFoundException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-test.xml");
         aisBus.start();
         aisBus.startConsumers();
@@ -185,7 +186,7 @@ public class AisBusTest {
     }
     
     //@Test
-    public void aisBusTest2() throws JAXBException {
+    public void aisBusTest2() throws JAXBException, FileNotFoundException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-example.xml");
         aisBus.start();
         aisBus.startConsumers();
