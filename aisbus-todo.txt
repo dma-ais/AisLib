@@ -1,11 +1,15 @@
-+ AisPacketReader retry
-
 ====
+
++ aisbus-service som kan tage fil argument
 
 + Refacor current AisBus/AisView setup (also use new tagging)
 	Remove region test in data classes
 
 + Legacy transformer that determines source type by gatehouse region id
+
+=====
+
++ AisPacketReader retry
 
 ======
 

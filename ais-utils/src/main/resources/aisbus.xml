@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <aisBusConfiguration>
+	<transformer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="sourceTypeSatTransformerConfiguration">
+		<gh_region>802</gh_region>
+		<gh_region>804</gh_region>
+		<source>ORBCOMM999</source>
+	</transformer>
 	<!-- The main provider -->
 	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
 		<name>AISD unfiltered</name>

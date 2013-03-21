@@ -3,12 +3,17 @@
 	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="duplicateFilterConfiguration">
 		<windowSize>10000</windowSize>
 	</filter>
+	<transformer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="sourceTypeSatTransformerConfiguration">
+		<gh_region>802</gh_region>
+		<gh_region>804</gh_region>
+		<source>ORBCOMM999</source>
+	</transformer>
 	<busPullMaxElements>1000</busPullMaxElements>
 	<busQueueSize>10000</busQueueSize>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
-<!-- 		<filter xsi:type="downSampleFilterConfiguration"> -->
-<!-- 			<samplingRate>600</samplingRate> -->
-<!-- 		</filter> -->
+		<!-- <filter xsi:type="downSampleFilterConfiguration"> -->
+		<!-- <samplingRate>600</samplingRate> -->
+		<!-- </filter> -->
 		<!-- <transformer xsi:type="cropVdmTransformerConfiguration" /> -->
 	</consumer>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpWriterConsumerConfiguration">

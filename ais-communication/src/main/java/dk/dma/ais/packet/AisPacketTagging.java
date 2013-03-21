@@ -159,9 +159,10 @@ public class AisPacketTagging {
     public CommentBlock getCommentBlock() {
         return getCommentBlock(new CommentBlock());
     }
-    
+
     /**
-     * Supplement given comment block with tags (overriding) 
+     * Supplement given comment block with tags (overriding)
+     * 
      * @param cb
      * @return
      */
@@ -183,9 +184,10 @@ public class AisPacketTagging {
         }
         return cb;
     }
-    
+
     /**
-     * Supplement given comment block with tags (not overriding) 
+     * Supplement given comment block with tags (not overriding)
+     * 
      * @param cb
      * @return
      */
@@ -207,7 +209,7 @@ public class AisPacketTagging {
         }
         return cb;
     }
-    
+
     /**
      * Get new tagging with tags in proposed tagging not already in the current tag
      * 
@@ -233,12 +235,13 @@ public class AisPacketTagging {
 
     /**
      * Determine if given tagging match this tagging
+     * 
      * @param parse
      * @return
      */
     public boolean filterMatch(AisPacketTagging tagging) {
         if (sourceId != null && (tagging.getSourceId() == null || !tagging.getSourceId().equals(sourceId))) {
-            return false; 
+            return false;
         }
         if (sourceBs != null && (tagging.getSourceBs() == null || tagging.getSourceBs() != sourceBs)) {
             return false;
@@ -253,19 +256,16 @@ public class AisPacketTagging {
     }
 
     /**
-     * Parse tags from AisPacket. Uses comment block with first priority and fall back to proprietary tags.
+     * Parse tags from Vdm. Uses comment block with first priority and fall back to proprietary tags.
      * 
      * @param packet
      * @return tagging instance
      */
-    public static AisPacketTagging parse(AisPacket packet) {
-        requireNonNull(packet);
+    public static AisPacketTagging parse(Vdm vdm) {
         AisPacketTagging tags = new AisPacketTagging();
-
         // Get timestamp
-        tags.setTimestamp(packet.getTimestamp());
+        tags.setTimestamp((vdm != null) ? vdm.getTimestamp() : null);
         // Get comment block
-        Vdm vdm = packet.getVdm();
         CommentBlock cb = (vdm != null) ? vdm.getCommentBlock() : null;
         // Get from comment block
         if (cb != null) {
@@ -299,5 +299,35 @@ public class AisPacketTagging {
 
         return tags;
     }
+
+    /**
+     * Parse tags from AisPacket. Uses comment block with first priority and fall back to proprietary tags.
+     * 
+     * @param packet
+     * @return tagging instance
+     */
+    public static AisPacketTagging parse(AisPacket packet) {
+        requireNonNull(packet);
+        return parse(packet.getVdm());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AisPacketTagging [timestamp=");
+        builder.append(timestamp);
+        builder.append(", sourceId=");
+        builder.append(sourceId);
+        builder.append(", sourceBs=");
+        builder.append(sourceBs);
+        builder.append(", sourceCountry=");
+        builder.append(sourceCountry);
+        builder.append(", sourceType=");
+        builder.append(sourceType);
+        builder.append("]");
+        return builder.toString();
+    }
+    
+    
 
 }

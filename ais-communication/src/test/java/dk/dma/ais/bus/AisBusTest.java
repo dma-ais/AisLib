@@ -41,6 +41,7 @@ import dk.dma.ais.bus.configuration.provider.TcpServerProviderConfiguration;
 import dk.dma.ais.bus.configuration.transform.CropVdmTransformerConfiguration;
 import dk.dma.ais.bus.configuration.transform.PacketTaggingConfiguration;
 import dk.dma.ais.bus.configuration.transform.ReplayTransformConfiguration;
+import dk.dma.ais.bus.configuration.transform.SourceTypeSatTransformerConfiguration;
 import dk.dma.ais.bus.configuration.transform.TaggingTransformerConfiguration;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpServerConf;
@@ -54,6 +55,12 @@ public class AisBusTest {
         // Bus Filters
         conf.getFilters().add(new DownSampleFilterConfiguration());
         conf.getFilters().add(new DuplicateFilterConfiguration());
+        
+        SourceTypeSatTransformerConfiguration satSourceConf = new SourceTypeSatTransformerConfiguration();
+        satSourceConf.getSatGhRegions().add("802");
+        satSourceConf.getSatGhRegions().add("804");
+        satSourceConf.getSatSources().add("ORBCOMM999");
+        conf.getTransformers().add(satSourceConf);
         
         // Provider
         TcpClientProviderConfiguration rrReader = new TcpClientProviderConfiguration();
