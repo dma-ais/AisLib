@@ -13,21 +13,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus;
+package dk.dma.ais.configuration.transform;
 
-import java.io.FileNotFoundException;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import javax.xml.bind.JAXBException;
+import dk.dma.ais.transform.IAisPacketTransformer;
+import dk.dma.ais.transform.ReplayTransformer;
 
-import dk.dma.ais.configuration.bus.AisBusConfiguration;
+@XmlRootElement
+public class ReplayTransformConfiguration extends TransformerConfiguration {
 
-/**
- * Get AisBus instance from XML configuration file 
- */
-public class AisBusFactory {
+    private double speedup = 1;
 
-    public static AisBus get(String filename) throws JAXBException, FileNotFoundException {
-        return (AisBus)(AisBusConfiguration.load(filename).getInstance());
+    public ReplayTransformConfiguration() {
+        super();
+    }
+
+    public double getSpeedup() {
+        return speedup;
+    }
+
+    public void setSpeedup(double speedup) {
+        this.speedup = speedup;
+    }
+
+    @Override
+    @XmlTransient
+    public IAisPacketTransformer getInstance() {
+        return new ReplayTransformer(speedup);
     }
 
 }

@@ -72,6 +72,11 @@
 				<radius>200000</radius>
 			</geometry>
 		</filter>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="messageTypeFilterConfiguration">
+			<disallowed>true</disallowed>
+			<message_type>6</message_type>
+			<message_type>8</message_type>
+		</filter>
 		<transformer xsi:type="replayTransformConfiguration">
 			<speedup>10.0</speedup>
 		</transformer>

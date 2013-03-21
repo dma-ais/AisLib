@@ -13,21 +13,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus;
+package dk.dma.ais.configuration.bus.consumer;
 
-import java.io.FileNotFoundException;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import javax.xml.bind.JAXBException;
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.consumer.StdoutConsumer;
 
-import dk.dma.ais.configuration.bus.AisBusConfiguration;
-
-/**
- * Get AisBus instance from XML configuration file 
- */
-public class AisBusFactory {
-
-    public static AisBus get(String filename) throws JAXBException, FileNotFoundException {
-        return (AisBus)(AisBusConfiguration.load(filename).getInstance());
+@XmlRootElement
+public class StdoutConsumerConfiguration extends AisBusConsumerConfiguration {
+    
+    public StdoutConsumerConfiguration() {
+        
+    }
+    
+    @Override
+    @XmlTransient
+    public AisBusComponent getInstance() {
+        StdoutConsumer consumer = new StdoutConsumer();
+        super.configure(consumer);
+        return consumer;
     }
 
 }

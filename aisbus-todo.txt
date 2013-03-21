@@ -1,7 +1,8 @@
 ====
 
 + Refacor current AisBus/AisView setup (also use new tagging)
-	Remove region test in data classes
+	Test
+	Make aisview and arctivweb specific ports	
 
 =====
 

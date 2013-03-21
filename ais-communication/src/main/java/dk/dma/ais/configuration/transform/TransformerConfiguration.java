@@ -13,21 +13,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus;
+package dk.dma.ais.configuration.transform;
 
-import java.io.FileNotFoundException;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
-import javax.xml.bind.JAXBException;
+import dk.dma.ais.transform.IAisPacketTransformer;
 
-import dk.dma.ais.configuration.bus.AisBusConfiguration;
+@XmlSeeAlso({ CropVdmTransformerConfiguration.class, TaggingTransformerConfiguration.class, ReplayTransformConfiguration.class,
+        SourceTypeSatTransformerConfiguration.class })
+public abstract class TransformerConfiguration {
 
-/**
- * Get AisBus instance from XML configuration file 
- */
-public class AisBusFactory {
+    public TransformerConfiguration() {
 
-    public static AisBus get(String filename) throws JAXBException, FileNotFoundException {
-        return (AisBus)(AisBusConfiguration.load(filename).getInstance());
     }
+
+    public abstract IAisPacketTransformer getInstance();
 
 }

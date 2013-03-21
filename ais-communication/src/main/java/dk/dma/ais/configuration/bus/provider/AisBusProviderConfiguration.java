@@ -13,21 +13,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.bus;
+package dk.dma.ais.configuration.bus.provider;
 
-import java.io.FileNotFoundException;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
-import javax.xml.bind.JAXBException;
+import dk.dma.ais.bus.AisBusProvider;
+import dk.dma.ais.configuration.bus.AisBusSocketConfiguration;
 
-import dk.dma.ais.configuration.bus.AisBusConfiguration;
+@XmlSeeAlso({ TcpClientProviderConfiguration.class, TcpServerProviderConfiguration.class, FileReaderProviderConfiguration.class })
+public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
 
-/**
- * Get AisBus instance from XML configuration file 
- */
-public class AisBusFactory {
+    public AisBusProviderConfiguration() {
 
-    public static AisBus get(String filename) throws JAXBException, FileNotFoundException {
-        return (AisBus)(AisBusConfiguration.load(filename).getInstance());
+    }
+    
+    protected AisBusProvider configure(AisBusProvider provider) {
+        super.configure(provider);
+        return provider;
     }
 
 }
