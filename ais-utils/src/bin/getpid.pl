@@ -6,7 +6,7 @@ print getpid( $ARGV[0] );
 
 sub getpid {
 	my $procname  = shift;
-	my $ps_out    = qx[ps ax | grep $procname];
+	my $ps_out    = qx[ps ax | grep "$procname"];
 	my @processes = split( /\n/, $ps_out );
 	foreach my $process (@processes) {
 		$process =~ s/^\s+//;

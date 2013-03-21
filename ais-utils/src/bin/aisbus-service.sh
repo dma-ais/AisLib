@@ -10,9 +10,11 @@ else
 	CONFFILE=$2
 fi
 
+PROCNAME="dk.dma.ais.utils.aisbus.AisBusLauncher -file $CONFFILE"
+
 stop () {
 	# Find pid
-	PID=`./getpid.pl aisbus.AisBusLauncher`
+	PID=`./getpid.pl "$PROCNAME"`
 	if [ -z $PID ]; then
 		echo "AisBus not running"
 		exit 1
@@ -24,7 +26,7 @@ stop () {
 
 case "$1" in
 start)
-	PID=`./getpid.pl aisbus.AisBusLauncher`
+	PID=`./getpid.pl "$PROCNAME"`
 	if [ ! -z $PID ]; then
 		echo "AisBus already running"
 		exit 1
@@ -43,7 +45,3 @@ restart)
 *)
     echo "Usage: $0 (start|stop|restart|help) [conffile]"
 esac
-
-
-
-
