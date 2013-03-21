@@ -56,7 +56,6 @@ public class AisFilter {
         long downsampleRate = 0;
         PrintStream out = System.out;
         boolean doubletFiltering = false;
-        boolean replayTag = false;
 
         if (args.length < 2) {
             usage();
@@ -90,8 +89,6 @@ public class AisFilter {
                 out = new PrintStream(args[++i]);
             } else if (args[i].indexOf("-F") >= 0) {
                 doubletFiltering = true;
-            } else if (args[i].indexOf("-R") >= 0) {
-                replayTag = true;
             }
             i++;
         }
@@ -135,7 +132,6 @@ public class AisFilter {
         // Message handler
         MessageHandler messageHandler = new MessageHandler(filterSettings, out);
         messageHandler.setDumpParsed(dumpParsed);
-        messageHandler.setReplayTag(replayTag);
         Consumer<AisMessage> handler = messageHandler;
 
         // Maybe insert downsampling filter

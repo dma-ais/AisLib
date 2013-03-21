@@ -25,7 +25,6 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisBinaryMessage;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.binary.AisApplicationMessage;
-import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.enav.util.function.Consumer;
@@ -41,7 +40,6 @@ public class MessageHandler implements Consumer<AisMessage> {
     private long end;
     private long msgCount;
     private long bytes;
-    private boolean replayTag;
 
     public MessageHandler(FilterSettings filter, PrintStream out) {
         this.filter = filter;
@@ -118,14 +116,6 @@ public class MessageHandler implements Consumer<AisMessage> {
         // Count message
         msgCount++;
 
-        // Print replay line
-        if (replayTag) {
-            DmaSourceTag dmaSourceTag = new DmaSourceTag();
-            dmaSourceTag.setSourceName("AISFILTER");
-            dmaSourceTag.setTimestamp(new Date());
-            aisMessage.setTag(dmaSourceTag);
-        }
-
         // Print tag line
         if (aisMessage.getTags() != null) {
             for (IProprietaryTag tag : aisMessage.getTags()) {
@@ -156,14 +146,6 @@ public class MessageHandler implements Consumer<AisMessage> {
             }
         }
 
-    }
-
-    public boolean isReplayTag() {
-        return replayTag;
-    }
-
-    public void setReplayTag(boolean replayTag) {
-        this.replayTag = replayTag;
     }
 
     public void setDumpParsed(boolean dumpParsed) {

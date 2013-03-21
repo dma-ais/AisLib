@@ -18,7 +18,8 @@ package dk.dma.ais.data;
 import java.io.Serializable;
 import java.util.Date;
 
-import dk.dma.enav.model.Country;
+import dk.dma.ais.packet.AisPacketTagging;
+import dk.dma.ais.packet.AisPacketTagging.SourceType;
 
 /**
  * Class to data about the source of an AIS target
@@ -27,32 +28,21 @@ public class AisTargetSourceData implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String sourceType = "LIVE";
-    private Country sourceCountry;
+    private AisPacketTagging tagging = new AisPacketTagging();
     private String sourceRegion;
-    private Integer sourceBs;
-    private String sourceSystem;
     private Date lastReport;
     private Date created;
 
     public AisTargetSourceData() {
         this.created = new Date();
     }
-
-    public String getSourceType() {
-        return sourceType;
+    
+    public AisPacketTagging getTagging() {
+        return tagging;
     }
-
-    public void setSourceType(String sourceType) {
-        this.sourceType = sourceType;
-    }
-
-    public Country getSourceCountry() {
-        return sourceCountry;
-    }
-
-    public void setSourceCountry(Country sourceCountry) {
-        this.sourceCountry = sourceCountry;
+    
+    public void setTagging(AisPacketTagging tagging) {
+        this.tagging = tagging;
     }
 
     public String getSourceRegion() {
@@ -63,22 +53,7 @@ public class AisTargetSourceData implements Serializable {
         this.sourceRegion = sourceRegion;
     }
 
-    public Integer getSourceBs() {
-        return sourceBs;
-    }
-
-    public void setSourceBs(Integer sourceBs) {
-        this.sourceBs = sourceBs;
-    }
-
-    public String getSourceSystem() {
-        return sourceSystem;
-    }
-
-    public void setSourceSystem(String sourceSystem) {
-        this.sourceSystem = sourceSystem;
-    }
-
+    
     public Date getLastReport() {
         return lastReport;
     }
@@ -96,7 +71,8 @@ public class AisTargetSourceData implements Serializable {
     }
 
     public boolean isSatData() {
-        return sourceType != null && sourceType.equals("SAT");
+        SourceType sourceType = tagging.getSourceType();
+        return (sourceType != null && sourceType == SourceType.SATELLITE);
     }
 
 }

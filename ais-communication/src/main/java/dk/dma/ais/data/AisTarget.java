@@ -27,10 +27,9 @@ import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.AisStaticCommon;
 import dk.dma.ais.message.IVesselPositionMessage;
-import dk.dma.ais.proprietary.DmaSourceTag;
+import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.proprietary.GatehouseSourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
-import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.enav.model.Country;
 
 /**
@@ -80,50 +79,20 @@ public abstract class AisTarget implements Serializable {
         }
 
         String sourceRegion = null;
-        String sourceType = "LIVE";
-        String sourceSystem = null;
-        Country sourceCountry = null;
-        Integer sourceBs = null;
-
+        // Get source region from Gatehouse tag
         if (aisMessage.getTags() != null) {
             for (IProprietaryTag tag : aisMessage.getTags()) {
-                if (tag instanceof DmaSourceTag) {
-                    DmaSourceTag dmaSourceTag = (DmaSourceTag) tag;
-                    sourceSystem = dmaSourceTag.getSourceName();
-                } else if (tag instanceof GatehouseSourceTag) {
+                if (tag instanceof GatehouseSourceTag) {
                     GatehouseSourceTag ghTag = (GatehouseSourceTag) tag;
                     sourceRegion = ghTag.getRegion();
-                    sourceCountry = ghTag.getCountry();
-                    sourceBs = ghTag.getBaseMmsi();
                 }
             }
         }
-        this.lastReport = aisMessage.getVdm().getTimestamp();
-
-        sourceData.setSourceSystem(sourceSystem);
-        if (sourceRegion != null) {
-            if (sourceRegion.length() == 0) {
-                sourceRegion = null;
-            } else {
-                // TODO This mapping should come from a tag in the future
-                if (sourceRegion.equals("802") || sourceRegion.equals("804")) {
-                    sourceType = "SAT";
-                }
-                if (sourceRegion.equals("808")) {
-                    CommentBlock cb = aisMessage.getVdm().getCommentBlock();
-                    if (cb != null) {
-                        String source = cb.getString("s");
-                        if (source != null && source.contains("ORBCOMM999")) {
-                            sourceType = "SAT";
-                        }
-                    }
-                }
-            }
-        }
+        
+        this.lastReport = aisMessage.getVdm().getTimestamp();        
+        
+        sourceData.setTagging(AisPacketTagging.parse(aisMessage.getVdm()));
         sourceData.setSourceRegion(sourceRegion);
-        sourceData.setSourceType(sourceType);
-        sourceData.setSourceBs(sourceBs);
-        sourceData.setSourceCountry(sourceCountry);
         sourceData.setLastReport(this.lastReport);
 
         // Set country

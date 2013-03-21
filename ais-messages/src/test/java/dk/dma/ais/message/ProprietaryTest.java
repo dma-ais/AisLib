@@ -26,6 +26,5 @@ public class ProprietaryTest {
     @Test
     public void pTest() {
         Assert.assertNotNull(ProprietaryFactory.parseTag("$PGHP,1,2010,6,11,11,46,11,874,276,0,,1,55*2C"));
-        Assert.assertNotNull(ProprietaryFactory.parseTag("$PDMA,TEST,34123123123*hh"));
     }
 }

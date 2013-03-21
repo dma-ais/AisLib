@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.Date;
 
 import net.jcip.annotations.NotThreadSafe;
-import dk.dma.ais.proprietary.DmaSourceTag;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.CommentBlock;
@@ -283,9 +282,6 @@ public class AisPacketTagging {
             return tags;
         }
         for (IProprietaryTag tag : vdm.getTags()) {
-            if (tags.getSourceId() == null && (tag instanceof DmaSourceTag)) {
-                tags.setSourceId(((DmaSourceTag) tag).getSourceName());
-            }
             if (tag instanceof IProprietarySourceTag) {
                 IProprietarySourceTag sourceTag = (IProprietarySourceTag) tag;
                 if (tags.getSourceBs() == null) {
