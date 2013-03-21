@@ -7,7 +7,7 @@ if [ -z $2 ]
 then
 	CONFFILE=aisbus.xml
 else
-	CONFFILE=$1
+	CONFFILE=$2
 fi
 
 stop () {

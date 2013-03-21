@@ -20,7 +20,7 @@
 		<param name="MaxBackupIndex" value="3" />
 		<param name="Threshold" value="INFO" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d %-5p [%c] %m%n" />
+			<param name="ConversionPattern" value="%d %-5p [%c{1}] %m%n" />
 		</layout>
 	</appender>
 	
@@ -31,7 +31,7 @@
 		<param name="MaxFileSize" value="1024KB" />
 		<param name="Threshold" value="ERROR" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d %-5p [%c] %m%n" />
+			<param name="ConversionPattern" value="%d %-5p [%c{1}] %m%n" />
 		</layout>
 	</appender>
 
