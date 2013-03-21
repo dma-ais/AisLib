@@ -1,11 +1,7 @@
 ====
 
-+ aisbus-service som kan tage fil argument
-
 + Refacor current AisBus/AisView setup (also use new tagging)
 	Remove region test in data classes
-
-+ Legacy transformer that determines source type by gatehouse region id
 
 =====
 
@@ -34,9 +30,11 @@
 
 ====
 
-+ Transformer that makes comment block out of gatehouse tag
-
 + Why ais-communication and ais-message ?
 
-+ Statistics on TcpClients also 
++ Rethink statistics (IN OUT OVERFLOW FILTERED)
+	Maybe not possible to implement in  AisBusComponent then but in sockets
+
++ Statistics on TcpClients also
+
 

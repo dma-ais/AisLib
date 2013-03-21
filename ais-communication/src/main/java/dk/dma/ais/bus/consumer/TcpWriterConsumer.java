@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.AisBusElement;
+import dk.dma.ais.bus.OverflowLogger;
 import dk.dma.ais.bus.tcp.IClientStoppedListener;
 import dk.dma.ais.bus.tcp.TcpClient;
 import dk.dma.ais.bus.tcp.TcpClientConf;
@@ -38,6 +39,7 @@ import dk.dma.ais.bus.tcp.TcpWriteClient;
 public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClientStoppedListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpWriterConsumer.class);
+    private final OverflowLogger overflowLogger = new OverflowLogger(LOG);
 
     private TcpWriteClient writeClient;
 
@@ -53,7 +55,10 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
     @Override
     public void receiveFiltered(AisBusElement queueElement) {
         if (status.isConnected()) {
-            writeClient.send(queueElement.getPacket().getStringMessage());
+            if (!writeClient.send(queueElement.getPacket().getStringMessage())) {
+                status.overflow();
+                overflowLogger.log("Overflow writing to client");
+            }
         }
     }
 
@@ -77,7 +82,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 setConnected();
                 writeClient.start();
                 // Wait for client to loose connection
-                writeClient.join();                
+                writeClient.join();
             } catch (IOException e) {
                 LOG.info("Connection error: " + e.getMessage());
             } catch (InterruptedException e) {
@@ -149,7 +154,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
 
     @Override
     public void clientStopped(TcpClient client) {
-
+        setNotConnected();
     }
 
 }

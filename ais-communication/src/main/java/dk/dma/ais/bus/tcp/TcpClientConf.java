@@ -22,7 +22,7 @@ public class TcpClientConf {
 
     private boolean gzipCompress;
     private int gzipBufferSize = 2048;
-    private int bufferSize = 2048;
+    private int bufferSize = 8192;
 
     public TcpClientConf() {
 
