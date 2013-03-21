@@ -3,7 +3,7 @@
 SCRIPTPATH=`dirname $0`
 cd $SCRIPTPATH
 
-if [ -z $1 ]
+if [ -z $2 ]
 then
 	CONFFILE=aisbus.xml
 else
