@@ -3,6 +3,13 @@
 SCRIPTPATH=`dirname $0`
 cd $SCRIPTPATH
 
+if [ -z $1 ]
+then
+	CONFFILE=aisbus.xml
+else
+	CONFFILE=$1
+fi
+
 stop () {
 	# Find pid
 	PID=`./getpid.pl aisbus.AisBusLauncher`
@@ -23,7 +30,7 @@ start)
 		exit 1
 	fi
     echo "Starting AisBus"
-    ./aisbus.sh -file aisbus.xml > /dev/null 2>&1 &
+    ./aisbus.sh -file $CONFFILE > /dev/null 2>&1 &
     ;;
 stop)
     stop
@@ -34,7 +41,7 @@ restart)
     $0 start
     ;;
 *)
-    echo "Usage: $0 (start|stop|restart|help)"
+    echo "Usage: $0 (start|stop|restart|help) [conffile]"
 esac
 
 
