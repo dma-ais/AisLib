@@ -53,7 +53,7 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
                 inputStream = socket.getInputStream();
             }
             AisStreamReader reader = new AisStreamReader(inputStream);
-            reader.registerPacketHandler(packetConsumer);
+            reader.registerPacketHandler(this);
             reader.start();
             reader.join();
         } catch (IOException e) {
