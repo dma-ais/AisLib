@@ -214,7 +214,7 @@ public class CommentBlock {
      * @return
      */
     public boolean isEmpty() {
-        return (parameterMap.size() == 0);
+        return parameterMap.size() == 0;
     }
     
     /**
