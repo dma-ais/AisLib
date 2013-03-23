@@ -52,9 +52,6 @@ public abstract class AisReader extends Thread {
 
     static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
 
-    // Temporary hack to allow the insertion of the DMA tag to indicate source
-    private boolean addDmaTag;
-
     public enum Status {
         CONNECTED, DISCONNECTED
     };
@@ -324,14 +321,6 @@ public abstract class AisReader extends Thread {
                 handleLine(line);
             }
         }
-    }
-
-    public boolean isAddDmaTag() {
-        return addDmaTag;
-    }
-
-    public void setAddDmaTag(boolean addDmaTag) {
-        this.addDmaTag = addDmaTag;
     }
 
     public String getSourceId() {

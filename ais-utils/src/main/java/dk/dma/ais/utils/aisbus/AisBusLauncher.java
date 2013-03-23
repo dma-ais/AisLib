@@ -29,6 +29,9 @@ import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.AisBusFactory;
 import dk.dma.ais.bus.AisBusProvider;
+import dk.dma.ais.bus.consumer.TcpServerConsumer;
+import dk.dma.ais.bus.provider.TcpServerProvider;
+import dk.dma.ais.bus.tcp.TcpClient;
 import dk.dma.commons.app.AbstractDaemon;
 
 /**
@@ -66,28 +69,47 @@ public class AisBusLauncher extends AbstractDaemon {
             ratePrint(aisBus, null);
             for (AisBusProvider provider : aisBus.getProviders()) {
                 ratePrint(provider, provider.getName());
+                if (provider instanceof TcpServerProvider) {
+                    for (TcpClient tcpClient : ((TcpServerProvider)provider).getServer().getClients()) {
+                        ratePrint(tcpClient);
+                    }
+                }
             }
             for (AisBusConsumer consumer : aisBus.getConsumers()) {
                 ratePrint(consumer, consumer.getName());
+                if (consumer instanceof TcpServerConsumer) {
+                    for (TcpClient tcpClient : ((TcpServerConsumer)consumer).getServer().getClients()) {
+                        ratePrint(tcpClient);
+                    }
+                }
             }
             LOG.info(StringUtils.leftPad("", 100, '-'));
             Thread.sleep(60000);
         }
 
     }
+    
+    private void ratePrint(TcpClient tcpClient) {
+        LOG.info(String.format("     %-15s %s", tcpClient.getRemoteHost(), tcpClient.rateReport()));
+    }
 
     private void ratePrint(AisBusComponent comp, String name) {
         if (name == null) {
             name = comp.getClass().getSimpleName();
         }
-        LOG.info(String.format("%-20s %s", name, comp.rateReport()));
+        ratePrint(comp.rateReport(), name);
+    }
+    
+    private void ratePrint(String report, String name) {
+        LOG.info(String.format("%-20s %s", name, report));
     }
 
     @Override
     protected void shutdown() {
-        LOG.info("Shutdown");
-        // TODO close AisBus
+        LOG.info("Shutting down ...");
+        aisBus.cancel();
         super.shutdown();
+        LOG.info("Shutting down done!");
     }
 
     public static void main(String[] args) throws Exception {

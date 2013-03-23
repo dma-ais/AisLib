@@ -21,6 +21,8 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.jcip.annotations.NotThreadSafe;
+
 import org.apache.commons.lang.StringUtils;
 
 import dk.dma.ais.binary.SixbitException;
@@ -40,6 +42,7 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
  * The class will deliver packets containing complete VDM and associated
  * comment blocks and proprietary tags.
  */
+@NotThreadSafe
 public class AisPacketReader {
 
     private static final int SENTENCE_TRACE_COUNT = 20;

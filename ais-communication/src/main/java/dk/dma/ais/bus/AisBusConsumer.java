@@ -86,6 +86,16 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
         consumerThread.start();
         super.start();
     }
+    
+    @Override
+    public void cancel() {
+        // Stop consumer thread
+        consumerThread.cancel();
+        try {
+            consumerThread.join(5000);
+        } catch (InterruptedException e) {
+        }
+    }
 
     /**
      * All consumers must implement a method to get the filtered packet

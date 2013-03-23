@@ -38,10 +38,10 @@ import dk.dma.ais.queue.MessageQueueOverflowException;
  */
 @ThreadSafe
 public class AisBus extends AisBusComponent implements Runnable {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(AisBus.class);
     private final OverflowLogger overflowLogger = new OverflowLogger(LOG);
-    
+
     /**
      * Queue to represent the bus
      */
@@ -56,14 +56,14 @@ public class AisBus extends AisBusComponent implements Runnable {
      * Collection of providers
      */
     private final CopyOnWriteArraySet<AisBusProvider> providers = new CopyOnWriteArraySet<>();
-    
+
     private volatile int busPullMaxElements = 1000;
     private volatile int busQueueSize = 10000;
 
     public AisBus() {
 
     }
-    
+
     /**
      * Initialize AisBus
      */
@@ -87,6 +87,16 @@ public class AisBus extends AisBusComponent implements Runnable {
         super.start();
     }
 
+    @Override
+    public void cancel() {
+        getThread().interrupt();
+        try {
+            getThread().join(THREAD_STOP_WAIT_MAX);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Start all consumers
      */
@@ -95,7 +105,16 @@ public class AisBus extends AisBusComponent implements Runnable {
             consumer.start();
         }
     }
-    
+
+    /**
+     * Stop all consumers
+     */
+    public void stopConsumers() {
+        for (AisBusConsumer consumer : consumers) {
+            consumer.cancel();
+        }
+    }
+
     /**
      * Start all providers
      */
@@ -104,7 +123,16 @@ public class AisBus extends AisBusComponent implements Runnable {
             provider.start();
         }
     }
-    
+
+    /**
+     * Stop all providers
+     */
+    public void stopProviders() {
+        for (AisBusProvider provider : providers) {
+            provider.cancel();
+        }
+    }
+
     /**
      * Push element onto the bus. Returns false if the bus is overflowing
      * 
@@ -122,11 +150,24 @@ public class AisBus extends AisBusComponent implements Runnable {
         try {
             busQueue.push(new AisBusElement(packet));
         } catch (MessageQueueOverflowException e) {
-            status.overflow();
-            overflowLogger.log("AisBus overflow [rate=" + status.getOverflowRate() + " packet/sec]");
+            overflowLogger.log("AisBus overflow [rate=" + avgOverflowRate() + " packet/sec]");
             return false;
         }
         return true;
+    }
+    
+    /**
+     * Get the average overflow rate experienced by all providers
+     * @return
+     */
+    public double avgOverflowRate() {
+        double sum = 0;
+        int count = 0;
+        for (AisBusProvider provider : providers) {
+            sum += provider.getStatus().getOverflowRate();
+            count++;
+        }
+        return sum / count;        
     }
 
     /**
@@ -164,7 +205,7 @@ public class AisBus extends AisBusComponent implements Runnable {
             // Consume from bus queue
             try {
                 busQueue.pull(elements, busPullMaxElements);
-            } catch (InterruptedException e) {                
+            } catch (InterruptedException e) {
                 break;
             }
             // Iterate through consumers
@@ -175,14 +216,13 @@ public class AisBus extends AisBusComponent implements Runnable {
                 }
             }
         }
-        
-        LOG.info("AisBus stopping");
-        
+
+        stopProviders();
+        stopConsumers();
+
         setStopped();
-        
-        // TODO stop consumers and providers
-        // use method on component that can be overridden
-        
+
+        LOG.info("Stopped");
     }
 
     public void setBusPullMaxElements(int busPullMaxElements) {
@@ -192,11 +232,11 @@ public class AisBus extends AisBusComponent implements Runnable {
     public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
-    
+
     public Set<AisBusConsumer> getConsumers() {
         return Collections.unmodifiableSet(consumers);
     }
-    
+
     public Set<AisBusProvider> getProviders() {
         return Collections.unmodifiableSet(providers);
     }

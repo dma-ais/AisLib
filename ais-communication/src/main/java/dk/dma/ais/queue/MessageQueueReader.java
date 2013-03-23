@@ -18,11 +18,6 @@ package dk.dma.ais.queue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import dk.dma.ais.bus.AisBus;
-
 import net.jcip.annotations.ThreadSafe;
 
 /**
@@ -31,8 +26,6 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public class MessageQueueReader<T> extends Thread {
     
-    private static final Logger LOG = LoggerFactory.getLogger(AisBus.class);
-
     private final IQueueEntryHandler<T> handler;
     private final IMessageQueue<T> queue;
     private final int pullMaxElements;
@@ -63,7 +56,6 @@ public class MessageQueueReader<T> extends Thread {
             list.clear();
         }
         
-        LOG.debug("Stopping message queue reader thread");
     }
 
     public IMessageQueue<T> getQueue() {
@@ -72,6 +64,10 @@ public class MessageQueueReader<T> extends Thread {
     
     public IQueueEntryHandler<T> getHandler() {
         return handler;
+    }
+    
+    public void cancel() {
+        this.interrupt();
     }
 
 }

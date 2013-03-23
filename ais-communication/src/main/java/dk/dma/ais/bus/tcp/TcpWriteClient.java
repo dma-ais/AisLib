@@ -51,8 +51,9 @@ public class TcpWriteClient extends TcpClient {
      * @param msg
      */
     public boolean send(String msg) {
+        status.receive();
         if (!buffer.offer(msg)) {
-            // TOOD update some statistics            
+            status.overflow();            
             return false;
         }
         return true;
@@ -60,6 +61,7 @@ public class TcpWriteClient extends TcpClient {
 
     @Override
     public void run() {
+        status.setConnected();
         try {
             // Open output stream
             OutputStream outputStream;
@@ -86,7 +88,9 @@ public class TcpWriteClient extends TcpClient {
                 }
             }
         } catch (IOException e) {
-            LOG.info("TCP client error: " + e.getMessage());
+            if (!isInterrupted()) {
+                LOG.info(e.getMessage());
+            }
         } catch (InterruptedException e) {
 
         }
@@ -95,9 +99,9 @@ public class TcpWriteClient extends TcpClient {
         } catch (IOException e) {
         }
         
-        LOG.info("TCP client stopping");
-        
         stopping();
+        
+        LOG.info("Stopped");
     }
 
 }

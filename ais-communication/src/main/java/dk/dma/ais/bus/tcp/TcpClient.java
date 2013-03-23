@@ -15,32 +15,76 @@
  */
 package dk.dma.ais.bus.tcp;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.status.AisBusComponentStatus;
 
 /**
  * Base class for all TCP clients
  */
 @ThreadSafe
 public abstract class TcpClient extends Thread {
-    
+
     protected final TcpClientConf conf;
-    protected final Socket socket;        
-    private final IClientStoppedListener stopListener;    
+    protected final Socket socket;
+    private final IClientStoppedListener stopListener;
     
-    public TcpClient(IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {        
+    protected final AisBusComponentStatus status = new AisBusComponentStatus();
+
+    public TcpClient(IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
+        status.setInitialized();
         this.stopListener = stopListener;
         this.socket = socket;
         this.conf = conf;
     }
-        
+
+    /**
+     * Get status for "component"
+     * @return
+     */
+    public AisBusComponentStatus getStatus() {
+        return status;
+    }
+    
+    public String getRemoteHost() {
+        InetSocketAddress address = (InetSocketAddress)socket.getRemoteSocketAddress();
+        if (address == null) {
+            return "not connected";
+        } else {
+            return address.toString();
+        }            
+    }
+
     /**
      * Method must be called before the thread stops
      */
     protected void stopping() {
+        status.setStopped();
         stopListener.clientStopped(this);
     }
-    
-    
+
+    /**
+     * Stop the client
+     */
+    public void cancel() {
+        this.interrupt();
+        try {
+            socket.close();
+        } catch (IOException ignored) {
+        }
+        try {
+            this.join(AisBusComponent.THREAD_STOP_WAIT_MAX);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String rateReport() {
+        return String.format("[count/overflow] %4.2f / %4.2f  (packets/sec)", status.getInRate(), status.getOverflowRate());
+    }
+
 }

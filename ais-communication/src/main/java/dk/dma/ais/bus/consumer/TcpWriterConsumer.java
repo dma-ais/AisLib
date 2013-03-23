@@ -86,8 +86,6 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
             } catch (IOException e) {
                 LOG.info("Connection error: " + e.getMessage());
             } catch (InterruptedException e) {
-                // TODO handle
-                e.printStackTrace();
                 break;
             } finally {
                 try {
@@ -102,14 +100,17 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 LOG.info("Waiting to reconnect");
                 Thread.sleep(reconnectInterval * 1000);
             } catch (InterruptedException e) {
-                // TODO handle interuption
-                e.printStackTrace();
                 break;
             }
         }
         
+        if (writeClient != null) {
+            writeClient.cancel();
+        }
+        
         setStopped();
-
+        
+        LOG.info("Stopped");        
     }
 
     @Override
@@ -118,6 +119,17 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
         setThread(t);
         t.start();
         super.start();
+    }
+    
+    @Override
+    public void cancel() {
+        getThread().interrupt();
+        try {
+            getThread().join(THREAD_STOP_WAIT_MAX);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        super.cancel();        
     }
 
     public int getPort() {

@@ -45,22 +45,22 @@ public class AisBusComponentStatus {
     private final long startTime;
 
     /**
-     * Number of packets received by the component and not filtered
+     * Number of packets received by the component
      */
-    private long packetCount;
+    private long inCount;
     /**
-     * Number of packets received but filtered away by the component
+     * Number of packets filtered by the component
      */
-    private long filteredPacketCount;
+    private long filteredCount;
     /**
      * Number of packets that cannot be delivered due to overflow at the receiver
      */
     private long overflowCount;
 
     /**
-     * Statistics for packet count the last flowStatInterval
+     * Statistics for in count the last flowStatInterval
      */
-    private final FlowStat packetCountStat;
+    private final FlowStat inCountStat;
 
     /**
      * Statistics for overflow the last flowStatInterval
@@ -81,7 +81,7 @@ public class AisBusComponentStatus {
         this.state = State.CREATED;
         this.startTime = System.currentTimeMillis();
         this.flowStatInterval = flowStatInterval;
-        this.packetCountStat = new FlowStat(flowStatInterval);
+        this.inCountStat = new FlowStat(flowStatInterval);
         this.overflowCountStat = new FlowStat(flowStatInterval);
         this.filteredCountStat = new FlowStat(flowStatInterval);
     }
@@ -90,8 +90,8 @@ public class AisBusComponentStatus {
      * Indicate a reception that is not filtered away
      */
     public synchronized void receive() {
-        packetCountStat.received();
-        packetCount++;
+        inCountStat.received();
+        inCount++;
     }
 
     /**
@@ -99,7 +99,7 @@ public class AisBusComponentStatus {
      */
     public synchronized void filtered() {
         filteredCountStat.received();
-        filteredPacketCount++;
+        filteredCount++;
     }
 
     /**
@@ -128,6 +128,10 @@ public class AisBusComponentStatus {
         state = State.STARTED;
     }
     
+    public synchronized boolean isStarted() {
+        return (state == State.STARTED || state == State.CONNECTED || state == State.NOT_CONNECTED);
+    }
+    
     public synchronized void setConnected() {
         state = State.CONNECTED;
     }
@@ -152,16 +156,16 @@ public class AisBusComponentStatus {
         return flowStatInterval;
     }
 
-    public synchronized long getPacketCount() {
-        return packetCount;
+    public synchronized long getInCount() {
+        return inCount;
     }
     
-    public synchronized double getPacketRate() {
-        return packetCountStat.getRate();
+    public synchronized double getInRate() {
+        return inCountStat.getRate();
     }
 
-    public synchronized long getFilteredPacketCount() {
-        return filteredPacketCount;
+    public synchronized long getFilteredCount() {
+        return filteredCount;
     }
     
     public synchronized double getFilteredRate() {
@@ -185,14 +189,14 @@ public class AisBusComponentStatus {
         builder.append(flowStatInterval);
         builder.append(", startTime=");
         builder.append(startTime);
-        builder.append(", packetCount=");
-        builder.append(packetCount);
-        builder.append(", filteredPacketCount=");
-        builder.append(filteredPacketCount);
+        builder.append(", inCount=");
+        builder.append(inCount);
+        builder.append(", filteredCount=");
+        builder.append(filteredCount);
         builder.append(", overflowCount=");
         builder.append(overflowCount);
-        builder.append(", packetCountStat=");
-        builder.append(packetCountStat);
+        builder.append(", inCountStat=");
+        builder.append(inCountStat);
         builder.append(", overflowCountStat=");
         builder.append(overflowCountStat);
         builder.append("]");

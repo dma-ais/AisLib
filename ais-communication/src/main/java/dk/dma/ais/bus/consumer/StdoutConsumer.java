@@ -34,4 +34,10 @@ public class StdoutConsumer extends AisBusConsumer {
         System.out.println(queueElement.getPacket().getStringMessage());
     }
     
+    @Override
+    public void cancel() {        
+        super.cancel();
+        setStopped();
+    }
+    
 }

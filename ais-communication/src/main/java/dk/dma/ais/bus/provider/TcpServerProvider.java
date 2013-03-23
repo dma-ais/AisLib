@@ -18,6 +18,7 @@ package dk.dma.ais.bus.provider;
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpReadServer;
+import dk.dma.ais.bus.tcp.TcpServer;
 import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.enav.util.function.Consumer;
@@ -52,6 +53,17 @@ public class TcpServerProvider extends AisBusProvider implements Consumer<AisPac
         server.start();
         super.start();
     }
+    
+    @Override
+    public void cancel() {
+        server.cancel();
+        try {
+            server.join(THREAD_STOP_WAIT_MAX);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        setStopped();
+    }
 
     public void setClientConf(TcpClientConf clientConf) {
         server.setClientConf(clientConf);
@@ -59,6 +71,10 @@ public class TcpServerProvider extends AisBusProvider implements Consumer<AisPac
 
     public void setServerConf(TcpServerConf serverConf) {
         server.setServerConf(serverConf);
+    }
+    
+    public TcpServer getServer() {
+        return server;
     }
 
 }

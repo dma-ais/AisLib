@@ -30,6 +30,13 @@ public class FlowStat {
     private Long lastReceived = null;
     // Timestamps for receives
     private LinkedList<Long> receives = new LinkedList<Long>();
+    
+    /**
+     * Default interval of one minute to calculate rate
+     */
+    public FlowStat() {
+        this(60000);
+    }
 
     /**
      * Constructor given the interval to calculate rate for

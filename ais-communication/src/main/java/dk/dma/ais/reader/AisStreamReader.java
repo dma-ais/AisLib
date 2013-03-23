@@ -43,7 +43,7 @@ public class AisStreamReader extends AisReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisStreamReader.class);
 
-    private InputStream stream;
+    private final InputStream stream;
 
     public AisStreamReader(InputStream stream) {
         this.stream = requireNonNull(stream);
@@ -54,9 +54,10 @@ public class AisStreamReader extends AisReader {
         try {
             readLoop(stream);
         } catch (IOException e) {
-            LOG.error("Failed to read stream: " + e.getMessage());
+            if (!isInterrupted()) {
+                LOG.error("Failed to read stream: " + e.getMessage());
+            }
         }
-        stream = null;
     }
 
     @Override
@@ -72,10 +73,10 @@ public class AisStreamReader extends AisReader {
 
     @Override
     public void stopReader() {
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException e) {}
+        this.interrupt();
+        try {
+            stream.close();
+        } catch (IOException ignored) {
         }
     }
 }

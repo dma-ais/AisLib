@@ -17,6 +17,7 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -30,7 +31,9 @@ import dk.dma.enav.model.Country;
  * Tags for an AisPacket. Encoded as comment blocks.
  */
 @NotThreadSafe
-public class AisPacketTagging {
+public class AisPacketTagging implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static final String SOURCE_ID_KEY = "si";
     public static final String SOURCE_BS_KEY = "sb";
@@ -242,7 +245,7 @@ public class AisPacketTagging {
         if (sourceId != null && (tagging.getSourceId() == null || !tagging.getSourceId().equals(sourceId))) {
             return false;
         }
-        if (sourceBs != null && (tagging.getSourceBs() == null || tagging.getSourceBs() != sourceBs)) {
+        if (sourceBs != null && (tagging.getSourceBs() == null || tagging.getSourceBs().intValue() != sourceBs)) {
             return false;
         }
         if (sourceCountry != null && (tagging.getSourceCountry() == null || !tagging.getSourceCountry().equals(sourceCountry))) {
@@ -323,7 +326,5 @@ public class AisPacketTagging {
         builder.append("]");
         return builder.toString();
     }
-    
-    
 
 }

@@ -27,7 +27,7 @@ public class OverflowLogger {
     private final Logger logger;
     
     public OverflowLogger(Logger logger) {
-        this(logger, 60000);
+        this(logger, 10000);
     }
 
     public OverflowLogger(Logger logger, long interval) {

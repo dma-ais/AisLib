@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,8 +32,8 @@ import dk.dma.enav.util.function.Consumer;
 /**
  * Thread class for reading AIS messages from a TCP stream.
  * 
- * Connection handling is fail tolerant. Connection error is handled by waiting a specified amount of time before doing
- * a re-connect (default 5 sec).
+ * Connection handling is fail tolerant. Connection error is handled by waiting a specified amount of time before doing a re-connect
+ * (default 5 sec).
  * 
  * Handlers for the parsed AIS messages must be registered with registerHanlder() method.
  * 
@@ -53,11 +54,13 @@ public class AisTcpReader extends AisReader {
     protected int port;
 
     protected OutputStream outputStream;
-    protected Socket clientSocket = new Socket();
+    protected final AtomicReference<Socket> clientSocket = new AtomicReference<>();
 
     protected int timeout = 10;
 
-    public AisTcpReader() {}
+    public AisTcpReader() {
+        clientSocket.set(new Socket());
+    }
 
     /**
      * Constructor with hostname and port
@@ -119,14 +122,15 @@ public class AisTcpReader extends AisReader {
             try {
                 disconnect();
                 connect();
-                readLoop(clientSocket.getInputStream());
+                readLoop(clientSocket.get().getInputStream());
             } catch (IOException e) {
-                LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
-                        + " seconds");
+                if (isInterrupted()) {
+                    return;
+                }
+                LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000 + " seconds");
                 try {
                     Thread.sleep(reconnectInterval);
                 } catch (InterruptedException intE) {
-                    LOG.info("Stopping reader");
                     return;
                 }
             }
@@ -135,29 +139,25 @@ public class AisTcpReader extends AisReader {
 
     @Override
     public void stopReader() {
+        this.interrupt();
         try {
             // Close socket if open
-            if (clientSocket != null) {
-                clientSocket.close();
-            }
-        } catch (IOException e) {
-            LOG.info("Could not close client socket");
-        }
-        // Interrupt this thread
-        this.interrupt();
+            clientSocket.get().close();
+        } catch (IOException ignored) {
+        }        
     }
 
     protected void connect() throws IOException {
         try {
             LOG.info("Connecting to source " + hostname + ":" + port);
-            clientSocket = new Socket();
+            clientSocket.set(new Socket());
             InetSocketAddress address = new InetSocketAddress(hostname, port);
-            clientSocket.connect(address);
+            clientSocket.get().connect(address);
             if (timeout > 0) {
-                clientSocket.setSoTimeout(timeout * 1000);
+                clientSocket.get().setSoTimeout(timeout * 1000);
             }
-            clientSocket.setKeepAlive(true);
-            outputStream = clientSocket.getOutputStream();
+            clientSocket.get().setKeepAlive(true);
+            outputStream = clientSocket.get().getOutputStream();
             LOG.info("Connected to source " + hostname + ":" + port);
         } catch (UnknownHostException e) {
             LOG.error("Unknown host: " + hostname + ": " + e.getMessage());
@@ -169,11 +169,12 @@ public class AisTcpReader extends AisReader {
     }
 
     protected void disconnect() {
-        if (clientSocket != null && getStatus() == Status.CONNECTED) {
+        if (getStatus() == Status.CONNECTED) {
             try {
                 LOG.info("Disconnecting source " + hostname + ":" + port);
-                clientSocket.close();
-            } catch (IOException e) {}
+                clientSocket.get().close();
+            } catch (IOException ignored) {
+            }
         }
     }
 
@@ -190,12 +191,7 @@ public class AisTcpReader extends AisReader {
     }
 
     public Status getStatus() {
-        synchronized (clientSocket) {
-            if (clientSocket.isConnected()) {
-                return Status.CONNECTED;
-            }
-            return Status.DISCONNECTED;
-        }
+        return clientSocket.get().isConnected() ? Status.CONNECTED : Status.DISCONNECTED;
     }
 
     /**

@@ -18,6 +18,7 @@ package dk.dma.ais.bus.consumer;
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.AisBusElement;
 import dk.dma.ais.bus.tcp.TcpClientConf;
+import dk.dma.ais.bus.tcp.TcpServer;
 import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.bus.tcp.TcpWriteServer;
 
@@ -43,6 +44,18 @@ public class TcpServerConsumer extends AisBusConsumer {
         server.start();
         super.start();
     }
+    
+    @Override
+    public void cancel() {
+        server.cancel();
+        try {
+            server.join(THREAD_STOP_WAIT_MAX);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        super.cancel();
+        setStopped();
+    }
 
     @Override
     public void receiveFiltered(AisBusElement queueElement) {
@@ -55,6 +68,10 @@ public class TcpServerConsumer extends AisBusConsumer {
     
     public void setServerConf(TcpServerConf serverConf) {
         server.setServerConf(serverConf);
+    }
+    
+    public TcpServer getServer() {
+        return server;
     }
 
 }

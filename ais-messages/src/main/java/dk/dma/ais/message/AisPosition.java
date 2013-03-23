@@ -15,8 +15,6 @@
  */
 package dk.dma.ais.message;
 
-import java.util.Objects;
-
 import dk.dma.enav.model.geometry.Position;
 
 /**
@@ -58,7 +56,9 @@ public class AisPosition {
 
     @Override
     public boolean equals(Object obj) {
-        Objects.requireNonNull(obj);
+        if (obj == null) {
+            return false;
+        }
         AisPosition pos2 = (AisPosition) obj;
         return pos2.rawLatitude == this.rawLatitude && pos2.rawLongitude == this.rawLongitude;
     }

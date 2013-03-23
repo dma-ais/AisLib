@@ -30,6 +30,11 @@ import dk.dma.ais.transform.IAisPacketTransformer;
  */
 @ThreadSafe
 public abstract class AisBusComponent {
+    
+    /**
+     * Maximum time to wait for threads to stop after having been cancelled
+     */
+    public static final long THREAD_STOP_WAIT_MAX = 10000;
 
     /**
      * The status of the component
@@ -107,6 +112,11 @@ public abstract class AisBusComponent {
     public synchronized Thread getThread() {
         return thread;
     }
+    
+    /**
+     * All components must implement a way to stop    
+     */
+    public abstract void cancel();
 
     /**
      * Method to handle incoming packet for all AisBus components. Will do filtering, transformation and tagging.
@@ -115,6 +125,8 @@ public abstract class AisBusComponent {
      * @return
      */
     protected AisPacket handleReceived(AisPacket packet) {
+        status.receive();
+        
         // Filter message
         if (filters.rejectedByFilter(packet)) {
             // Update statistics
@@ -130,8 +142,6 @@ public abstract class AisBusComponent {
         // Update statistics
         if (packet == null) {
             status.filtered();
-        } else {
-            status.receive();
         }
 
         return packet;
@@ -167,7 +177,7 @@ public abstract class AisBusComponent {
     }
     
     public String rateReport() {
-        return String.format("[packets/filtered/overflow] %4.2f / %4.2f / %4.2f  (packets/sec)", status.getPacketRate(), status.getFilteredRate(), status.getOverflowRate());
+        return String.format("[received/filtered/overflow] %4.2f / %4.2f / %4.2f  (packets/sec)", status.getInRate(), status.getFilteredRate(), status.getOverflowRate());
     }
     
 

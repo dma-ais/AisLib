@@ -15,7 +15,6 @@
  */
 package dk.dma.ais.message.binary;
 
-import java.util.Objects;
 
 /**
  * Subarea class for area notice
@@ -52,7 +51,9 @@ public class SubArea {
 
     @Override
     public boolean equals(Object obj) {
-        Objects.requireNonNull(obj);
+        if (obj == null) {
+            return false;
+        }
         SubArea subarea = (SubArea) obj;
         boolean equalz = false;
         if (subarea.rawsSAreaShape == this.rawsSAreaShape)

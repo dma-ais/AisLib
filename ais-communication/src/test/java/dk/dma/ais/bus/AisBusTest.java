@@ -173,16 +173,20 @@ public class AisBusTest {
     @Test
     public void aisBusTest() throws JAXBException, FileNotFoundException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-test.xml");
+        
+        int threadCount = Thread.activeCount();
+        
         aisBus.start();
         aisBus.startConsumers();
         aisBus.startProviders();
         
         try {
-            Thread.sleep(10000);
+            Thread.sleep(8000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         
+        System.out.println("Threads: " + Thread.activeCount());
         System.out.println("AisBus: " + aisBus.getStatus());
         for (AisBusProvider provider : aisBus.getProviders()) {
             System.out.println("Provider: " + provider.toString());
@@ -190,6 +194,13 @@ public class AisBusTest {
         for (AisBusConsumer consumer : aisBus.getConsumers()) {
             System.out.println("Consumer: " + consumer.toString());            
         }
+        
+        System.out.println("Stopping AisBus");
+        aisBus.cancel();
+        System.out.println("Done stopping AisBus");
+        
+        Assert.assertEquals(threadCount, Thread.activeCount());
+        
     }
     
     //@Test

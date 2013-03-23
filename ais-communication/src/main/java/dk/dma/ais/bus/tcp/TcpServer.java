@@ -22,9 +22,12 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dk.dma.ais.bus.AisBusComponent;
 
 /**
  * Base class for TCP servers. Spawns and handles TCP clients.
@@ -33,7 +36,7 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
 
-    protected ServerSocket serverSocket;
+    protected final AtomicReference<ServerSocket> serverSocket = new AtomicReference<>();
 
     protected TcpServerConf serverConf = new TcpServerConf();
     protected TcpClientConf clientConf = new TcpClientConf();
@@ -70,7 +73,7 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
 
         // Setup server socket
         try {
-            serverSocket = new ServerSocket(serverConf.getPort());
+            serverSocket.set(new ServerSocket(serverConf.getPort()));
         } catch (IOException e) {
             LOG.error("Failed to setup server socket: " + e.getMessage());
             return;
@@ -87,15 +90,17 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
                 }
 
                 LOG.info("Waiting for connections on port " + serverConf.getPort());
-                socket = serverSocket.accept();
+                socket = serverSocket.get().accept();
                 socket.setKeepAlive(true);
                 LOG.info("Accepting connection from " + socket.getRemoteSocketAddress());
             } catch (IOException e) {
-                LOG.info("Connection failed " + e.getMessage());
+                if (!isInterrupted()) {
+                    LOG.info(e.getMessage());
+                }
                 if (socket != null) {
                     try {
                         socket.close();
-                    } catch (IOException closeE) {
+                    } catch (IOException ignored) {
                     }
                 }
                 semaphore.release();
@@ -108,14 +113,29 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
             client.start();
 
         }
-        
-        LOG.info("TCP server stopping");
-        
+                        
         // Stop clients
         for (TcpClient client : clients) {
-            client.interrupt();            
+            client.cancel();            
         }
+        
+        LOG.info("Stopped");
 
+    }
+    
+    public void cancel() {
+        this.interrupt();
+        if (serverSocket.get() != null) {
+            try {
+                serverSocket.get().close();
+            } catch (IOException ignored) {                
+            }
+        }
+        try {
+            this.join(AisBusComponent.THREAD_STOP_WAIT_MAX);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public TcpClientConf getClientConf() {
@@ -132,6 +152,10 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
 
     public void setServerConf(TcpServerConf serverConf) {
         this.serverConf = serverConf;
+    }
+    
+    public Set<TcpClient> getClients() {
+        return clients;
     }
 
 }

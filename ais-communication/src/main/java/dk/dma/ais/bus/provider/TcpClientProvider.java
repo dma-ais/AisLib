@@ -109,6 +109,10 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
 
         }
         
+        if (readClient != null) {
+            readClient.cancel();
+        }
+        
         setStopped();
     }
 
@@ -124,6 +128,17 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
         setThread(t);
         t.start();
         super.start();
+    }
+    
+    @Override
+    public void cancel() {
+        getThread().interrupt();   
+        try {
+            getThread().join(THREAD_STOP_WAIT_MAX);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        setStopped();
     }
 
     @Override

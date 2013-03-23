@@ -30,11 +30,11 @@ import dk.dma.enav.util.function.Consumer;
 /**
  * A reading TCP client
  */
-public class TcpReadClient extends TcpClient {
-    
+public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
+
     private static final Logger LOG = LoggerFactory.getLogger(TcpReadClient.class);
 
-    private Consumer<AisPacket> packetConsumer;
+    private final Consumer<AisPacket> packetConsumer;
 
     public TcpReadClient(Consumer<AisPacket> packetConsumer, IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
         super(stopListener, socket, conf);
@@ -43,6 +43,7 @@ public class TcpReadClient extends TcpClient {
 
     @Override
     public void run() {
+        status.setConnected();
         // Read from socket
         try {
             InputStream inputStream;
@@ -56,7 +57,9 @@ public class TcpReadClient extends TcpClient {
             reader.start();
             reader.join();
         } catch (IOException e) {
-            LOG.info("TCP client error: " + e.getMessage());
+            if (!isInterrupted()) {
+                LOG.info(e.getMessage());
+            }
         } catch (InterruptedException e) {
         }
 
@@ -64,10 +67,16 @@ public class TcpReadClient extends TcpClient {
             socket.close();
         } catch (IOException e) {
         }
-        
-        LOG.info("TCP client stopping");
 
         stopping();
+
+        LOG.info("Stopped");
+    }
+
+    @Override
+    public void accept(AisPacket packet) {
+        status.receive();
+        packetConsumer.accept(packet);
     }
 
 }
