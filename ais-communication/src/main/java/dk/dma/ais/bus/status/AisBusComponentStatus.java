@@ -129,7 +129,7 @@ public class AisBusComponentStatus {
     }
     
     public synchronized boolean isStarted() {
-        return (state == State.STARTED || state == State.CONNECTED || state == State.NOT_CONNECTED);
+        return state == State.STARTED || state == State.CONNECTED || state == State.NOT_CONNECTED;
     }
     
     public synchronized void setConnected() {
@@ -137,7 +137,7 @@ public class AisBusComponentStatus {
     }
     
     public synchronized boolean isConnected() {
-        return (state == State.CONNECTED);
+        return state == State.CONNECTED;
     }
     
     public synchronized void setNotConnected() {

@@ -22,7 +22,7 @@ import org.slf4j.Logger;
  */
 public class OverflowLogger {
 
-    private long lastLogging = 0L;
+    private long lastLogging;
     private final long interval;
     private final Logger logger;
     

@@ -43,7 +43,7 @@ public class ReplayTest {
         trans.setSpeedup(100);
         
         aisReader.registerPacketHandler(new Consumer<AisPacket>() {
-            Long origOffset = null;            
+            Long origOffset;            
             @Override
             public void accept(AisPacket aisPacket) {
                 trans.transform(aisPacket);

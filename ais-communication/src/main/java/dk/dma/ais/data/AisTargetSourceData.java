@@ -72,7 +72,7 @@ public class AisTargetSourceData implements Serializable {
 
     public boolean isSatData() {
         SourceType sourceType = tagging.getSourceType();
-        return (sourceType != null && sourceType == SourceType.SATELLITE);
+        return sourceType != null && sourceType == SourceType.SATELLITE;
     }
     
     public String getSourceType() {

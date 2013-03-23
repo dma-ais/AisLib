@@ -27,7 +27,7 @@ public class FlowStat {
 
     private final long interval;
     private final long created;
-    private Long lastReceived = null;
+    private Long lastReceived;
     // Timestamps for receives
     private LinkedList<Long> receives = new LinkedList<Long>();
     
@@ -77,7 +77,7 @@ public class FlowStat {
         if (last == now) {
             return 0;
         }
-        return ((double) receives.size() / ((double) (now - last) / 1000));
+        return (double) receives.size() / ((double) (now - last) / 1000);
     }
 
     /**

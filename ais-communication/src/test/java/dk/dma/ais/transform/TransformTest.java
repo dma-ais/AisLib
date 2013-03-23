@@ -75,7 +75,7 @@ public class TransformTest {
         System.out.println("Sat transformed\n" + packet.getStringMessage());
         System.out.println("cb: " + packet.getVdm().getCommentBlock());
         System.out.println("tagging: " + tagging);
-        return (tagging.getSourceType() != null && tagging.getSourceType() == SourceType.SATELLITE);        
+        return tagging.getSourceType() != null && tagging.getSourceType() == SourceType.SATELLITE;        
     }
 
 }

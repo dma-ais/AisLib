@@ -110,7 +110,7 @@ public class AisPacketTagging implements Serializable {
      * @return
      */
     public boolean isEmpty() {
-        return (timestamp == null && sourceId == null && sourceBs == null && sourceCountry == null && sourceType == null);
+        return timestamp == null && sourceId == null && sourceBs == null && sourceCountry == null && sourceType == null;
     }
 
     public Date getTimestamp() {

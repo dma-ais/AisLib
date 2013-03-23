@@ -28,7 +28,7 @@ import dk.dma.ais.filter.MessageTypeFilter;
 public class MessageTypeFilterConfiguration extends FilterConfiguration {
 
     private List<Integer> messageTypes = new ArrayList<>();
-    private boolean disallowed = false;
+    private boolean disallowed;
 
     public MessageTypeFilterConfiguration() {
 
