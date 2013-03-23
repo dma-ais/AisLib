@@ -50,7 +50,7 @@
 		</filter>
 		<serverConf>
 			<maxClients>10</maxClients>
-			<port>9997</port>
+			<port>9991</port>
 		</serverConf>
 	</consumer>
 </aisBusConfiguration>
