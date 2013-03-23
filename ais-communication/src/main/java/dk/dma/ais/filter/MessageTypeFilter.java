@@ -32,7 +32,7 @@ public class MessageTypeFilter implements IPacketFilter {
      * Set of message types either allowed or disallowed
      */
     private final Set<Integer> messageTypes = new HashSet<>();
-    private boolean disallowed = false;
+    private boolean disallowed;
     
     public MessageTypeFilter() {
         
