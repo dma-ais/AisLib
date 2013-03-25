@@ -57,7 +57,7 @@ public class AisPacketTest {
                 Date timestamp = aisPacket.getTimestamp();
                 System.out.println("timestamp: " + timestamp);
                 Assert.assertNotNull(timestamp);
-                
+
                 // Get tagging
                 AisPacketTagging tagging = AisPacketTagging.parse(aisPacket);
                 Assert.assertEquals(tagging.getSourceId(), "some_file_dump");
@@ -80,6 +80,34 @@ public class AisPacketTest {
         aisReader.start();
         aisReader.join();
 
+    }
+
+    @Test
+    public void retryTest() throws IOException, InterruptedException {
+        // Open input stream
+        URL url = ClassLoader.getSystemResource("retry_example.txt");
+        Assert.assertNotNull(url);
+        InputStream inputStream = url.openStream();
+        Assert.assertNotNull(inputStream);
+
+        // Make AIS reader instance
+        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        aisReader.registerPacketHandler(new Consumer<AisPacket>() {            
+            final int[] senders = {563510000, 211235220, 2655619, 246250000, 205634000, 211462260};
+            int count = 0;
+            @Override            
+            public void accept(AisPacket aisPacket) {                
+                AisMessage message = null;
+                try {
+                    message = aisPacket.getAisMessage();
+                } catch (AisMessageException | SixbitException e) {
+                    Assert.fail(e.getMessage());
+                }
+                Assert.assertEquals(senders[count++], message.getUserId());
+            }
+        });
+        aisReader.start();
+        aisReader.join();
     }
 
     @Test
