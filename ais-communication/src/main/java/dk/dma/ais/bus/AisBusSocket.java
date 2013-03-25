@@ -57,7 +57,7 @@ public abstract class AisBusSocket extends AisBusComponent {
     }
 
     public synchronized String getName() {
-        return name;
+        return name == null ? getClass().getSimpleName() : name;
     }
 
     public synchronized void setName(String name) {

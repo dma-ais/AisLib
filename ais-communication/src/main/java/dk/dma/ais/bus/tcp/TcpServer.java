@@ -95,7 +95,7 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
                 LOG.info("Accepting connection from " + socket.getRemoteSocketAddress());
             } catch (IOException e) {
                 if (!isInterrupted()) {
-                    LOG.info(e.getMessage());
+                    LOG.info(getName() + ": " + e.getMessage());
                 }
                 if (socket != null) {
                     try {

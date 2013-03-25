@@ -88,7 +88,7 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
                 readClient.join();
 
             } catch (IOException e) {
-                LOG.info("Connection error: " + e.getMessage());
+                LOG.info(getName() + ": connection error: " + e.getMessage());
             } catch (InterruptedException e) {                
                 break;
             } finally {
