@@ -94,7 +94,7 @@ public class AisPacketTest {
         AisStreamReader aisReader = new AisStreamReader(inputStream);
         aisReader.registerPacketHandler(new Consumer<AisPacket>() {            
             final int[] senders = {563510000, 211235220, 2655619, 246250000, 205634000, 211462260};
-            int count = 0;
+            int count;
             @Override            
             public void accept(AisPacket aisPacket) {                
                 AisMessage message = null;
