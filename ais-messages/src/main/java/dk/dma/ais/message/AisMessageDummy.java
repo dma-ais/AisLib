@@ -34,8 +34,7 @@ public class AisMessageDummy extends AisMessage {
 
     @Override
     public SixbitEncoder getEncoded() {
-        SixbitEncoder encoder = super.encode();
-        return encoder;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -15,18 +15,18 @@
  */
 package dk.dma.ais.configuration.transform;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
-
+import dk.dma.ais.transform.AnonymousTransformer;
 import dk.dma.ais.transform.IAisPacketTransformer;
 
-@XmlSeeAlso({ CropVdmTransformerConfiguration.class, TaggingTransformerConfiguration.class, ReplayTransformConfiguration.class,
-        SourceTypeSatTransformerConfiguration.class, AnonymousTransfomerConfiguration.class })
-public abstract class TransformerConfiguration {
-
-    public TransformerConfiguration() {
-
+public class AnonymousTransfomerConfiguration extends TransformerConfiguration {
+    
+    public AnonymousTransfomerConfiguration() {
+        
     }
 
-    public abstract IAisPacketTransformer getInstance();
+    @Override
+    public IAisPacketTransformer getInstance() {
+        return new AnonymousTransformer();
+    }
 
 }

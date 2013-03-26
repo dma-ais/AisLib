@@ -92,9 +92,7 @@ public class AisMessage21 extends AisMessage implements IPositionMessage {
 
     @Override
     public SixbitEncoder getEncoded() {
-        SixbitEncoder encoder = super.encode();
-        // TODO
-        return encoder;
+        throw new UnsupportedOperationException();
     }
 
     public int getAtonType() {

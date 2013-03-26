@@ -85,11 +85,7 @@ public class AisMessage17 extends AisMessage {
 
     @Override
     public SixbitEncoder getEncoded() {
-        SixbitEncoder encoder = super.encode();
-
-        // TODO
-
-        return encoder;
+        throw new UnsupportedOperationException();
     }
 
     public int getSpare1() {

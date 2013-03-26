@@ -40,6 +40,7 @@ import dk.dma.ais.configuration.filter.LocationFilterConfiguration;
 import dk.dma.ais.configuration.filter.TaggingFilterConfiguration;
 import dk.dma.ais.configuration.filter.TargetCountryFilterConfiguration;
 import dk.dma.ais.configuration.filter.geometry.CircleGeometryConfiguration;
+import dk.dma.ais.configuration.transform.AnonymousTransfomerConfiguration;
 import dk.dma.ais.configuration.transform.CropVdmTransformerConfiguration;
 import dk.dma.ais.configuration.transform.PacketTaggingConfiguration;
 import dk.dma.ais.configuration.transform.ReplayTransformConfiguration;
@@ -106,6 +107,7 @@ public class AisBusTest {
         locFilter.getGeometries().add(circleConf);        
         fileConf.getFilters().add(locFilter);
         fileConf.getFilters().add(tgtFilter);
+        fileConf.getTransformers().add(new AnonymousTransfomerConfiguration());
         
         PacketTaggingConfiguration tagging = new PacketTaggingConfiguration();
         tagging.setSourceBs(2190048);

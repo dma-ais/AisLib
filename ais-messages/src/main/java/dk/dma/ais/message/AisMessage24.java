@@ -89,8 +89,7 @@ public class AisMessage24 extends AisStaticCommon {
 
     @Override
     public SixbitEncoder getEncoded() {
-        // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public int getPartNumber() {
