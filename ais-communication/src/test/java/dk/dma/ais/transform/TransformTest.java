@@ -15,7 +15,9 @@
  */
 package dk.dma.ais.transform;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,10 +50,13 @@ public class TransformTest {
     
     @Test
     public void sourceTypeSatTest() throws SentenceException {
-        SourceTypeSatTransformer transformer = new SourceTypeSatTransformer();
-        transformer.getSatGhRegions().add("802");
-        transformer.getSatGhRegions().add("804");
-        transformer.getSatSources().add("ORBCOMM999");
+        
+        Set<String> satGhRegions = new HashSet<>();
+        satGhRegions.add("802");
+        satGhRegions.add("804");
+        Set<String> satSources = new HashSet<>();
+        satSources.add("ORBCOMM999");        
+        SourceTypeSatTransformer transformer = new SourceTypeSatTransformer(satGhRegions, satSources);        
         
         String msg;
         msg = "$PGHP,1,2013,3,21,10,13,55,0,338,808,,1,05*2D\r\n";

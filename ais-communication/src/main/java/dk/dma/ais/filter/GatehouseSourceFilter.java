@@ -19,10 +19,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
-
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.proprietary.GatehouseSourceTag;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
@@ -51,15 +50,14 @@ public class GatehouseSourceFilter extends MessageFilterBase {
     /**
      * Map from filter name to set of accepted values
      */
-    @GuardedBy("this")
-    private final Map<String, HashSet<String>> filter = new HashMap<>();
+    private final Map<String, HashSet<String>> filter = new ConcurrentHashMap<>();
 
     public GatehouseSourceFilter() {
 
     }
 
     @Override
-    public synchronized boolean rejectedByFilter(AisMessage message) {
+    public boolean rejectedByFilter(AisMessage message) {
         if (isEmpty()) {
             return false;
         }
@@ -102,11 +100,11 @@ public class GatehouseSourceFilter extends MessageFilterBase {
         return false;
     }
 
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
         return filter.size() == 0;
     }
 
-    public synchronized void addFilterValue(String filterName, String value) {
+    public void addFilterValue(String filterName, String value) {
         if (!FILTER_NAMES.contains(filterName)) {
             throw new IllegalArgumentException("Unknown filter: " + filterName);
         }

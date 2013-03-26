@@ -15,24 +15,25 @@
  */
 package dk.dma.ais.filter;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.sentence.Vdm;
 
 /**
  * Filtering based on message types
  */
-@NotThreadSafe
+@ThreadSafe
 public class MessageTypeFilter implements IPacketFilter {
     
     /**
      * Set of message types either allowed or disallowed
      */
-    private final Set<Integer> messageTypes = new HashSet<>();
-    private boolean disallowed;
+    private final Set<Integer> messageTypes = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
+    private volatile boolean disallowed;
     
     public MessageTypeFilter() {
         

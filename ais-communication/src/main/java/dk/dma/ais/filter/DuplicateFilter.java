@@ -49,14 +49,12 @@ public class DuplicateFilter extends MessageFilterBase {
     /**
      * A default window size of 10 seconds is used
      */
-    @GuardedBy("this")
-    private long windowSize = 10000;
+    private volatile long windowSize = 10000;
 
     /**
      * Number of message receptions since last cleanup
      */
-    @GuardedBy("this")
-    private long cleanupAge;
+    private volatile long cleanupAge;
 
     public DuplicateFilter() {
     }
@@ -120,11 +118,11 @@ public class DuplicateFilter extends MessageFilterBase {
         return false;
     }
 
-    public synchronized long getWindowSize() {
+    public long getWindowSize() {
         return windowSize;
     }
 
-    public synchronized void setWindowSize(long windowSize) {
+    public void setWindowSize(long windowSize) {
         this.windowSize = windowSize;
     }
 

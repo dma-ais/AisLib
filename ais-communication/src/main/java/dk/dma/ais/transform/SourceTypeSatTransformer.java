@@ -15,11 +15,11 @@
  */
 package dk.dma.ais.transform;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.jcip.annotations.NotThreadSafe;
-
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.packet.AisPacketTagging.SourceType;
@@ -32,27 +32,29 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
  * Transformer that maps a number of proprietary taggings into
  * source type SATELLITE tagging 
  */
-@NotThreadSafe
+@ThreadSafe
 public class SourceTypeSatTransformer implements IAisPacketTransformer {
     
     /**
      * Set of Gatehouse region ids that should map into source type SAT
      */
-    private final Set<String> satGhRegions = new HashSet<>();
+    private final Set<String> satGhRegions;
     
     /**
      * Comment block source ('s') that maps in to source type SAT. A source 
      * just need to be contained in the source string
      */
-    private final Set<String> satSources = new HashSet<>();    
+    private final Set<String> satSources;
     
     private final AisPacketTagging satTagging; 
     private final AisPacketTaggingTransformer transformer;
     
-    public SourceTypeSatTransformer() {
-        satTagging = new AisPacketTagging();
-        satTagging.setSourceType(SourceType.SATELLITE);
+    public SourceTypeSatTransformer(Collection<String> satGhRegions, Collection<String> satSources) {
+        this.satTagging = new AisPacketTagging();
+        this.satTagging.setSourceType(SourceType.SATELLITE);
         transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, satTagging);
+        this.satGhRegions = new HashSet<>(satGhRegions);
+        this.satSources = new HashSet<>(satSources);
     }
 
     @Override
@@ -84,12 +86,4 @@ public class SourceTypeSatTransformer implements IAisPacketTransformer {
         return packet;
     }
     
-    public Set<String> getSatGhRegions() {
-        return satGhRegions;
-    }
-    
-    public Set<String> getSatSources() {
-        return satSources;
-    }
-
 }

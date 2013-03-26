@@ -29,7 +29,7 @@ public abstract class MessageFilterBase implements IMessageFilter, IPacketFilter
      * Helper method to extract message from packet and do test
      */
     @Override
-    public synchronized boolean rejectedByFilter(AisPacket packet) {
+    public boolean rejectedByFilter(AisPacket packet) {
         AisMessage message = packet.tryGetAisMessage();
         if (message != null) {
             return this.rejectedByFilter(message);

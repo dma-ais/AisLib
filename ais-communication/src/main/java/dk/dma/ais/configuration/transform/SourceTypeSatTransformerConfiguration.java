@@ -54,13 +54,7 @@ public class SourceTypeSatTransformerConfiguration extends TransformerConfigurat
 
     @Override
     public IAisPacketTransformer getInstance() {
-        SourceTypeSatTransformer trans = new SourceTypeSatTransformer();
-        for (String region : satGhRegions) {
-            trans.getSatGhRegions().add(region);
-        }
-        for (String source : satSources) {
-            trans.getSatSources().add(source);
-        }
-        return trans;
+        return new SourceTypeSatTransformer(satGhRegions, satSources);
     }
+    
 }

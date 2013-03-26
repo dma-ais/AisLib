@@ -15,10 +15,9 @@
  */
 package dk.dma.ais.filter;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.message.AisMessage;
 
@@ -39,20 +38,17 @@ public class DownSampleFilter extends MessageFilterBase {
     /**
      * Sample rate in seconds
      */
-    @GuardedBy("this")
-    private long samplingRate = 60;
+    private volatile long samplingRate = 60;
 
     /**
      * Map from MMSI to last time a pos report was received
      */
-    @GuardedBy("this")
-    private final Map<Integer, Long> posReceived = new HashMap<>();
+    private final Map<Integer, Long> posReceived = new ConcurrentHashMap<>();
 
     /**
      * Map from MMSI to last time a static report was received
      */
-    @GuardedBy("this")
-    private final Map<Integer, Long> statReceived = new HashMap<>();
+    private final Map<Integer, Long> statReceived = new ConcurrentHashMap<>();
 
     /**
      * Empty contructor
@@ -70,7 +66,7 @@ public class DownSampleFilter extends MessageFilterBase {
     }
 
     @Override
-    public synchronized boolean rejectedByFilter(AisMessage message) {
+    public boolean rejectedByFilter(AisMessage message) {
         // If not sampling always accept
         if (samplingRate == 0) {
             return false;
@@ -126,7 +122,7 @@ public class DownSampleFilter extends MessageFilterBase {
      * 
      * @return
      */
-    public synchronized long getSamplingRate() {
+    public long getSamplingRate() {
         return samplingRate;
     }
 
@@ -136,7 +132,7 @@ public class DownSampleFilter extends MessageFilterBase {
      * @param samplingRate
      */
 
-    public synchronized void setSamplingRate(long samplingRate) {
+    public void setSamplingRate(long samplingRate) {
         this.samplingRate = samplingRate;
     }
 

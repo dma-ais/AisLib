@@ -15,23 +15,24 @@
  */
 package dk.dma.ais.filter;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.enav.model.Country;
 
 /**
  * Filter based on the country of the AIS target
  */
-@NotThreadSafe
+@ThreadSafe
 public class TargetCountryFilter extends MessageFilterBase {
 
     /**
      * Set of allowed countries by their ISO 3166 three letter code
      */
-    private final Set<String> allowedCountries = new HashSet<>();
+    private final Set<String> allowedCountries = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     
     public TargetCountryFilter() {
         

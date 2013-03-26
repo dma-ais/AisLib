@@ -17,7 +17,6 @@ package dk.dma.ais.transform;
 
 import java.util.Date;
 
-import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 
@@ -28,8 +27,7 @@ import dk.dma.ais.packet.AisPacket;
 @ThreadSafe
 public class ReplayTransformer implements IAisPacketTransformer {
     
-    @GuardedBy("this")
-    private double speedup = 1;
+    private volatile double speedup = 1;
     
     private Long epochStream;
     private Long epochReplay;
@@ -83,6 +81,5 @@ public class ReplayTransformer implements IAisPacketTransformer {
     public synchronized void setSpeedup(double speedup) {
         this.speedup = speedup;
     }
-
 
 }
