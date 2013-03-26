@@ -34,15 +34,15 @@ public class AnonymousTransformTest implements Consumer<AisPacket >{
     
     @Override
     public void accept(AisPacket packet) {
+        System.out.println("---");
+        System.out.println("original packet  :\n" + packet.getStringMessage());
         AisMessage message = packet.tryGetAisMessage();
+        System.out.println("original message :\n" + message);
         AisPacket newPacket = anonymizer.transform(packet);
         AisMessage newMessage = null;
         if (newPacket != null) {
             newMessage = newPacket.tryGetAisMessage();
         }
-        System.out.println("---");
-        System.out.println("original packet  :\n" + packet.getStringMessage());
-        System.out.println("original message :\n" + message);
         System.out.println("new packet       :\n" + ((newPacket != null) ? newPacket.getStringMessage() : null));        
         System.out.println("new message      :\n" + newMessage);
     }
