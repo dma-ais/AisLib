@@ -41,13 +41,14 @@
 			<port>9998</port>
 		</serverConf>
 	</consumer>
-	<!-- Down sampled duplicate filtered data -->
+	<!-- Down sampled, duplicate filtered and anonymized data -->
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerConsumerConfiguration">
 		<name>Down sampled data</name>
 		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="duplicateFilterConfiguration" />
-		<filter xsi:type="downSampleFilterConfiguration">
+		<filter xsi:type="downSampleFilterConfiguration">		
 			<samplingRate>300</samplingRate>
 		</filter>
+		<transformer xsi:type="anonymousTransfomerConfiguration"/>
 		<serverConf>
 			<maxClients>10</maxClients>
 			<port>9991</port>

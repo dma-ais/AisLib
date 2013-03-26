@@ -80,12 +80,13 @@ public class CommentBlockLine {
         // Split into fields
         String[] fields = StringUtils.split(line.substring(start + 1, end), ',');
         for (String field : fields) {
-            String[] parts = StringUtils.split(field, ':');
-            if (parts.length != 2) {
+            int sep = field.indexOf(':');
+            if (sep < 0) {
                 throw new CommentBlockException("Malformed comment block field: " + field);
             }
-            String parameterCode = parts[0];
-            String value = parts[1];
+            String parameterCode = field.substring(0, sep);
+            String value = field.substring(sep + 1);
+            
             // Check for grouping parameter code
             int groupCharIndex;
             if ((groupCharIndex = parameterCode.indexOf('G')) >= 0) {
@@ -95,7 +96,7 @@ public class CommentBlockLine {
                 } catch (NumberFormatException e) {
                     throw new CommentBlockException("Invalid group tag: " + parameterCode);
                 }
-                groupId = parts[1];
+                groupId = value;
             }
             // Check for tag block group
             if (parameterCode.equals("g")) {
