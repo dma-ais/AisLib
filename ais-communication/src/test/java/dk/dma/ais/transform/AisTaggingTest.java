@@ -66,6 +66,23 @@ public class AisTaggingTest {
         Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("somekey"), "someval");
         Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("key"), "oldval");
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
+        
+        msg = "\\s:AAUSAT3,c:1364272372,sub:2,bid:0,seq:231288,type:1,rssi:-72,freq:162000000*5E\\!AIVDM,1,1,,C,18153ogP?w1dD@@`JiRN4?wp0000,0*48";
+        packet = AisPacketReader.from(msg);
+        tagging = new AisPacketTagging();
+        tagging.setSourceId("AIS-SAT");
+        transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
+        newPacket = transformer.transform(packet);
+        newTagging = AisPacketTagging.parse(newPacket);
+        System.out.println("NEW packet:\n" + newPacket.getStringMessage());
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("si"), "AIS-SAT");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("s"), "AAUSAT3");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("sub"), "2");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("bid"), "0");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("seq"), "231288");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("type"), "1");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("rssi"), "-72");
+        Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("freq"), "162000000");
     }
 
     @Test
