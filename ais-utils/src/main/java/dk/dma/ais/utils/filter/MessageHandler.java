@@ -19,27 +19,36 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.message.AisBinaryMessage;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.binary.AisApplicationMessage;
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.util.function.Consumer;
 
-public class MessageHandler implements Consumer<AisMessage> {
+public class MessageHandler implements Consumer<AisPacket> {
+
+    private final SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
     private volatile boolean stop;
 
-    private PrintStream out;
-    private FilterSettings filter;
+    private final PrintStream out;
+    private final FilterSettings filter;
     private boolean dumpParsed;
     private long start;
     private long end;
     private long msgCount;
     private long bytes;
+
+    private final List<IPacketFilter> filters = new CopyOnWriteArrayList<>();
 
     public MessageHandler(FilterSettings filter, PrintStream out) {
         this.filter = filter;
@@ -47,19 +56,30 @@ public class MessageHandler implements Consumer<AisMessage> {
     }
 
     @Override
-    public void accept(AisMessage aisMessage) {
+    public void accept(AisPacket packet) {
 
         end = System.currentTimeMillis();
         if (start == 0) {
             start = end;
         }
 
+        for (IPacketFilter filter : filters) {
+            if (filter.rejectedByFilter(packet)) {
+                return;
+            }
+        }
+
         Integer baseMMSI = -1;
         String country = "";
         String region = "";
 
+        Vdm vdm = packet.getVdm();
+        if (vdm == null) {
+            return;
+        }
+
         // Get source tag properties
-        IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
+        IProprietarySourceTag sourceTag = vdm.getSourceTag();
         if (sourceTag != null) {
             baseMMSI = sourceTag.getBaseMmsi();
             if (sourceTag.getCountry() != null) {
@@ -74,7 +94,7 @@ public class MessageHandler implements Consumer<AisMessage> {
         }
 
         // Maybe check for start date
-        Date timestamp = aisMessage.getVdm().getTimestamp();
+        Date timestamp = vdm.getTimestamp();
         if (filter.getStartDate() != null && timestamp != null) {
             if (timestamp.before(filter.getStartDate())) {
                 return;
@@ -116,36 +136,42 @@ public class MessageHandler implements Consumer<AisMessage> {
         // Count message
         msgCount++;
 
-        // Print tag line
-        if (aisMessage.getTags() != null) {
-            for (IProprietaryTag tag : aisMessage.getTags()) {
-                bytes += tag.getSentence().length() + 2;
-                out.println(tag.getSentence());
-                // Maybe print parsed
-                if (dumpParsed) {
-                    out.println("+-- " + tag.toString());
-                }
-            }
-        }
-        // Print original line
-        String orgLines = aisMessage.getVdm().getOrgLinesJoined();
-        bytes += orgLines.length() + 2;
-        out.println(orgLines);
+        // Print tag line packet
+        out.println(packet.getStringMessage());
 
         // Maybe print parsed
         if (dumpParsed) {
-            out.println("+-- " + aisMessage.toString());
+            if (timestamp != null) {
+                out.println("+ timetamp " + timestampFormat.format(timestamp));
+            }
+            if (vdm.getTags() != null) {
+                for (IProprietaryTag tag : vdm.getTags()) {
+                    out.println("+ " + tag.toString());
+                }
+            }
+            AisMessage aisMessage = packet.tryGetAisMessage();
+            if (aisMessage != null) {
+                out.println("+ " + aisMessage.toString());
+            } else {
+                out.println("+ AIS message could not be parsed");
+            }
+
             // Check for binary message
-            if (aisMessage.getMsgId() == 6 || aisMessage.getMsgId() == 8) {
+            if (aisMessage instanceof AisBinaryMessage) {
                 AisBinaryMessage binaryMessage = (AisBinaryMessage) aisMessage;
                 try {
                     AisApplicationMessage appMessage = binaryMessage.getApplicationMessage();
-                    out.println("+-- " + appMessage);
-                } catch (SixbitException e) {}
-
+                    out.println(appMessage);
+                } catch (SixbitException e) {
+                }
             }
+            System.out.println("---------------------------");
         }
 
+    }
+
+    public List<IPacketFilter> getFilters() {
+        return filters;
     }
 
     public void setDumpParsed(boolean dumpParsed) {

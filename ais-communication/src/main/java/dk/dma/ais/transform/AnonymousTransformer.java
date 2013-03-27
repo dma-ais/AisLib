@@ -26,9 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.message.AisBinaryMessage;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisStaticCommon;
+import dk.dma.ais.message.binary.AisApplicationMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.CommentBlock;
@@ -86,6 +88,19 @@ public class AnonymousTransformer implements IAisPacketTransformer {
     private AisPacket createPacket(AisMessage message, AisPacket packet) {
         List<String> lines = new ArrayList<>(4);
         int sequence = message.getVdm().getSequence();
+
+        // Handle binary message
+        if (message instanceof AisBinaryMessage) {
+            try {
+                AisApplicationMessage appMessage = ((AisBinaryMessage) message).getApplicationMessage();
+                if (appMessage == null) {
+                    return null;
+                }
+            } catch (SixbitException e) {
+                return null;
+            }
+        }
+
         String[] sentences;
         try {
             sentences = Vdm.createSentences(message, sequence);
@@ -140,7 +155,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
      */
     private void anonymize(AisStaticCommon message) {
         // Change name
-        message.setName("SHIP" + message.getUserId()); 
+        message.setName("SHIP" + message.getUserId());
         // Callsign
         message.setCallsign("CALL" + message.getUserId());
     }

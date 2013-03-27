@@ -22,13 +22,10 @@ import java.util.Date;
 
 import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.DuplicateFilter;
-import dk.dma.ais.filter.MessageHandlerFilter;
-import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.reader.RoundRobinAisTcpReader;
-import dk.dma.enav.util.function.Consumer;
 
 /**
  * Simple application to filter AIS messages based on various filters
@@ -132,24 +129,18 @@ public class AisFilter {
         // Message handler
         MessageHandler messageHandler = new MessageHandler(filterSettings, out);
         messageHandler.setDumpParsed(dumpParsed);
-        Consumer<AisMessage> handler = messageHandler;
 
+        // Add filters
         // Maybe insert downsampling filter
         if (downsampleRate > 0) {
-            MessageHandlerFilter downsample = new MessageHandlerFilter(new DownSampleFilter(downsampleRate));
-            downsample.registerReceiver(messageHandler);
-            handler = downsample;
+            messageHandler.getFilters().add(new DownSampleFilter(downsampleRate));
         }
-
-        // Maybe insert doublet filtering
         if (doubletFiltering) {
-            MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilter());
-            doubletFilter.registerReceiver(handler);
-            handler = doubletFilter;
+            messageHandler.getFilters().add(new DuplicateFilter());
         }
 
         // Register handler
-        aisReader.registerHandler(handler);
+        aisReader.registerPacketHandler(messageHandler);
 
         // Start reader thread
         Date start = new Date();
