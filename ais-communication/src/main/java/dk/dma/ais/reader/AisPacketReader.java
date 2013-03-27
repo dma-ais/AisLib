@@ -160,7 +160,7 @@ public class AisPacketReader {
             newVdm();
             // Do a single retry with the current line. The faulty sentence may be the last, not this one.
             if (!retry) {
-                LOG.error("Discarding current sentence group. New start: " + e.getMessage());
+                LOG.info("Discarding current sentence group. New start: " + e.getMessage());
                 return readLine(line, true);
             }
             throw new SentenceException(e, sentenceTrace);
