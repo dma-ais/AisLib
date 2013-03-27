@@ -105,7 +105,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
         try {
             sentences = Vdm.createSentences(message, sequence);
         } catch (UnsupportedOperationException e) {
-            LOG.error("Encoding not supported by message type " + message.getMsgId());
+            LOG.debug("Encoding not supported by message type " + message.getMsgId());
             return null;
         } catch (SixbitException e) {
             LOG.error("Failed to encode AIS message: " + message + ": " + e.getMessage());

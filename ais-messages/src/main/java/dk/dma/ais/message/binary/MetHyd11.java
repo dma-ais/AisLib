@@ -65,7 +65,7 @@ public class MetHyd11 extends AisApplicationMessage {
 
     @Override
     public SixbitEncoder getEncoded() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

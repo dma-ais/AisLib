@@ -18,6 +18,7 @@ package dk.dma.ais.message.binary;
 import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.message.AisBinaryMessage;
 
 /**
  * Dummy message that represents an unknown ASM
@@ -28,6 +29,11 @@ public class UnknownAsm extends AisApplicationMessage {
 
     public UnknownAsm(int dac, int fi) {
         super(dac, fi);
+    }
+
+    public UnknownAsm(AisBinaryMessage binaryMessage) {
+        this(binaryMessage.getDac(), binaryMessage.getFi());
+        this.binArray = binaryMessage.getData();        
     }
 
     @Override
