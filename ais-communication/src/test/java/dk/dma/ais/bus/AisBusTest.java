@@ -26,6 +26,7 @@ import org.junit.Test;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
+import dk.dma.ais.configuration.bus.consumer.DistributerConsumerConfiguration;
 import dk.dma.ais.configuration.bus.consumer.StdoutConsumerConfiguration;
 import dk.dma.ais.configuration.bus.consumer.TcpServerConsumerConfiguration;
 import dk.dma.ais.configuration.bus.consumer.TcpWriterConsumerConfiguration;
@@ -142,6 +143,10 @@ public class AisBusTest {
         tcpServer.setServerConf(serverConf);
         conf.getConsumers().add(tcpServer);
         
+        // Consumer
+        DistributerConsumerConfiguration distributerConf = new DistributerConsumerConfiguration();
+        distributerConf.setName("DISTRIBUTER");
+        conf.getConsumers().add(distributerConf);
         
         // Save
         AisBusConfiguration.save("aisbus.xml", conf);

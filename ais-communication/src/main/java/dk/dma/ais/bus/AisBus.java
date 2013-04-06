@@ -181,6 +181,34 @@ public class AisBus extends AisBusComponent implements Runnable {
         // Make consumer queue
         consumers.add(consumer);
     }
+    
+    /**
+     * Get consumer by name
+     * @param name
+     * @return
+     */
+    public AisBusConsumer getConsumer(String name) {
+        for (AisBusConsumer consumer : consumers) {
+            if (consumer.getName() != null && consumer.getName().equals(name)) {
+                return consumer;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get provider by name
+     * @param name
+     * @return
+     */
+    public AisBusProvider getProvider(String name) {
+        for (AisBusProvider provider : providers) {
+            if (provider.getName() != null && provider.getName().equals(name)) {
+                return provider;
+            }
+        }
+        return null; 
+    }
 
     /**
      * Register a provider

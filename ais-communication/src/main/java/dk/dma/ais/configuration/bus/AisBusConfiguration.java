@@ -33,7 +33,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import dk.dma.ais.bus.AisBus;
-import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.configuration.bus.consumer.AisBusConsumerConfiguration;
@@ -88,7 +87,7 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
 
     @Override
     @XmlTransient
-    public AisBusComponent getInstance() {
+    public AisBus getInstance() {
         AisBus aisBus = new AisBus();
         aisBus.setBusQueueSize(busQueueSize);
         aisBus.setBusPullMaxElements(busPullMaxElements);
