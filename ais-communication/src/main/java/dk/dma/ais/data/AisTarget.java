@@ -69,8 +69,6 @@ public abstract class AisTarget implements Serializable {
      * @param aisMessage
      */
     public void update(AisMessage aisMessage) {
-        // Set last report time
-        this.lastReport = new Date();
         // Set MMSI
         this.mmsi = aisMessage.getUserId();
         // Set source data
@@ -89,7 +87,10 @@ public abstract class AisTarget implements Serializable {
             }
         }
         
-        this.lastReport = aisMessage.getVdm().getTimestamp();        
+        this.lastReport = aisMessage.getVdm().getTimestamp();  
+        if (this.lastReport == null) {
+            this.lastReport = new Date();
+        }
         
         sourceData.setTagging(AisPacketTagging.parse(aisMessage.getVdm()));
         sourceData.setSourceRegion(sourceRegion);
