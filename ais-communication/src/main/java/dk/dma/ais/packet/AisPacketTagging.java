@@ -251,8 +251,12 @@ public class AisPacketTagging implements Serializable {
         if (sourceCountry != null && (tagging.getSourceCountry() == null || !tagging.getSourceCountry().equals(sourceCountry))) {
             return false;
         }
-        if (sourceType != null && (tagging.getSourceType() == null || tagging.getSourceType() != sourceType)) {
-            return false;
+        // Default tagging is TERRESTRIAL
+        if (sourceType != null) {
+            SourceType taggingSourceType = (tagging.getSourceType() != null) ? tagging.getSourceType() : SourceType.TERRESTRIAL;
+            if (taggingSourceType != sourceType) {
+                return false;                
+            }            
         }
         return true;
     }
