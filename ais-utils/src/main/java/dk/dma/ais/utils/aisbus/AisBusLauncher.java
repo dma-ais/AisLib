@@ -66,7 +66,7 @@ public class AisBusLauncher extends AbstractDaemon {
         Thread.sleep(2000);
 
         while (true) {
-            LOG.info(StringUtils.leftPad("", 100, '-'));
+            LOG.debug(StringUtils.leftPad("", 100, '-'));
             ratePrint(aisBus, null);
             for (AisBusProvider provider : aisBus.getProviders()) {
                 ratePrint(provider, provider.getName());
@@ -84,14 +84,14 @@ public class AisBusLauncher extends AbstractDaemon {
                     }
                 }
             }
-            LOG.info(StringUtils.leftPad("", 100, '-'));
+            LOG.debug(StringUtils.leftPad("", 100, '-'));
             Thread.sleep(60000);
         }
 
     }
 
     private void ratePrint(TcpClient tcpClient) {
-        LOG.info(String.format("     %-15s %s", tcpClient.getRemoteHost(), tcpClient.rateReport()));
+        LOG.debug(String.format("     %-15s %s", tcpClient.getRemoteHost(), tcpClient.rateReport()));
     }
 
     private void ratePrint(AisBusComponent comp, String name) {
@@ -102,7 +102,7 @@ public class AisBusLauncher extends AbstractDaemon {
     }
 
     private void ratePrint(String report, String name) {
-        LOG.info(String.format("%-20s %s", name, report));
+        LOG.debug(String.format("%-20s %s", name, report));
     }
 
     @Override
