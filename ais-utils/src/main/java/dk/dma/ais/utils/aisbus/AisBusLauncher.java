@@ -16,6 +16,7 @@
 package dk.dma.ais.utils.aisbus;
 
 import java.io.FileNotFoundException;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -61,16 +62,16 @@ public class AisBusLauncher extends AbstractDaemon {
         aisBus.startConsumers();
         LOG.info("Starting providers");
         aisBus.startProviders();
-        
+
         Thread.sleep(2000);
 
-        while (true) {            
+        while (true) {
             LOG.info(StringUtils.leftPad("", 100, '-'));
             ratePrint(aisBus, null);
             for (AisBusProvider provider : aisBus.getProviders()) {
                 ratePrint(provider, provider.getName());
                 if (provider instanceof TcpServerProvider) {
-                    for (TcpClient tcpClient : ((TcpServerProvider)provider).getServer().getClients()) {
+                    for (TcpClient tcpClient : ((TcpServerProvider) provider).getServer().getClients()) {
                         ratePrint(tcpClient);
                     }
                 }
@@ -78,7 +79,7 @@ public class AisBusLauncher extends AbstractDaemon {
             for (AisBusConsumer consumer : aisBus.getConsumers()) {
                 ratePrint(consumer, consumer.getName());
                 if (consumer instanceof TcpServerConsumer) {
-                    for (TcpClient tcpClient : ((TcpServerConsumer)consumer).getServer().getClients()) {
+                    for (TcpClient tcpClient : ((TcpServerConsumer) consumer).getServer().getClients()) {
                         ratePrint(tcpClient);
                     }
                 }
@@ -88,7 +89,7 @@ public class AisBusLauncher extends AbstractDaemon {
         }
 
     }
-    
+
     private void ratePrint(TcpClient tcpClient) {
         LOG.info(String.format("     %-15s %s", tcpClient.getRemoteHost(), tcpClient.rateReport()));
     }
@@ -99,7 +100,7 @@ public class AisBusLauncher extends AbstractDaemon {
         }
         ratePrint(comp.rateReport(), name);
     }
-    
+
     private void ratePrint(String report, String name) {
         LOG.info(String.format("%-20s %s", name, report));
     }
@@ -113,6 +114,13 @@ public class AisBusLauncher extends AbstractDaemon {
     }
 
     public static void main(String[] args) throws Exception {
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
+                System.exit(-1);
+            }
+        });
         new AisBusLauncher().execute(args);
     }
 
