@@ -27,7 +27,7 @@ import dk.dma.ais.configuration.transform.TransformerConfiguration;
 public abstract class AisBusComponentConfiguration {
 
     private List<FilterConfiguration> filters = new ArrayList<>();
-    
+        
     private List<TransformerConfiguration> transformers = new ArrayList<>();
 
     public AisBusComponentConfiguration() {
