@@ -15,22 +15,18 @@
  */
 package dk.dma.ais.configuration.bus.provider;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import dk.dma.ais.bus.AisBusProvider;
-import dk.dma.ais.configuration.bus.AisBusSocketConfiguration;
+import dk.dma.ais.bus.AisBusComponent;
+import dk.dma.ais.bus.provider.CollectorProvider;
 
-@XmlSeeAlso({ TcpClientProviderConfiguration.class, TcpServerProviderConfiguration.class, FileReaderProviderConfiguration.class,
-        CollectorProviderConfiguration.class })
-public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
-
-    public AisBusProviderConfiguration() {
-
-    }
-
-    protected AisBusProvider configure(AisBusProvider provider) {
-        super.configure(provider);
-        return provider;
+@XmlRootElement
+public class CollectorProviderConfiguration extends AisBusProviderConfiguration {
+    
+    @Override
+    public AisBusComponent getInstance() {
+        CollectorProvider provider = new CollectorProvider();        
+        return super.configure(provider);
     }
 
 }
