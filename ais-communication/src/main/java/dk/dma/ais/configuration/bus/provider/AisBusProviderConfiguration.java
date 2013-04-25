@@ -21,7 +21,7 @@ import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.configuration.bus.AisBusSocketConfiguration;
 
 @XmlSeeAlso({ TcpClientProviderConfiguration.class, TcpServerProviderConfiguration.class, FileReaderProviderConfiguration.class,
-        CollectorProviderConfiguration.class })
+        CollectorProviderConfiguration.class, RepeatingFileReaderProviderConfiguration.class })
 public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
 
     public AisBusProviderConfiguration() {
