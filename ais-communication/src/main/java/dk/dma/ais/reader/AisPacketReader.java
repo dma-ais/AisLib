@@ -179,7 +179,7 @@ public class AisPacketReader {
         }
         
         // Make packet 
-        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis());
+        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"));
         
         // Maybe add source id
         if (sourceId != null) {
@@ -218,7 +218,8 @@ public class AisPacketReader {
     public static AisPacket from(String messageString) throws SentenceException {
         AisPacket packet = null;
         AisPacketReader packetReader = new AisPacketReader();
-        String[] lines = StringUtils.split(messageString, "\n");
+        //String[] lines = StringUtils.split(messageString, "\n");
+        String[] lines = messageString.split("\\r?\\n");
         for (String line : lines) {
             packet = packetReader.readLine(line);
             if (packet != null) {
