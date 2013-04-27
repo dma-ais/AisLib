@@ -30,8 +30,8 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(RoundRobinAisTcpReader.class);
 
-    private List<String> hostnames = new ArrayList<>();
-    private List<Integer> ports = new ArrayList<>();
+    List<String> hostnames = new ArrayList<>();
+    List<Integer> ports = new ArrayList<>();
     private int currentHost = -1;
 
     public RoundRobinAisTcpReader() {

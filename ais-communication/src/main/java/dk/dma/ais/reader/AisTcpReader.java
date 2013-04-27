@@ -20,11 +20,16 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.net.HostAndPort;
 
 import dk.dma.ais.sentence.Abk;
 import dk.dma.enav.util.function.Consumer;
@@ -144,7 +149,7 @@ public class AisTcpReader extends AisReader {
             // Close socket if open
             clientSocket.get().close();
         } catch (IOException ignored) {
-        }        
+        }
     }
 
     protected void connect() throws IOException {
@@ -248,4 +253,42 @@ public class AisTcpReader extends AisReader {
         return port;
     }
 
+    /**
+     * Parses the string and returns either an {@link AisTcpReader} if only one hostname is found or a {@link RoundRobinAisTcpReader} if more than 1 host name is found.
+     * Example "mySource=ais163.sealan.dk:65262,ais167.sealan.dk:65261" will return a RoundRobinAisTcpReader alternating between the two sources if one is down.
+     * @param fullSource the full source
+     * @return a ais reader
+     */
+    public static AisTcpReader parse(String fullSource) {
+        try (Scanner s = new Scanner(fullSource);) {
+            s.useDelimiter("\\s*=\\s*");
+            if (!s.hasNext()) {
+                throw new IllegalArgumentException("Source must be of the format src=host:port,host:port, was "
+                        + fullSource);
+            }
+            String src = s.next();
+            List<String> hosts = new ArrayList<>();
+            if (!s.hasNext()) {
+                throw new IllegalArgumentException("A list of hostname:ports must follow the source (format src=host:port,host:port), was "
+                        + fullSource);
+            }
+            try (Scanner s1 = new Scanner(s.next())) {
+                s1.useDelimiter("\\s*,\\s*");
+                if (!s1.hasNext()) {
+                    throw new IllegalArgumentException(
+                            "Source must have at least one host:port (format src=host:port,host:port), was "
+                                    + fullSource);
+                }
+                while (s1.hasNext()) {
+                    String hostPort = s1.next();
+                    HostAndPort hap = HostAndPort.fromString(hostPort);
+                    hosts.add(hap.toString());
+                }
+            }
+
+            final AisTcpReader r = hosts.size() == 1 ? new AisTcpReader(hosts.get(0)) : new RoundRobinAisTcpReader(hosts);
+            r.setSourceId(src);
+            return r;
+        }
+    }
 }
