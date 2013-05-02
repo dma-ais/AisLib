@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import dk.dma.ais.transform.IAisPacketTransformer;
 
 @XmlSeeAlso({ CropVdmTransformerConfiguration.class, TaggingTransformerConfiguration.class, ReplayTransformConfiguration.class,
-        SourceTypeSatTransformerConfiguration.class, AnonymousTransfomerConfiguration.class })
+        SourceTypeSatTransformerConfiguration.class, AnonymousTransfomerConfiguration.class, PacketTransformerCollectionConfiguration.class })
 public abstract class TransformerConfiguration {
 
     public TransformerConfiguration() {

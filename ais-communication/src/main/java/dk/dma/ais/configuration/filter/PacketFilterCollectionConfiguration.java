@@ -31,7 +31,7 @@ public class PacketFilterCollectionConfiguration extends FilterConfiguration {
     private static final int TYPE_AND = 0;
     private int filterType = TYPE_AND;
 
-    @XmlElement(name = "collectionFilter")
+    @XmlElement(name = "filterCollection")
     private List<FilterConfiguration> collection = new ArrayList<>();
 
     public int getFilterType() {
@@ -46,7 +46,7 @@ public class PacketFilterCollectionConfiguration extends FilterConfiguration {
         return collection;
     }
 
-    public void setFilters(List<FilterConfiguration> filters) {
+    public void set(List<FilterConfiguration> filters) {
         this.collection = filters;
     }
 
