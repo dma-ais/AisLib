@@ -29,6 +29,16 @@ import dk.dma.ais.packet.AisPacket;
 public class PacketFilterCollection implements IPacketFilter {
 
     private final CopyOnWriteArrayList<IPacketFilter> packetFilters = new CopyOnWriteArrayList<>();
+    static final int TYPE_AND = 0;
+    static final int TYPE_OR = 1;
+    
+    private int filterType = TYPE_AND;
+    
+
+    public int getFilterType() {
+        return filterType;
+    }
+
 
     public PacketFilterCollection() {
 
@@ -39,12 +49,26 @@ public class PacketFilterCollection implements IPacketFilter {
      */
     @Override
     public boolean rejectedByFilter(AisPacket packet) {
-        for (IPacketFilter filter : packetFilters) {
-            if (filter.rejectedByFilter(packet)) {
-                return true;
+        switch (filterType) {
+        case TYPE_OR:
+            for (IPacketFilter filter : packetFilters) {
+                if (!filter.rejectedByFilter(packet)) {
+                    return false;
+                }
             }
+            return true;
+        case TYPE_AND:
+            //fall through to default        
+        default:
+            for (IPacketFilter filter : packetFilters) {
+                if (filter.rejectedByFilter(packet)) {
+                    return true;
+                }
+            }
+            return false;
         }
-        return false;
+        
+        
     }
 
     /**
@@ -55,5 +79,16 @@ public class PacketFilterCollection implements IPacketFilter {
     public void addFilter(IPacketFilter filter) {
            packetFilters.add(filter);
     }
+    
+    /**
+     * 
+     */
+    public boolean isType(int t) {
+        return filterType == t;
+    }
 
+    public void setFilterType(int filterType) {
+        this.filterType = filterType;
+        
+    }
 }

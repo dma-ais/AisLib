@@ -13,21 +13,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.configuration.filter;
+package dk.dma.ais.configuration.reader;
 
+import java.io.FileNotFoundException;
+
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
-import dk.dma.ais.filter.IPacketFilter;
+import dk.dma.ais.reader.AisReader;
 
-@XmlSeeAlso({ PacketFilterCollectionConfiguration.class,
-        DownSampleFilterConfiguration.class,
-        DuplicateFilterConfiguration.class,
-        GatehouseSourceFilterConfiguration.class,
-        TargetCountryFilterConfiguration.class,
-        TaggingFilterConfiguration.class, LocationFilterConfiguration.class,
-        MessageTypeFilterConfiguration.class, })
-public abstract class FilterConfiguration {
+@XmlRootElement
+@XmlSeeAlso({ AisFileReaderConfiguration.class, AisTcpReaderConfiguration.class})
+public abstract class AisReaderConfiguration {
 
-    public abstract IPacketFilter getInstance();
-
+    public abstract AisReader getInstance() throws FileNotFoundException;
 }

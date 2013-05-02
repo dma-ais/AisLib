@@ -13,21 +13,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.configuration.filter;
+package dk.dma.ais.configuration.reader;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import java.io.FileNotFoundException;
 
-import dk.dma.ais.filter.IPacketFilter;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisTcpReader;
 
-@XmlSeeAlso({ PacketFilterCollectionConfiguration.class,
-        DownSampleFilterConfiguration.class,
-        DuplicateFilterConfiguration.class,
-        GatehouseSourceFilterConfiguration.class,
-        TargetCountryFilterConfiguration.class,
-        TaggingFilterConfiguration.class, LocationFilterConfiguration.class,
-        MessageTypeFilterConfiguration.class, })
-public abstract class FilterConfiguration {
+public class AisTcpReaderConfiguration extends AisReaderConfiguration {
 
-    public abstract IPacketFilter getInstance();
+    private long reconnectInterval = 5000; // Default 5 sec
+    private String hostname;
+    private int port;
+    private int timeout = 10;
+
+    @Override
+    public AisReader getInstance() throws FileNotFoundException {
+        AisTcpReader aisTcpReader = new AisTcpReader(hostname, port);
+        aisTcpReader.setReconnectInterval(reconnectInterval);
+        aisTcpReader.setTimeout(timeout);
+
+        return aisTcpReader;
+    }
 
 }
