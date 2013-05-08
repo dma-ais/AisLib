@@ -21,7 +21,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,8 +39,8 @@ import dk.dma.enav.util.function.Consumer;
 /**
  * Thread class for reading AIS messages from a TCP stream.
  * 
- * Connection handling is fail tolerant. Connection error is handled by waiting a specified amount of time before doing a re-connect
- * (default 5 sec).
+ * Connection handling is fail tolerant. Connection error is handled by waiting a specified amount of time before doing
+ * a re-connect (default 5 sec).
  * 
  * Handlers for the parsed AIS messages must be registered with registerHanlder() method.
  * 
@@ -54,14 +56,15 @@ public class AisTcpReader extends AisReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisTcpReader.class);
 
-    protected long reconnectInterval = 5000; // Default 5 sec
-    protected String hostname;
-    protected int port;
-
+    protected volatile long reconnectInterval = 5000; // Default 5 sec
+    protected volatile String hostname;
+    protected volatile int port;
     protected OutputStream outputStream;
     protected final AtomicReference<Socket> clientSocket = new AtomicReference<>();
 
-    protected int timeout = 10;
+    protected volatile int timeout = 10;
+
+    private volatile boolean shutdown;
 
     public AisTcpReader() {
         clientSocket.set(new Socket());
@@ -123,7 +126,7 @@ public class AisTcpReader extends AisReader {
      */
     @Override
     public void run() {
-        while (true) {
+        while (!shutdown) {
             try {
                 disconnect();
                 connect();
@@ -132,11 +135,14 @@ public class AisTcpReader extends AisReader {
                 if (isInterrupted()) {
                     return;
                 }
-                LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000 + " seconds");
-                try {
-                    Thread.sleep(reconnectInterval);
-                } catch (InterruptedException intE) {
-                    return;
+                LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
+                        + " seconds");
+                if (!shutdown) {
+                    try {
+                        Thread.sleep(reconnectInterval);
+                    } catch (InterruptedException intE) {
+                        return;
+                    }
                 }
             }
         }
@@ -144,12 +150,13 @@ public class AisTcpReader extends AisReader {
 
     @Override
     public void stopReader() {
+        LOG.info("Stopping reader " + toString());
         this.interrupt();
         try {
             // Close socket if open
             clientSocket.get().close();
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
+        shutdown = true;
     }
 
     protected void connect() throws IOException {
@@ -178,8 +185,7 @@ public class AisTcpReader extends AisReader {
             try {
                 LOG.info("Disconnecting source " + hostname + ":" + port);
                 clientSocket.get().close();
-            } catch (IOException ignored) {
-            }
+            } catch (IOException ignored) {}
         }
     }
 
@@ -253,13 +259,21 @@ public class AisTcpReader extends AisReader {
         return port;
     }
 
+    public String toString() {
+        return "TcpReader [sourceIf = " + getSourceId() + ", host=" + getHostname() + ":" + getPort() + "]";
+    }
+
     /**
-     * Parses the string and returns either an {@link AisTcpReader} if only one hostname is found or a {@link RoundRobinAisTcpReader} if more than 1 host name is found.
-     * Example "mySource=ais163.sealan.dk:65262,ais167.sealan.dk:65261" will return a RoundRobinAisTcpReader alternating between the two sources if one is down.
-     * @param fullSource the full source
+     * Parses the string and returns either an {@link AisTcpReader} if only one hostname is found or a
+     * {@link RoundRobinAisTcpReader} if more than 1 host name is found. Example
+     * "mySource=ais163.sealan.dk:65262,ais167.sealan.dk:65261" will return a RoundRobinAisTcpReader alternating between
+     * the two sources if one is down.
+     * 
+     * @param fullSource
+     *            the full source
      * @return a ais reader
      */
-    public static AisTcpReader parse(String fullSource) {
+    public static AisTcpReader parseSource(String fullSource) {
         try (Scanner s = new Scanner(fullSource);) {
             s.useDelimiter("\\s*=\\s*");
             if (!s.hasNext()) {
@@ -269,8 +283,9 @@ public class AisTcpReader extends AisReader {
             String src = s.next();
             List<String> hosts = new ArrayList<>();
             if (!s.hasNext()) {
-                throw new IllegalArgumentException("A list of hostname:ports must follow the source (format src=host:port,host:port), was "
-                        + fullSource);
+                throw new IllegalArgumentException(
+                        "A list of hostname:ports must follow the source (format src=host:port,host:port), was "
+                                + fullSource);
             }
             try (Scanner s1 = new Scanner(s.next())) {
                 s1.useDelimiter("\\s*,\\s*");
@@ -286,9 +301,28 @@ public class AisTcpReader extends AisReader {
                 }
             }
 
-            final AisTcpReader r = hosts.size() == 1 ? new AisTcpReader(hosts.get(0)) : new RoundRobinAisTcpReader(hosts);
+            final AisTcpReader r = hosts.size() == 1 ? new AisTcpReader(hosts.get(0)) : new RoundRobinAisTcpReader(
+                    hosts);
             r.setSourceId(src);
             return r;
         }
     }
+
+    /**
+     * Equivalent to {@link #parseSource(String)} except that it will parse an array of sources. Returning a map making
+     * sure there all source names are unique
+     */
+    public static Map<String, AisTcpReader> parseSourceList(List<String> sources) {
+        Map<String, AisTcpReader> readers = new HashMap<>();
+        for (String s : sources) {
+            AisTcpReader r = parseSource(s);
+            if (readers.put(r.getSourceId(), r) != null) {
+                // Make sure its unique
+                throw new Error("More than one reader specified with the same source id (id =" + r.getSourceId()
+                        + "), source string = " + sources);
+            }
+        }
+        return readers;
+    }
+
 }

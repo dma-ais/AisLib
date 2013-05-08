@@ -28,17 +28,17 @@ public class AisTcpReaderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void parseFailNoHostNamePorts1() {
-        AisTcpReader.parse("sdsd");
+        AisTcpReader.parseSource("sdsd");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void parseFailNoHostNamePorts2() {
-        AisTcpReader.parse("sdsd=");
+        AisTcpReader.parseSource("sdsd=");
     }
 
     @Test
     public void parseOneHost() {
-        AisTcpReader r = AisTcpReader.parse("sdsd=ff:123");
+        AisTcpReader r = AisTcpReader.parseSource("sdsd=ff:123");
         assertSame(AisTcpReader.class, r.getClass());
         assertEquals("ff", r.getHostname());
         assertEquals(123, r.getPort());
@@ -47,7 +47,7 @@ public class AisTcpReaderTest {
 
     @Test
     public void parseTwoHosts() {
-        AisTcpReader r = AisTcpReader.parse("sdsd=ff:123, dd:1235");
+        AisTcpReader r = AisTcpReader.parseSource("sdsd=ff:123, dd:1235");
         assertSame(RoundRobinAisTcpReader.class, r.getClass());
         RoundRobinAisTcpReader tr = (RoundRobinAisTcpReader) r;
         assertEquals("ff", tr.hostnames.get(0));

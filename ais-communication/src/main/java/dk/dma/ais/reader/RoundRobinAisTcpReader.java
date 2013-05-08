@@ -109,6 +109,11 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
         }
     }
 
+    public String toString() {
+        String current=hostnames.get(currentHost) + ":" + ports.get(currentHost);
+        return "RoundRobinTcpReader [sourceIf = " + getSourceId() + ", current host=" + current  +"]";
+    }
+
     private void setHost() {
         hostname = hostnames.get(currentHost);
         port = ports.get(currentHost);
