@@ -18,11 +18,16 @@ package dk.dma.ais.packet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.commons.util.io.OutputStreamSink;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Common utility methods for {@link AisPacket}.
@@ -98,5 +103,19 @@ public class AisPackets {
             }
         }
         return result;
+    }
+
+
+    public static List<AisPacket> readFromFile(Path p) throws IOException {
+        final ConcurrentLinkedQueue<AisPacket> list = new ConcurrentLinkedQueue<>();
+        AisStreamReader r = new AisStreamReader(Files.newInputStream(p));
+        r.registerPacketHandler(new Consumer<AisPacket>() {
+            @Override
+            public void accept(AisPacket t) {
+                list.add(t);
+            }
+        });
+        r.run(); // we do not need to run it in another thread
+        return new ArrayList<>(list);
     }
 }
