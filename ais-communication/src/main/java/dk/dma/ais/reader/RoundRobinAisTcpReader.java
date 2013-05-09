@@ -86,23 +86,25 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
 
     @Override
     public void run() {
-        while (true) {
+        while (!shutdown) {
             try {
                 disconnect();
                 setHost();
                 connect();
                 readLoop(clientSocket.get().getInputStream());
             } catch (IOException e) {
-                if (isInterrupted()) {
+                if (shutdown || isInterrupted()) {
                     return;
                 }
                 LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
                         + " seconds");
-                try {
-                    Thread.sleep(reconnectInterval);
-                } catch (InterruptedException intE) {
-                    LOG.info("Stopping reader");
-                    return;
+                if (!shutdown) {
+                    try {
+                        Thread.sleep(reconnectInterval);
+                    } catch (InterruptedException intE) {
+                        LOG.info("Stopping reader");
+                        return;
+                    }
                 }
                 selectHost();
             }
@@ -110,7 +112,7 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
     }
 
     public String toString() {
-        String current=hostnames.get(currentHost) + ":" + ports.get(currentHost);
+        String current = hostnames.get(currentHost) + ":" + ports.get(currentHost);
         return "RoundRobinTcpReader [sourceIf = " + getSourceId() + ", current host=" + current  +"]";
     }
 

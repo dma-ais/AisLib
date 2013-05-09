@@ -64,7 +64,7 @@ public class AisTcpReader extends AisReader {
 
     protected volatile int timeout = 10;
 
-    private volatile boolean shutdown;
+    volatile boolean shutdown;
 
     public AisTcpReader() {
         clientSocket.set(new Socket());
@@ -132,15 +132,18 @@ public class AisTcpReader extends AisReader {
                 connect();
                 readLoop(clientSocket.get().getInputStream());
             } catch (IOException e) {
-                if (isInterrupted()) {
+                if (shutdown || isInterrupted()) {
                     return;
                 }
                 LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
                         + " seconds");
                 if (!shutdown) {
                     try {
+                        // LOG.info("Starting to sleep " + getId() + " " + shutdown);
                         Thread.sleep(reconnectInterval);
+                        // LOG.info("Wake up " + getId() + " " + shutdown);
                     } catch (InterruptedException intE) {
+                        // intE.printStackTrace();
                         return;
                     }
                 }
@@ -150,13 +153,14 @@ public class AisTcpReader extends AisReader {
 
     @Override
     public void stopReader() {
-        LOG.info("Stopping reader " + toString());
+        LOG.info("Stopping reader " + toString() + " in thread " + getId());
+        shutdown = true;
         this.interrupt();
+        // LOG.info("Interrupted thread " + this.getId());
         try {
             // Close socket if open
             clientSocket.get().close();
         } catch (IOException ignored) {}
-        shutdown = true;
     }
 
     protected void connect() throws IOException {
@@ -175,7 +179,9 @@ public class AisTcpReader extends AisReader {
             LOG.error("Unknown host: " + hostname + ": " + e.getMessage());
             throw e;
         } catch (IOException e) {
-            LOG.error("Could not connect to: " + hostname + ": " + e.getMessage());
+            if (!shutdown) {
+                LOG.error("Could not connect to: " + hostname + ": " + e.getMessage());
+            }
             throw e;
         }
     }
