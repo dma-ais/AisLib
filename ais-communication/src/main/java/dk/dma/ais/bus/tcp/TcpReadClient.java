@@ -18,6 +18,7 @@ package dk.dma.ais.bus.tcp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPInputStream;
 
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
     private static final Logger LOG = LoggerFactory.getLogger(TcpReadClient.class);
 
     private final Consumer<AisPacket> packetConsumer;
+    private final AtomicReference<AisStreamReader> reader = new AtomicReference<>();
 
     public TcpReadClient(Consumer<AisPacket> packetConsumer, IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
         super(stopListener, socket, conf);
@@ -52,10 +54,10 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
             } else {
                 inputStream = socket.getInputStream();
             }
-            AisStreamReader reader = new AisStreamReader(inputStream);
-            reader.registerPacketHandler(this);
-            reader.start();
-            reader.join();
+            reader.set(new AisStreamReader(inputStream));
+            reader.get().registerPacketHandler(this);
+            reader.get().start();
+            reader.get().join();
         } catch (IOException e) {
             if (!isInterrupted()) {
                 LOG.info(e.getMessage());
@@ -71,6 +73,15 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
         stopping();
 
         LOG.info("Stopped");
+    }
+    
+    @Override
+    public void cancel() {
+        AisStreamReader r = reader.get();
+        if (r != null) {
+            r.stopReader();
+        }
+        super.cancel();
     }
 
     @Override

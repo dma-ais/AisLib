@@ -15,7 +15,6 @@
  */
 package dk.dma.ais.bus.tcp;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -72,10 +71,6 @@ public abstract class TcpClient extends Thread {
      */
     public void cancel() {
         this.interrupt();
-        try {
-            socket.close();
-        } catch (IOException ignored) {
-        }
         try {
             this.join(AisBusComponent.THREAD_STOP_WAIT_MAX);
         } catch (InterruptedException e) {

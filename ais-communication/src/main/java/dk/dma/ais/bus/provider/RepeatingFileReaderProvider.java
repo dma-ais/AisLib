@@ -84,7 +84,7 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
     @Override
     public void run() {
         InputStream stream;
-        while (true) {                       
+        while (true) {  
             try {
                 stream = new FileInputStream(filename);
                 if (gzip) {
@@ -102,7 +102,7 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
             try {
                 aisReader.get().join();
             } catch (InterruptedException e) {
-                break;
+                return;
             }
             
             try {
@@ -121,14 +121,6 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 return;
-            }
-            
-        }
-        
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException e) {
             }
             
         }
