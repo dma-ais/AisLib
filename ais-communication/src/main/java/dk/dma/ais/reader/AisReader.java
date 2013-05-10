@@ -55,6 +55,9 @@ public abstract class AisReader extends Thread {
     public enum Status {
         CONNECTED, DISCONNECTED
     };
+    
+    /** Flag that indicates the reader should shutdown */
+    private volatile boolean shutdown;
 
     /** Reader to parse lines and deliver complete AIS packets. */
     protected final AisPacketReader packetReader = new AisPacketReader();
@@ -79,7 +82,7 @@ public abstract class AisReader extends Thread {
 
     /** The number of lines read by this reader. */
     private final AtomicLong linesRead = new AtomicLong();
-
+    
     @ManagedAttribute
     public long getNumberOfBytesWritten() {
         return bytesWritten.get();
@@ -201,11 +204,6 @@ public abstract class AisReader extends Thread {
     public abstract Status getStatus();
 
     /**
-     * Stop the reading thread
-     */
-    public abstract void stopReader();
-
-    /**
      * The method to do the actual sending
      * 
      * @param sendRequest
@@ -318,10 +316,27 @@ public abstract class AisReader extends Thread {
     protected void readLoop(InputStream stream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new CountingInputStream(stream, bytesRead)))) {
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                if (isShutdown()) {
+                    return;
+                }
                 handleLine(line);
             }
         }
     }
+    
+    /**
+     * Stop the reader
+     */
+    public void stopReader() {
+        shutdown = true;
+        this.interrupt();
+    }
+    
+    protected boolean isShutdown() {
+        return shutdown;
+    }
+    
+    
 
     public String getSourceId() {
         return packetReader.getSourceId();

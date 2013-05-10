@@ -86,19 +86,19 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
 
     @Override
     public void run() {
-        while (!shutdown) {
+        while (!isShutdown()) {
             try {
                 disconnect();
                 setHost();
                 connect();
                 readLoop(clientSocket.get().getInputStream());
             } catch (IOException e) {
-                if (shutdown || isInterrupted()) {
+                if (isShutdown() || isInterrupted()) {
                     return;
                 }
                 LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
                         + " seconds");
-                if (!shutdown) {
+                if (!isShutdown()) {
                     try {
                         Thread.sleep(reconnectInterval);
                     } catch (InterruptedException intE) {

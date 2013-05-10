@@ -64,8 +64,6 @@ public class AisTcpReader extends AisReader {
 
     protected volatile int timeout = 10;
 
-    volatile boolean shutdown;
-
     public AisTcpReader() {
         clientSocket.set(new Socket());
     }
@@ -126,23 +124,23 @@ public class AisTcpReader extends AisReader {
      */
     @Override
     public void run() {
-        while (!shutdown) {
+        while (!isShutdown()) {
             try {
                 disconnect();
                 connect();
                 readLoop(clientSocket.get().getInputStream());
             } catch (IOException e) {
-                if (shutdown || isInterrupted()) {
+                if (isShutdown() || isInterrupted()) {
                     return;
                 }
                 LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
                         + " seconds");
-                if (!shutdown) {
+                if (!isShutdown()) {
                     try {
                         // LOG.info("Starting to sleep " + getId() + " " + shutdown);
                         Thread.sleep(reconnectInterval);
                         // LOG.info("Wake up " + getId() + " " + shutdown);
-                    } catch (InterruptedException intE) {
+                    } catch (InterruptedException ignored) {
                         // intE.printStackTrace();
                         return;
                     }
@@ -153,10 +151,7 @@ public class AisTcpReader extends AisReader {
 
     @Override
     public void stopReader() {
-        LOG.info("Stopping reader " + toString() + " in thread " + getId());
-        shutdown = true;
-        this.interrupt();
-        // LOG.info("Interrupted thread " + this.getId());
+        super.stopReader();
         try {
             // Close socket if open
             clientSocket.get().close();
@@ -179,7 +174,7 @@ public class AisTcpReader extends AisReader {
             LOG.error("Unknown host: " + hostname + ": " + e.getMessage());
             throw e;
         } catch (IOException e) {
-            if (!shutdown) {
+            if (!isShutdown()) {
                 LOG.error("Could not connect to: " + hostname + ": " + e.getMessage());
             }
             throw e;
