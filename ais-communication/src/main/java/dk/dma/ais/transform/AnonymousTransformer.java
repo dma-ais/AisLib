@@ -157,7 +157,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
         // Change name
         message.setName("SHIP" + message.getUserId());
         // Callsign
-        message.setCallsign("CALL" + message.getUserId());
+        message.setCallsign("C" + message.getUserId());
     }
 
     private void anonymize(AisMessage5 message) {
