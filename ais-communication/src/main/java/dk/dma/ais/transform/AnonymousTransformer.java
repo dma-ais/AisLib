@@ -15,10 +15,19 @@
  */
 package dk.dma.ais.transform;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,9 +44,10 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.Country;
 
 /**
- * Transformer that anonymizer
+ * Transformer that anonymizes ais packets
  */
 @ThreadSafe
 public class AnonymousTransformer implements IAisPacketTransformer {
@@ -45,14 +55,104 @@ public class AnonymousTransformer implements IAisPacketTransformer {
     private static final Logger LOG = LoggerFactory.getLogger(AnonymousTransformer.class);
 
     /**
-     * Map from MMSI to new anonymous MMSI
+     * Class holding anonymized data for target
      */
-    private final ConcurrentHashMap<Integer, Integer> mmsiMap = new ConcurrentHashMap<>();
+    private class AnonData {
+        private final int mmsi;
+        private final String name;
+        private final int imoNo;
+        private final String callsign;
+        private final String destination;
+
+        public AnonData(int mmsi, String name, int imoNo, String callsign, String destination) {
+            this.mmsi = mmsi;
+            this.name = name;
+            this.imoNo = imoNo;
+            this.callsign = callsign;
+            this.destination = destination;
+        }
+
+        public int getMmsi() {
+            return mmsi;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getImoNo() {
+            return imoNo;
+        }
+
+        public String getCallsign() {
+            return callsign;
+        }
+
+        public synchronized String getDestination() {
+            return destination;
+        }
+
+    }
+
+    /**
+     * List of available MID's
+     */
+    private static final ArrayList<Integer> MID_LIST = new ArrayList<>(Country.getMidMap().keySet());
+
+    /**
+     * List of random names
+     */
+    private static final ArrayList<String> NAME_LIST = new ArrayList<>();
+
+    /**
+     * Location of random names file
+     */
+    private static final String LOCATION = AnonymousTransformer.class.getPackage().getName().replace(".", "/") + "/names.txt";
+
+    /**
+     * Load random names
+     */
+    static {
+        URL url = ClassLoader.getSystemResource(LOCATION);
+        if (url == null) {
+            url = Thread.currentThread().getContextClassLoader().getResource(LOCATION);
+        }
+        if (url == null) {
+            throw new Error("Could not locate " + LOCATION + " on classpath");
+        }
+
+        try {
+            InputStreamReader in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(in);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                NAME_LIST.add(line.toUpperCase());
+            }
+        } catch (IOException e) {
+            throw new Error("Failed to load random names list: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Map from MMSI to anonymized data
+     */
+    @GuardedBy("this")
+    private final Map<Integer, AnonData> anonDataMap = new HashMap<>();
 
     /**
      * Counter to keep track of MMSI to anonymous MMSI map
      */
-    private volatile int counter;
+    @GuardedBy("this")
+    private int counter;
+
+    /**
+     * Random number generator
+     */
+    private final Random rand;
+
+    public AnonymousTransformer() {
+        rand = new Random(System.currentTimeMillis());
+    }
 
     @Override
     public AisPacket transform(AisPacket packet) {
@@ -62,20 +162,101 @@ public class AnonymousTransformer implements IAisPacketTransformer {
             return null;
         }
 
+        // Get anonymized data for target
+        AnonData anonData = getAnonData(message);
+
         // Transformation for all mesasges
-        anonymize(message);
+        anonymize(message, anonData);
 
         // Transformation for general static data
         if (message instanceof AisStaticCommon) {
-            anonymize((AisStaticCommon) message);
+            anonymize((AisStaticCommon) message, anonData);
         }
 
         // Transformation for class A static data
         if (message instanceof AisMessage5) {
-            anonymize((AisMessage5) message);
+            anonymize((AisMessage5) message, anonData);
         }
 
         return createPacket(message, packet);
+    }
+
+    private synchronized AnonData getAnonData(AisMessage message) {
+        // Try to get from map
+        AnonData anonData = anonDataMap.get(message.getUserId());
+        if (anonData != null) {
+            return anonData;
+        }
+        // Make anonymized data
+        int mmsi = makeMmsi(counter++);
+        String name = makeName();
+        String callsign = makeCallsign();
+        String destination = makeDestination();
+        int imoNo = counter;
+
+        anonData = new AnonData(mmsi, name, imoNo, callsign, destination);
+        anonDataMap.put(message.getUserId(), anonData);
+        return anonData;
+    }
+
+    /**
+     * Make MMSI from random country and counter
+     * 
+     * @param id
+     * @return
+     */
+    private int makeMmsi(int id) {
+        return MID_LIST.get(rand.nextInt(MID_LIST.size())) * 1000000 + id;
+    }
+    
+    /**
+     * Get random name from list of names
+     * @return
+     */
+    private String makeName() {
+        return NAME_LIST.get(rand.nextInt(NAME_LIST.size()));
+    }
+    
+    /**
+     * Make random callsign
+     * @return
+     */
+    private String makeCallsign() {
+        return UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+    }
+
+    /**
+     * Make random destination
+     */
+    private String makeDestination() {
+        return "N/A";
+    }
+
+    /**
+     * Do transformation basic for all AIS messages
+     * 
+     * @param message
+     */
+    private void anonymize(AisMessage message, AnonData anonData) {
+        message.setUserId(anonData.getMmsi());
+    }
+    
+    /**
+     * 
+     * @param posMessage
+     */
+    private void anonymize(AisStaticCommon message, AnonData anonData) {
+        // Change name
+        message.setName(anonData.getName());
+        // Callsign
+        message.setCallsign(anonData.getCallsign());
+    }
+
+    private void anonymize(AisMessage5 message, AnonData anonData) {
+        // IMO
+        message.setImo(anonData.getImoNo());
+        // Dest
+        message.setDest(anonData.getDestination());
     }
 
     /**
@@ -131,40 +312,6 @@ public class AnonymousTransformer implements IAisPacketTransformer {
         }
 
         return AisPacket.from(StringUtils.join(lines, "\r\n"), packet.getReceiveTimestamp());
-    }
-
-    /**
-     * Do transformation basic for all AIS messages
-     * 
-     * @param message
-     */
-    private void anonymize(AisMessage message) {
-        // Anonymize MMSI
-        // Get or set mapping (the incrementation with not guarantee multiple increments
-        // but this is not important)
-        if (mmsiMap.putIfAbsent(message.getUserId(), counter) == null) {
-            counter++;
-        }
-        int anonId = mmsiMap.get(message.getUserId());
-        message.setUserId(anonId);
-    }
-
-    /**
-     * 
-     * @param posMessage
-     */
-    private void anonymize(AisStaticCommon message) {
-        // Change name
-        message.setName("SHIP" + message.getUserId());
-        // Callsign
-        message.setCallsign("C" + message.getUserId());
-    }
-
-    private void anonymize(AisMessage5 message) {
-        // IMO
-        message.setImo(message.getUserId());
-        // Dest
-        message.setDest("ETERNITY");
     }
 
 }
