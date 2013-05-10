@@ -54,45 +54,6 @@ public class AnonymousTransformer implements IAisPacketTransformer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AnonymousTransformer.class);
 
-    /**
-     * Class holding anonymized data for target
-     */
-    private class AnonData {
-        private final int mmsi;
-        private final String name;
-        private final int imoNo;
-        private final String callsign;
-        private final String destination;
-
-        public AnonData(int mmsi, String name, int imoNo, String callsign, String destination) {
-            this.mmsi = mmsi;
-            this.name = name;
-            this.imoNo = imoNo;
-            this.callsign = callsign;
-            this.destination = destination;
-        }
-
-        public int getMmsi() {
-            return mmsi;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getImoNo() {
-            return imoNo;
-        }
-
-        public String getCallsign() {
-            return callsign;
-        }
-
-        public synchronized String getDestination() {
-            return destination;
-        }
-
-    }
 
     /**
      * List of available MID's
@@ -312,6 +273,46 @@ public class AnonymousTransformer implements IAisPacketTransformer {
         }
 
         return AisPacket.from(StringUtils.join(lines, "\r\n"), packet.getReceiveTimestamp());
+    }
+    
+    /**
+     * Class holding anonymized data for target
+     */
+    private class AnonData {
+        private final int mmsi;
+        private final String name;
+        private final int imoNo;
+        private final String callsign;
+        private final String destination;
+
+        public AnonData(int mmsi, String name, int imoNo, String callsign, String destination) {
+            this.mmsi = mmsi;
+            this.name = name;
+            this.imoNo = imoNo;
+            this.callsign = callsign;
+            this.destination = destination;
+        }
+
+        public int getMmsi() {
+            return mmsi;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getImoNo() {
+            return imoNo;
+        }
+
+        public String getCallsign() {
+            return callsign;
+        }
+
+        public synchronized String getDestination() {
+            return destination;
+        }
+
     }
 
 }
