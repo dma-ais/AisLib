@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.StringUtils;
@@ -55,9 +56,9 @@ public abstract class AisReader extends Thread {
     public enum Status {
         CONNECTED, DISCONNECTED
     };
-    
+
     /** Flag that indicates the reader should shutdown */
-    private volatile boolean shutdown;
+    final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
     /** Reader to parse lines and deliver complete AIS packets. */
     protected final AisPacketReader packetReader = new AisPacketReader();
@@ -82,7 +83,7 @@ public abstract class AisReader extends Thread {
 
     /** The number of lines read by this reader. */
     private final AtomicLong linesRead = new AtomicLong();
-    
+
     @ManagedAttribute
     public long getNumberOfBytesWritten() {
         return bytesWritten.get();
@@ -323,20 +324,20 @@ public abstract class AisReader extends Thread {
             }
         }
     }
-    
+
     /**
      * Stop the reader
      */
     public void stopReader() {
-        shutdown = true;
+        shutdownLatch.countDown();
         this.interrupt();
     }
-    
+
     protected boolean isShutdown() {
-        return shutdown;
+        return shutdownLatch.getCount() == 0;
     }
-    
-    
+
+
 
     public String getSourceId() {
         return packetReader.getSourceId();

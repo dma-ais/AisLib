@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.StringUtils;
@@ -138,7 +139,7 @@ public class AisTcpReader extends AisReader {
                 if (!isShutdown()) {
                     try {
                         // LOG.info("Starting to sleep " + getId() + " " + shutdown);
-                        Thread.sleep(reconnectInterval);
+                        shutdownLatch.await(reconnectInterval, TimeUnit.MILLISECONDS);
                         // LOG.info("Wake up " + getId() + " " + shutdown);
                     } catch (InterruptedException ignored) {
                         // intE.printStackTrace();
