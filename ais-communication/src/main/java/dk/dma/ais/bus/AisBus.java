@@ -26,6 +26,7 @@ import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.dma.ais.bus.status.AisBusComponentStatus.State;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
@@ -89,6 +90,9 @@ public class AisBus extends AisBusComponent implements Runnable {
 
     @Override
     public void cancel() {
+        if (status.getState() != State.STARTED) {
+            return;
+        }
         getThread().interrupt();
         try {
             getThread().join(THREAD_STOP_WAIT_MAX);
