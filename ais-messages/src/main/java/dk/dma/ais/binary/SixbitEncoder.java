@@ -65,7 +65,7 @@ public class SixbitEncoder {
      */
     public void addString(String str, int length) {
         int i = 0;
-        for (; i < str.length(); i++) {
+        for (; i < str.length() && i < length; i++) {
             int c = str.charAt(i);
             if (c >= 64) {
                 c -= 64;
