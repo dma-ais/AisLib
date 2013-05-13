@@ -21,10 +21,13 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import net.jcip.annotations.GuardedBy;
@@ -71,7 +74,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
     private static final String LOCATION = AnonymousTransformer.class.getPackage().getName().replace(".", "/") + "/names.txt";
 
     /**
-     * Load random names
+     * Load names and make random order
      */
     static {
         URL url = ClassLoader.getSystemResource(LOCATION);
@@ -86,9 +89,12 @@ public class AnonymousTransformer implements IAisPacketTransformer {
             InputStreamReader in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(in);
             String line;
+            Set<String> names = new HashSet<>();
             while ((line = reader.readLine()) != null) {
-                NAME_LIST.add(line.toUpperCase());
-            }
+                names.add(line.trim());
+            }            
+            NAME_LIST.addAll(names);
+            Collections.shuffle(NAME_LIST);
         } catch (IOException e) {
             throw new Error("Failed to load random names list: " + e.getMessage());
         }
@@ -149,8 +155,8 @@ public class AnonymousTransformer implements IAisPacketTransformer {
             return anonData;
         }
         // Make anonymized data
-        int mmsi = makeMmsi(counter++);
-        String name = makeName();
+        String name = makeName(counter);
+        int mmsi = makeMmsi(counter++);        
         String callsign = makeCallsign();
         String destination = makeDestination();
         int imoNo = counter;
@@ -174,8 +180,8 @@ public class AnonymousTransformer implements IAisPacketTransformer {
      * Get random name from list of names
      * @return
      */
-    private String makeName() {
-        return NAME_LIST.get(rand.nextInt(NAME_LIST.size()));
+    private String makeName(int id) {
+        return NAME_LIST.get(id % NAME_LIST.size());
     }
     
     /**
