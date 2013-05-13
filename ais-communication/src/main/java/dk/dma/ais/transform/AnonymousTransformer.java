@@ -91,7 +91,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
             String line;
             Set<String> names = new HashSet<>();
             while ((line = reader.readLine()) != null) {
-                names.add(line.trim());
+                names.add(line.trim().toUpperCase());
             }            
             NAME_LIST.addAll(names);
             Collections.shuffle(NAME_LIST);
