@@ -48,9 +48,17 @@ public class AisPacket implements Comparable<AisPacket> {
     private transient Vdm vdm;
     private AisMessage message;
 
+    public AisPacket(String stringMessage) {
+        this(stringMessage, System.currentTimeMillis());
+    }
+    
     public AisPacket(String stringMessage, long receiveTimestamp) {
         this.rawMessage = requireNonNull(stringMessage);
         this.receiveTimestamp = receiveTimestamp;
+    }
+    
+    public AisPacket(Vdm vdm, String stringMessage) {
+        this(vdm, stringMessage, System.currentTimeMillis());
     }
 
     public AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp) {
@@ -167,8 +175,13 @@ public class AisPacket implements Comparable<AisPacket> {
         return null;
 
     }
+    
     public static AisPacket from(String stringMessage, long receiveTimestamp) {
         return new AisPacket(stringMessage, receiveTimestamp);
+    }
+    
+    public static AisPacket from(String stringMessage) {
+        return new AisPacket(stringMessage, System.currentTimeMillis());
     }
 
     /** {@inheritDoc} */

@@ -13,24 +13,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.configuration.bus.provider;
+package dk.dma.ais.bus.provider;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
-
+import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.bus.AisBusProvider;
-import dk.dma.ais.configuration.bus.AisBusSocketConfiguration;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.enav.util.function.Consumer;
 
-@XmlSeeAlso({ TcpClientProviderConfiguration.class, TcpServerProviderConfiguration.class, FileReaderProviderConfiguration.class,
-        CollectorProviderConfiguration.class, RepeatingFileReaderProviderConfiguration.class })
-public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
-
-    public AisBusProviderConfiguration() {
-
+/**
+ * Provider that allows to push packets onto the bus 
+ */
+@ThreadSafe
+public class CollectorProvider extends AisBusProvider implements Consumer<AisPacket> {
+    
+    public CollectorProvider() {
+        
+    }
+    
+    @Override
+    public void accept(AisPacket packet) {
+        push(packet);        
     }
 
-    protected AisBusProvider configure(AisBusProvider provider) {
-        super.configure(provider);
-        return provider;
+    @Override
+    public void cancel() {
+                
     }
 
 }

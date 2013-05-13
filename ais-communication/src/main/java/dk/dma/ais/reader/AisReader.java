@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.StringUtils;
@@ -55,6 +56,9 @@ public abstract class AisReader extends Thread {
     public enum Status {
         CONNECTED, DISCONNECTED
     };
+
+    /** Flag that indicates the reader should shutdown */
+    final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
     /** Reader to parse lines and deliver complete AIS packets. */
     protected final AisPacketReader packetReader = new AisPacketReader();
@@ -201,11 +205,6 @@ public abstract class AisReader extends Thread {
     public abstract Status getStatus();
 
     /**
-     * Stop the reading thread
-     */
-    public abstract void stopReader();
-
-    /**
      * The method to do the actual sending
      * 
      * @param sendRequest
@@ -318,10 +317,27 @@ public abstract class AisReader extends Thread {
     protected void readLoop(InputStream stream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new CountingInputStream(stream, bytesRead)))) {
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                if (isShutdown()) {
+                    return;
+                }
                 handleLine(line);
             }
         }
     }
+
+    /**
+     * Stop the reader
+     */
+    public void stopReader() {
+        shutdownLatch.countDown();
+        this.interrupt();
+    }
+
+    protected boolean isShutdown() {
+        return shutdownLatch.getCount() == 0;
+    }
+
+
 
     public String getSourceId() {
         return packetReader.getSourceId();

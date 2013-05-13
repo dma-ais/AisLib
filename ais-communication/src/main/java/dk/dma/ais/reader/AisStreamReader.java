@@ -54,7 +54,7 @@ public class AisStreamReader extends AisReader {
         try {
             readLoop(stream);
         } catch (IOException e) {
-            if (!isInterrupted()) {
+            if (!isShutdown()) {
                 LOG.error("Failed to read stream: " + e.getMessage());
             }
         }
@@ -73,7 +73,7 @@ public class AisStreamReader extends AisReader {
 
     @Override
     public void stopReader() {
-        this.interrupt();
+        super.stopReader();
         try {
             stream.close();
         } catch (IOException ignored) {

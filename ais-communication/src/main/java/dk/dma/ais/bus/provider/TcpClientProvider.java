@@ -86,16 +86,12 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
                 readClient.start();
                 // Wait for client to loose connection
                 readClient.join();
-
+                readClient = null;
             } catch (IOException e) {
                 LOG.info(getName() + ": connection error: " + e.getMessage());
             } catch (InterruptedException e) {                
+                readClient.cancel();
                 break;
-            } finally {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                }
             }
             
             setNotConnected();
@@ -107,10 +103,6 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
                 break;
             }
 
-        }
-        
-        if (readClient != null) {
-            readClient.cancel();
         }
         
         setStopped();

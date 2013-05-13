@@ -30,8 +30,8 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(RoundRobinAisTcpReader.class);
 
-    private List<String> hostnames = new ArrayList<>();
-    private List<Integer> ports = new ArrayList<>();
+    List<String> hostnames = new ArrayList<>();
+    List<Integer> ports = new ArrayList<>();
     private int currentHost = -1;
 
     public RoundRobinAisTcpReader() {
@@ -86,27 +86,34 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
 
     @Override
     public void run() {
-        while (true) {
+        while (!isShutdown()) {
             try {
                 disconnect();
                 setHost();
                 connect();
                 readLoop(clientSocket.get().getInputStream());
             } catch (IOException e) {
-                if (isInterrupted()) {
+                if (isShutdown() || isInterrupted()) {
                     return;
                 }
                 LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
                         + " seconds");
-                try {
-                    Thread.sleep(reconnectInterval);
-                } catch (InterruptedException intE) {
-                    LOG.info("Stopping reader");
-                    return;
+                if (!isShutdown()) {
+                    try {
+                        Thread.sleep(reconnectInterval);
+                    } catch (InterruptedException intE) {
+                        LOG.info("Stopping reader");
+                        return;
+                    }
                 }
                 selectHost();
             }
         }
+    }
+
+    public String toString() {
+        String current = hostnames.get(currentHost) + ":" + ports.get(currentHost);
+        return "RoundRobinTcpReader [sourceIf = " + getSourceId() + ", current host=" + current  +"]";
     }
 
     private void setHost() {
