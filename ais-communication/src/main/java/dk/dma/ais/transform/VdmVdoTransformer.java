@@ -76,9 +76,7 @@ public class VdmVdoTransformer implements IAisPacketTransformer {
 
             // Maybe do talker transformation
             if (own && ownTalker != null) {
-                System.out.println("line before: " + line);
                 line = line.substring(0, start + 1) + ownTalker + line.substring(start + 3);
-                System.out.println("line after: " + line);
             }
 
             // Calculate checksum
