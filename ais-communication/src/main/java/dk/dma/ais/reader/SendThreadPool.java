@@ -15,8 +15,9 @@
  */
 package dk.dma.ais.reader;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import net.jcip.annotations.ThreadSafe;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import dk.dma.enav.util.function.Consumer;
 /**
  * Class to hold a pool of send threads.
  */
+@ThreadSafe
 public class SendThreadPool {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendThreadPool.class);
@@ -34,7 +36,7 @@ public class SendThreadPool {
     /**
      * The pool is implemented as a hash map
      */
-    private Map<String, SendThread> threads = new HashMap<>();
+    private ConcurrentHashMap<String, SendThread> threads = new ConcurrentHashMap<>();
 
     public SendThreadPool() {}
 
@@ -45,7 +47,7 @@ public class SendThreadPool {
      * @param resultListener
      * @return
      */
-    public synchronized SendThread createSendThread(SendRequest sendRequest, Consumer<Abk> resultListener) {
+    public SendThread createSendThread(SendRequest sendRequest, Consumer<Abk> resultListener) {
         // Generate hash value that uniquely defines message
         String hash = sendHash(sendRequest);
 
@@ -65,7 +67,7 @@ public class SendThreadPool {
      * 
      * @param abk
      */
-    public synchronized void handleAbk(Abk abk) {
+    public void handleAbk(Abk abk) {
         LOG.debug("Handling Abk: " + abk);
         // Find thread
         String hash = abkHash(abk);
@@ -78,7 +80,7 @@ public class SendThreadPool {
         sendThread.setAbk(abk);
     }
 
-    public synchronized void removeThread(String hash) {
+    public void removeThread(String hash) {
         LOG.debug("Removing thread with hash: " + hash);
         threads.remove(hash);
         LOG.debug("Threads in pool: " + threads.size());
