@@ -22,12 +22,12 @@ import javax.xml.bind.JAXBException;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
 
 /**
- * Get AisBus instance from XML configuration file 
+ * Get AisBus instance from XML configuration file
  */
 public class AisBusFactory {
 
     public static AisBus get(String filename) throws JAXBException, FileNotFoundException {
-        return (AisBus)(AisBusConfiguration.load(filename).getInstance());
+        return AisBusConfiguration.load(filename).getInstance();
     }
 
 }

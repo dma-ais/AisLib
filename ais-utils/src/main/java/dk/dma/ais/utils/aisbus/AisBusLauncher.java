@@ -40,7 +40,7 @@ import dk.dma.commons.app.AbstractDaemon;
  */
 public class AisBusLauncher extends AbstractDaemon {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AisBusLauncher.class);
+    static final Logger LOG = LoggerFactory.getLogger(AisBusLauncher.class);
 
     @Parameter(names = "-file", description = "AisBus configuration file")
     String confFile = "aisbus.xml";

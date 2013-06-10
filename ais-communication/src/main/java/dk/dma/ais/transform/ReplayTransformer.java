@@ -64,9 +64,9 @@ public class ReplayTransformer implements IAisPacketTransformer {
 
             // How long has elapsed in the stream and in replay
             long elapsedStream = timestamp.getTime() - epochStream;
-            long elapsedReplay = (long) ((double) (now - epochReplay) * speedup);
+            long elapsedReplay = (long) ((now - epochReplay) * speedup);
             diff = elapsedStream - elapsedReplay;
-            sleepTime = (long) ((double) diff / speedup);
+            sleepTime = (long) (diff / speedup);
         }
 
         // Sleep if diff is becoming too large
@@ -74,12 +74,12 @@ public class ReplayTransformer implements IAisPacketTransformer {
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
-                
+
             }
         }
         return packet;
     }
-    
+
     /**
      * Method to reset the replay values. Can be used
      * if the stream of packets are being repeated.

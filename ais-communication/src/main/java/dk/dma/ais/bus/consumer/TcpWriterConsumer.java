@@ -69,8 +69,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
     public void run() {
         setNotConnected();
         while (true) {
-            Socket socket = new Socket();
-            try {
+            try(Socket socket = new Socket()) {
                 // Connect
                 InetSocketAddress address = new InetSocketAddress(host, port);
                 LOG.info("Connecting to " + host + ":" + port + " ...");
@@ -87,13 +86,8 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 LOG.info(getName() + ": connection error: " + e.getMessage());
             } catch (InterruptedException e) {
                 break;
-            } finally {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                }
             }
-            
+
             setNotConnected();
 
             try {
@@ -103,14 +97,14 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
                 break;
             }
         }
-        
+
         if (writeClient != null) {
             writeClient.cancel();
         }
-        
+
         setStopped();
-        
-        LOG.info("Stopped");        
+
+        LOG.info("Stopped");
     }
 
     @Override
@@ -120,7 +114,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
         t.start();
         super.start();
     }
-    
+
     @Override
     public void cancel() {
         getThread().interrupt();
@@ -129,7 +123,7 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        super.cancel();        
+        super.cancel();
     }
 
     public int getPort() {

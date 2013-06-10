@@ -29,8 +29,8 @@ public class FlowStat {
     private final long created;
     private Long lastReceived;
     // Timestamps for receives
-    private LinkedList<Long> receives = new LinkedList<Long>();
-    
+    private LinkedList<Long> receives = new LinkedList<>();
+
     /**
      * Default interval of one minute to calculate rate
      */
@@ -44,7 +44,7 @@ public class FlowStat {
      */
     public FlowStat(long interval) {
         this.created = System.currentTimeMillis();
-        this.interval = interval;        
+        this.interval = interval;
     }
 
     /**
@@ -54,7 +54,7 @@ public class FlowStat {
     public Long getLastReceived() {
         return lastReceived;
     }
-    
+
     /**
      * Get time of creation
      * @return
@@ -73,11 +73,11 @@ public class FlowStat {
         if (receives.size() == 0) {
             return 0;
         }
-        long last = receives.getLast();        
+        long last = receives.getLast();
         if (last == now) {
             return 0;
         }
-        return (double) receives.size() / ((double) (now - last) / 1000);
+        return receives.size() / ((double) (now - last) / 1000);
     }
 
     /**
@@ -92,7 +92,7 @@ public class FlowStat {
     private void truncateReceives(long now) {
         while (receives.size() > 0) {
             long last = receives.getLast();
-            if ((now - last) > interval) {
+            if (now - last > interval) {
                 receives.removeLast();
             } else {
                 break;
@@ -116,6 +116,6 @@ public class FlowStat {
         builder.append("]");
         return builder.toString();
     }
-    
-    
+
+
 }
