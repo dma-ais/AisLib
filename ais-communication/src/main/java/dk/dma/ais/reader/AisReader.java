@@ -42,6 +42,7 @@ import dk.dma.ais.queue.MessageQueueReader;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.commons.management.ManagedAttribute;
+import dk.dma.commons.management.ManagedResource;
 import dk.dma.commons.util.io.CountingInputStream;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Consumer;
@@ -49,6 +50,7 @@ import dk.dma.enav.util.function.Consumer;
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.
  */
+@ManagedResource
 public abstract class AisReader extends Thread {
 
     static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
@@ -202,6 +204,7 @@ public abstract class AisReader extends Thread {
      * 
      * @return status
      */
+    @ManagedAttribute
     public abstract Status getStatus();
 
     /**
@@ -338,7 +341,7 @@ public abstract class AisReader extends Thread {
     }
 
 
-
+    @ManagedAttribute
     public String getSourceId() {
         return packetReader.getSourceId();
     }

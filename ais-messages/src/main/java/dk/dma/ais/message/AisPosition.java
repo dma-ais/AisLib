@@ -93,6 +93,14 @@ public class AisPosition {
         return latitude;
     }
 
+    public double getLatitudeDouble() {
+        return getLatitude() / resolution / 60.0;
+    }
+
+    public double getLongitudeDouble() {
+        return getLongitude() / resolution / 60.0;
+    }
+
     /**
      * Get signed longitude
      * 
