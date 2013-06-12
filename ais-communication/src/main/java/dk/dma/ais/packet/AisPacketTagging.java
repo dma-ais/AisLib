@@ -55,13 +55,7 @@ public class AisPacketTagging implements Serializable {
         }
 
         public String encode() {
-            switch (this) {
-            case TERRESTRIAL:
-                return "LIVE";
-            case SATELLITE:
-                return "SAT";
-            }
-            return null;
+            return this == TERRESTRIAL ? "LIVE" : "SAT";
         }
     }
 
@@ -253,10 +247,10 @@ public class AisPacketTagging implements Serializable {
         }
         // Default tagging is TERRESTRIAL
         if (sourceType != null) {
-            SourceType taggingSourceType = (tagging.getSourceType() != null) ? tagging.getSourceType() : SourceType.TERRESTRIAL;
+            SourceType taggingSourceType = tagging.getSourceType() != null ? tagging.getSourceType() : SourceType.TERRESTRIAL;
             if (taggingSourceType != sourceType) {
-                return false;                
-            }            
+                return false;
+            }
         }
         return true;
     }
@@ -270,9 +264,9 @@ public class AisPacketTagging implements Serializable {
     public static AisPacketTagging parse(Vdm vdm) {
         AisPacketTagging tags = new AisPacketTagging();
         // Get timestamp
-        tags.setTimestamp((vdm != null) ? vdm.getTimestamp() : null);
+        tags.setTimestamp(vdm != null ? vdm.getTimestamp() : null);
         // Get comment block
-        CommentBlock cb = (vdm != null) ? vdm.getCommentBlock() : null;
+        CommentBlock cb = vdm != null ? vdm.getCommentBlock() : null;
         // Get from comment block
         if (cb != null) {
             tags.setSourceId(cb.getString(SOURCE_ID_KEY));
