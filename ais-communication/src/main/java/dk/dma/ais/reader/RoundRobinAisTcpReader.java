@@ -96,8 +96,8 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
                 if (isShutdown() || isInterrupted()) {
                     return;
                 }
-                LOG.error("Source communication failed: " + e.getMessage() + " retry in " + reconnectInterval / 1000
-                        + " seconds");
+                LOG.error("Source communication failed: " + e.getMessage() + ": host:port: " + hostname + ":" + port + " Retry in "
+                        + reconnectInterval / 1000 + " seconds");
                 if (!isShutdown()) {
                     try {
                         Thread.sleep(reconnectInterval);
