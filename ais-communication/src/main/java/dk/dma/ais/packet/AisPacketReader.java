@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.reader;
+package dk.dma.ais.packet;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -28,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.binary.SixbitException;
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.proprietary.ProprietaryFactory;
 import dk.dma.ais.sentence.CommentBlock;
@@ -46,7 +44,8 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
  */
 @NotThreadSafe
 public class AisPacketReader {
-    
+
+    /** The logger  */
     private static final Logger LOG = LoggerFactory.getLogger(AisPacketReader.class);
 
     private static final int SENTENCE_TRACE_COUNT = 20;
@@ -64,22 +63,15 @@ public class AisPacketReader {
     /**
      * List of the raw lines of the AIS packet
      */
-    private List<String> packetLines = new ArrayList<>();
+    private final List<String> packetLines = new ArrayList<>();
 
     /**
      * Possible proprietary tags for current VDM
      */
-    private Deque<IProprietaryTag> tags = new ArrayDeque<>();
+    private final Deque<IProprietaryTag> tags = new ArrayDeque<>();
 
-    private Deque<String> sentenceTrace = new ArrayDeque<>(SENTENCE_TRACE_COUNT);
+    private final Deque<String> sentenceTrace = new ArrayDeque<>(SENTENCE_TRACE_COUNT);
 
-    /**
-     * Constructor
-     */
-    public AisPacketReader() {
-
-    }
-    
     /**
      * Handle a single line. If a complete packet is assembled the package will be returned. Otherwise null is returned.
      * 
@@ -138,7 +130,7 @@ public class AisPacketReader {
 
         // Check if proprietary line
         if (ProprietaryFactory.isProprietaryTag(line)) {
-            // Try to parse with one the registered factories in META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
+            // Try to parse with one of the registered factories in META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
             IProprietaryTag tag = ProprietaryFactory.parseTag(line);
             if (tag != null) {
                 tags.add(tag);
@@ -177,10 +169,10 @@ public class AisPacketReader {
         if (tags.size() > 0) {
             vdm.setTags(new LinkedList<>(tags));
         }
-        
-        // Make packet 
+
+        // Make packet
         AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"));
-        
+
         // Maybe add source id
         if (sourceId != null) {
             AisPacketTagging tagging = new AisPacketTagging();
@@ -207,26 +199,4 @@ public class AisPacketReader {
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
-
-    /**
-     * Construct AisPacket from raw packet string
-     * @param messageString
-     * @param optional factory
-     * @return
-     * @throws SentenceException
-     */
-    public static AisPacket from(String messageString) throws SentenceException {
-        AisPacket packet = null;
-        AisPacketReader packetReader = new AisPacketReader();
-        //String[] lines = StringUtils.split(messageString, "\n");
-        String[] lines = messageString.split("\\r?\\n");
-        for (String line : lines) {
-            packet = packetReader.readLine(line);
-            if (packet != null) {
-                return packet;
-            }
-        }
-        return null;
-    }
-
 }

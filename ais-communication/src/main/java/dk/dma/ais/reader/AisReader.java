@@ -34,6 +34,7 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.IQueueEntryHandler;
@@ -67,9 +68,6 @@ public abstract class AisReader extends Thread {
 
     /** List receivers for the AIS messages. */
     protected final CopyOnWriteArrayList<Consumer<AisMessage>> handlers = new CopyOnWriteArrayList<>();
-
-    /** List of receiver queues. */
-    protected final CopyOnWriteArrayList<IMessageQueue<AisMessage>> messageQueues = new CopyOnWriteArrayList<>();
 
     /** List of packet handlers. */
     protected final CopyOnWriteArrayList<Consumer<? super AisPacket>> packetHandlers = new CopyOnWriteArrayList<>();
@@ -143,8 +141,17 @@ public abstract class AisReader extends Thread {
      * 
      * @param queue
      */
-    public void registerQueue(IMessageQueue<AisMessage> queue) {
-        messageQueues.add(queue);
+    public void registerQueue(final IMessageQueue<AisMessage> queue) {
+        requireNonNull(queue);
+        registerHandler(new Consumer<AisMessage>() {
+            @Override
+            public void accept(AisMessage message) {
+                try {
+                    queue.push(message);
+                } catch (MessageQueueOverflowException e) {
+                    LOG.error("Message queue overflow, dropping message: " + e.getMessage());
+                }
+            }});
     }
 
     /**
@@ -281,33 +288,22 @@ public abstract class AisReader extends Thread {
         }
 
         // Distribute AIS message
-        if (handlers.size() > 0 || messageQueues.size() > 0) {
+        if (handlers.size() > 0) {
             AisMessage message = null;
             // Parse AIS message
             try {
-                message = AisMessage.getInstance(packet.getVdm());
+                message = packet.getAisMessage();
             } catch (AisMessageException me) {
                 LOG.info("AIS message exception: " + me.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
             } catch (SixbitException se) {
                 LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
             }
-            if (message == null) {
-                return;
-            }
-
-            // Distribute message
-            for (Consumer<AisMessage> aisHandler : handlers) {
-                aisHandler.accept(message);
-            }
-            for (IMessageQueue<AisMessage> queue : messageQueues) {
-                try {
-                    queue.push(message);
-                } catch (MessageQueueOverflowException e) {
-                    LOG.error("Message queue overflow, dropping message: " + e.getMessage());
+            if (message != null) { // Distribute message
+                for (Consumer<AisMessage> aisHandler : handlers) {
+                    aisHandler.accept(message);
                 }
             }
         }
-
     }
 
     /**

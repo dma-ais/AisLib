@@ -22,11 +22,10 @@ import org.junit.Test;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.packet.AisPacketTagging.SourceType;
-import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.sentence.SentenceException;
 
 public class FilterTest {
-    
+
     @Test
     public void taggingFilterTest() throws SentenceException {
         String msg;
@@ -34,10 +33,10 @@ public class FilterTest {
         msg += "$PGHP,1,2013,3,13,10,39,18,375,219,,2190047,1,4A*57\r\n";
         msg += "\\g:1-2-0136,c:1363174860*24\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
         msg += "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
-        AisPacket packet = AisPacketReader.from(msg);
+        AisPacket packet = AisPacket.readFromString(msg);
         AisPacketTagging filterTagging = new AisPacketTagging();
         filterTagging.setSourceType(SourceType.TERRESTRIAL);
-        TaggingFilter filter = new TaggingFilter(filterTagging);        
+        TaggingFilter filter = new TaggingFilter(filterTagging);
         Assert.assertFalse(filter.rejectedByFilter(packet));
     }
 

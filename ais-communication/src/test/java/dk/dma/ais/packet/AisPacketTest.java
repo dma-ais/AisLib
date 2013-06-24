@@ -28,7 +28,6 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.packet.AisPacketTagging.SourceType;
-import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.enav.util.function.Consumer;
@@ -92,11 +91,11 @@ public class AisPacketTest {
 
         // Make AIS reader instance
         AisStreamReader aisReader = new AisStreamReader(inputStream);
-        aisReader.registerPacketHandler(new Consumer<AisPacket>() {            
+        aisReader.registerPacketHandler(new Consumer<AisPacket>() {
             final int[] senders = {563510000, 211235220, 2655619, 246250000, 205634000, 211462260};
             int count;
-            @Override            
-            public void accept(AisPacket aisPacket) {                
+            @Override
+            public void accept(AisPacket aisPacket) {
                 AisMessage message = null;
                 try {
                     message = aisPacket.getAisMessage();
@@ -116,7 +115,7 @@ public class AisPacketTest {
         msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
         msg += "\\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
         msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
-        AisPacket packet = AisPacketReader.from(msg);
+        AisPacket packet = AisPacket.readFromString(msg);
         Assert.assertNotNull(packet);
         Assert.assertNotNull(packet.getVdm());
         Assert.assertNotNull(packet.getVdm().getTags());
@@ -130,7 +129,7 @@ public class AisPacketTest {
         msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
         msg += "\\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
         msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
-        AisPacket packet = AisPacketReader.from(msg);
+        AisPacket packet = AisPacket.readFromString(msg);
         AisPacketTagging tags = AisPacketTagging.parse(packet);
         Assert.assertEquals(tags.getSourceId(), null);
         Assert.assertEquals(tags.getSourceCountry().getThreeLetter(), "NLD");
@@ -142,7 +141,7 @@ public class AisPacketTest {
         msg += "\\si:AISD*3F\\\r\n";
         msg += "\\1G2:0125,c:1354719387*0D\\!AIVDM,2,1,4,A,539LiHP2;42`@pE<000<tq@V1<TpL4000000001?1SV@@73R0J0TQCAD,0*1E\r\n";
         msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
-        packet = AisPacketReader.from(msg);
+        packet = AisPacket.readFromString(msg);
         tags = AisPacketTagging.parse(packet);
         Assert.assertEquals(tags.getSourceId(), "AISD");
         Assert.assertEquals(tags.getSourceCountry().getThreeLetter(), "NLD");
@@ -154,7 +153,7 @@ public class AisPacketTest {
         msg += "\\si:AISD,sb:2190048,sc:SWE,st:SAT*1E\\\r\n";
         msg += "\\g:1-2-0136,c:1354725824*22\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
         msg += "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
-        packet = AisPacketReader.from(msg);
+        packet = AisPacket.readFromString(msg);
         tags = AisPacketTagging.parse(packet);
         Assert.assertEquals(tags.getSourceId(), "AISD");
         Assert.assertEquals(tags.getSourceCountry().getThreeLetter(), "SWE");

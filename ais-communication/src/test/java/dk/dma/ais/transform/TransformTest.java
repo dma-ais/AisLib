@@ -28,7 +28,6 @@ import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.packet.AisPacketTagging.SourceType;
-import dk.dma.ais.reader.AisPacketReader;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
 
@@ -40,7 +39,7 @@ public class TransformTest {
         msg = "$PGHP,1,2013,3,13,10,39,18,375,219,,2190047,1,4A*57\r\n";
         msg += "\\g:1-2-0136,c:1363174860*24\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
         msg += "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
-        AisPacket packet = AisPacketReader.from(msg);
+        AisPacket packet = AisPacket.readFromString(msg);
 
         CropVdmTransformer tranformer = new CropVdmTransformer();
         AisPacket newPacket = tranformer.transform(packet);
@@ -78,7 +77,7 @@ public class TransformTest {
     }
 
     private boolean isSat(IAisPacketTransformer trans, String msg) throws SentenceException {
-        AisPacket packet = AisPacketReader.from(msg);
+        AisPacket packet = AisPacket.readFromString(msg);
         packet = trans.transform(packet);
         AisPacketTagging tagging = AisPacketTagging.parse(packet);
         System.out.println("Sat transformed\n" + packet.getStringMessage());
@@ -94,15 +93,15 @@ public class TransformTest {
         msg = "$PGHP,1,2013,3,13,10,39,18,375,219,,2190047,1,4A*57\r\n";
         msg += "\\g:1-2-0136,c:1363174860*24\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
         msg += "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
-        AisPacket packet = AisPacketReader.from(msg);
+        AisPacket packet = AisPacket.readFromString(msg);
 
         packet = transformer.transform(packet);
         System.out.println("VDO packet:\n" + packet.getStringMessage());
-        
+
         Vdm vdm = packet.getVdm();
         Assert.assertNotNull(vdm);
         AisMessage message = packet.getAisMessage();
-        Assert.assertNotNull(message);        
+        Assert.assertNotNull(message);
         Assert.assertTrue(message.getVdm().isOwnMessage());
     }
 
