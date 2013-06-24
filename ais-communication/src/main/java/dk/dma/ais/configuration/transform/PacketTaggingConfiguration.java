@@ -17,8 +17,8 @@ package dk.dma.ais.configuration.transform;
 
 import javax.xml.bind.annotation.XmlTransient;
 
-import dk.dma.ais.packet.AisPacketTagging;
-import dk.dma.ais.packet.AisPacketTagging.SourceType;
+import dk.dma.ais.packet.AisPacketTags;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 
 public class PacketTaggingConfiguration {
@@ -65,8 +65,8 @@ public class PacketTaggingConfiguration {
     }
     
     @XmlTransient
-    public AisPacketTagging getInstance() {
-        AisPacketTagging tagging = new AisPacketTagging();
+    public AisPacketTags getInstance() {
+        AisPacketTags tagging = new AisPacketTags();
         tagging.setSourceId(sourceId);
         tagging.setSourceBs(sourceBs);
         if (sourceCountry != null) {

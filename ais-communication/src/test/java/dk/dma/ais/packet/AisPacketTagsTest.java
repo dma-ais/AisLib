@@ -13,21 +13,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.transform;
+package dk.dma.ais.packet;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTagging;
-import dk.dma.ais.packet.AisPacketTagging.SourceType;
+import dk.dma.ais.packet.AisPacketTags;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.transform.AisPacketTaggingTransformer;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 import dk.dma.enav.model.Country;
 
-public class AisTaggingTest {
+public class AisPacketTagsTest {
 
     @Test
     public void testPrepend() throws SentenceException {
@@ -37,13 +38,13 @@ public class AisTaggingTest {
         msg += "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
         AisPacket packet = AisPacket.readFromString(msg);
 
-        AisPacketTagging tagging = new AisPacketTagging();
+        AisPacketTags tagging = new AisPacketTags();
         tagging.setSourceId("AISD");
         tagging.setSourceBs(999999999);
         tagging.setSourceCountry(Country.getByCode("SWE"));
         AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
         AisPacket newPacket = transformer.transform(packet);
-        AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
+        AisPacketTags newTagging = newPacket.getTags();
 
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
         Assert.assertEquals(newTagging.getSourceId(), "AISD");
@@ -52,12 +53,12 @@ public class AisTaggingTest {
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
 
         packet = AisPacket.readFromString("\\key:oldval*51\\\r\n" + msg);
-        tagging = new AisPacketTagging();
+        tagging = new AisPacketTags();
         transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
         transformer.getExtraTags().put("somekey", "someval");
         transformer.getExtraTags().put("key", "newval");
         newPacket = transformer.transform(packet);
-        newTagging = AisPacketTagging.parse(newPacket);
+        newTagging = newPacket.getTags();
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
         Assert.assertEquals(newTagging.getSourceId(), null);
         Assert.assertEquals(newTagging.getSourceBs().intValue(), 2190047);
@@ -68,11 +69,11 @@ public class AisTaggingTest {
 
         msg = "\\s:AAUSAT3,c:1364272372,sub:2,bid:0,seq:231288,type:1,rssi:-72,freq:162000000*5E\\!AIVDM,1,1,,C,18153ogP?w1dD@@`JiRN4?wp0000,0*48";
         packet = AisPacket.readFromString(msg);
-        tagging = new AisPacketTagging();
+        tagging = new AisPacketTags();
         tagging.setSourceId("AIS-SAT");
         transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
         newPacket = transformer.transform(packet);
-        newTagging = AisPacketTagging.parse(newPacket);
+        newTagging = newPacket.getTags();
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
         Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("si"), "AIS-SAT");
         Assert.assertEquals(newPacket.getVdm().getCommentBlock().getString("s"), "AAUSAT3");
@@ -92,11 +93,11 @@ public class AisTaggingTest {
         msg += "\\g:1-2-0136,c:1363174860*24\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
         msg += "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
         AisPacket packet = AisPacket.readFromString(msg);
-        AisPacketTagging tagging = new AisPacketTagging();
+        AisPacketTags tagging = new AisPacketTags();
         tagging.setSourceId("AISD");
         AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.REPLACE, tagging);
         AisPacket newPacket = transformer.transform(packet);
-        AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
+        AisPacketTags newTagging = newPacket.getTags();
 
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
         Assert.assertEquals(newTagging.getSourceId(), "AISD");
@@ -105,13 +106,13 @@ public class AisTaggingTest {
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
 
         packet = AisPacket.readFromString("\\key:oldval*51\\\r\n" + msg);
-        tagging = new AisPacketTagging();
+        tagging = new AisPacketTags();
         transformer = new AisPacketTaggingTransformer(Policy.REPLACE, tagging);
         transformer.getExtraTags().put("somekey", "someval");
         transformer.getExtraTags().put("key", "newval");
         newPacket = transformer.transform(packet);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
-        newTagging = AisPacketTagging.parse(newPacket);
+        newTagging = newPacket.getTags();
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1363174860000L);
         Assert.assertEquals(newTagging.getSourceId(), null);
         Assert.assertEquals(newTagging.getSourceBs(), null);
@@ -130,14 +131,14 @@ public class AisTaggingTest {
         msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
         AisPacket packet = AisPacket.readFromString(msg);
 
-        AisPacketTagging tagging = new AisPacketTagging();
+        AisPacketTags tagging = new AisPacketTags();
         tagging.setSourceId("bar");
         tagging.setSourceBs(999999999);
 
         AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.MERGE_OVERRIDE, tagging);
         AisPacket newPacket = transformer.transform(packet);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
-        AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
+        AisPacketTags newTagging = newPacket.getTags();
         CommentBlock cb = newPacket.getVdm().getCommentBlock();
 
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1354719387000L);
@@ -147,13 +148,13 @@ public class AisTaggingTest {
         Assert.assertEquals(cb.getString("somekey"), "somevalue");
 
         packet = AisPacket.readFromString("\\key:oldval*51\\\r\n" + msg);
-        tagging = new AisPacketTagging();
+        tagging = new AisPacketTags();
         transformer = new AisPacketTaggingTransformer(Policy.MERGE_OVERRIDE, tagging);
         transformer.getExtraTags().put("somekey", "someval");
         transformer.getExtraTags().put("key", "newval");
         newPacket = transformer.transform(packet);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
-        newTagging = AisPacketTagging.parse(newPacket);
+        newTagging = newPacket.getTags();
         cb = newPacket.getVdm().getCommentBlock();
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1354719387000L);
         Assert.assertEquals(newTagging.getSourceId(), "foo");
@@ -172,7 +173,7 @@ public class AisTaggingTest {
         msg += "\\2G2:0125*7B\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
         AisPacket packet = AisPacket.readFromString(msg);
 
-        AisPacketTagging tagging = new AisPacketTagging();
+        AisPacketTags tagging = new AisPacketTags();
         tagging.setSourceId("bar");
         tagging.setSourceBs(999999999);
         tagging.setSourceType(SourceType.SATELLITE);
@@ -181,7 +182,7 @@ public class AisTaggingTest {
         AisPacketTaggingTransformer transformer = new AisPacketTaggingTransformer(Policy.MERGE_PRESERVE, tagging);
         AisPacket newPacket = transformer.transform(packet);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
-        AisPacketTagging newTagging = AisPacketTagging.parse(newPacket);
+        AisPacketTags newTagging = newPacket.getTags();
         CommentBlock cb = newPacket.getVdm().getCommentBlock();
 
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1354719387000L);
@@ -191,13 +192,13 @@ public class AisTaggingTest {
         Assert.assertEquals(cb.getString("somekey"), "somevalue");
 
         packet = AisPacket.readFromString("\\key:oldval*51\\\r\n" + msg);
-        tagging = new AisPacketTagging();
+        tagging = new AisPacketTags();
         transformer = new AisPacketTaggingTransformer(Policy.MERGE_PRESERVE, tagging);
         transformer.getExtraTags().put("somekey", "someval");
         transformer.getExtraTags().put("key", "newval");
         newPacket = transformer.transform(packet);
         System.out.println("NEW packet:\n" + newPacket.getStringMessage());
-        newTagging = AisPacketTagging.parse(newPacket);
+        newTagging = newPacket.getTags();
         cb = newPacket.getVdm().getCommentBlock();
 
         Assert.assertEquals(newTagging.getTimestamp().getTime(), 1354719387000L);

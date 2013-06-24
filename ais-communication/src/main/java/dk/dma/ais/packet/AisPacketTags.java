@@ -15,8 +15,6 @@
  */
 package dk.dma.ais.packet;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -31,7 +29,7 @@ import dk.dma.enav.model.Country;
  * Tags for an AisPacket. Encoded as comment blocks.
  */
 @NotThreadSafe
-public class AisPacketTagging implements Serializable {
+public class AisPacketTags implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -80,7 +78,7 @@ public class AisPacketTagging implements Serializable {
      */
     private SourceType sourceType;
 
-    public AisPacketTagging() {
+    public AisPacketTags() {
 
     }
 
@@ -89,7 +87,7 @@ public class AisPacketTagging implements Serializable {
      * 
      * @param t
      */
-    public AisPacketTagging(AisPacketTagging t) {
+    public AisPacketTags(AisPacketTags t) {
         if (t.timestamp != null) {
             this.timestamp = (Date) t.timestamp.clone();
         }
@@ -212,8 +210,8 @@ public class AisPacketTagging implements Serializable {
      * @param tagging
      * @return
      */
-    public AisPacketTagging mergeMissing(AisPacketTagging proposed) {
-        AisPacketTagging addedTagging = new AisPacketTagging();
+    public AisPacketTags mergeMissing(AisPacketTags proposed) {
+        AisPacketTags addedTagging = new AisPacketTags();
         if (getSourceId() == null && proposed.getSourceId() != null) {
             addedTagging.setSourceId(proposed.getSourceId());
         }
@@ -235,7 +233,7 @@ public class AisPacketTagging implements Serializable {
      * @param parse
      * @return
      */
-    public boolean filterMatch(AisPacketTagging tagging) {
+    public boolean filterMatch(AisPacketTags tagging) {
         if (sourceId != null && (tagging.getSourceId() == null || !tagging.getSourceId().equals(sourceId))) {
             return false;
         }
@@ -261,8 +259,8 @@ public class AisPacketTagging implements Serializable {
      * @param packet
      * @return tagging instance
      */
-    public static AisPacketTagging parse(Vdm vdm) {
-        AisPacketTagging tags = new AisPacketTagging();
+    static AisPacketTags parse(Vdm vdm) {
+        AisPacketTags tags = new AisPacketTags();
         // Get timestamp
         tags.setTimestamp(vdm != null ? vdm.getTimestamp() : null);
         // Get comment block
@@ -295,17 +293,6 @@ public class AisPacketTagging implements Serializable {
         }
 
         return tags;
-    }
-
-    /**
-     * Parse tags from AisPacket. Uses comment block with first priority and fall back to proprietary tags.
-     * 
-     * @param packet
-     * @return tagging instance
-     */
-    public static AisPacketTagging parse(AisPacket packet) {
-        requireNonNull(packet);
-        return parse(packet.getVdm());
     }
 
     @Override

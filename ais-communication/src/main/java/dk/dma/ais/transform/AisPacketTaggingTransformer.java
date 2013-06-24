@@ -27,7 +27,7 @@ import net.jcip.annotations.Immutable;
 import org.apache.commons.lang.StringUtils;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTagging;
+import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.Vdm;
 
@@ -57,7 +57,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
          * Make new tagging as a merge of current and given tagging, preserving duplicate tags already in the current tagging
          */
         MERGE_PRESERVE;
-        
+
         public static Policy fromString(String str) {
             if (str.equalsIgnoreCase("PREPEND_MISSING")) {
                 return PREPEND_MISSING;
@@ -74,8 +74,8 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
     }
 
     private final Policy policy;
-    private final AisPacketTagging tagging;
-    private final Map<String, String> extraTags = new HashMap<>(); 
+    private final AisPacketTags tagging;
+    private final Map<String, String> extraTags = new HashMap<>();
 
     /**
      * Constructor taking policy and the tagging to be used
@@ -83,13 +83,13 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
      * @param policy
      * @param tagging
      */
-    public AisPacketTaggingTransformer(Policy policy, AisPacketTagging tagging) {
+    public AisPacketTaggingTransformer(Policy policy, AisPacketTags tagging) {
         Objects.requireNonNull(policy);
         Objects.requireNonNull(tagging);
         this.policy = policy;
         this.tagging = tagging;
     }
-    
+
     /**
      * Get map of optional extra tags to be included in the tagging
      * @return map
@@ -97,11 +97,11 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
     public Map<String, String> getExtraTags() {
         return extraTags;
     }
-    
+
     public void addExtraTags(Map<String, String> tags) {
         extraTags.putAll(tags);
     }
-    
+
     @Override
     public AisPacket transform(AisPacket packet) {
         switch (policy) {
@@ -117,7 +117,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
             throw new IllegalArgumentException("Policy not implemented yet");
         }
     }
-    
+
     private AisPacket mergePreserveTransform(AisPacket packet) {
         Vdm vdm = packet.getVdm();
         if (vdm == null) {
@@ -157,7 +157,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
     }
 
     private AisPacket replaceTransform(AisPacket packet) {
-        AisPacketTagging newTagging = new AisPacketTagging(tagging);
+        AisPacketTags newTagging = new AisPacketTags(tagging);
         newTagging.setTimestamp(packet.getTimestamp());
         CommentBlock cb = newTagging.getCommentBlock();
         // Add extra tags
@@ -168,10 +168,10 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         }
         return newPacket(packet, sentences);
     }
-    
+
     private AisPacket prependTransform(AisPacket packet) {
         // What is missing
-        AisPacketTagging addedTagging = AisPacketTagging.parse(packet).mergeMissing(tagging);
+        AisPacketTags addedTagging = packet.getTags().mergeMissing(tagging);
         CommentBlock cb = addedTagging.getCommentBlock();
         // Add extra tags
         addExtraTags(cb, packet, false);
@@ -182,7 +182,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         String newCb = cb.encode();
         return newPacket(packet, newCb + "\r\n" + packet.getStringMessage());
     }
-    
+
     /**
      * Add extra tags to comment block
      * @param cb
@@ -193,14 +193,14 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         Vdm vdm = packet.getVdm();
         if (vdm != null) {
             currentCb = vdm.getCommentBlock();
-        }        
+        }
         for (Entry<String, String> entry : extraTags.entrySet()) {
-            if (override || currentCb == null || !currentCb.contains(entry.getKey())) {            
+            if (override || currentCb == null || !currentCb.contains(entry.getKey())) {
                 cb.addString(entry.getKey(), entry.getValue());
             }
         }
-    }    
-    
+    }
+
     /**
      * Remove any thing else than sentences (and proprietary is chosen)
      * @param rawPacket
@@ -235,7 +235,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
         }
         return croppedLines;
     }
-    
+
     private AisPacket newPacket(AisPacket oldPacket, String newRawMessage) {
         return new AisPacket(newRawMessage, oldPacket.getReceiveTimestamp());
     }

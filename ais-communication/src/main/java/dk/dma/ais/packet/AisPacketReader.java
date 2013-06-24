@@ -175,7 +175,7 @@ public class AisPacketReader {
 
         // Maybe add source id
         if (sourceId != null) {
-            AisPacketTagging tagging = new AisPacketTagging();
+            AisPacketTags tagging = new AisPacketTags();
             tagging.setSourceId(sourceId);
             AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
             packet = tranformer.transform(packet);

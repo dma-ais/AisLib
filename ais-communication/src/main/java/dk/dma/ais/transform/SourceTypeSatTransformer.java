@@ -21,8 +21,8 @@ import java.util.Set;
 
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTagging;
-import dk.dma.ais.packet.AisPacketTagging.SourceType;
+import dk.dma.ais.packet.AisPacketTags;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.Vdm;
@@ -46,11 +46,11 @@ public class SourceTypeSatTransformer implements IAisPacketTransformer {
      */
     private final Set<String> satSources;
     
-    private final AisPacketTagging satTagging; 
+    private final AisPacketTags satTagging; 
     private final AisPacketTaggingTransformer transformer;
     
     public SourceTypeSatTransformer(Collection<String> satGhRegions, Collection<String> satSources) {
-        this.satTagging = new AisPacketTagging();
+        this.satTagging = new AisPacketTags();
         this.satTagging.setSourceType(SourceType.SATELLITE);
         transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, satTagging);
         this.satGhRegions = new HashSet<>(satGhRegions);

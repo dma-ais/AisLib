@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import net.jcip.annotations.NotThreadSafe;
+
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Bytes;
 
@@ -40,11 +42,13 @@ import dk.dma.enav.model.geometry.PositionTime;
  * 
  * @author Kasper Nielsen
  */
+@NotThreadSafe
 public class AisPacket implements Comparable<AisPacket> {
 
     private final transient long receiveTimestamp;
     private final String rawMessage;
     private transient Vdm vdm;
+    private transient AisPacketTags tags;
     private AisMessage message;
 
     public AisPacket(String stringMessage) {
@@ -121,7 +125,19 @@ public class AisPacket implements Comparable<AisPacket> {
         return vdm;
     }
 
-    // TODO fix
+    /**
+     * Returns the tags of the packet.
+     * 
+     * @return the tags of the packet
+     */
+    public AisPacketTags getTags() {
+        if (tags != null) {
+            return tags;
+        }
+        return tags = AisPacketTags.parse(getVdm());
+    }
+
+    // TODO fizx
     public AisMessage tryGetAisMessage() {
         try {
             return getAisMessage();

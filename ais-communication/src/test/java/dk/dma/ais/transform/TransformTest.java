@@ -26,8 +26,8 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTagging;
-import dk.dma.ais.packet.AisPacketTagging.SourceType;
+import dk.dma.ais.packet.AisPacketTags;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
 
@@ -79,7 +79,7 @@ public class TransformTest {
     private boolean isSat(IAisPacketTransformer trans, String msg) throws SentenceException {
         AisPacket packet = AisPacket.readFromString(msg);
         packet = trans.transform(packet);
-        AisPacketTagging tagging = AisPacketTagging.parse(packet);
+        AisPacketTags tagging = packet.getTags();
         System.out.println("Sat transformed\n" + packet.getStringMessage());
         System.out.println("cb: " + packet.getVdm().getCommentBlock());
         System.out.println("tagging: " + tagging);

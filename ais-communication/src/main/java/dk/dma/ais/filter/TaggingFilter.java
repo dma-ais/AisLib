@@ -17,7 +17,7 @@ package dk.dma.ais.filter;
 
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTagging;
+import dk.dma.ais.packet.AisPacketTags;
 
 /**
  * Filter based on a given tagging. Non null fields in the tagging much
@@ -25,16 +25,16 @@ import dk.dma.ais.packet.AisPacketTagging;
  */
 @ThreadSafe
 public class TaggingFilter implements IPacketFilter {
-    
-    private final AisPacketTagging filterTagging;
-    
-    public TaggingFilter(AisPacketTagging filterTagging) {
+
+    private final AisPacketTags filterTagging;
+
+    public TaggingFilter(AisPacketTags filterTagging) {
         this.filterTagging = filterTagging;
     }
 
     @Override
     public boolean rejectedByFilter(AisPacket packet) {
-        return !filterTagging.filterMatch(AisPacketTagging.parse(packet));        
+        return !filterTagging.filterMatch(packet.getTags());
     }
 
 }
