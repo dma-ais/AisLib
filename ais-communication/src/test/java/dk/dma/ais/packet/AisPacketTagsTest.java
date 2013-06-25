@@ -19,8 +19,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
