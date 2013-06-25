@@ -131,10 +131,11 @@ public class AisPacket implements Comparable<AisPacket> {
      * @return the tags of the packet
      */
     public AisPacketTags getTags() {
-        if (tags != null) {
-            return tags;
+        AisPacketTags tags= this.tags;
+        if (tags == null) {
+            return this.tags = AisPacketTags.parse(getVdm());
         }
-        return tags = AisPacketTags.parse(getVdm());
+        return tags;
     }
 
     // TODO fizx
