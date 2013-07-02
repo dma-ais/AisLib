@@ -47,6 +47,7 @@ import dk.dma.commons.management.ManagedResource;
 import dk.dma.commons.util.io.CountingInputStream;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Consumer;
+import dk.dma.enav.util.function.Predicate;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.
@@ -126,6 +127,24 @@ public abstract class AisReader extends Thread {
                 }
             }});
     }
+
+    /**
+     * Add a packet handler
+     * 
+     * @param packetHandler
+     */
+    public void registerPacketHandler(final Predicate<? super AisPacket> predicate, final Consumer<? super AisPacket> packetConsumer) {
+        requireNonNull(predicate);
+        requireNonNull(packetConsumer);
+        registerPacketHandler(new Consumer<AisPacket>(){
+            @Override
+            public void accept(AisPacket t) {
+                if (predicate.test(t)) {
+                    packetConsumer.accept(t);
+                }
+            }});
+    }
+
 
     /**
      * Add a packet handler
