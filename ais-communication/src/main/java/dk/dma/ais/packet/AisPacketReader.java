@@ -17,9 +17,7 @@ package dk.dma.ais.packet;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -63,14 +61,14 @@ public class AisPacketReader {
     /**
      * List of the raw lines of the AIS packet
      */
-    private final List<String> packetLines = new ArrayList<>();
+    private final ArrayList<String> packetLines = new ArrayList<>();
 
     /**
      * Possible proprietary tags for current VDM
      */
-    private final Deque<IProprietaryTag> tags = new ArrayDeque<>();
+    private final ArrayDeque<IProprietaryTag> tags = new ArrayDeque<>();
 
-    private final Deque<String> sentenceTrace = new ArrayDeque<>(SENTENCE_TRACE_COUNT);
+    private final ArrayDeque<String> sentenceTrace = new ArrayDeque<>(SENTENCE_TRACE_COUNT);
 
     /**
      * Handle a single line. If a complete packet is assembled the package will be returned. Otherwise null is returned.
