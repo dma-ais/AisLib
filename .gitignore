@@ -3,5 +3,6 @@ target
 .settings
 .project
 .classpath
+*.tokens
 ais-communication/aisbus.xml
 *~

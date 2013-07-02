@@ -1,9 +1,9 @@
 grammar SourceFilter; 
 
-prog: expr;
+prog: expr EOF;
 
 expr:   'id' EQUALS idList      # sourceId
-    |   'bs' EQUALS intList     # sourceBasestation
+    |   'bs' EQUALS idList      # sourceBasestation
     |   'country' EQUALS idList # sourceCountry
     |   'type' EQUALS ID        # sourceType
     |   'region' EQUALS idList  # sourceRegion
@@ -12,12 +12,10 @@ expr:   'id' EQUALS idList      # sourceId
     ;
 
 
-intList : INT (',' INT)* ;
 idList : ID (',' ID)* ;
 
 EQUALS :   '=' ;
 WS     :   [ \t]+ -> skip ; // toss out whitespace
 AND    :   '&' ;
 OR     :   '|' ;
-INT    :   [0-9]+ ;         // match integers
-ID     :   [a-zA-Z][a-zA-Z0-9]+ ;      // match identifiers
+ID     :   [a-zA-Z0-9]+ ;      // match identifiers

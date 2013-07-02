@@ -19,9 +19,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import dk.dma.ais.internal.parser.sourcefilter.SourceFilterBaseVisitor;
@@ -51,8 +55,15 @@ public class AisPacketFilters {
         SourceFilterLexer lexer = new SourceFilterLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         SourceFilterParser parser = new SourceFilterParser(tokens);
+
+        // Better errors
+        lexer.removeErrorListeners();
+        parser.removeErrorListeners();
+        lexer.addErrorListener(new VerboseListener());
+        parser.addErrorListener(new VerboseListener());
+
         ProgContext tree = parser.prog();
-        return tree.accept(new SourceFilterImpl());
+        return tree.expr().accept(new SourceFilterToPredicateVisitor());
     }
 
     public static Predicate<AisPacket> filterOnSourceType(final SourceType sourceType) {
@@ -73,7 +84,7 @@ public class AisPacketFilters {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 Country country = p.getTags().getSourceCountry();
-                return country != null && Arrays.binarySearch(c, country) != -1;
+                return country != null && Arrays.binarySearch(c, country) >= 0;
             }
 
             public String toString() {
@@ -96,7 +107,7 @@ public class AisPacketFilters {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 Integer sourceBs = p.getTags().getSourceBs();
-                return sourceBs != null && Arrays.binarySearch(copy, sourceBs) != -1;
+                return sourceBs != null && Arrays.binarySearch(copy, sourceBs) >= 0;
             }
 
             public String toString() {
@@ -110,7 +121,7 @@ public class AisPacketFilters {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 String sourceId = p.getTags().getSourceId();
-                return sourceId != null && Arrays.binarySearch(s, sourceId) != -1;
+                return sourceId != null && Arrays.binarySearch(s, sourceId) >= 0;
             }
 
             public String toString() {
@@ -126,7 +137,7 @@ public class AisPacketFilters {
             public boolean test(AisPacket p) {
                 IProprietarySourceTag sourceTag = p.getVdm().getSourceTag();
                 String region = sourceTag == null ? null : sourceTag.getRegion();
-                return region != null && Arrays.binarySearch(s, region) != -1;
+                return region != null && Arrays.binarySearch(s, region) >= 0;
             }
 
             public String toString() {
@@ -143,15 +154,29 @@ public class AisPacketFilters {
     static <T> T[] check(T... elements) {
         T[] s = elements.clone();
         Arrays.sort(s);
+        for (int i = 0; i < s.length; i++) {
+            if (s[i] == null) {
+                throw new NullPointerException("Array is null at position " + i);
+            }
+        }
         // Check for nulls
         return s;
     }
 
-    public static void main(String[] args) {
-        System.out.println(filterOnSourceRegion(""));
+    static class VerboseListener extends BaseErrorListener {
+        @Override
+        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
+                String msg, RecognitionException e) {
+            throw new IllegalArgumentException(msg + " @ character " + charPositionInLine);
+            // if (recognizer instanceof Parser)
+            // List<String> stack = ((Parser) recognizer).getRuleInvocationStack();
+            // Collections.reverse(stack);
+            // System.err.println("rule stack: " + stack);
+            // System.err.println("line " + line + ":" + charPositionInLine + " at " + offendingSymbol + ": " + msg);
+        }
     }
 
-    static class SourceFilterImpl extends SourceFilterBaseVisitor<Predicate<AisPacket>> {
+    static class SourceFilterToPredicateVisitor extends SourceFilterBaseVisitor<Predicate<AisPacket>> {
 
         @Override
         public Predicate<AisPacket> visitOrAnd(OrAndContext ctx) {
@@ -175,12 +200,13 @@ public class AisPacketFilters {
 
         @Override
         public Predicate<AisPacket> visitSourceBasestation(SourceBasestationContext ctx) {
-            return filterOnSourceBaseStation(readArrays(ctx.intList().INT()));
+            return filterOnSourceBaseStation(readArrays(ctx.idList().ID()));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceCountry(SourceCountryContext ctx) {
-            return filterOnSourceCountry(Country.findAllByCode(readArrays(ctx.idList().ID())).toArray(new Country[0]));
+            List<Country> countries = Country.findAllByCode(readArrays(ctx.idList().ID()));
+            return filterOnSourceCountry(countries.toArray(new Country[countries.size()]));
         }
 
         @Override
@@ -190,7 +216,7 @@ public class AisPacketFilters {
 
         @Override
         public Predicate<AisPacket> visitSourceRegion(SourceRegionContext ctx) {
-            return filterOnSourceId(readArrays(ctx.idList().ID()));
+            return filterOnSourceRegion(readArrays(ctx.idList().ID()));
         }
 
         @Override
