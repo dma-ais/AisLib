@@ -38,25 +38,6 @@ public class AisPacketTags implements Serializable {
     public static final String SOURCE_COUNTRY_KEY = "sc";
     public static final String SOURCE_TYPE_KEY = "st";
 
-    public enum SourceType {
-        TERRESTRIAL, SATELLITE;
-        public static SourceType fromString(String st) {
-            if (st == null) {
-                return null;
-            }
-            if (st.equalsIgnoreCase("LIVE")) {
-                return TERRESTRIAL;
-            } else if (st.equalsIgnoreCase("SAT")) {
-                return SATELLITE;
-            }
-            throw new IllegalArgumentException("Unknow source type: " + st);
-        }
-
-        public String encode() {
-            return this == TERRESTRIAL ? "LIVE" : "SAT";
-        }
-    }
-
     /**
      * Timestamp (comment block key: 'c', value: seconds since 1970)
      */
@@ -312,4 +293,23 @@ public class AisPacketTags implements Serializable {
         return builder.toString();
     }
 
+
+    public enum SourceType {
+        TERRESTRIAL, SATELLITE;
+        public static SourceType fromString(String st) {
+            if (st == null) {
+                return null;
+            }
+            if (st.equalsIgnoreCase("LIVE")) {
+                return TERRESTRIAL;
+            } else if (st.equalsIgnoreCase("SAT")) {
+                return SATELLITE;
+            }
+            throw new IllegalArgumentException("Unknow source type: " + st);
+        }
+
+        public String encode() {
+            return this == TERRESTRIAL ? "LIVE" : "SAT";
+        }
+    }
 }
