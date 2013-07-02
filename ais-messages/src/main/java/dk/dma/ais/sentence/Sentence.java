@@ -83,7 +83,7 @@ public abstract class Sentence {
 
         // Split into prefix and sentence
         splitLine(line);
-        
+
         // Save raw sentence
         rawSentences.add(this.msg);
 
@@ -156,7 +156,7 @@ public abstract class Sentence {
 
         return encoded;
     }
-    
+
     /**
      * Split line into prefix and message part. Message will start at first ! or $ character
      * 
@@ -315,7 +315,7 @@ public abstract class Sentence {
      * @return
      */
     public static boolean hasSentence(String line) {
-        return line.indexOf("!") >= 0 || line.indexOf("$") >= 0;
+        return line.indexOf('!') >= 0 || line.indexOf('$') >= 0;
     }
 
     /**
@@ -326,7 +326,7 @@ public abstract class Sentence {
     public List<String> getOrgLines() {
         return orgLines;
     }
-    
+
     /**
      * Get original lines joined by carriage return line feed
      * 
@@ -335,7 +335,7 @@ public abstract class Sentence {
     public String getOrgLinesJoined() {
         return StringUtils.join(orgLines.iterator(), "\r\n");
     }
-    
+
     /**
      * Get original raw sentences without any prefix
      * @return
@@ -345,7 +345,7 @@ public abstract class Sentence {
     }
 
     /**
-     * Get original raw sentences without any prefix joined by carriage return line feed 
+     * Get original raw sentences without any prefix joined by carriage return line feed
      * @return
      */
     public String getRawSentencesJoined() {
