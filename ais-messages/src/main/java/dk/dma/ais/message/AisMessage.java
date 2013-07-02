@@ -16,8 +16,12 @@
 package dk.dma.ais.message;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
@@ -33,6 +37,10 @@ public abstract class AisMessage implements Serializable {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
+
+    /** A set of all valid AIS message types. */
+    public static final Set<Integer> VALID_MESSAGE_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(1,
+            2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 17, 18, 19, 21, 24)));
 
     protected int msgId; // 6 bit: message id
     protected int repeat; // 2 bit: How many times message has been repeated
