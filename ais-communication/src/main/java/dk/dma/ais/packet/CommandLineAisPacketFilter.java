@@ -29,7 +29,7 @@ import dk.dma.enav.util.function.Predicate;
  * 
  * @author Kasper Nielsen
  */
-public class AisPacketFilter extends Predicate<AisPacket> {
+public class CommandLineAisPacketFilter extends Predicate<AisPacket> {
 
     @Parameter(names = "-start", description = "[Filter] Start date (inclusive), format == yyyy-MM-dd")
     private volatile Date start;
