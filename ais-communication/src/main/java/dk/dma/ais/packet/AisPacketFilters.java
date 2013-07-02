@@ -17,31 +17,17 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterBaseVisitor;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterLexer;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.OrAndContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.ParensContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.ProgContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceBasestationContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceCountryContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceIdContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceRegionContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceTypeContext;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.AisPosition;
+import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
+import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.Country;
+import dk.dma.enav.model.geometry.Area;
+import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Predicate;
 
 /**
@@ -50,55 +36,17 @@ import dk.dma.enav.util.function.Predicate;
  */
 public class AisPacketFilters {
 
-    public static Predicate<AisPacket> parseSourceFilter(String filter) {
-        ANTLRInputStream input = new ANTLRInputStream(requireNonNull(filter));
-        SourceFilterLexer lexer = new SourceFilterLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        SourceFilterParser parser = new SourceFilterParser(tokens);
-
-        // Better errors
-        lexer.removeErrorListeners();
-        parser.removeErrorListeners();
-        lexer.addErrorListener(new VerboseListener());
-        parser.addErrorListener(new VerboseListener());
-
-        ProgContext tree = parser.prog();
-        return tree.expr().accept(new SourceFilterToPredicateVisitor());
-    }
-
-    public static Predicate<AisPacket> filterOnSourceType(final SourceType sourceType) {
-        requireNonNull(sourceType, "sourceType is null");
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                return sourceType == p.getTags().getSourceType();
+    @SafeVarargs
+    static <T> T[] check(T... elements) {
+        T[] s = elements.clone();
+        Arrays.sort(s);
+        for (int i = 0; i < s.length; i++) {
+            if (s[i] == null) {
+                throw new NullPointerException("Array is null at position " + i);
             }
-
-            public String toString() {
-                return "sourceType = " + sourceType;
-            }
-        };
-    }
-
-    public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
-        final Country[] c = check(countries);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                Country country = p.getTags().getSourceCountry();
-                return country != null && Arrays.binarySearch(c, country) >= 0;
-            }
-
-            public String toString() {
-                return "sourceCountry = " + skipBrackets(Arrays.toString(c));
-            }
-        };
-    }
-
-    public static Predicate<AisPacket> filterOnSourceBaseStation(final String... ids) {
-        final int[] bss = new int[ids.length];
-        for (int i = 0; i < bss.length; i++) {
-            bss[i] = Integer.valueOf(ids[i]);
         }
-        return filterOnSourceBaseStation(bss);
+        // Check for nulls
+        return s;
     }
 
     public static Predicate<AisPacket> filterOnSourceBaseStation(final int... ids) {
@@ -112,6 +60,28 @@ public class AisPacketFilters {
 
             public String toString() {
                 return "sourceBaseStation = " + skipBrackets(Arrays.toString(copy));
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnSourceBaseStation(final String... ids) {
+        final int[] bss = new int[ids.length];
+        for (int i = 0; i < bss.length; i++) {
+            bss[i] = Integer.valueOf(ids[i]);
+        }
+        return filterOnSourceBaseStation(bss);
+    }
+
+    public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
+        final Country[] c = check(countries);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                Country country = p.getTags().getSourceCountry();
+                return country != null && Arrays.binarySearch(c, country) >= 0;
+            }
+
+            public String toString() {
+                return "sourceCountry = " + skipBrackets(Arrays.toString(c));
             }
         };
     }
@@ -146,91 +116,107 @@ public class AisPacketFilters {
         };
     }
 
+    public static Predicate<AisPacket> filterOnSourceType(final SourceType sourceType) {
+        requireNonNull(sourceType, "sourceType is null");
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                return sourceType == p.getTags().getSourceType();
+            }
+
+            public String toString() {
+                return "sourceType = " + sourceType;
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnMessagePositionWithin(final Area area) {
+        requireNonNull(area);
+        return filterOnMessageType(IPositionMessage.class, new Predicate<IPositionMessage>() {
+            public boolean test(IPositionMessage element) {
+                AisPosition pos = element.getPos();
+                if (pos != null) {
+                    Position p = pos.getGeoLocation();
+                    return p != null && area.containedWithin(p);
+                }
+                return false;
+            }
+
+            public String toString() {
+                return "position within = " + area;
+            }
+        });
+    }
+
+    static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
+        requireNonNull(messageType);
+        requireNonNull(predicate);
+        return new AbstractMessagePredicate() {
+            @SuppressWarnings("unchecked")
+            public boolean test(AisMessage m) {
+                if (messageType.isAssignableFrom(m.getClass())) {
+                    return predicate.test((T) m);
+                }
+                return false;
+            }
+
+            public String toString() {
+                return predicate.toString();
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnMessageType(final int... types) {
+        final int[] t = types.clone();
+        Arrays.sort(t);
+        for (int i : t) {
+            if (!AisMessage.VALID_MESSAGE_TYPES.contains(i)) {
+                throw new IllegalArgumentException(i + " is not a valid message type");
+            }
+        }
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                Vdm vdm = p.getVdm();
+                return vdm != null && Arrays.binarySearch(t, vdm.getMsgId()) >= 0;
+            }
+
+            public String toString() {
+                return "messageType = " + skipBrackets(Arrays.toString(t));
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnTargetCountry(final Country... countries) {
+        final Country[] c = AisPacketFilters.check(countries);
+        return new AbstractMessagePredicate() {
+            public boolean test(AisMessage m) {
+                Country country = Country.getCountryForMmsi(m.getUserId());
+                return country != null && Arrays.binarySearch(c, country) >= 0;
+            }
+
+            public String toString() {
+                return "targetCountry = " + skipBrackets(Arrays.toString(c));
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> parseSourceFilter(String filter) {
+        return AisPacketFiltersParseHelper.parseSourceFilter(filter);
+    }
+
     static String skipBrackets(String s) {
         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
     }
 
-    @SafeVarargs
-    static <T> T[] check(T... elements) {
-        T[] s = elements.clone();
-        Arrays.sort(s);
-        for (int i = 0; i < s.length; i++) {
-            if (s[i] == null) {
-                throw new NullPointerException("Array is null at position " + i);
-            }
-        }
-        // Check for nulls
-        return s;
-    }
+    static abstract class AbstractMessagePredicate extends Predicate<AisPacket> {
 
-    static class VerboseListener extends BaseErrorListener {
+        abstract boolean test(AisMessage message);
+
+        /** {@inheritDoc} */
         @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-                String msg, RecognitionException e) {
-            throw new IllegalArgumentException(msg + " @ character " + charPositionInLine);
-            // if (recognizer instanceof Parser)
-            // List<String> stack = ((Parser) recognizer).getRuleInvocationStack();
-            // Collections.reverse(stack);
-            // System.err.println("rule stack: " + stack);
-            // System.err.println("line " + line + ":" + charPositionInLine + " at " + offendingSymbol + ": " + msg);
+        public boolean test(AisPacket element) {
+            AisMessage m = element.tryGetAisMessage();
+            return m != null && test(m);
         }
     }
 
-    static class SourceFilterToPredicateVisitor extends SourceFilterBaseVisitor<Predicate<AisPacket>> {
-
-        @Override
-        public Predicate<AisPacket> visitOrAnd(OrAndContext ctx) {
-            return ctx.op.getType() == SourceFilterParser.AND ? visit(ctx.expr(0)).and(visit(ctx.expr(1))) : visit(
-                    ctx.expr(0)).or(visit(ctx.expr(1)));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitParens(ParensContext ctx) {
-            final Predicate<AisPacket> p = visit(ctx.expr());
-            return new Predicate<AisPacket>() {
-                public boolean test(AisPacket element) {
-                    return p.test(element);
-                }
-
-                public String toString() {
-                    return "(" + p.toString() + ")";
-                }
-            };
-        }
-
-        @Override
-        public Predicate<AisPacket> visitSourceBasestation(SourceBasestationContext ctx) {
-            return filterOnSourceBaseStation(readArrays(ctx.idList().ID()));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitSourceCountry(SourceCountryContext ctx) {
-            List<Country> countries = Country.findAllByCode(readArrays(ctx.idList().ID()));
-            return filterOnSourceCountry(countries.toArray(new Country[countries.size()]));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitSourceId(final SourceIdContext ctx) {
-            return filterOnSourceId(readArrays(ctx.idList().ID()));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitSourceRegion(SourceRegionContext ctx) {
-            return filterOnSourceRegion(readArrays(ctx.idList().ID()));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitSourceType(SourceTypeContext ctx) {
-            final SourceType type = SourceType.fromString(ctx.ID().getText());
-            return filterOnSourceType(type);
-        }
-
-        private static String[] readArrays(Iterable<TerminalNode> iter) {
-            ArrayList<String> list = new ArrayList<>();
-            for (TerminalNode t : iter) {
-                list.add(t.getText());
-            }
-            return list.toArray(new String[list.size()]);
-        }
-    }
 }
