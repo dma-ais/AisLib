@@ -61,7 +61,7 @@ public class CircleGeometryConfiguration extends GeometryConfiguration {
     @Override
     @XmlTransient
     public Predicate<? super Position> getPredicate() {
-        return new Circle(lat, lon, radius, CoordinateSystem.GEODETIC).containedWithin();
+        return new Circle(lat, lon, radius, CoordinateSystem.GEODETIC).contains();
     }
 
 }

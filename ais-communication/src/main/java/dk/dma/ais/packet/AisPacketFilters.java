@@ -136,7 +136,7 @@ public class AisPacketFilters {
                 AisPosition pos = element.getPos();
                 if (pos != null) {
                     Position p = pos.getGeoLocation();
-                    return p != null && area.containedWithin(p);
+                    return p != null && area.contains(p);
                 }
                 return false;
             }
@@ -207,7 +207,7 @@ public class AisPacketFilters {
         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
     }
 
-    static abstract class AbstractMessagePredicate extends Predicate<AisPacket> {
+    abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {
 
         abstract boolean test(AisMessage message);
 

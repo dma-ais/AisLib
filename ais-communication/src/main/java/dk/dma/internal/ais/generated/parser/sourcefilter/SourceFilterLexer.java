@@ -1,5 +1,5 @@
 // Generated from SourceFilter.g4 by ANTLR 4.1
-package dk.dma.ais.internal.parser.sourcefilter;
+package dk.dma.internal.ais.generated.parser.sourcefilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

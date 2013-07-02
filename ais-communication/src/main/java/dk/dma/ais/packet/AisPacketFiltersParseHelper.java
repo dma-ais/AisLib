@@ -32,20 +32,20 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterBaseVisitor;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterLexer;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.OrAndContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.ParensContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.ProgContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceBasestationContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceCountryContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceIdContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceRegionContext;
-import dk.dma.ais.internal.parser.sourcefilter.SourceFilterParser.SourceTypeContext;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.util.function.Predicate;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterBaseVisitor;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterLexer;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.OrAndContext;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ParensContext;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ProgContext;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceBasestationContext;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceCountryContext;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceIdContext;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceRegionContext;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceTypeContext;
 /**
  *
  * @author Kasper Nielsen
