@@ -15,85 +15,49 @@
  */
 package dk.dma.ais.message;
 
-import java.io.Serializable;
+public enum NavigationalStatus {
 
-public class NavigationalStatus implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    public enum NavStatus {
-        UNDEFINED, UNDER_WAY_USING_ENGINE, AT_ANCHOR, NOT_UNDER_COMMAND, RESTRICTED_MANOEUVRABILITY, CONSTRAINED_BY_HER_DRAUGHT, MOORED, AGROUND, ENGAGED_IN_FISHING, UNDER_WAY, SAILING, AIS_SART
-    }
-
-    private NavStatus navStatus;
-
-    public NavigationalStatus(int intNavStatus) {
-        navStatus = NavStatus.UNDEFINED;
-
-        switch (intNavStatus) {
+    UNDEFINED, UNDER_WAY_USING_ENGINE, AT_ANCHOR, NOT_UNDER_COMMAND, RESTRICTED_MANOEUVRABILITY, CONSTRAINED_BY_HER_DRAUGHT, MOORED, AGROUND, ENGAGED_IN_FISHING, UNDER_WAY, SAILING, AIS_SART {
+        public String prettyStatus() {
+            return name().replace("_", "-");
+        }}
+    ;
+    public static NavigationalStatus get(int intNavigationalStatus) {
+        switch (intNavigationalStatus) {
         case 0:
-            navStatus = NavStatus.UNDER_WAY_USING_ENGINE;
-            break;
+            return UNDER_WAY_USING_ENGINE;
         case 1:
-            navStatus = NavStatus.AT_ANCHOR;
-            break;
+            return AT_ANCHOR;
         case 2:
-            navStatus = NavStatus.NOT_UNDER_COMMAND;
-            break;
+            return NOT_UNDER_COMMAND;
         case 3:
-            navStatus = NavStatus.RESTRICTED_MANOEUVRABILITY;
-            break;
+            return RESTRICTED_MANOEUVRABILITY;
         case 4:
-            navStatus = NavStatus.CONSTRAINED_BY_HER_DRAUGHT;
-            break;
+            return CONSTRAINED_BY_HER_DRAUGHT;
         case 5:
-            navStatus = NavStatus.MOORED;
-            break;
+            return MOORED;
         case 6:
-            navStatus = NavStatus.AGROUND;
-            break;
+            return AGROUND;
         case 7:
-            navStatus = NavStatus.ENGAGED_IN_FISHING;
-            break;
+            return ENGAGED_IN_FISHING;
         case 8:
-            navStatus = NavStatus.UNDER_WAY;
-            break;
+            return UNDER_WAY;
         case 14:
-            navStatus = NavStatus.AIS_SART;
-            break;
+            return AIS_SART;
         case 15:
-            navStatus = NavStatus.UNDEFINED;
-            break;
+            return UNDEFINED;
+        default:
+            return UNDEFINED;
         }
-
-    }
-
-    public NavStatus getNavType() {
-        return this.navStatus;
     }
 
     public String prettyStatus() {
-        NavigationalStatus navStatus = this;
-        String result;
-
-        if (navStatus.getNavType() == NavStatus.AIS_SART) {
-            result = navStatus.getNavType().toString().replace("_", "-");
-        } else {
-
-            String navStat = navStatus.getNavType().toString().replace("_", " ");
-            result = navStat.substring(0, 1) + navStat.substring(1).toLowerCase();
-        }
-
-        return result;
+        String navStat = name().replace("_", " ");
+        return navStat.substring(0, 1) + navStat.substring(1).toLowerCase();
     }
 
     @Override
     public String toString() {
-        // only capitalize the first letter - need to remove underscore - maybe
-        NavigationalStatus navStatus = this;
-
-        return navStatus.prettyStatus();
-
+        return prettyStatus();
     }
-
 }

@@ -80,10 +80,10 @@ public class ShipTypeCargoNavStatusTest {
         int ais_sart = 14;
 
         // Prepare Ships
-        NavigationalStatus underWayUsingengine = new NavigationalStatus(under_way_using_engine);
-        NavigationalStatus moored2 = new NavigationalStatus(moored);
-        NavigationalStatus engagedInFishing = new NavigationalStatus(engaged_in_fishing);
-        NavigationalStatus aisSart = new NavigationalStatus(ais_sart);
+        NavigationalStatus underWayUsingengine = NavigationalStatus.get(under_way_using_engine);
+        NavigationalStatus moored2 = NavigationalStatus.get(moored);
+        NavigationalStatus engagedInFishing = NavigationalStatus.get(engaged_in_fishing);
+        NavigationalStatus aisSart = NavigationalStatus.get(ais_sart);
 
         System.out.println(underWayUsingengine);
         Assert.assertEquals(underWayUsingengine.prettyStatus(), "Under way using engine");
