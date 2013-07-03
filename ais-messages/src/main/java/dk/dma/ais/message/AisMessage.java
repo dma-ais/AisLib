@@ -226,7 +226,7 @@ public abstract class AisMessage implements Serializable {
             break;
         case 11:
             // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisUnsupportedMessageType(vdm);
             break;
         case 12:
             message = new AisMessage12(vdm);
@@ -239,11 +239,11 @@ public abstract class AisMessage implements Serializable {
             break;
         case 15:
             // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisUnsupportedMessageType(vdm);
             break;
         case 16:
             // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisUnsupportedMessageType(vdm);
             break;
         case 17:
             message = new AisMessage17(vdm);
@@ -256,18 +256,18 @@ public abstract class AisMessage implements Serializable {
             break;
         case 20:
             // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisUnsupportedMessageType(vdm);
             break;
         case 21:
             message = new AisMessage21(vdm);
             break;
         case 22:
             // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisUnsupportedMessageType(vdm);
             break;
         case 23:
             // TODO implement real message class
-            message = new AisMessageDummy(vdm);
+            message = new AisUnsupportedMessageType(vdm);
             break;
         case 24:
             message = new AisMessage24(vdm);

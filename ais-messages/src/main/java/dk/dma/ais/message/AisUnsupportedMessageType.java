@@ -22,12 +22,12 @@ import dk.dma.ais.sentence.Vdm;
 /**
  * Class to fill in for AIS message classes not yet implemented
  */
-public class AisMessageDummy extends AisMessage {
+public class AisUnsupportedMessageType extends AisMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
-    public AisMessageDummy(Vdm vdm) throws AisMessageException, SixbitException {
+    public AisUnsupportedMessageType(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse(vdm.getBinArray());
     }
