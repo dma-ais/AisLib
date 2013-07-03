@@ -147,7 +147,7 @@ public class AisPacketFilters {
         });
     }
 
-    static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
+    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
         requireNonNull(messageType);
         requireNonNull(predicate);
         return new AbstractMessagePredicate() {
