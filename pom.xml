@@ -16,6 +16,12 @@
   <packaging>pom</packaging>
   <description>This parent pom for AIS</description>
 
+  <scm>
+    <connection>scm:git:git@github.com:dma-ais/AisLib.git</connection>
+    <developerConnection>scm:git:git@github.com:dma-ais/AisLib.git</developerConnection>
+    <url>https://github.com/dma-ais/AisLib</url>
+  </scm>
+  
   <modules>
     <module>ais-lib-messages</module>
     <module>ais-lib-communication</module>    
