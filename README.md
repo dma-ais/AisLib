@@ -251,7 +251,7 @@ source tags are handled.
 
 Proprietary factories are defined in the file
 
-    ais-messages/src/main/resources/META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
+    ais-lib-messages/src/main/resources/META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
 
 ```java
 AisReader reader = new AisStreamReader(new FileInputStream("sentences.txt"));

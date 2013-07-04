@@ -4,5 +4,5 @@ target
 .project
 .classpath
 *.tokens
-ais-communication/aisbus.xml
+ais-lib-communication/aisbus.xml
 *~

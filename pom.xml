@@ -11,15 +11,15 @@
 
   <groupId>dk.dma.ais</groupId>
   <artifactId>ais-parent</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>2.0-SNAPSHOT</version>
   <name>AIS Parent</name>
   <packaging>pom</packaging>
   <description>This parent pom for AIS</description>
 
   <modules>
-    <module>ais-communication</module>
-    <module>ais-messages</module>
-    <module>ais-utils</module>
+    <module>ais-lib-messages</module>
+    <module>ais-lib-communication</module>    
+    <module>ais-lib-utils</module>
   </modules>
 
   <dependencies>

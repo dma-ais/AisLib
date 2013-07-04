@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>dk.dma.ais</groupId>
 		<artifactId>ais-parent</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>ais-utils</artifactId>
-	<name>AIS utils </name>
+	<artifactId>ais-lib-utils</artifactId>
+	<name>AIS utils</name>
 
 	<build>
 		<plugins>
@@ -20,7 +20,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptor>src/assembly/bin.xml</descriptor>
-					<finalName>ais-utils-${project.version}</finalName>
+					<finalName>ais-lib-utils-${project.version}</finalName>
 				</configuration>
 				<executions>
 					<execution>
@@ -37,12 +37,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ais-messages</artifactId>
+			<artifactId>ais-lib-messages</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ais-communication</artifactId>
+			<artifactId>ais-lib-communication</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
