@@ -126,8 +126,7 @@ class AisPacketFiltersParseHelper {
 
         @Override
         public Predicate<AisPacket> visitSourceType(SourceTypeContext ctx) {
-            final SourceType type = SourceType.fromString(ctx.ID().getText());
-            return filterOnSourceType(type);
+            return filterOnSourceType(SourceType.fromString(ctx.ID().getText()));
         }
 
         private static String[] readArrays(Iterable<TerminalNode> iter) {

@@ -64,6 +64,13 @@ public class AisPacketFilters {
         };
     }
 
+    /**
+     * Returns a predicate that will filter packets based on the base station source tag.
+     * 
+     * @param ids
+     *            the id of the base stations for which packets should be accepted
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnSourceBaseStation(final String... ids) {
         final int[] bss = new int[ids.length];
         for (int i = 0; i < bss.length; i++) {
@@ -72,6 +79,13 @@ public class AisPacketFilters {
         return filterOnSourceBaseStation(bss);
     }
 
+    /**
+     * Returns a predicate that will filter packets based on the country of the source tag.
+     * 
+     * @param ids
+     *            the countries for which packets should be accepted
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
         final Country[] c = check(countries);
         return new Predicate<AisPacket>() {
