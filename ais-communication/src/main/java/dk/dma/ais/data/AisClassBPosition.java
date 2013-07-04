@@ -16,6 +16,7 @@
 package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage18;
+import dk.dma.ais.message.AisMessage19;
 import dk.dma.ais.message.IVesselPositionMessage;
 
 /**
@@ -33,6 +34,11 @@ public class AisClassBPosition extends AisVesselPosition {
         super();
         update(msg18);
     }
+    
+    public AisClassBPosition(AisMessage19 msg19) {
+        super();
+        update(msg19);
+    }
 
     /**
      * Update data object with data from AIS message
@@ -41,6 +47,15 @@ public class AisClassBPosition extends AisVesselPosition {
      */
     public void update(AisMessage18 msg18) {
         super.update((IVesselPositionMessage) msg18);
+    }
+    
+    /**
+     * Update data object with data from AIS message
+     * 
+     * @param msg19
+     */
+    public void update(AisMessage19 msg19) {
+        super.update((IVesselPositionMessage) msg19);
     }
 
 }

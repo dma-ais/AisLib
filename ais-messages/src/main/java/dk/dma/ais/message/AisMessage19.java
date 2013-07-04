@@ -27,7 +27,7 @@ import dk.dma.enav.model.geometry.Position;
  * Extended Class B equipment position report as defined by ITU-R M.1371-4
  * 
  */
-public class AisMessage19 extends AisMessage implements IVesselPositionMessage {
+public class AisMessage19 extends AisStaticCommon implements IVesselPositionMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;

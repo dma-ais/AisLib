@@ -17,6 +17,7 @@ package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage18;
+import dk.dma.ais.message.AisMessage19;
 import dk.dma.ais.message.AisMessage24;
 
 /**
@@ -59,7 +60,7 @@ public class AisClassBTarget extends AisVesselTarget {
      * @return
      */
     public static boolean isClassBPosOrStatic(AisMessage aisMessage) {
-        return aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24;
+        return aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24 || aisMessage instanceof AisMessage19;
     }
 
 }

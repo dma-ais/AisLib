@@ -20,6 +20,7 @@ import java.util.Date;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage18;
+import dk.dma.ais.message.AisMessage19;
 import dk.dma.ais.message.AisMessage21;
 import dk.dma.ais.message.AisMessage24;
 import dk.dma.ais.message.AisMessage4;
@@ -119,7 +120,7 @@ public abstract class AisTarget implements Serializable {
         AisTarget target = null;
         if (aisMessage instanceof AisPositionMessage || aisMessage instanceof AisMessage5) {
             target = new AisClassATarget();
-        } else if (aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24) {
+        } else if (aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24 || aisMessage instanceof AisMessage19) {
             target = new AisClassBTarget();
         } else if (aisMessage instanceof AisMessage4) {
             target = new AisBsTarget();

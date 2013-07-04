@@ -17,6 +17,7 @@ package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage18;
+import dk.dma.ais.message.AisMessage19;
 import dk.dma.ais.message.AisMessage24;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPositionMessage;
@@ -54,12 +55,23 @@ public abstract class AisVesselTarget extends AisTarget {
                 vesselPosition = new AisClassBPosition((AisMessage18) aisMessage);
             } else {
                 ((AisClassBPosition) vesselPosition).update((AisMessage18) aisMessage);
-            }
+            }           
         } else if (aisMessage instanceof AisMessage24) {
             if (vesselStatic == null || !(vesselStatic instanceof AisClassBStatic)) {
                 vesselStatic = new AisClassBStatic((AisMessage24) aisMessage);
             } else {
                 ((AisClassBStatic) vesselStatic).update((AisMessage24) aisMessage);
+            }
+        } else if (aisMessage instanceof AisMessage19) {
+            if (vesselPosition == null || !(vesselPosition instanceof AisClassBPosition)) {
+                vesselPosition = new AisClassBPosition((AisMessage19) aisMessage);
+            } else {
+                ((AisClassBPosition) vesselPosition).update((AisMessage19) aisMessage);
+            }           
+            if (vesselStatic == null || !(vesselStatic instanceof AisClassBStatic)) {
+                vesselStatic = new AisClassBStatic((AisMessage19) aisMessage);
+            } else {
+                ((AisClassBStatic) vesselStatic).update((AisMessage19) aisMessage);
             }
         }
 

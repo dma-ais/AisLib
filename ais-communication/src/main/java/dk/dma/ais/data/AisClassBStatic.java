@@ -16,6 +16,7 @@
 package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.AisMessage19;
 import dk.dma.ais.message.AisMessage24;
 import dk.dma.ais.message.ShipTypeCargo;
 
@@ -34,6 +35,11 @@ public class AisClassBStatic extends AisVesselStatic {
         super();
         update(msg24);
     }
+    
+    public AisClassBStatic(AisMessage19 msg19) {
+        super();
+        update(msg19);
+    }
 
     public void update(AisMessage24 msg24) {
         if (msg24.getPartNumber() == 0) {
@@ -45,6 +51,15 @@ public class AisClassBStatic extends AisVesselStatic {
             this.dimensions = new AisTargetDimensions(msg24);
         }
         super.update((AisMessage) msg24);
+    }
+    
+    public void update(AisMessage19 msg19) {
+        this.name = AisMessage.trimText(msg19.getName());
+        this.callsign = AisMessage.trimText(msg19.getCallsign());
+        this.shipType = (byte) msg19.getShipType();
+        this.shipTypeCargo = new ShipTypeCargo(this.shipType);
+        this.dimensions = new AisTargetDimensions(msg19);
+        super.update((AisMessage) msg19);
     }
 
 }
