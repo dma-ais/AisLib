@@ -20,6 +20,7 @@
     <module>ais-communication</module>
     <module>ais-messages</module>
     <module>ais-utils</module>
+    <module>ais-lib-cli</module>
   </modules>
 
   <dependencies>
