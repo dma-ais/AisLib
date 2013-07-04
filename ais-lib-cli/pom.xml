@@ -48,7 +48,7 @@
   <dependencies>
     <dependency>
       <groupId>dk.dma.ais</groupId>
-      <artifactId>ais-communication</artifactId>
+      <artifactId>ais-lib-communication</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
