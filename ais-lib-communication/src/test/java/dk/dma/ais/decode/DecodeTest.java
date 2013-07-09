@@ -16,12 +16,18 @@
 package dk.dma.ais.decode;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -30,7 +36,10 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage6;
+import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.binary.RouteSuggestionReply;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.proprietary.ProprietaryFactory;
 import dk.dma.ais.reader.AisStreamReader;
@@ -38,6 +47,8 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.Country;
+import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Consumer;
 
 public class DecodeTest {
@@ -47,8 +58,7 @@ public class DecodeTest {
     /**
      * Test the AisStreamReader class
      * 
-     * Notice that inputStream could be any InputStream. TCP, file, pipe etc. For fail tolerant TCP reading use
-     * AisTcpReader
+     * Notice that inputStream could be any InputStream. TCP, file, pipe etc. For fail tolerant TCP reading use AisTcpReader
      * 
      * @throws IOException
      * @throws InterruptedException
@@ -232,6 +242,89 @@ public class DecodeTest {
         Assert.assertEquals(abk.getMsgId(), 8);
         Assert.assertEquals(abk.getSequence(), 3);
         Assert.assertEquals(abk.getResult().getRes(), 3);
+    }
+
+    //@Test
+    public void makeTrackTest() throws IOException, InterruptedException {
+        // Open input stream
+        // URL url = ClassLoader.getSystemResource("small_cb_example.txt");
+        // Assert.assertNotNull(url);
+        // InputStream inputStream = url.openStream();
+        // Assert.assertNotNull(inputStream);
+        String filename = "/Users/oleborup/pride_of_hull_311062900.txt";
+        //String filename = "/Users/oleborup/pride_of_rotterdam_244980000.txt";
+        FileInputStream inputStream = new FileInputStream(filename);
+
+        final ArrayList<AisPositionMessage> posMessages = new ArrayList<>();
+
+        // Make AIS reader instance
+        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        aisReader.registerPacketHandler(new Consumer<AisPacket>() {
+            @Override
+            public void accept(AisPacket packet) {
+                Date t = packet.getTimestamp();
+                if (t == null) {
+                    return;
+                }
+                // Filter on country
+                AisPacketTags tags = packet.getTags();
+                if (tags == null) {
+                    return;
+                }
+                Country country = tags.getSourceCountry();
+                if (country == null) {
+                    return;
+                }
+                if (!country.getTwoLetter().equals("NL") && !country.getTwoLetter().equals("GB")) {
+                    return;
+                }                
+                AisMessage message = packet.tryGetAisMessage();
+                if (message == null || !(message instanceof AisPositionMessage)) {
+                    return;
+                }
+                posMessages.add((AisPositionMessage) message);
+            }
+        });
+        aisReader.start();
+        aisReader.join();
+        inputStream.close();
+        System.out.println("Position messages: " + posMessages.size());
+        
+        ArrayList<String> positions = new ArrayList<>();
+        Integer mmsi = null;
+        Position lastPos = null;
+        Position refPos = Position.create(52.58, 2.3);
+        for (AisPositionMessage posMessage : posMessages) {
+            Position pos = posMessage.getPos().getGeoLocation();
+            if (pos == null) {
+                continue;
+            }
+            if (refPos.rhumbLineDistanceTo(pos) > 500000) {
+                continue;
+            }
+            if (mmsi == null) {
+                mmsi = posMessage.getUserId();
+            }
+            if (lastPos != null) {
+                // Downsample on distance
+                if (lastPos.rhumbLineDistanceTo(pos) < 1000) {
+                    continue;
+                }                
+            }
+            String strPos = String.format(Locale.US, "%f,%f,0", pos.getLongitude(), pos.getLatitude());
+            positions.add(strPos);
+            lastPos = pos;
+        }
+        
+        System.out.println("Positions in KML: " + positions.size());
+        StringBuilder buf = new StringBuilder();
+        buf.append("<kml><Document><name>Tracks</name><open>1</open><Folder><name>" + mmsi + "</name>");
+        buf.append("<Placemark><name>" + mmsi + "</name><LineString><coordinates>\n");
+        buf.append(StringUtils.join(positions, " "));
+        buf.append("\n</coordinates></LineString></Placemark></Folder></Document></kml>");
+        PrintWriter out = new PrintWriter(filename + ".kml");
+        out.print(buf);
+        out.close();        
     }
 
 }
