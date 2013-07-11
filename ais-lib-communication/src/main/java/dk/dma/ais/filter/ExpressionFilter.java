@@ -13,17 +13,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.configuration.filter;
+package dk.dma.ais.filter;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketFilters;
+import dk.dma.enav.util.function.Predicate;
 
-import dk.dma.ais.filter.IPacketFilter;
+/**
+ * Filtering using string expression
+ * @see dk.dma.ais.packet.AisPacketFiltersParseHelper 
+ */
+public class ExpressionFilter implements IPacketFilter {
+    
+    final Predicate<AisPacket> predicate;
+    
+    public ExpressionFilter(String filter) {
+        this.predicate = AisPacketFilters.parseSourceFilter(filter);
+    }
 
-@XmlSeeAlso({ PacketFilterCollectionConfiguration.class, DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class,
-        GatehouseSourceFilterConfiguration.class, TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class,
-        LocationFilterConfiguration.class, MessageTypeFilterConfiguration.class, ExpressionFilterConfiguration.class, })
-public abstract class FilterConfiguration {
-
-    public abstract IPacketFilter getInstance();
+    @Override
+    public boolean rejectedByFilter(AisPacket packet) {
+        return !predicate.test(packet);
+    }
 
 }
