@@ -28,7 +28,6 @@ import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -39,6 +38,7 @@ import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterLexer;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser;
+import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.EqualityTestContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.OrAndContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ParensContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ProgContext;
@@ -106,32 +106,34 @@ class AisPacketFiltersParseHelper {
 
         @Override
         public Predicate<AisPacket> visitSourceBasestation(SourceBasestationContext ctx) {
-            return checkNegate(ctx, filterOnSourceBaseStation(readArrays(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStation(readArrays(ctx.idList().ID())));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceCountry(SourceCountryContext ctx) {
             List<Country> countries = Country.findAllByCode(readArrays(ctx.idList().ID()));
-            return checkNegate(ctx, filterOnSourceCountry(countries.toArray(new Country[countries.size()])));
+            return checkNegate(ctx.equalityTest(),
+                    filterOnSourceCountry(countries.toArray(new Country[countries.size()])));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceId(final SourceIdContext ctx) {
-            return checkNegate(ctx, filterOnSourceId(readArrays(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceId(readArrays(ctx.idList().ID())));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceRegion(SourceRegionContext ctx) {
-            return checkNegate(ctx, filterOnSourceRegion(readArrays(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceRegion(readArrays(ctx.idList().ID())));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceType(SourceTypeContext ctx) {
-            return checkNegate(ctx, filterOnSourceType(SourceType.fromString(ctx.ID().getText())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceType(SourceType.fromString(ctx.ID().getText())));
         }
 
-        public Predicate<AisPacket> checkNegate(ParserRuleContext context, Predicate<AisPacket> p) {
-            String text = context.getChild(1).getText();
+        public Predicate<AisPacket> checkNegate(EqualityTestContext context, Predicate<AisPacket> p) {
+            String text = context.getChild(0).getText();
+            System.out.println(text);
             return text.equals("!=") ? p.negate() : p;
         }
 

@@ -12,6 +12,41 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#equalityTest}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEqualityTest(@NotNull SourceFilterParser.EqualityTestContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#sourceId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceId(@NotNull SourceFilterParser.SourceIdContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#idList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdList(@NotNull SourceFilterParser.IdListContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#prog}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProg(@NotNull SourceFilterParser.ProgContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#sourceRegion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#sourceCountry}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -26,39 +61,11 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitSourceType(@NotNull SourceFilterParser.SourceTypeContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#idList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdList(@NotNull SourceFilterParser.IdListContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#sourceBasestation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSourceBasestation(@NotNull SourceFilterParser.SourceBasestationContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#sourceRegion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#sourceId}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSourceId(@NotNull SourceFilterParser.SourceIdContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#prog}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitProg(@NotNull SourceFilterParser.ProgContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#OrAnd}.

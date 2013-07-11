@@ -2,15 +2,16 @@ grammar SourceFilter;
 
 prog: expr EOF;
 
-expr:   'id' ('!='|'=') idList      # sourceId
-    |   'bs' ('!='|'=') idList      # sourceBasestation
-    |   'country' ('!='|'=') idList # sourceCountry
-    |   'type' ('!='|'=') ID        # sourceType
-    |   'region' ('!='|'=') idList  # sourceRegion
-    |   expr op=('&'|'|') expr  # OrAnd
-    |   '(' expr ')'            # parens
+expr:   'id' equalityTest idList      # sourceId
+    |   'bs' equalityTest idList      # sourceBasestation
+    |   'country' equalityTest idList # sourceCountry
+    |   'type' equalityTest ID        # sourceType
+    |   'region' equalityTest idList  # sourceRegion
+    |   expr op=('&'|'|') expr      # OrAnd
+    |   '(' expr ')'                # parens
     ;
 
+equalityTest : '!='|'=';
 
 idList : ID (',' ID)* ;
 
