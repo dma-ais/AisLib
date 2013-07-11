@@ -25,17 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import dk.dma.ais.reader.AisStreamReader;
 import dk.dma.commons.util.io.OutputStreamSink;
-import dk.dma.enav.util.function.Consumer;
 
 /**
  * Common utility methods for {@link AisPacket}.
+ * 
  * @author Kasper Nielsen
  */
 public class AisPackets {
 
-    /** A thread local with a default text format.  */
+    /** A thread local with a default text format. */
     static final ThreadLocal<SimpleDateFormat> DEFAULT_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -105,17 +104,13 @@ public class AisPackets {
         return result;
     }
 
-
     public static List<AisPacket> readFromFile(Path p) throws IOException {
         final ConcurrentLinkedQueue<AisPacket> list = new ConcurrentLinkedQueue<>();
-        AisStreamReader r = new AisStreamReader(Files.newInputStream(p));
-        r.registerPacketHandler(new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket t) {
-                list.add(t);
-            }
-        });
-        r.run(); // we do not need to run it in another thread
+        AisPacketInputStream r = new AisPacketInputStream(Files.newInputStream(p));
+        AisPacket packet;
+        while ((packet = r.readPacket()) != null) {
+            list.add(packet);
+        }
         return new ArrayList<>(list);
     }
 }

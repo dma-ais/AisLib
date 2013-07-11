@@ -15,11 +15,6 @@
  */
 package dk.dma.ais.reader;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.sentence.Abk;
-import dk.dma.enav.util.function.Consumer;
 
 /**
  * Move this to AisMessage#tryParse(String) when cleaned up
@@ -27,52 +22,47 @@ import dk.dma.enav.util.function.Consumer;
  */
 public class AisMessageParser {
 
-    /**
-     * Parses a (Should the signature be String[]??)
-     * 
-     * @param string
-     *            the string to parse
-     * @return the corresponding AIS message or null if the string could not be parsed
-     */
-    public static AisMessage tryParse(String string) {
-        final AtomicReference<AisMessage> ref = new AtomicReference<>();
-        if (string != null && string.length() > 0) {
-            DummyReader dummy = new DummyReader();
-
-            dummy.registerHandler(new Consumer<AisMessage>() {
-
-                @Override
-                public void accept(AisMessage aisMessage) {
-                    ref.set(aisMessage);
-                }
-            });
-
-            String[] lines = string.split("\\r?\\n");
-            for (String s : lines) {
-                dummy.handleLine(s);
-            }
-        }
-        return ref.get();
-    }
-
-    static class DummyReader extends AisReader {
-        /** {@inheritDoc} */
-        @Override
-        protected void handleLine(String line) {
-            super.handleLine(line);
-        }
-
-        @Override
-        public void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException {}
-
-        @Override
-        public Status getStatus() {
-            return null;
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void stopReader() {}
-
-    }
+    // /**
+    // * Parses a (Should the signature be String[]??)
+    // *
+    // * @param string
+    // * the string to parse
+    // * @return the corresponding AIS message or null if the string could not be parsed
+    // */
+    // public static AisMessage tryParse(String string) {
+    // final AtomicReference<AisMessage> ref = new AtomicReference<>();
+    // if (string != null && string.length() > 0) {
+    // DummyReader dummy = new DummyReader();
+    //
+    // dummy.registerHandler(new Consumer<AisMessage>() {
+    //
+    // @Override
+    // public void accept(AisMessage aisMessage) {
+    // ref.set(aisMessage);
+    // }
+    // });
+    //
+    // String[] lines = string.split("\\r?\\n");
+    // for (String s : lines) {
+    // dummy.handleLine(s);
+    // }
+    // }
+    // return ref.get();
+    // }
+    //
+    // static class DummyReader extends AisReader {
+    //
+    // @Override
+    // public void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException {}
+    //
+    // @Override
+    // public Status getStatus() {
+    // return null;
+    // }
+    //
+    // /** {@inheritDoc} */
+    // @Override
+    // public void stopReader() {}
+    //
+    // }
 }

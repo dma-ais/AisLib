@@ -32,18 +32,15 @@ import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
-import dk.dma.ais.transform.AisPacketTaggingTransformer;
-import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 
 /**
- * Class to parse lines in a stream containing VDM sentences.
- * The class will deliver packets containing complete VDM and associated
- * comment blocks and proprietary tags.
+ * Class to parse lines in a stream containing VDM sentences. The class will deliver packets containing complete VDM and
+ * associated comment blocks and proprietary tags.
  */
 @NotThreadSafe
-public class AisPacketReader {
+class AisPacketReader {
 
-    /** The logger  */
+    /** The logger */
     private static final Logger LOG = LoggerFactory.getLogger(AisPacketReader.class);
 
     private static final int SENTENCE_TRACE_COUNT = 20;
@@ -51,7 +48,7 @@ public class AisPacketReader {
     /**
      * The id of the source
      */
-    private String sourceId;
+    // private String sourceId;
 
     /**
      * A received VDO/VDM
@@ -84,6 +81,7 @@ public class AisPacketReader {
 
     /**
      * If an out of sequence packet is encountered, the parsing will be restarted at the out of sequence packet
+     * 
      * @param line
      * @param retry
      * @return
@@ -128,7 +126,8 @@ public class AisPacketReader {
 
         // Check if proprietary line
         if (ProprietaryFactory.isProprietaryTag(line)) {
-            // Try to parse with one of the registered factories in META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
+            // Try to parse with one of the registered factories in
+            // META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
             IProprietaryTag tag = ProprietaryFactory.parseTag(line);
             if (tag != null) {
                 tags.add(tag);
@@ -171,14 +170,6 @@ public class AisPacketReader {
         // Make packet
         AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"));
 
-        // Maybe add source id
-        if (sourceId != null) {
-            AisPacketTags tagging = new AisPacketTags();
-            tagging.setSourceId(sourceId);
-            AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
-            packet = tranformer.transform(packet);
-        }
-
         newVdm();
 
         return packet;
@@ -188,13 +179,5 @@ public class AisPacketReader {
         vdm = new Vdm();
         tags.clear();
         packetLines.clear();
-    }
-
-    public String getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(String sourceId) {
-        this.sourceId = sourceId;
     }
 }

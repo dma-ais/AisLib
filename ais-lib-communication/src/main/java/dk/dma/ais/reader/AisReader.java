@@ -17,10 +17,8 @@ package dk.dma.ais.reader;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -34,17 +32,15 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketReader;
+import dk.dma.ais.packet.AisPacketInputStream;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.IQueueEntryHandler;
 import dk.dma.ais.queue.MessageQueueOverflowException;
 import dk.dma.ais.queue.MessageQueueReader;
 import dk.dma.ais.sentence.Abk;
-import dk.dma.ais.sentence.SentenceException;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedResource;
-import dk.dma.commons.util.io.CountingInputStream;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Consumer;
 import dk.dma.enav.util.function.Predicate;
@@ -63,9 +59,6 @@ public abstract class AisReader extends Thread {
 
     /** Flag that indicates the reader should shutdown */
     final CountDownLatch shutdownLatch = new CountDownLatch(1);
-
-    /** Reader to parse lines and deliver complete AIS packets. */
-    protected final AisPacketReader packetReader = new AisPacketReader();
 
     /** List receivers for the AIS messages. */
     protected final CopyOnWriteArrayList<Consumer<AisMessage>> handlers = new CopyOnWriteArrayList<>();
@@ -125,7 +118,8 @@ public abstract class AisReader extends Thread {
                 } catch (IOException e) {
                     LOG.error("Error processing packet:" + t.getStringMessage(), e);
                 }
-            }});
+            }
+        });
     }
 
     /**
@@ -133,18 +127,19 @@ public abstract class AisReader extends Thread {
      * 
      * @param packetHandler
      */
-    public void registerPacketHandler(final Predicate<? super AisPacket> predicate, final Consumer<? super AisPacket> packetConsumer) {
+    public void registerPacketHandler(final Predicate<? super AisPacket> predicate,
+            final Consumer<? super AisPacket> packetConsumer) {
         requireNonNull(predicate);
         requireNonNull(packetConsumer);
-        registerPacketHandler(new Consumer<AisPacket>(){
+        registerPacketHandler(new Consumer<AisPacket>() {
             @Override
             public void accept(AisPacket t) {
                 if (predicate.test(t)) {
                     packetConsumer.accept(t);
                 }
-            }});
+            }
+        });
     }
-
 
     /**
      * Add a packet handler
@@ -170,7 +165,8 @@ public abstract class AisReader extends Thread {
                 } catch (MessageQueueOverflowException e) {
                     LOG.error("Message queue overflow, dropping message: " + e.getMessage());
                 }
-            }});
+            }
+        });
     }
 
     /**
@@ -205,7 +201,8 @@ public abstract class AisReader extends Thread {
      * @throws InterruptedException
      * @throws SendException
      */
-    public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException, InterruptedException {
+    public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException,
+            InterruptedException {
         SendRequest sendRequest = new SendRequest(aisMessage, sequence, destination);
         ClientSendThread clientSendThread = new ClientSendThread(this, sendRequest);
         return clientSendThread.send();
@@ -268,64 +265,6 @@ public abstract class AisReader extends Thread {
     }
 
     /**
-     * Handle a received line
-     * 
-     * @param line
-     */
-    protected void handleLine(String line) {
-        linesRead.incrementAndGet();
-        // Check for ABK
-        if (Abk.isAbk(line)) {
-            LOG.debug("Received ABK: " + line);
-            Abk abk = new Abk();
-            try {
-                abk.parse(line);
-                sendThreadPool.handleAbk(abk);
-            } catch (Exception e) {
-                LOG.error("Failed to parse ABK: " + line + ": " + e.getMessage());
-            }
-            packetReader.newVdm();
-            return;
-        }
-
-        AisPacket packet;
-        try {
-            packet = packetReader.readLine(line);
-        } catch (SentenceException se) {
-            LOG.info("Sentence error: " + se.getMessage() + " line: " + line);
-            return;
-        }
-
-        // No complete packet yet
-        if (packet == null) {
-            return;
-        }
-
-        // Distribute packet
-        for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
-            packetHandler.accept(packet);
-        }
-
-        // Distribute AIS message
-        if (handlers.size() > 0) {
-            AisMessage message = null;
-            // Parse AIS message
-            try {
-                message = packet.getAisMessage();
-            } catch (AisMessageException me) {
-                LOG.info("AIS message exception: " + me.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
-            } catch (SixbitException se) {
-                LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
-            }
-            if (message != null) { // Distribute message
-                for (Consumer<AisMessage> aisHandler : handlers) {
-                    aisHandler.accept(message);
-                }
-            }
-        }
-    }
-
-    /**
      * The main read loop
      * 
      * @param stream
@@ -333,12 +272,35 @@ public abstract class AisReader extends Thread {
      * @throws IOException
      */
     protected void readLoop(InputStream stream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new CountingInputStream(stream, bytesRead)))) {
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                if (isShutdown()) {
-                    return;
+        AisPacketInputStream s = new AisPacketInputStream(stream) {
+            @Override
+            protected void handleAbk(Abk abk) {
+                sendThreadPool.handleAbk(abk);
+            }
+        };
+        AisPacket packet = null;
+        while ((packet = s.readPacket(sourceId)) != null) {
+            for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
+                packetHandler.accept(packet);
+            }
+
+            // Distribute AIS message
+            if (handlers.size() > 0) {
+                AisMessage message = null;
+                // Parse AIS message
+                try {
+                    message = packet.getAisMessage();
+                } catch (AisMessageException me) {
+                    LOG.info("AIS message exception: " + me.getMessage() + " vdm: "
+                            + packet.getVdm().getOrgLinesJoined());
+                } catch (SixbitException se) {
+                    LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
                 }
-                handleLine(line);
+                if (message != null) { // Distribute message
+                    for (Consumer<AisMessage> aisHandler : handlers) {
+                        aisHandler.accept(message);
+                    }
+                }
             }
         }
     }
@@ -355,13 +317,14 @@ public abstract class AisReader extends Thread {
         return shutdownLatch.getCount() == 0;
     }
 
+    String sourceId;
 
     @ManagedAttribute
     public String getSourceId() {
-        return packetReader.getSourceId();
+        return sourceId;
     }
 
     public void setSourceId(String sourceId) {
-        packetReader.setSourceId(sourceId);
+        this.sourceId = sourceId;
     }
 }
