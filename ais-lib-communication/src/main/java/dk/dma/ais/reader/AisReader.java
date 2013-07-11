@@ -78,6 +78,9 @@ public abstract class AisReader extends Thread {
     /** The number of lines read by this reader. */
     private final AtomicLong linesRead = new AtomicLong();
 
+    /** The source id. */
+    private String sourceId;
+
     @ManagedAttribute
     public long getNumberOfBytesWritten() {
         return bytesWritten.get();
@@ -317,8 +320,6 @@ public abstract class AisReader extends Thread {
         return shutdownLatch.getCount() == 0;
     }
 
-    String sourceId;
-
     @ManagedAttribute
     public String getSourceId() {
         return sourceId;
@@ -327,4 +328,5 @@ public abstract class AisReader extends Thread {
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
+
 }

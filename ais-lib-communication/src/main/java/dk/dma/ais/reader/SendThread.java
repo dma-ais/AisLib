@@ -24,7 +24,7 @@ import dk.dma.enav.util.function.Consumer;
 /**
  * A thread class that handles the sending and the wait for an acknowledge.
  */
-public class SendThread extends Thread {
+class SendThread extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendThread.class);
 

@@ -18,7 +18,6 @@ package dk.dma.ais.packet;
 import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,7 +26,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.transform.AisPacketTaggingTransformer;
@@ -39,22 +37,12 @@ import dk.dma.commons.util.io.CountingInputStream;
  * @author Kasper Nielsen
  */
 public class AisPacketInputStream {
-    static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
-
-    final InputStream stream;
-
-    volatile boolean closed;
-
-    public static void main(String[] args) throws IOException {
-        AisPacketInputStream s = new AisPacketInputStream(new FileInputStream("null"));
-        AisPacket p;
-        while ((p = s.readPacket()) != null) {
-            System.out.println(p);
-        }
-    }
+    static final Logger LOG = LoggerFactory.getLogger(AisPacketInputStream.class);
 
     /** The number of bytes read by this reader. */
     private final AtomicLong bytesRead = new AtomicLong();
+
+    volatile boolean closed;
 
     /** The number of lines read by this reader. */
     private final AtomicLong linesRead = new AtomicLong();
@@ -64,17 +52,19 @@ public class AisPacketInputStream {
 
     final BufferedReader reader;
 
+    final InputStream stream;
+
     public AisPacketInputStream(InputStream stream) {
         this.stream = requireNonNull(stream);
         reader = new BufferedReader(new InputStreamReader(new CountingInputStream(stream, bytesRead)));
     }
 
-    protected void handleAbk(Abk abk) {}
-
     public void close() throws IOException {
         stream.close();
         closed = true;
     }
+
+    protected void handleAbk(Abk abk) {}
 
     /**
      * Handle a received line
@@ -108,15 +98,15 @@ public class AisPacketInputStream {
     }
 
     /**
-     * Reads the next AisPacket
-     * 
-     * @return
-     * @throws IOException
+     * Reads the next AisPacket.
      */
     public AisPacket readPacket() throws IOException {
         return readPacket(null);
     }
 
+    /**
+     * Reads the next AisPacket using the specified source id.
+     */
     public AisPacket readPacket(String source) throws IOException {
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             if (closed) {
@@ -132,28 +122,6 @@ public class AisPacketInputStream {
                     return tranformer.transform(p);
                 }
                 return p;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Construct AisPacket from raw packet string
-     * 
-     * @param messageString
-     * @param optional
-     *            factory
-     * @return
-     * @throws SentenceException
-     */
-    public static AisPacket readPacketFromString(String messageString) throws SentenceException {
-        AisPacket packet = null;
-        AisPacketReader packetReader = new AisPacketReader();
-        String[] lines = messageString.split("\\r?\\n");
-        for (String line : lines) {
-            packet = packetReader.readLine(line);
-            if (packet != null) {
-                return packet;
             }
         }
         return null;

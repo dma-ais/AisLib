@@ -30,7 +30,7 @@ import dk.dma.enav.util.function.Consumer;
  * client.isSuccess();
  * 
  */
-public class ClientSendThread extends Thread implements Consumer<Abk> {
+class ClientSendThread extends Thread implements Consumer<Abk> {
 
     protected AisReader aisReader;
     protected SendRequest sendRequest;
