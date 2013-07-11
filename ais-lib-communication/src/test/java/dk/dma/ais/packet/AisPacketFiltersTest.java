@@ -103,7 +103,6 @@ public class AisPacketFiltersTest {
         assertFalse(filterOnSourceRegion("1").test(p2));
     }
 
-
     @Test
     public void testParseSourceFilter() {
         assertTrue(parseSourceFilter("id = AISD, SD").test(p3));
@@ -119,5 +118,14 @@ public class AisPacketFiltersTest {
         p1.getTags().setSourceType(SourceType.SATELLITE);
         assertTrue(parseSourceFilter("country = DNK & bs =2190047 & type = SAT").test(p1));
         assertTrue(parseSourceFilter("country = DNK & bs =3,4,4,5,5,2190047 & type = SAT").test(p1));
+    }
+
+    @Test
+    public void testParseSourceFilterNegative() {
+        assertFalse(parseSourceFilter("id != AISD, SD").test(p3));
+        assertTrue(parseSourceFilter("id != AFISD, SD").test(p3));
+        assertTrue(parseSourceFilter("(id != AISD, SD) | country != DNK").test(p2));
+        assertTrue(parseSourceFilter("(id != AISD, SD) | (country != DNK, NLD)").test(p2));
+        assertFalse(parseSourceFilter("country != NLD").test(p2));
     }
 }

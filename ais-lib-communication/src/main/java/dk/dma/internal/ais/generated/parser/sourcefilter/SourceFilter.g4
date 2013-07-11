@@ -2,11 +2,11 @@ grammar SourceFilter;
 
 prog: expr EOF;
 
-expr:   'id' EQUALS idList      # sourceId
-    |   'bs' EQUALS idList      # sourceBasestation
-    |   'country' EQUALS idList # sourceCountry
-    |   'type' EQUALS ID        # sourceType
-    |   'region' EQUALS idList  # sourceRegion
+expr:   'id' ('!='|'=') idList      # sourceId
+    |   'bs' ('!='|'=') idList      # sourceBasestation
+    |   'country' ('!='|'=') idList # sourceCountry
+    |   'type' ('!='|'=') ID        # sourceType
+    |   'region' ('!='|'=') idList  # sourceRegion
     |   expr op=('&'|'|') expr  # OrAnd
     |   '(' expr ')'            # parens
     ;
@@ -15,6 +15,7 @@ expr:   'id' EQUALS idList      # sourceId
 idList : ID (',' ID)* ;
 
 EQUALS :   '=' ;
+NEQUALS :   '!=' ;
 WS     :   [ \t]+ -> skip ; // toss out whitespace
 AND    :   '&' ;
 OR     :   '|' ;
