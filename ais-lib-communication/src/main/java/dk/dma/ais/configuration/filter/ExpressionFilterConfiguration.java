@@ -15,15 +15,31 @@
  */
 package dk.dma.ais.configuration.filter;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
 
+import dk.dma.ais.filter.ExpressionFilter;
 import dk.dma.ais.filter.IPacketFilter;
 
-@XmlSeeAlso({ PacketFilterCollectionConfiguration.class, DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class,
-        GatehouseSourceFilterConfiguration.class, TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class,
-        LocationFilterConfiguration.class, MessageTypeFilterConfiguration.class, ExpressionFilterConfiguration.class, })
-public abstract class FilterConfiguration {
+@XmlRootElement
+public class ExpressionFilterConfiguration extends FilterConfiguration {
 
-    public abstract IPacketFilter getInstance();
+    private String expression;
+
+    public ExpressionFilterConfiguration() {
+
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
+    }
+
+    @Override
+    public IPacketFilter getInstance() {
+        return new ExpressionFilter(expression);
+    }
 
 }

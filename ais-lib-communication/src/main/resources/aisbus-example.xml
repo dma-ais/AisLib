@@ -22,6 +22,9 @@
 			<radius>200000</radius>
 		</geometry>
 	</filter>
+	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="expressionFilterConfiguration">
+			<expression><![CDATA[country=DNK]]></expression>
+		</filter>
 	<busPullMaxElements>1000</busPullMaxElements>
 	<busQueueSize>10000</busQueueSize>
 	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
