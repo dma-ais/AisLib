@@ -38,7 +38,7 @@ import dk.dma.ais.sentence.Vdm;
  * associated comment blocks and proprietary tags.
  */
 @NotThreadSafe
-class AisPacketReader {
+public class AisPacketReader {
 
     /** The logger */
     private static final Logger LOG = LoggerFactory.getLogger(AisPacketReader.class);

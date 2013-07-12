@@ -29,7 +29,7 @@ import dk.dma.enav.util.function.Consumer;
  * Class to hold a pool of send threads.
  */
 @ThreadSafe
-class SendThreadPool {
+public class SendThreadPool {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendThreadPool.class);
 
