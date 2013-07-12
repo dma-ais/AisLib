@@ -16,8 +16,12 @@
 package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantLock;
+
 import jsr166e.ConcurrentHashMapV8;
-import jsr166e.ConcurrentHashMapV8.Action;
 import dk.dma.enav.util.function.Consumer;
 import dk.dma.enav.util.function.Predicate;
 
@@ -31,6 +35,8 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
 
     final Predicate<? super AisPacket> predicate;
     final DefaultAisPacketStream root;
+
+    final Object lock = new Object();
 
     DefaultAisPacketStream() {
         this.predicate = null;
@@ -49,14 +55,19 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
         if (root != null) {
             throw new UnsupportedOperationException("Can only add elements to the root stream");
         }
-
-        // TODO Must deliver in order
-        map.forEachKeyInParallel(new Action<SubscriptionImpl>() {
-            @Override
-            public void apply(SubscriptionImpl s) {
-                handlePacket(p, s);
+        synchronized (lock) {
+            for (SubscriptionImpl s : map.keySet()) {
+                s.packets.add(p);
+                s.deliver();
             }
-        });
+        }
+        //
+        // map.forEachKeyInParallel(new Action<SubscriptionImpl>() {
+        // @Override
+        // public void apply(SubscriptionImpl s) {
+        // s.deliver();
+        // }
+        // });
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -82,8 +93,11 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
     }
 
     class SubscriptionImpl implements Subscription {
+        final ReentrantLock lock = new ReentrantLock();
         final Consumer<? super AisPacket> consumer;
         final Predicate<? super AisPacket> predicate;
+        final ConcurrentLinkedQueue<AisPacket> packets = new ConcurrentLinkedQueue<>();
+        final CountDownLatch cancelled = new CountDownLatch(1);
 
         SubscriptionImpl(Predicate<? super AisPacket> predicate, Consumer<? super AisPacket> consumer) {
             this.predicate = predicate;
@@ -94,6 +108,36 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
         @Override
         public void cancel() {
             map.remove(this);
+            cancelled.countDown();
+        }
+
+        public void deliver() {
+            while (lock.tryLock()) {
+                try {
+                    if (packets.isEmpty()) {
+                        return;
+                    }
+                    for (AisPacket p = packets.poll(); p != null; p = packets.poll()) {
+                        if (predicate == null || predicate.test(p)) {
+                            consumer.accept(p);
+                        }
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public boolean isCancelled() {
+            return !map.containsKey(this);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void awaitCancelled() throws InterruptedException {
+            cancelled.await();
         }
     }
 }

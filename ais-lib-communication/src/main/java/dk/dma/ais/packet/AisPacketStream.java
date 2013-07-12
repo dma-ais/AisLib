@@ -43,6 +43,10 @@ public interface AisPacketStream {
     Subscription subscribePacketSink(OutputStreamSink<AisPacket> sink, OutputStream os);
 
     interface Subscription {
+        void awaitCancelled() throws InterruptedException;
+
         void cancel();
+
+        boolean isCancelled();
     }
 }
