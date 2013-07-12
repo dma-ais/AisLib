@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,6 +34,8 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketInputStream;
+import dk.dma.ais.packet.AisPacketStream;
+import dk.dma.ais.packet.AisPacketStreams;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.IQueueEntryHandler;
@@ -41,9 +44,7 @@ import dk.dma.ais.queue.MessageQueueReader;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedResource;
-import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Consumer;
-import dk.dma.enav.util.function.Predicate;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.
@@ -53,15 +54,17 @@ public abstract class AisReader extends Thread {
 
     static final Logger LOG = LoggerFactory.getLogger(AisReader.class);
 
-    public enum Status {
-        CONNECTED, DISCONNECTED
-    };
+    /** The number of bytes read by this reader. */
+    private final AtomicLong bytesRead = new AtomicLong();;
 
-    /** Flag that indicates the reader should shutdown */
-    final CountDownLatch shutdownLatch = new CountDownLatch(1);
+    /** The number of bytes written by this reader. */
+    private final AtomicLong bytesWritten = new AtomicLong();
 
     /** List receivers for the AIS messages. */
     protected final CopyOnWriteArrayList<Consumer<AisMessage>> handlers = new CopyOnWriteArrayList<>();
+
+    /** The number of lines read by this reader. */
+    private final AtomicLong linesRead = new AtomicLong();
 
     /** List of packet handlers. */
     protected final CopyOnWriteArrayList<Consumer<? super AisPacket>> packetHandlers = new CopyOnWriteArrayList<>();
@@ -69,169 +72,11 @@ public abstract class AisReader extends Thread {
     /** A pool of sending threads. A sending thread handles the sending and reception of ABK message. */
     protected final SendThreadPool sendThreadPool = new SendThreadPool();
 
-    /** The number of bytes read by this reader. */
-    private final AtomicLong bytesRead = new AtomicLong();
-
-    /** The number of bytes written by this reader. */
-    private final AtomicLong bytesWritten = new AtomicLong();
-
-    /** The number of lines read by this reader. */
-    private final AtomicLong linesRead = new AtomicLong();
+    /** Flag that indicates the reader should shutdown */
+    final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
     /** The source id. */
     private String sourceId;
-
-    @ManagedAttribute
-    public long getNumberOfBytesWritten() {
-        return bytesWritten.get();
-    }
-
-    @ManagedAttribute
-    public long getNumberOfBytesRead() {
-        return bytesRead.get();
-    }
-
-    @ManagedAttribute
-    public long getNumberOfLinesRead() {
-        return linesRead.get();
-    }
-
-    /**
-     * Add an AIS handler
-     * 
-     * @param aisHandler
-     */
-    public void registerHandler(Consumer<AisMessage> aisHandler) {
-        handlers.add(aisHandler);
-    }
-
-    /**
-     * Add a packet handler
-     * 
-     * @param packetHandler
-     */
-    public void registerOutputStreamSink(final OutputStreamSink<AisPacket> oss, final OutputStream output) {
-        requireNonNull(oss);
-        requireNonNull(output);
-        packetHandlers.add(new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket t) {
-                try {
-                    oss.process(output, t);
-                } catch (IOException e) {
-                    LOG.error("Error processing packet:" + t.getStringMessage(), e);
-                }
-            }
-        });
-    }
-
-    /**
-     * Add a packet handler
-     * 
-     * @param packetHandler
-     */
-    public void registerPacketHandler(final Predicate<? super AisPacket> predicate,
-            final Consumer<? super AisPacket> packetConsumer) {
-        requireNonNull(predicate);
-        requireNonNull(packetConsumer);
-        registerPacketHandler(new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket t) {
-                if (predicate.test(t)) {
-                    packetConsumer.accept(t);
-                }
-            }
-        });
-    }
-
-    /**
-     * Add a packet handler
-     * 
-     * @param packetHandler
-     */
-    public void registerPacketHandler(Consumer<? super AisPacket> packetConsumer) {
-        packetHandlers.add(packetConsumer);
-    }
-
-    /**
-     * Add a queue for receiving messages
-     * 
-     * @param queue
-     */
-    public void registerQueue(final IMessageQueue<AisMessage> queue) {
-        requireNonNull(queue);
-        registerHandler(new Consumer<AisMessage>() {
-            @Override
-            public void accept(AisMessage message) {
-                try {
-                    queue.push(message);
-                } catch (MessageQueueOverflowException e) {
-                    LOG.error("Message queue overflow, dropping message: " + e.getMessage());
-                }
-            }
-        });
-    }
-
-    /**
-     * Make a new queue and reader for the queue. Start and attach to to given handler.
-     * 
-     * @param handler
-     */
-    public void registerQueueHandler(IQueueEntryHandler<AisMessage> handler) {
-        MessageQueueReader<AisMessage> queueReader = new MessageQueueReader<>(handler,
-                new BlockingMessageQueue<AisMessage>());
-        registerQueue(queueReader.getQueue());
-        queueReader.start();
-    }
-
-    /**
-     * Method to send addressed or broadcast AIS messages (ABM or BBM).
-     * 
-     * @param sendRequest
-     * @param resultListener
-     *            A class to handle the result when it is ready.
-     */
-    public abstract void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException;
-
-    /**
-     * Blocking method to send message in an easy way
-     * 
-     * @param aisMessage
-     * @param sequence
-     * @param destination
-     * @param timeout
-     * @return
-     * @throws InterruptedException
-     * @throws SendException
-     */
-    public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException,
-            InterruptedException {
-        SendRequest sendRequest = new SendRequest(aisMessage, sequence, destination);
-        ClientSendThread clientSendThread = new ClientSendThread(this, sendRequest);
-        return clientSendThread.send();
-    }
-
-    /**
-     * Sending with 60 sec default timeout
-     * 
-     * @param aisMessage
-     * @param sequence
-     * @param destination
-     * @return
-     * @throws SendException
-     * @throws InterruptedException
-     */
-    public Abk send(AisMessage aisMessage, int sequence, int destination) throws SendException, InterruptedException {
-        return send(aisMessage, sequence, destination, 60000);
-    }
-
-    /**
-     * Get the status of the connection, either connected or disconnected
-     * 
-     * @return status
-     */
-    @ManagedAttribute
-    public abstract Status getStatus();
 
     /**
      * The method to do the actual sending
@@ -265,6 +110,38 @@ public abstract class AisReader extends Thread {
 
         // Start send thread
         sendThread.start();
+    }
+
+    @ManagedAttribute
+    public long getNumberOfBytesRead() {
+        return bytesRead.get();
+    }
+
+    @ManagedAttribute
+    public long getNumberOfBytesWritten() {
+        return bytesWritten.get();
+    }
+
+    @ManagedAttribute
+    public long getNumberOfLinesRead() {
+        return linesRead.get();
+    }
+
+    @ManagedAttribute
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    /**
+     * Get the status of the connection, either connected or disconnected
+     * 
+     * @return status
+     */
+    @ManagedAttribute
+    public abstract Status getStatus();
+
+    protected boolean isShutdown() {
+        return shutdownLatch.getCount() == 0;
     }
 
     /**
@@ -309,6 +186,100 @@ public abstract class AisReader extends Thread {
     }
 
     /**
+     * Add an AIS handler
+     * 
+     * @param aisHandler
+     */
+    public void registerHandler(Consumer<AisMessage> aisHandler) {
+        handlers.add(aisHandler);
+    }
+
+    /**
+     * Add a packet handler
+     * 
+     * @param packetHandler
+     */
+    public void registerPacketHandler(Consumer<? super AisPacket> packetConsumer) {
+        packetHandlers.add(packetConsumer);
+    }
+
+    /**
+     * Add a queue for receiving messages
+     * 
+     * @param queue
+     */
+    public void registerQueue(final IMessageQueue<AisMessage> queue) {
+        requireNonNull(queue);
+        registerHandler(new Consumer<AisMessage>() {
+            @Override
+            public void accept(AisMessage message) {
+                try {
+                    queue.push(message);
+                } catch (MessageQueueOverflowException e) {
+                    LOG.error("Message queue overflow, dropping message: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * Make a new queue and reader for the queue. Start and attach to to given handler.
+     * 
+     * @param handler
+     */
+    public void registerQueueHandler(IQueueEntryHandler<AisMessage> handler) {
+        MessageQueueReader<AisMessage> queueReader = new MessageQueueReader<>(handler,
+                new BlockingMessageQueue<AisMessage>());
+        registerQueue(queueReader.getQueue());
+        queueReader.start();
+    }
+
+    /**
+     * Sending with 60 sec default timeout
+     * 
+     * @param aisMessage
+     * @param sequence
+     * @param destination
+     * @return
+     * @throws SendException
+     * @throws InterruptedException
+     */
+    public Abk send(AisMessage aisMessage, int sequence, int destination) throws SendException, InterruptedException {
+        return send(aisMessage, sequence, destination, 60000);
+    }
+
+    /**
+     * Blocking method to send message in an easy way
+     * 
+     * @param aisMessage
+     * @param sequence
+     * @param destination
+     * @param timeout
+     * @return
+     * @throws InterruptedException
+     * @throws SendException
+     */
+    public Abk send(AisMessage aisMessage, int sequence, int destination, int timeout) throws SendException,
+            InterruptedException {
+        SendRequest sendRequest = new SendRequest(aisMessage, sequence, destination);
+        ClientSendThread clientSendThread = new ClientSendThread(this, sendRequest);
+        return clientSendThread.send();
+    }
+
+    /**
+     * Method to send addressed or broadcast AIS messages (ABM or BBM).
+     * 
+     * @param sendRequest
+     * @param resultListener
+     *            A class to handle the result when it is ready.
+     */
+    public abstract void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException;
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    /**
      * Stop the reader
      */
     public void stopReader() {
@@ -316,17 +287,39 @@ public abstract class AisReader extends Thread {
         this.interrupt();
     }
 
-    protected boolean isShutdown() {
-        return shutdownLatch.getCount() == 0;
+    /**
+     * Returns a ais packet stream.
+     * 
+     * @return the stream
+     */
+    public AisPacketStream stream() {
+        final AisPacketStream s = AisPacketStreams.newStream();
+        registerPacketHandler(new Consumer<AisPacket>() {
+            public void accept(AisPacket p) {
+                s.add(p);
+            }
+        });
+        return AisPacketStreams.immutableStream(s);// Only adds from reader
     }
 
-    @ManagedAttribute
-    public String getSourceId() {
-        return sourceId;
+    public static AisPacketStream streamAll(AisReader... readers) {
+        return streamAll(Arrays.asList(readers));
     }
 
-    public void setSourceId(String sourceId) {
-        this.sourceId = sourceId;
+    public static AisPacketStream streamAll(Iterable<? extends AisReader> readers) {
+        requireNonNull(readers);
+        final AisPacketStream s = AisPacketStreams.newStream();
+        for (AisReader r : readers) {
+            r.registerPacketHandler(new Consumer<AisPacket>() {
+                public void accept(AisPacket p) {
+                    s.add(p);
+                }
+            });
+        }
+        return AisPacketStreams.immutableStream(s);// Only adds from reader
     }
 
+    public enum Status {
+        CONNECTED, DISCONNECTED
+    }
 }

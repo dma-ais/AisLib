@@ -21,6 +21,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -94,7 +96,6 @@ public class AisPacketInputStream {
             LOG.info("Sentence error: " + se.getMessage() + " line: " + line);
             return null;
         }
-
     }
 
     /**
@@ -102,6 +103,36 @@ public class AisPacketInputStream {
      */
     public AisPacket readPacket() throws IOException {
         return readPacket(null);
+    }
+
+    /**
+     * Returns a AIS packet stream running in a new thread.
+     * 
+     * @return a AIS packet stream running in a new thread
+     */
+    public AisPacketStream stream() {
+        return stream(Executors.newSingleThreadExecutor());
+    }
+
+    /**
+     * Returns a AIS packet stream using the specified executor.
+     * 
+     * @return a AIS packet stream using the specified executor
+     */
+    public AisPacketStream stream(Executor e) {
+        final AisPacketStream s = AisPacketStreams.newStream();
+        e.execute(new Runnable() {
+            public void run() {
+                try {
+                    for (AisPacket p = readPacket(); p != null; readPacket()) {
+                        s.add(readPacket());
+                    }
+                } catch (IOException e) {
+                    LOG.error("Failed to read packet: ", e);
+                }
+            }
+        });
+        return AisPacketStreams.immutableStream(s);
     }
 
     /**

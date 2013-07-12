@@ -41,13 +41,7 @@ class ArchiverUtil {
         requireNonNull(reader);
         requireNonNull(handler);
         requireNonNull(latch);
-        reader.registerPacketHandler(new Consumer<AisPacket>() {
-
-            @Override
-            public void accept(AisPacket aisPacket) {
-                handler.accept(aisPacket);
-            }
-        });
+        reader.registerPacketHandler(handler);
         return new AbstractExecutionThreadService() {
             @Override
             protected void triggerShutdown() {
@@ -75,13 +69,7 @@ class ArchiverUtil {
     static Service wrapAisReader(final AisReader reader, final Consumer<AisPacket> handler) {
         requireNonNull(reader);
         requireNonNull(handler);
-        reader.registerPacketHandler(new Consumer<AisPacket>() {
-
-            @Override
-            public void accept(AisPacket aisPacket) {
-                handler.accept(aisPacket);
-            }
-        });
+        reader.registerPacketHandler(handler);
         return new AbstractExecutionThreadService() {
             @Override
             protected void triggerShutdown() {
