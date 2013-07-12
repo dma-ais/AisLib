@@ -22,12 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.message.AisMessage12;
-import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
-import dk.dma.ais.reader.AisTcpReader;
-import dk.dma.ais.reader.ClientSendThread;
-import dk.dma.ais.reader.SendException;
-import dk.dma.ais.reader.SendRequest;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.AnySentence;
 
