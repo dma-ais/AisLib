@@ -77,14 +77,14 @@ public class FileDump extends AbstractDaemon {
         LOGGER.info("Starting file archiver with sources = " + sources);
         LOGGER.info("Archived files are written to " + backup.toPath().toAbsolutePath());
         // setup a reader group
-        AisReaderGroup readerGroup = AisReaderGroup.create(sources);
+        AisReaderGroup g = AisReaderGroup.create(sources);
 
         // Starts the backup service that will write files to disk if disconnected
         final AbstractBatchedStage<AisPacket> fileWriter = start(FileWriterService.dateService(backup.toPath(),
                 backupFormat, AisPackets.OUTPUT_TO_TEXT));
 
-        start(readerGroup.asService());// connects to all sources
-        readerGroup.stream().subscribePackets(new Consumer<AisPacket>() {
+        start(g.asService());// connects to all sources
+        g.stream().subscribePackets(new Consumer<AisPacket>() {
             public void accept(AisPacket p) {
                 // We use offer because we do not want to block receiving thread
                 if (!fileWriter.getInputQueue().offer(p)) {
