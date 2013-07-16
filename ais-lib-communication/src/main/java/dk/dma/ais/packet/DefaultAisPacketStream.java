@@ -19,9 +19,14 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import jsr166e.ConcurrentHashMapV8;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dk.dma.enav.util.function.Consumer;
 import dk.dma.enav.util.function.Predicate;
 
@@ -30,6 +35,8 @@ import dk.dma.enav.util.function.Predicate;
  * @author Kasper Nielsen
  */
 class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
+    /** The logger */
+    static final Logger LOG = LoggerFactory.getLogger(DefaultAisPacketStream.class);
 
     final ConcurrentHashMapV8<SubscriptionImpl, SubscriptionImpl> map;
 
@@ -93,6 +100,7 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
     }
 
     class SubscriptionImpl implements Subscription {
+        final AtomicLong count = new AtomicLong();
         final ReentrantLock lock = new ReentrantLock();
         final Consumer<? super AisPacket> consumer;
         final Predicate<? super AisPacket> predicate;
@@ -107,8 +115,29 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
         /** {@inheritDoc} */
         @Override
         public void cancel() {
-            map.remove(this);
-            cancelled.countDown();
+            cancel(null);
+        }
+
+        /** {@inheritDoc} */
+        synchronized void cancel(Throwable e) {
+            lock.lock();
+            try {
+                if (cancelled.getCount() > 0) {
+                    map.remove(this);
+                    cancelled.countDown();
+                    if (consumer instanceof AisPacketStream.StreamConsumer) {
+                        try {
+                            ((AisPacketStream.StreamConsumer<?>) consumer).end(e);
+                        } catch (RuntimeException ex) {
+                            if (e == null) {
+                                LOG.error("Failed to write footer", ex);
+                            }
+                        }
+                    }
+                }
+            } finally {
+                lock.unlock();
+            }
         }
 
         public void deliver() {
@@ -118,9 +147,20 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
                         return;
                     }
                     for (AisPacket p = packets.poll(); p != null; p = packets.poll()) {
-                        if (predicate == null || predicate.test(p)) {
-                            consumer.accept(p);
+                        try {
+                            if (predicate == null || predicate.test(p)) {
+                                if (count.getAndIncrement() == 0 && consumer instanceof AisPacketStream.StreamConsumer) {
+                                    ((AisPacketStream.StreamConsumer<?>) consumer).begin();
+                                }
+                                consumer.accept(p);
+                            }
+                        } catch (RuntimeException e) {
+                            try {
+                                cancel(e == AisPacketStream.CANCEL ? null : e);
+                            } catch (RuntimeException ignore) {}
+                            return;
                         }
+
                     }
                 } finally {
                     lock.unlock();

@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
@@ -299,23 +298,6 @@ public abstract class AisReader extends Thread {
                 s.add(p);
             }
         });
-        return AisPacketStreams.immutableStream(s);// Only adds from reader
-    }
-
-    public static AisPacketStream streamAll(AisReader... readers) {
-        return streamAll(Arrays.asList(readers));
-    }
-
-    public static AisPacketStream streamAll(Iterable<? extends AisReader> readers) {
-        requireNonNull(readers);
-        final AisPacketStream s = AisPacketStreams.newStream();
-        for (AisReader r : readers) {
-            r.registerPacketHandler(new Consumer<AisPacket>() {
-                public void accept(AisPacket p) {
-                    s.add(p);
-                }
-            });
-        }
         return AisPacketStreams.immutableStream(s);// Only adds from reader
     }
 

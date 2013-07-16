@@ -133,7 +133,6 @@ class AisPacketFiltersParseHelper {
 
         public Predicate<AisPacket> checkNegate(EqualityTestContext context, Predicate<AisPacket> p) {
             String text = context.getChild(0).getText();
-            System.out.println(text);
             return text.equals("!=") ? p.negate() : p;
         }
 

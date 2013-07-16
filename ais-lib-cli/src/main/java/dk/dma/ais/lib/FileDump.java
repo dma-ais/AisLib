@@ -18,7 +18,6 @@ package dk.dma.ais.lib;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +27,7 @@ import com.google.inject.Injector;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPackets;
-import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisTcpReader;
+import dk.dma.ais.reader.AisReaderGroup;
 import dk.dma.commons.app.AbstractDaemon;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedOperation;
@@ -56,20 +54,15 @@ public class FileDump extends AbstractDaemon {
     @Parameter(names = "-fileformat", description = "The backup Format")
     String backupFormat = "yyyy/MM-dd/'aisarchive' yyyy-MM-dd HHmm'.txt.zip'";
 
-    AbstractBatchedStage<AisPacket> fileWriter;
-
-    final ConcurrentHashMap<String, AisTcpReader> readers = new ConcurrentHashMap<>();
-
     @Parameter(description = "filestore [A list of AIS sources (sourceName=host:port,host:port sourceName=host:port ...]")
     List<String> sources;
 
-    FileDump() {
+    public FileDump() {
         super("AisStore");
     }
 
-    @ManagedOperation
-    public void addReader(String sourceName, String value) {
-
+    public FileDump(String name) {
+        super(name);
     }
 
     @ManagedAttribute
@@ -87,32 +80,27 @@ public class FileDump extends AbstractDaemon {
     protected void runDaemon(Injector injector) throws Exception {
         LOGGER.info("Starting file archiver with sources = " + sources);
         LOGGER.info("Archived files are written to " + backup.toPath().toAbsolutePath());
-        // setup an AisReader for each source
-        readers.putAll(AisTcpReader.parseSourceList(sources));
+        // setup a reader group
+        AisReaderGroup readerGroup = AisReaderGroup.create(sources);
 
         // Starts the backup service that will write files to disk if disconnected
-        fileWriter = start(FileWriterService.dateService(backup.toPath(), backupFormat, AisPackets.OUTPUT_TO_TEXT));
+        final AbstractBatchedStage<AisPacket> fileWriter = start(FileWriterService.dateService(backup.toPath(),
+                backupFormat, AisPackets.OUTPUT_TO_TEXT));
 
-        for (AisReader reader : readers.values()) {
-            startReader(reader);
-        }
-    }
-
-    private void startReader(AisReader reader) {
-        start(ArchiverUtil.wrapAisReader(reader, new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket aisPacket) {
-                // We use offer because we do not want to block receiving
-                if (fileWriter != null && !fileWriter.getInputQueue().offer(aisPacket)) {
+        start(readerGroup.asService());// connects to all sources
+        readerGroup.stream().subscribePackets(new Consumer<AisPacket>() {
+            public void accept(AisPacket p) {
+                // We use offer because we do not want to block receiving thread
+                if (!fileWriter.getInputQueue().offer(p)) {
                     LOGGER.error("Could not persist packet, dropping it");
                 }
             }
-        }));
+        });
     }
 
     public static void main(String[] args) throws Exception {
-        // args = new String[] { "src1=ais163.sealan.dk:65262,ais167.sealan.dk:65261",
-        // "src2=iala63.sealan.dk:4712,iala68.sealan.dk:4712", "src3=10.10.5.144:65061" };
+        args = new String[] { "src1=ais163.sealan.dk:65262,ais167.sealan.dk:65261",
+                "src2=iala63.sealan.dk:4712,iala68.sealan.dk:4712", "src3=10.10.5.144:65061" };
         if (args.length == 0) {
             System.err.println("Must specify at least 1 source (sourceName=host:port,host:port sourceName=host:port)");
             System.exit(1);

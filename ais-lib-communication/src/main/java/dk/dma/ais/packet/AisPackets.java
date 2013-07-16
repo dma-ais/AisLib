@@ -113,4 +113,12 @@ public class AisPackets {
         }
         return new ArrayList<>(list);
     }
+
+    public static OutputStreamSink<AisPacket> newTableSink(String columns, boolean writeHeader) {
+        return new TableOutputStreamSink(columns, writeHeader);
+    }
+
+    public static OutputStreamSink<AisPacket> newTableSink(String columns, boolean writeHeader, String seperator) {
+        return new TableOutputStreamSink(columns, writeHeader, seperator);
+    }
 }

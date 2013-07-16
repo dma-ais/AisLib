@@ -28,6 +28,9 @@ import dk.dma.enav.util.function.Predicate;
  */
 public interface AisPacketStream {
 
+    /** Thrown by a subscriber to indicate that the subscription should be cancelled. */
+    RuntimeException CANCEL = new RuntimeException();
+
     void add(AisPacket p);
 
     AisPacketStream filter(Predicate<? super AisPacket> predicate);
@@ -41,6 +44,19 @@ public interface AisPacketStream {
     Subscription subscribePackets(Consumer<AisPacket> c);
 
     Subscription subscribePacketSink(OutputStreamSink<AisPacket> sink, OutputStream os);
+
+    public abstract class StreamConsumer<T> implements Consumer<T> {
+        /** Invoked immediately before the first message is delivered. */
+        public void begin() {}
+
+        /**
+         * Invoked immediately after the last message has been delivered.
+         * 
+         * @param cause
+         *            if an exception caused the consumer to be unsubscribed
+         */
+        public void end(Throwable cause) {}
+    }
 
     interface Subscription {
         void awaitCancelled() throws InterruptedException;

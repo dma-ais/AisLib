@@ -68,15 +68,34 @@ public class AisPacketStreams {
         @Override
         public Subscription subscribeMessages(final Consumer<AisMessage> c) {
             requireNonNull(c);
-            return subscribePackets(new Consumer<AisPacket>() {
-                @Override
-                public void accept(AisPacket t) {
-                    AisMessage m = t.tryGetAisMessage();
-                    if (m != null) {
-                        c.accept(m);
+            if (c instanceof AisPacketStream.StreamConsumer) {
+                final AisPacketStream.StreamConsumer<AisMessage> sc = (StreamConsumer<AisMessage>) c;
+                return subscribePackets(new AisPacketStream.StreamConsumer<AisPacket>() {
+                    public void accept(AisPacket t) {
+                        AisMessage m = t.tryGetAisMessage();
+                        if (m != null) {
+                            c.accept(m);
+                        }
                     }
-                }
-            });
+
+                    public void begin() {
+                        sc.begin();
+                    }
+
+                    public void end(Throwable cause) {
+                        sc.end(cause);
+                    }
+                });
+            } else {
+                return subscribePackets(new Consumer<AisPacket>() {
+                    public void accept(AisPacket t) {
+                        AisMessage m = t.tryGetAisMessage();
+                        if (m != null) {
+                            c.accept(m);
+                        }
+                    }
+                });
+            }
         }
 
         /** {@inheritDoc} */
@@ -84,13 +103,31 @@ public class AisPacketStreams {
         public Subscription subscribePacketSink(final OutputStreamSink<AisPacket> sink, final OutputStream os) {
             requireNonNull(sink);
             requireNonNull(os);
-            return subscribePackets(new Consumer<AisPacket>() {
+            return subscribePackets(new StreamConsumer<AisPacket>() {
                 @Override
                 public void accept(AisPacket t) {
                     try {
                         sink.process(os, t);
                     } catch (IOException e) {
-                        LOG.error("Could not write packet", e);
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                public void begin() {
+                    try {
+                        sink.header(os);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                public void end(Throwable cause) {
+                    try {
+                        sink.footer(os);
+                    } catch (IOException e) {
+                        if (cause == null) {// dont throw if already on exception path
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             });
