@@ -57,10 +57,6 @@ public class FileDump extends AbstractDaemon {
     @Parameter(description = "filestore [A list of AIS sources (sourceName=host:port,host:port sourceName=host:port ...]")
     List<String> sources;
 
-    public FileDump() {
-        super("AisLib");
-    }
-
     @ManagedAttribute
     public String getDirectory() {
         return backup.getAbsolutePath();

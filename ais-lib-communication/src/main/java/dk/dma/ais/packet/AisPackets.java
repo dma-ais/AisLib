@@ -94,7 +94,7 @@ public class AisPackets {
      *            exclusive end
      * @return
      */
-    public static List<AisPacket> filterPacketsByTime(Iterable<AisPacket> packets, long start, long end) {
+    static List<AisPacket> filterPacketsByTime(Iterable<AisPacket> packets, long start, long end) {
         ArrayList<AisPacket> result = new ArrayList<>();
         for (AisPacket p : packets) {
             if (start <= p.getBestTimestamp() && p.getBestTimestamp() < end) {
@@ -104,12 +104,13 @@ public class AisPackets {
         return result;
     }
 
-    public static List<AisPacket> readFromFile(Path p) throws IOException {
+    static List<AisPacket> readFromFile(Path p) throws IOException {
         final ConcurrentLinkedQueue<AisPacket> list = new ConcurrentLinkedQueue<>();
-        AisPacketInputStream r = new AisPacketInputStream(Files.newInputStream(p));
         AisPacket packet;
-        while ((packet = r.readPacket()) != null) {
-            list.add(packet);
+        try (AisPacketInputStream r = new AisPacketInputStream(Files.newInputStream(p))) {
+            while ((packet = r.readPacket()) != null) {
+                list.add(packet);
+            }
         }
         return new ArrayList<>(list);
     }

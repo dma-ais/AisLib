@@ -38,7 +38,7 @@ import dk.dma.commons.util.io.CountingInputStream;
  * 
  * @author Kasper Nielsen
  */
-public class AisPacketInputStream {
+public class AisPacketInputStream implements AutoCloseable {
     static final Logger LOG = LoggerFactory.getLogger(AisPacketInputStream.class);
 
     /** The number of bytes read by this reader. */
