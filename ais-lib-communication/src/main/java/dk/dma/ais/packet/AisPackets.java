@@ -107,11 +107,11 @@ public class AisPackets {
     static List<AisPacket> readFromFile(Path p) throws IOException {
         final ConcurrentLinkedQueue<AisPacket> list = new ConcurrentLinkedQueue<>();
         AisPacket packet;
-        try (AisPacketInputStream r = new AisPacketInputStream(Files.newInputStream(p))) {
-            while ((packet = r.readPacket()) != null) {
-                list.add(packet);
-            }
+        AisPacketInputStream r = new AisPacketInputStream(Files.newInputStream(p));
+        while ((packet = r.readPacket()) != null) {
+            list.add(packet);
         }
+
         return new ArrayList<>(list);
     }
 

@@ -33,7 +33,7 @@ import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedOperation;
 import dk.dma.commons.management.ManagedResource;
 import dk.dma.commons.service.AbstractBatchedStage;
-import dk.dma.commons.service.io.FileWriterService;
+import dk.dma.commons.service.io.MessageToFileService;
 import dk.dma.commons.util.io.IoUtil;
 import dk.dma.enav.util.function.Consumer;
 
@@ -76,7 +76,7 @@ public class FileDump extends AbstractDaemon {
         AisReaderGroup g = AisReaderGroup.create(sources);
 
         // Starts the backup service that will write files to disk if disconnected
-        final AbstractBatchedStage<AisPacket> fileWriter = start(FileWriterService.dateService(backup.toPath(),
+        final AbstractBatchedStage<AisPacket> fileWriter = start(MessageToFileService.dateTimeService(backup.toPath(),
                 backupFormat, AisPackets.OUTPUT_TO_TEXT));
 
         start(g.asService());// connects to all sources

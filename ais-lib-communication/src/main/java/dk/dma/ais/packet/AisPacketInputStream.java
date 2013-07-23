@@ -38,7 +38,7 @@ import dk.dma.commons.util.io.CountingInputStream;
  * 
  * @author Kasper Nielsen
  */
-public class AisPacketInputStream implements AutoCloseable {
+public class AisPacketInputStream {
     static final Logger LOG = LoggerFactory.getLogger(AisPacketInputStream.class);
 
     /** The number of bytes read by this reader. */
@@ -56,9 +56,20 @@ public class AisPacketInputStream implements AutoCloseable {
 
     final InputStream stream;
 
+    /**
+     * Sometimes we expect input to only contain valid messages. So we want to throw an exception in case we meet some
+     * unknown content. This was added when trying to find a bug, where we where trying to read a gzipped stream.
+     */
+    final boolean errorFree;
+
     public AisPacketInputStream(InputStream stream) {
+        this(stream, false);
+    }
+
+    public AisPacketInputStream(InputStream stream, boolean errorFree) {
         this.stream = requireNonNull(stream);
         reader = new BufferedReader(new InputStreamReader(new CountingInputStream(stream, bytesRead)));
+        this.errorFree = errorFree;
     }
 
     public void close() throws IOException {
@@ -74,7 +85,7 @@ public class AisPacketInputStream implements AutoCloseable {
      * @param line
      * @return
      */
-    protected AisPacket handleLine(String line) {
+    private AisPacket handleLine(String line) throws IOException {
         linesRead.incrementAndGet();
         // Check for ABK
         if (Abk.isAbk(line)) {
@@ -84,6 +95,9 @@ public class AisPacketInputStream implements AutoCloseable {
                 abk.parse(line);
                 handleAbk(abk);
             } catch (Exception e) {
+                if (errorFree) {
+                    throw new IOException(e);
+                }
                 LOG.error("Failed to parse ABK: " + line + ": " + e.getMessage());
             }
             packetReader.newVdm();
@@ -93,6 +107,9 @@ public class AisPacketInputStream implements AutoCloseable {
         try {
             return packetReader.readLine(line);
         } catch (SentenceException se) {
+            if (errorFree) {
+                throw new IOException(se);
+            }
             LOG.info("Sentence error: " + se.getMessage() + " line: " + line);
             return null;
         }
