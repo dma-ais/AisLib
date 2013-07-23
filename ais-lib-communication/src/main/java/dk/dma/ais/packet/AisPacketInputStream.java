@@ -17,13 +17,18 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +43,7 @@ import dk.dma.commons.util.io.CountingInputStream;
  * 
  * @author Kasper Nielsen
  */
-public class AisPacketInputStream {
+public class AisPacketInputStream implements AutoCloseable {
     static final Logger LOG = LoggerFactory.getLogger(AisPacketInputStream.class);
 
     /** The number of bytes read by this reader. */
@@ -152,10 +157,14 @@ public class AisPacketInputStream {
         return AisPacketStreams.immutableStream(s);
     }
 
+    public AisPacket readPacket(String source) throws IOException {
+        return readPacket0(source);
+    }
+
     /**
      * Reads the next AisPacket using the specified source id.
      */
-    public AisPacket readPacket(String source) throws IOException {
+    AisPacket readPacket0(String source) throws IOException {
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             if (closed) {
                 return null;
@@ -173,5 +182,37 @@ public class AisPacketInputStream {
             }
         }
         return null;
+    }
+
+    public static AisPacketInputStream createFromFile(Path p, boolean errorOnRead) throws IOException {
+        InputStream is = Files.newInputStream(p);
+        BufferedInputStream bis = new BufferedInputStream(is);
+        if (!p.getFileName().toString().endsWith(".zip")) {
+            return new AisPacketInputStream(bis, errorOnRead); // not a zip file
+        }
+        final ZipInputStream zis = new ZipInputStream(bis);
+
+        return new AisPacketInputStream(zis, errorOnRead) {
+            boolean isFirst = true;
+            ZipEntry e;
+
+            /** {@inheritDoc} */
+            @Override
+            AisPacket readPacket0(String source) throws IOException {
+                if (!isFirst && e == null) {
+                    return null; // already empty
+                } else if (isFirst) {
+                    e = zis.getNextEntry();
+                    isFirst = false;
+                }
+                AisPacket p = super.readPacket0(source);
+                // while the packet is null and we still have more zip entries
+                while (p == null && e != null) {
+                    e = zis.getNextEntry();
+                    p = super.readPacket0(source);
+                }
+                return p;
+            }
+        };
     }
 }
