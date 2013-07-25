@@ -93,7 +93,7 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
 
     /** {@inheritDoc} */
     @Override
-    public Subscription subscribePackets(Consumer<AisPacket> c) {
+    public Subscription subscribe(Consumer<AisPacket> c) {
         SubscriptionImpl s = new SubscriptionImpl(predicate, c);
         map.put(s, s);
         return s;

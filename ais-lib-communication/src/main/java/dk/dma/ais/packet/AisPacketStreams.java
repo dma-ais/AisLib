@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,23 @@ public class AisPacketStreams {
 
         /** {@inheritDoc} */
         @Override
+        public AisPacketStream limit(long limit) {
+            if (limit < 1) {
+                throw new IllegalArgumentException("Limit must be at least 1, was: " + limit);
+            }
+            final AtomicLong l = new AtomicLong(limit);
+            return filter(new Predicate<AisPacket>() {
+                public boolean test(AisPacket element) {
+                    if (l.getAndDecrement() <= 0) {
+                        throw AisPacketStream.CANCEL;
+                    }
+                    return true;
+                }
+            });
+        }
+
+        /** {@inheritDoc} */
+        @Override
         public AisPacketStream filterOnMessageType(int... messageTypes) {
             return filter(AisPacketFilters.filterOnMessageType(messageTypes));
         }
@@ -77,7 +95,7 @@ public class AisPacketStreams {
             requireNonNull(c);
             if (c instanceof AisPacketStream.StreamConsumer) {
                 final AisPacketStream.StreamConsumer<AisMessage> sc = (StreamConsumer<AisMessage>) c;
-                return subscribePackets(new AisPacketStream.StreamConsumer<AisPacket>() {
+                return subscribe(new AisPacketStream.StreamConsumer<AisPacket>() {
                     public void accept(AisPacket t) {
                         AisMessage m = t.tryGetAisMessage();
                         if (m != null) {
@@ -94,7 +112,7 @@ public class AisPacketStreams {
                     }
                 });
             } else {
-                return subscribePackets(new Consumer<AisPacket>() {
+                return subscribe(new Consumer<AisPacket>() {
                     public void accept(AisPacket t) {
                         AisMessage m = t.tryGetAisMessage();
                         if (m != null) {
@@ -107,10 +125,10 @@ public class AisPacketStreams {
 
         /** {@inheritDoc} */
         @Override
-        public Subscription subscribePacketSink(final OutputStreamSink<AisPacket> sink, final OutputStream os) {
+        public Subscription subscribeSink(final OutputStreamSink<AisPacket> sink, final OutputStream os) {
             requireNonNull(sink);
             requireNonNull(os);
-            return subscribePackets(new StreamConsumer<AisPacket>() {
+            return subscribe(new StreamConsumer<AisPacket>() {
                 @Override
                 public void accept(AisPacket t) {
                     try {
@@ -172,18 +190,27 @@ public class AisPacketStreams {
             return stream.filterOnMessageType(messageTypes);
         }
 
+        /**
+         * @param limit
+         * @return
+         * @see dk.dma.ais.packet.AisPacketStream#limit(long)
+         */
+        public AisPacketStream limit(long limit) {
+            return stream.limit(limit);
+        }
+
+        public Subscription subscribe(Consumer<AisPacket> c) {
+            return stream.subscribe(c);
+        }
+
         public Subscription subscribeMessages(Consumer<AisMessage> c) {
             return stream.subscribeMessages(c);
         }
 
-        public Subscription subscribePackets(Consumer<AisPacket> c) {
-            return stream.subscribePackets(c);
-        }
-
         /** {@inheritDoc} */
         @Override
-        public Subscription subscribePacketSink(OutputStreamSink<AisPacket> sink, OutputStream os) {
-            return null;
+        public Subscription subscribeSink(OutputStreamSink<AisPacket> sink, OutputStream os) {
+            return stream.subscribeSink(sink, os);
         }
     }
 

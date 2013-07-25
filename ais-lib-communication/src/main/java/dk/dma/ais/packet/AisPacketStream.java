@@ -53,11 +53,13 @@ public interface AisPacketStream {
 
     AisPacketStream filterOnMessageType(int... messageTypes);
 
+    AisPacketStream limit(long limit);
+
     Subscription subscribeMessages(Consumer<AisMessage> c);
 
-    Subscription subscribePackets(Consumer<AisPacket> c);
+    Subscription subscribe(Consumer<AisPacket> c);
 
-    Subscription subscribePacketSink(OutputStreamSink<AisPacket> sink, OutputStream os);
+    Subscription subscribeSink(OutputStreamSink<AisPacket> sink, OutputStream os);
 
     public abstract class StreamConsumer<T> implements Consumer<T> {
         /** Invoked immediately before the first message is delivered. */

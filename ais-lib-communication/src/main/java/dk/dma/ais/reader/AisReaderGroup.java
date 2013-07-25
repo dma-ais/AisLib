@@ -16,6 +16,7 @@
 package dk.dma.ais.reader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,7 +63,7 @@ public class AisReaderGroup implements Iterable<AisReader> {
         lock.lock();
         try {
             readers.put(reader.getSourceId(), reader);
-            subscriptions.put(reader, reader.stream().subscribePackets(new Consumer<AisPacket>() {
+            subscriptions.put(reader, reader.stream().subscribe(new Consumer<AisPacket>() {
                 public void accept(AisPacket p) {
                     stream.add(p);
                 }
@@ -161,6 +162,26 @@ public class AisReaderGroup implements Iterable<AisReader> {
             r.setSourceId(src);
             return r;
         }
+    }
+
+    public static String[] getDefaultSources() {
+        String p = System.getenv("AIS_DEFAULT_SOURCES");
+        if (p == null) {
+            p = System.getProperty("AIS_DEFAULT_SOURCES");
+            if (p == null) {
+                throw new IllegalStateException("The property AIS_DEFAULT_SOURCES has not been set");
+            }
+        }
+        return p.split(";");
+    }
+
+    /**
+     * Creates a default group from reader available in the system property ais.default.sources
+     * 
+     * @return
+     */
+    public static AisReaderGroup create() {
+        return create(Arrays.asList(getDefaultSources()));
     }
 
     /**

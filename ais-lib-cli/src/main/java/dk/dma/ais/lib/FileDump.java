@@ -80,7 +80,7 @@ public class FileDump extends AbstractDaemon {
                 backupFormat, AisPackets.OUTPUT_TO_TEXT));
 
         start(g.asService());// connects to all sources
-        g.stream().subscribePackets(new Consumer<AisPacket>() {
+        g.stream().subscribe(new Consumer<AisPacket>() {
             public void accept(AisPacket p) {
                 // We use offer because we do not want to block receiving thread
                 if (!fileWriter.getInputQueue().offer(p)) {

@@ -20,6 +20,7 @@ import java.io.Serializable;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.Country;
+import dk.dma.enav.util.function.Predicate;
 
 /**
  * 
@@ -173,5 +174,9 @@ public class AisPacketSource implements Serializable {
 
         return new AisPacketSource(sourceId, sourceBaseStation == null ? Integer.MIN_VALUE : sourceBaseStation,
                 sourceCountry, sourceType, region);
+    }
+
+    public static Predicate<AisPacketSource> createPredicate(String expression) {
+        return AisPacketSourceFilters.parseSourceFilter(expression);
     }
 }
