@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.packet;
+package dk.dma.ais.lib;
 
 import java.util.Date;
 import java.util.List;
@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.beust.jcommander.Parameter;
 
 import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.enav.util.function.Predicate;
 
 /**

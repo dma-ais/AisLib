@@ -25,7 +25,6 @@ import java.util.List;
 import net.jcip.annotations.NotThreadSafe;
 
 import com.google.common.hash.Hashing;
-import com.google.common.primitives.Bytes;
 
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
@@ -51,20 +50,12 @@ public class AisPacket implements Comparable<AisPacket> {
     private transient AisPacketTags tags;
     private AisMessage message;
 
-    public AisPacket(String stringMessage) {
-        this(stringMessage, System.currentTimeMillis());
-    }
-
-    public AisPacket(String stringMessage, long receiveTimestamp) {
+    private AisPacket(String stringMessage, long receiveTimestamp) {
         this.rawMessage = requireNonNull(stringMessage);
         this.receiveTimestamp = receiveTimestamp;
     }
 
-    public AisPacket(Vdm vdm, String stringMessage) {
-        this(vdm, stringMessage, System.currentTimeMillis());
-    }
-
-    public AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp) {
+    AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp) {
         this(stringMessage, receiveTimestamp);
         this.vdm = vdm;
     }
@@ -79,12 +70,11 @@ public class AisPacket implements Comparable<AisPacket> {
     }
 
     public static AisPacket fromByteArray(byte[] array) {
-        byte[] b = Arrays.copyOfRange(array, 1, array.length);
-        return from(new String(b, StandardCharsets.US_ASCII), -1);
+        return from(new String(array, StandardCharsets.US_ASCII), -1);
     }
 
     public byte[] toByteArray() {
-        return Bytes.concat(new byte[] { 1 }, rawMessage.getBytes(StandardCharsets.US_ASCII));
+        return rawMessage.getBytes(StandardCharsets.US_ASCII);
     }
 
     public long getBestTimestamp() {
@@ -131,7 +121,7 @@ public class AisPacket implements Comparable<AisPacket> {
      * @return the tags of the packet
      */
     public AisPacketTags getTags() {
-        AisPacketTags tags= this.tags;
+        AisPacketTags tags = this.tags;
         if (tags == null) {
             return this.tags = AisPacketTags.parse(getVdm());
         }
@@ -198,15 +188,17 @@ public class AisPacket implements Comparable<AisPacket> {
 
     /**
      * Construct AisPacket from raw packet string
+     * 
      * @param messageString
-     * @param optional factory
+     * @param optional
+     *            factory
      * @return
      * @throws SentenceException
      */
     public static AisPacket readFromString(String messageString) throws SentenceException {
         AisPacket packet = null;
         AisPacketReader packetReader = new AisPacketReader();
-        //String[] lines = StringUtils.split(messageString, "\n");
+        // String[] lines = StringUtils.split(messageString, "\n");
         String[] lines = messageString.split("\\r?\\n");
         for (String line : lines) {
             packet = packetReader.readLine(line);

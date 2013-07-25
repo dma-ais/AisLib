@@ -23,6 +23,7 @@ import dk.dma.enav.util.function.Consumer;
 import dk.dma.enav.util.function.Predicate;
 
 /**
+ * A stream of packets.
  * 
  * @author Kasper Nielsen
  */
@@ -31,8 +32,21 @@ public interface AisPacketStream {
     /** Thrown by a subscriber to indicate that the subscription should be cancelled. */
     RuntimeException CANCEL = new RuntimeException();
 
-    void add(AisPacket p);
+    /**
+     * Adds the specified packet to the stream
+     * 
+     * @param packet
+     *            the packet to add
+     */
+    void add(AisPacket packet);
 
+    /**
+     * Returns a new stream that only streams packets accepted by the specified predicate.
+     * 
+     * @param predicate
+     *            the predicate to test against each element
+     * @return the new stream
+     */
     AisPacketStream filter(Predicate<? super AisPacket> predicate);
 
     AisPacketStream filter(String expression);
@@ -58,11 +72,17 @@ public interface AisPacketStream {
         public void end(Throwable cause) {}
     }
 
+    /** A subcription is created each time a new consumer is added to the stream. */
     interface Subscription {
         void awaitCancelled() throws InterruptedException;
 
+        /**
+         * Cancels this subscription. After this subscription has been cancelled. No more packets will be delivered to
+         * the consumer.
+         */
         void cancel();
 
+        /** Returns whether or not the subscription has been cancelled. */
         boolean isCancelled();
     }
 }

@@ -50,11 +50,13 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
          */
         REPLACE,
         /**
-         * Make new tagging as a merge of current and given tagging, overriding duplicate tags already in the current tagging
+         * Make new tagging as a merge of current and given tagging, overriding duplicate tags already in the current
+         * tagging
          */
         MERGE_OVERRIDE,
         /**
-         * Make new tagging as a merge of current and given tagging, preserving duplicate tags already in the current tagging
+         * Make new tagging as a merge of current and given tagging, preserving duplicate tags already in the current
+         * tagging
          */
         MERGE_PRESERVE;
 
@@ -92,6 +94,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
 
     /**
      * Get map of optional extra tags to be included in the tagging
+     * 
      * @return map
      */
     public Map<String, String> getExtraTags() {
@@ -185,8 +188,10 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
 
     /**
      * Add extra tags to comment block
+     * 
      * @param cb
-     * @param override existing
+     * @param override
+     *            existing
      */
     private void addExtraTags(CommentBlock cb, AisPacket packet, boolean override) {
         CommentBlock currentCb = null;
@@ -203,6 +208,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
 
     /**
      * Remove any thing else than sentences (and proprietary is chosen)
+     * 
      * @param rawPacket
      * @param removeProprietary
      * @return
@@ -237,7 +243,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
     }
 
     private AisPacket newPacket(AisPacket oldPacket, String newRawMessage) {
-        return new AisPacket(newRawMessage, oldPacket.getReceiveTimestamp());
+        return AisPacket.from(newRawMessage, oldPacket.getReceiveTimestamp());
     }
 
 }

@@ -151,33 +151,34 @@ public abstract class AisReader extends Thread {
      * @throws IOException
      */
     protected void readLoop(InputStream stream) throws IOException {
-        AisPacketInputStream s = new AisPacketInputStream(stream) {
+        try (AisPacketInputStream s = new AisPacketInputStream(stream) {
             @Override
             protected void handleAbk(Abk abk) {
                 sendThreadPool.handleAbk(abk);
             }
-        };
-        AisPacket packet = null;
-        while ((packet = s.readPacket(sourceId)) != null) {
-            for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
-                packetHandler.accept(packet);
-            }
-
-            // Distribute AIS message
-            if (handlers.size() > 0) {
-                AisMessage message = null;
-                // Parse AIS message
-                try {
-                    message = packet.getAisMessage();
-                } catch (AisMessageException me) {
-                    LOG.info("AIS message exception: " + me.getMessage() + " vdm: "
-                            + packet.getVdm().getOrgLinesJoined());
-                } catch (SixbitException se) {
-                    LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
+        }) {
+            AisPacket packet = null;
+            while ((packet = s.readPacket(sourceId)) != null) {
+                for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
+                    packetHandler.accept(packet);
                 }
-                if (message != null) { // Distribute message
-                    for (Consumer<AisMessage> aisHandler : handlers) {
-                        aisHandler.accept(message);
+
+                // Distribute AIS message
+                if (handlers.size() > 0) {
+                    AisMessage message = null;
+                    // Parse AIS message
+                    try {
+                        message = packet.getAisMessage();
+                    } catch (AisMessageException me) {
+                        LOG.info("AIS message exception: " + me.getMessage() + " vdm: "
+                                + packet.getVdm().getOrgLinesJoined());
+                    } catch (SixbitException se) {
+                        LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
+                    }
+                    if (message != null) { // Distribute message
+                        for (Consumer<AisMessage> aisHandler : handlers) {
+                            aisHandler.accept(message);
+                        }
                     }
                 }
             }

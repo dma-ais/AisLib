@@ -26,7 +26,7 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.sentence.Vdm;
 
 /**
- * Transformer that strips everything from the packet except the raw VDM sentences 
+ * Transformer that strips everything from the packet except the raw VDM sentences
  */
 @ThreadSafe
 public class CropVdmTransformer implements IAisPacketTransformer {
@@ -40,7 +40,7 @@ public class CropVdmTransformer implements IAisPacketTransformer {
                 newLines.add(line);
             }
         }
-        return new AisPacket(StringUtils.join(newLines, "\r\n"), packet.getReceiveTimestamp());
+        return AisPacket.from(StringUtils.join(newLines, "\r\n"), packet.getReceiveTimestamp());
     }
-    
+
 }

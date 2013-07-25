@@ -36,28 +36,28 @@ public class CommentBlockEncodeTest {
         int maxLen = 80;
         Random rand = new Random();
         Map<String, String> map = new HashMap<>();
-        for (int i=0; i < pairs; i++) {
+        for (int i = 0; i < pairs; i++) {
             String key = Integer.toString(i);
-            char c = (char)(65 + rand.nextInt(23));
+            char c = (char) (65 + rand.nextInt(23));
             String value = StringUtils.leftPad("", rand.nextInt(70) + 1, c);
-            map.put(key, value);            
+            map.put(key, value);
         }
-        
+
         CommentBlock cb = new CommentBlock();
         for (Entry<String, String> pair : map.entrySet()) {
             cb.addString(pair.getKey(), pair.getValue());
         }
-        
+
         String str = cb.encode(maxLen) + "\r\n";
         str += "!AIVDM,1,1,,A,H39LOOQUQPD0000000000000000,4*6D";
-        
-        AisPacket packet = new AisPacket(str);
+
+        AisPacket packet = AisPacket.from(str, System.currentTimeMillis());
         cb = packet.getVdm().getCommentBlock();
-        
+
         for (Entry<String, String> pair : map.entrySet()) {
             String value = cb.getString(pair.getKey());
-            Assert.assertEquals(value, pair.getValue());            
+            Assert.assertEquals(value, pair.getValue());
         }
     }
-    
+
 }

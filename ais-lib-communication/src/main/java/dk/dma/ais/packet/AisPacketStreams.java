@@ -29,17 +29,24 @@ import dk.dma.enav.util.function.Consumer;
 import dk.dma.enav.util.function.Predicate;
 
 /**
+ * Stream utility methods.
  * 
  * @author Kasper Nielsen
  */
 public class AisPacketStreams {
 
+    /** The logger. */
     static final Logger LOG = LoggerFactory.getLogger(AisPacketStreams.class);
 
     public static AisPacketStream immutableStream(AisPacketStream s) {
         return s instanceof ImmutableAisPacketStream ? s : new ImmutableAisPacketStream(s);
     }
 
+    /**
+     * Returns a new stream.
+     * 
+     * @return the new stream
+     */
     public static AisPacketStream newStream() {
         return new DefaultAisPacketStream();
     }

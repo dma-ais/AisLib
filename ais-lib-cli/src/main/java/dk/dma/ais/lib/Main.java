@@ -27,11 +27,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         CliCommandList c = new CliCommandList("AisLib");
-        c.add("filedump", "Reads data from AIS datasources and stores data into text files", new Command() {
-            public void execute(String[] args) throws Exception {
-                FileDump.main(args);
-            }
-        });
+        c.add(FileDump.class, "filedump", "Reads data from AIS datasources and stores data into text files");
         c.add("bus", "AisBus....", new Command() {
             public void execute(String[] args) throws Exception {
                 FileDump.main(args);

@@ -168,7 +168,7 @@ public class AisPacketReader {
         }
 
         // Make packet
-        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"));
+        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis());
 
         newVdm();
 
