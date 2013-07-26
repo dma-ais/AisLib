@@ -52,7 +52,7 @@ import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.Sour
  * 
  * @author Kasper Nielsen
  */
-class AisPacketSourceSourceParseHelper {
+class AisPacketSourceParseHelper {
     static Predicate<AisPacketSource> parseSourceFilter(String filter) {
         ANTLRInputStream input = new ANTLRInputStream(requireNonNull(filter));
         SourceFilterLexer lexer = new SourceFilterLexer(input);

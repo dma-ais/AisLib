@@ -136,7 +136,7 @@ class AisPacketSourceFilters {
     }
 
     public static Predicate<AisPacketSource> parseSourceFilter(String filter) {
-        return AisPacketSourceSourceParseHelper.parseSourceFilter(filter);
+        return AisPacketSourceParseHelper.parseSourceFilter(filter);
     }
 
     static String skipBrackets(String s) {
