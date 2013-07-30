@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.message;
 
+
 /**
  * Interface for all messages carrying a the position of the sending target.
  */

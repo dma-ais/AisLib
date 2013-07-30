@@ -29,6 +29,7 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.geometry.Position;
 
 /**
  * Abstract base class for all AIS messages
@@ -176,6 +177,15 @@ public abstract class AisMessage implements Serializable {
      */
     public Vdm getVdm() {
         return vdm;
+    }
+
+    /**
+     * Returns a valid position if this message has a valid position, otherwise null.
+     * 
+     * @return a valid position if this message has a valid position, otherwise null
+     */
+    public Position getValidPosition() {
+        return null;
     }
 
     /**

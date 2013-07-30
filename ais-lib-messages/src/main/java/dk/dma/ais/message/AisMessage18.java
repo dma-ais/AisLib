@@ -19,6 +19,7 @@ import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS message 18
@@ -117,9 +118,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     private int commStateSelectorFlag; // 1 bit
 
     /**
-     * Communication state: SOTDMA communication state (see 3.3.7.2.1, Annex 2), if communication state selector flag
-     * is set to 0, or ITDMA communication state (see 3.3.7.3.2, Annex 2), if communication state selector flag is set
-     * to 1 Because Class B CS does not use any Communication State information, this field should be filled with the
+     * Communication state: SOTDMA communication state (see 3.3.7.2.1, Annex 2), if communication state selector flag is
+     * set to 0, or ITDMA communication state (see 3.3.7.3.2, Annex 2), if communication state selector flag is set to 1
+     * Because Class B CS does not use any Communication State information, this field should be filled with the
      * following value: 1100000000000000110
      */
     private int commState; // 19 bits : SOTDMA sync state
@@ -238,6 +239,12 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
      */
     public AisPosition getPos() {
         return pos;
+    }
+
+    @Override
+    public Position getValidPosition() {
+        AisPosition pos = this.pos;
+        return pos == null ? null : pos.getGeoLocation();
     }
 
     /**

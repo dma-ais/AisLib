@@ -123,9 +123,9 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
      * SOTDMA/ITDMA sync state: sync state is part of the defined communication state (19) bits. The sync state is the
      * first 2 bits of the 19 bits in the communication state of the message.
      * 
-     * 0 UTC direct (see  3.1.1.1) 1 UTC indirect (see  3.1.1.2) 2 Station is synchronized to a base station (base
-     * direct) 3 Station is synchronized to another station based on the highest number of received stations or to
-     * another mobile station, which is directly synchronized to a base station
+     * 0 UTC direct (see 3.1.1.1) 1 UTC indirect (see 3.1.1.2) 2 Station is synchronized to a base station (base direct)
+     * 3 Station is synchronized to another station based on the highest number of received stations or to another
+     * mobile station, which is directly synchronized to a base station
      */
     protected int syncState; // 2 bits
 
@@ -250,6 +250,12 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
 
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
+    }
+
+    @Override
+    public final Position getValidPosition() {
+        AisPosition pos = this.pos;
+        return pos == null ? null : pos.getGeoLocation();
     }
 
     public AisPosition getPos() {

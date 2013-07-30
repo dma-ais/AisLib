@@ -23,6 +23,7 @@ import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS message 4
@@ -174,6 +175,12 @@ public class AisMessage4 extends AisMessage implements IPositionMessage {
 
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
+    }
+
+    @Override
+    public Position getValidPosition() {
+        AisPosition pos = this.pos;
+        return pos == null ? null : pos.getGeoLocation();
     }
 
     public AisPosition getPos() {
