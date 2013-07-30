@@ -37,8 +37,7 @@ import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
 
 /**
- * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag
- * blocks.
+ * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag blocks.
  * 
  * @author Kasper Nielsen
  */
@@ -54,6 +53,10 @@ public class AisPacket implements Comparable<AisPacket> {
     private AisPacket(String stringMessage, long receiveTimestamp) {
         this.rawMessage = requireNonNull(stringMessage);
         this.receiveTimestamp = receiveTimestamp;
+    }
+    
+    public AisPacket(String stringMessage) {
+        this(stringMessage, System.currentTimeMillis());
     }
 
     AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp) {
