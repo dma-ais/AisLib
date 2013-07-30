@@ -15,8 +15,7 @@
  */
 package dk.dma.ais.filter;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.message.AisMessage;

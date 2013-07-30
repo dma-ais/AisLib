@@ -15,8 +15,7 @@
  */
 package dk.dma.ais.packet;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacketTags.SourceType;
@@ -207,8 +206,5 @@ public class AisPacketTagsTest {
         Assert.assertEquals(cb.getString("key"), "oldval");
 
     }
-
-
-
 
 }

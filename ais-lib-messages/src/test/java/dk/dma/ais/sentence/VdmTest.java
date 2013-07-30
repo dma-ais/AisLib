@@ -15,8 +15,7 @@
  */
 package dk.dma.ais.sentence;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.binary.SixbitException;

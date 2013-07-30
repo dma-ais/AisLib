@@ -20,9 +20,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import junit.framework.Assert;
-
 import org.apache.commons.lang.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacket;

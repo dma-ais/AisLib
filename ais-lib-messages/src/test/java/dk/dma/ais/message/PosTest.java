@@ -15,8 +15,7 @@
  */
 package dk.dma.ais.message;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.enav.model.geometry.Position;
