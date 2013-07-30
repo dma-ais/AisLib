@@ -17,6 +17,7 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
@@ -67,6 +68,13 @@ public class AisPacket implements Comparable<AisPacket> {
      */
     public byte[] calculateHash128() {
         return Hashing.murmur3_128().hashString(rawMessage).asBytes();
+    }
+
+    public static AisPacket fromByteBuffer(ByteBuffer buffer) {
+        int cap = buffer.remaining();
+        byte[] buf = new byte[cap];
+        buffer.get(buf);
+        return fromByteArray(buf);
     }
 
     public static AisPacket fromByteArray(byte[] array) {
@@ -212,6 +220,6 @@ public class AisPacket implements Comparable<AisPacket> {
     /** {@inheritDoc} */
     @Override
     public int compareTo(AisPacket p) {
-        return Long.compare(getTimestamp().getTime(), p.getTimestamp().getTime());
+        return Long.compare(getBestTimestamp(), p.getBestTimestamp());
     }
 }
