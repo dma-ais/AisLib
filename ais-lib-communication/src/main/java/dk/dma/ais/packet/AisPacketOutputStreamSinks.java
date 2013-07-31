@@ -62,35 +62,38 @@ public class AisPacketOutputStreamSinks {
         }
     };
 
-    /** A sink that writes an ais packet the past track as a json to an output stream. */
+    /**
+     * A sink that writes an AIS packet the past track as a JSON to an output stream. The implementation is a little bit
+     * special. Because we are stateless, ending tags are written when the next package is received. Or the end is
+     * reached.
+     */
     public static final OutputStreamSink<AisPacket> PAST_TRACK_JSON = new OutputStreamSink<AisPacket>() {
 
         @Override
         public void process(OutputStream stream, AisPacket p, long count) throws IOException {
+            DecimalFormat df = POSITION_FORMATTER.get();
             AisMessage m = p.tryGetAisMessage();
             IVesselPositionMessage im = (IVesselPositionMessage) m;
             Position pos = m.getValidPosition();
+
             StringBuilder sb = new StringBuilder();
             if (count > 1) {
                 sb.append("  },");
             }
             sb.append("\n  \"point\": {\n");
             sb.append("    \"timestamp\": ").append(p.getBestTimestamp()).append(",\n");
-            DecimalFormat df = POSITION_FORMATTER.get();
             sb.append("    \"lon\": ").append(df.format(pos.getLongitude())).append(",\n");
             sb.append("    \"lat\": ").append(df.format(pos.getLatitude())).append(",\n");
             sb.append("    \"sog\": ").append(im.getSog()).append(",\n");
             sb.append("    \"cog\": ").append(im.getCog()).append(",\n");
-            sb.append("    \"heading\": ").append(im.getTrueHeading());
-
-            writeAscii(sb.toString(), stream);
-            stream.write('\n');
+            sb.append("    \"heading\": ").append(im.getTrueHeading()).append("\n");
+            writeAscii(sb, stream);
         }
 
         /** {@inheritDoc} */
         @Override
         public void footer(OutputStream stream, long count) throws IOException {
-            if (count > 0) {
+            if (count > 0) { // write the closing tag, unless we have never written anything.
                 writeAscii("  }\n", stream);
             }
             writeAscii("}}", stream);
@@ -103,7 +106,7 @@ public class AisPacketOutputStreamSinks {
         }
     };
 
-    /** A sink that writes an ais packet to an output stream. Printing only the actual sentence . */
+    /** A sink that writes an AIS packet to an output stream. Printing only the actual sentence . */
     public static final OutputStreamSink<AisPacket> OUTPUT_PREFIXED_SENTENCES = new OutputStreamSink<AisPacket>() {
 
         @Override
@@ -120,7 +123,7 @@ public class AisPacketOutputStreamSinks {
         }
     };
 
-    /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
+    /** A sink that writes an AIS packet to an output stream. Using the default multi-line format. */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_HTML = new OutputStreamSink<AisPacket>() {
         @Override
         public void process(OutputStream stream, AisPacket message, long count) throws IOException {
@@ -157,6 +160,7 @@ public class AisPacketOutputStreamSinks {
         return result;
     }
 
+    // currently unused
     static List<AisPacket> readFromFile(Path p) throws IOException {
         final ConcurrentLinkedQueue<AisPacket> list = new ConcurrentLinkedQueue<>();
         AisPacket packet;
