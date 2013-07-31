@@ -15,24 +15,30 @@
  */
 package dk.dma.ais.packet;
 
+import static dk.dma.commons.util.io.IoUtil.writeAscii;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.commons.util.io.OutputStreamSink;
+import dk.dma.enav.model.geometry.Position;
 
 /**
  * Common utility methods for {@link AisPacket}.
  * 
  * @author Kasper Nielsen
  */
-public class AisPackets {
+public class AisPacketOutputStreamSinks {
 
     /** A thread local with a default text format. */
     static final ThreadLocal<SimpleDateFormat> DEFAULT_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
@@ -41,12 +47,59 @@ public class AisPackets {
         }
     };
 
+    static final ThreadLocal<DecimalFormat> POSITION_FORMATTER = new ThreadLocal<DecimalFormat>() {
+        protected DecimalFormat initialValue() {
+            return new DecimalFormat("###.#####");
+        }
+    };
+
     /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_TEXT = new OutputStreamSink<AisPacket>() {
         @Override
-        public void process(OutputStream stream, AisPacket message) throws IOException {
+        public void process(OutputStream stream, AisPacket message, long count) throws IOException {
             stream.write(message.getStringMessage().getBytes(StandardCharsets.US_ASCII));
             stream.write('\n');
+        }
+    };
+
+    /** A sink that writes an ais packet the past track as a json to an output stream. */
+    public static final OutputStreamSink<AisPacket> PAST_TRACK_JSON = new OutputStreamSink<AisPacket>() {
+
+        @Override
+        public void process(OutputStream stream, AisPacket p, long count) throws IOException {
+            AisMessage m = p.tryGetAisMessage();
+            IVesselPositionMessage im = (IVesselPositionMessage) m;
+            Position pos = m.getValidPosition();
+            StringBuilder sb = new StringBuilder();
+            if (count > 1) {
+                sb.append("  },");
+            }
+            sb.append("\n  \"point\": {\n");
+            sb.append("    \"timestamp\": ").append(p.getBestTimestamp()).append(",\n");
+            DecimalFormat df = POSITION_FORMATTER.get();
+            sb.append("    \"lon\": ").append(df.format(pos.getLongitude())).append(",\n");
+            sb.append("    \"lat\": ").append(df.format(pos.getLatitude())).append(",\n");
+            sb.append("    \"sog\": ").append(im.getSog()).append(",\n");
+            sb.append("    \"cog\": ").append(im.getCog()).append(",\n");
+            sb.append("    \"heading\": ").append(im.getTrueHeading());
+
+            writeAscii(sb.toString(), stream);
+            stream.write('\n');
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void footer(OutputStream stream, long count) throws IOException {
+            if (count > 0) {
+                writeAscii("  }\n", stream);
+            }
+            writeAscii("}}", stream);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void header(OutputStream stream) throws IOException {
+            stream.write("{\"track\": {".getBytes(StandardCharsets.US_ASCII));
         }
     };
 
@@ -54,14 +107,14 @@ public class AisPackets {
     public static final OutputStreamSink<AisPacket> OUTPUT_PREFIXED_SENTENCES = new OutputStreamSink<AisPacket>() {
 
         @Override
-        public void process(OutputStream stream, AisPacket message) throws IOException {
+        public void process(OutputStream stream, AisPacket message, long count) throws IOException {
             List<String> rawSentences = message.getVdm().getRawSentences();
             String dateTimeStr = DEFAULT_DATE_FORMAT.get().format(message.getVdm().getTimestamp());
             byte[] b = dateTimeStr.getBytes(StandardCharsets.US_ASCII);
             for (String sentence : rawSentences) {
                 stream.write(b);
                 stream.write(',');
-                stream.write(sentence.getBytes(StandardCharsets.US_ASCII));
+                writeAscii(sentence, stream);
                 stream.write('\n');
             }
         }
@@ -70,14 +123,14 @@ public class AisPackets {
     /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_HTML = new OutputStreamSink<AisPacket>() {
         @Override
-        public void process(OutputStream stream, AisPacket message) throws IOException {
+        public void process(OutputStream stream, AisPacket message, long count) throws IOException {
             for (String str : message.getStringMessage().split("\r\n")) {
                 str = str.replace("<", "&lt;");
                 str = str.replace(">", "&gt;");
                 str = str.replace("/", "&qout;");
                 str = str.replace("&", "&amp;");
-                stream.write(str.getBytes(StandardCharsets.US_ASCII));
-                stream.write("</br>".getBytes(StandardCharsets.US_ASCII));
+                writeAscii(str, stream);
+                writeAscii("</br>", stream);
                 stream.write('\n');
             }
         }

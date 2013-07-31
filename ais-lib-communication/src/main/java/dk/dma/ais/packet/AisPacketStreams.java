@@ -128,11 +128,12 @@ public class AisPacketStreams {
         public Subscription subscribeSink(final OutputStreamSink<AisPacket> sink, final OutputStream os) {
             requireNonNull(sink);
             requireNonNull(os);
+            final AtomicLong l = new AtomicLong();
             return subscribe(new StreamConsumer<AisPacket>() {
                 @Override
                 public void accept(AisPacket t) {
                     try {
-                        sink.process(os, t);
+                        sink.process(os, t, l.incrementAndGet());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -148,7 +149,7 @@ public class AisPacketStreams {
 
                 public void end(Throwable cause) {
                     try {
-                        sink.footer(os);
+                        sink.footer(os, l.get());
                     } catch (IOException e) {
                         if (cause == null) {// dont throw if already on exception path
                             throw new RuntimeException(e);

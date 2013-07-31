@@ -84,7 +84,7 @@ class TableOutputStreamSink extends OutputStreamSink<AisPacket> {
 
     /** {@inheritDoc} */
     @Override
-    public void process(OutputStream stream, AisPacket packet) throws IOException {
+    public void process(OutputStream stream, AisPacket packet, long count) throws IOException {
         AisMessage m = packet.tryGetAisMessage();
         if (m != null) {
             long n = counter.incrementAndGet();

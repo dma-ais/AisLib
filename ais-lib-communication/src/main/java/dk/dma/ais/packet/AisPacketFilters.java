@@ -179,6 +179,15 @@ public class AisPacketFilters {
         };
     }
 
+    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
+        requireNonNull(messageType);
+        return new AbstractMessagePredicate() {
+            public boolean test(AisMessage m) {
+                return messageType.isAssignableFrom(m.getClass());
+            }
+        };
+    }
+
     public static Predicate<AisPacket> filterOnMessageType(final int... types) {
         final int[] t = types.clone();
         Arrays.sort(t);
