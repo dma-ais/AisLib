@@ -30,8 +30,6 @@ public class SixbitEncoder {
      */
     private int padBits;
 
-    public SixbitEncoder() {}
-
     /**
      * Add a value using bits number of bits
      * 

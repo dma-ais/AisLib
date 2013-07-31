@@ -27,10 +27,6 @@ public class BinArray extends BitSet {
     private int length;
     private int readPtr;
 
-    public BinArray() {
-        super();
-    }
-
     /**
      * Append bits from a sixbit encoded string
      * 
