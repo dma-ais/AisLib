@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -179,5 +180,16 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
         public void awaitCancelled() throws InterruptedException {
             cancelled.await();
         }
+
+        /**
+         * {@inheritDoc}
+         * 
+         * @return
+         */
+        @Override
+        public boolean awaitCancelled(long timeout, TimeUnit unit) throws InterruptedException {
+            return cancelled.await(timeout, unit);
+        }
     }
+
 }

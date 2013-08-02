@@ -16,6 +16,7 @@
 package dk.dma.ais.packet;
 
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.commons.util.io.OutputStreamSink;
@@ -77,6 +78,8 @@ public interface AisPacketStream {
     /** A subcription is created each time a new consumer is added to the stream. */
     interface Subscription {
         void awaitCancelled() throws InterruptedException;
+
+        boolean awaitCancelled(long timeout, TimeUnit unit) throws InterruptedException;
 
         /**
          * Cancels this subscription. After this subscription has been cancelled. No more packets will be delivered to
