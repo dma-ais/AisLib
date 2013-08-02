@@ -23,6 +23,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.net.HostAndPort;
+
 /**
  * An extended AisTcpReader with added possibility of doing round robin connect attempt to list of AIS TCP sources.
  */
@@ -30,12 +32,19 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(RoundRobinAisTcpReader.class);
 
-    List<String> hostnames = new ArrayList<>();
-    List<Integer> ports = new ArrayList<>();
+    List<HostAndPort> hosts = new ArrayList<>();
     private int currentHost = -1;
 
-    public RoundRobinAisTcpReader() {
-        super();
+    /**
+     * Set hosts and ports from a comma separated list on the form: host1:port1,...,hostN:portN
+     * 
+     * @param commaHostPort
+     */
+    public RoundRobinAisTcpReader(String commaHostPort) {
+        String[] hostPorts = StringUtils.split(commaHostPort, ",");
+        for (String hp : hostPorts) {
+            addHostPort(hp);
+        }
     }
 
     /**
@@ -50,27 +59,13 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
     }
 
     /**
-     * Set hosts and ports from a comma separated list on the form: host1:port1,...,hostN:portN
-     * 
-     * @param commaHostPort
-     */
-    public RoundRobinAisTcpReader setCommaseparatedHostPort(String commaHostPort) {
-        String[] hostPorts = StringUtils.split(commaHostPort, ",");
-        for (String hp : hostPorts) {
-            addHostPort(hp);
-        }
-        return this;
-    }
-
-    /**
      * Add another host/port on the form host:port
      * 
      * @param hostPort
      */
     public void addHostPort(String hostPort) {
         setHostPort(hostPort);
-        hostnames.add(hostname);
-        ports.add(port);
+        hosts.add(HostAndPort.fromString(hostPort));
         currentHost = 0;
         setHost();
     }
@@ -81,7 +76,7 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
      * @return
      */
     public int getHostCount() {
-        return hostnames.size();
+        return hosts.size();
     }
 
     @Override
@@ -96,8 +91,8 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
                 if (isShutdown() || isInterrupted()) {
                     return;
                 }
-                LOG.error("Source communication failed: " + e.getMessage() + ": host:port: " + hostname + ":" + port + " Retry in "
-                        + reconnectInterval / 1000 + " seconds");
+                LOG.error("Source communication failed: " + e.getMessage() + ": host:port: " + hostAndPort
+                        + " Retry in " + reconnectInterval / 1000 + " seconds");
                 if (!isShutdown()) {
                     try {
                         Thread.sleep(reconnectInterval);
@@ -112,17 +107,16 @@ public class RoundRobinAisTcpReader extends AisTcpReader {
     }
 
     public String toString() {
-        String current = hostnames.get(currentHost) + ":" + ports.get(currentHost);
-        return "RoundRobinTcpReader [sourceIf = " + getSourceId() + ", current host=" + current  +"]";
+        HostAndPort current = hosts.get(currentHost);
+        return "RoundRobinTcpReader [sourceIf = " + getSourceId() + ", current host=" + current + "]";
     }
 
     private void setHost() {
-        hostname = hostnames.get(currentHost);
-        port = ports.get(currentHost);
+        hostAndPort = hosts.get(currentHost);
     }
 
     private void selectHost() {
-        currentHost = (currentHost + 1) % hostnames.size();
+        currentHost = (currentHost + 1) % hosts.size();
     }
 
 }

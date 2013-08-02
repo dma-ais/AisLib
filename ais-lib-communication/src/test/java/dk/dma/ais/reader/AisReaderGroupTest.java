@@ -50,10 +50,10 @@ public class AisReaderGroupTest {
         AisTcpReader r = AisReaderGroup.parseSource("sdsd=ff:123, dd:1235");
         assertSame(RoundRobinAisTcpReader.class, r.getClass());
         RoundRobinAisTcpReader tr = (RoundRobinAisTcpReader) r;
-        assertEquals("ff", tr.hostnames.get(0));
-        assertEquals("dd", tr.hostnames.get(1));
-        assertEquals(123, tr.ports.get(0).intValue());
-        assertEquals(1235, tr.ports.get(1).intValue());
+        assertEquals("ff", tr.hosts.get(0).getHostText());
+        assertEquals("dd", tr.hosts.get(1).getHostText());
+        assertEquals(123, tr.hosts.get(0).getPort());
+        assertEquals(1235, tr.hosts.get(1).getPort());
         assertEquals(2, tr.getHostCount());
         assertEquals("sdsd", r.getSourceId());
     }

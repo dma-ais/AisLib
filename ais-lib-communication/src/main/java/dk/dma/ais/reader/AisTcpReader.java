@@ -23,9 +23,10 @@ import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.net.HostAndPort;
 
 import dk.dma.ais.sentence.Abk;
 import dk.dma.enav.util.function.Consumer;
@@ -51,8 +52,7 @@ public class AisTcpReader extends AisReader {
     private static final Logger LOG = LoggerFactory.getLogger(AisTcpReader.class);
 
     protected volatile long reconnectInterval = 5000; // Default 5 sec
-    protected volatile String hostname;
-    protected volatile int port;
+    protected volatile HostAndPort hostAndPort;
     protected OutputStream outputStream;
     protected final AtomicReference<Socket> clientSocket = new AtomicReference<>();
 
@@ -70,12 +70,11 @@ public class AisTcpReader extends AisReader {
      */
     public AisTcpReader(String hostname, int port) {
         this();
-        this.hostname = hostname;
-        this.port = port;
+        hostAndPort = HostAndPort.fromParts(hostname, port);
     }
 
     /**
-     * Contructor where hostname port is specified in string on the form: host:port
+     * Constructor where hostname port is specified in string on the form: host:port
      * 
      * @param hostPort
      */
@@ -85,32 +84,12 @@ public class AisTcpReader extends AisReader {
     }
 
     /**
-     * Set hostname
-     * 
-     * @param hostname
-     */
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
-
-    /**
-     * Set port
-     * 
-     * @param port
-     */
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    /**
      * Set host and port from string: host:port
      * 
      * @param hostPort
      */
     protected void setHostPort(String hostPort) {
-        String[] parts = StringUtils.split(hostPort, ':');
-        this.hostname = parts[0];
-        this.port = Integer.parseInt(parts[1]);
+        hostAndPort = HostAndPort.fromString(hostPort);
     }
 
     /**
@@ -127,7 +106,7 @@ public class AisTcpReader extends AisReader {
                 if (isShutdown() || isInterrupted()) {
                     return;
                 }
-                LOG.error("Source communication failed: " + e.getMessage() + ": host:port: " + hostname + ":" + port
+                LOG.error("Source communication failed: " + e.getMessage() + ": host:port: " + hostAndPort
                         + " Retry in " + reconnectInterval / 1000 + " seconds");
                 if (!isShutdown()) {
                     try {
@@ -154,22 +133,22 @@ public class AisTcpReader extends AisReader {
 
     protected void connect() throws IOException {
         try {
-            LOG.info("Connecting to source " + hostname + ":" + port);
+            LOG.info("Connecting to source " + hostAndPort);
             clientSocket.set(new Socket());
-            InetSocketAddress address = new InetSocketAddress(hostname, port);
+            InetSocketAddress address = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
             clientSocket.get().connect(address);
             if (timeout > 0) {
                 clientSocket.get().setSoTimeout(timeout * 1000);
             }
             clientSocket.get().setKeepAlive(true);
             outputStream = clientSocket.get().getOutputStream();
-            LOG.info("Connected to source " + hostname + ":" + port);
+            LOG.info("Connected to source " + hostAndPort);
         } catch (UnknownHostException e) {
-            LOG.error("Unknown host: " + hostname + ": " + e.getMessage());
+            LOG.error("Unknown host: " + hostAndPort.getHostText() + ": " + e.getMessage());
             throw e;
         } catch (IOException e) {
             if (!isShutdown()) {
-                LOG.error("Could not connect to: " + hostname + ": " + e.getMessage());
+                LOG.error("Could not connect to: " + hostAndPort + ": " + e.getMessage());
             }
             throw e;
         }
@@ -178,7 +157,7 @@ public class AisTcpReader extends AisReader {
     protected void disconnect() {
         if (getStatus() == Status.CONNECTED) {
             try {
-                LOG.info("Disconnecting source " + hostname + ":" + port);
+                LOG.info("Disconnecting source " + hostAndPort);
                 clientSocket.get().close();
             } catch (IOException ignored) {}
         }
@@ -242,7 +221,7 @@ public class AisTcpReader extends AisReader {
      * @return
      */
     public String getHostname() {
-        return hostname;
+        return hostAndPort.getHostText();
     }
 
     /**
@@ -251,7 +230,7 @@ public class AisTcpReader extends AisReader {
      * @return
      */
     public int getPort() {
-        return port;
+        return hostAndPort.getPort();
     }
 
     public String toString() {

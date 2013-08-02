@@ -59,9 +59,16 @@ public class AisReaderGroup implements Iterable<AisReader> {
 
     final ReentrantLock lock = new ReentrantLock();
 
+    public void addReader(String url) {
+
+    }
+
     void add(AisReader reader) {
         lock.lock();
         try {
+            if (readers.containsKey(reader.getSourceId())) {
+
+            }
             readers.put(reader.getSourceId(), reader);
             subscriptions.put(reader, reader.stream().subscribe(new Consumer<AisPacket>() {
                 public void accept(AisPacket p) {
