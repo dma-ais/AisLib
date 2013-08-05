@@ -99,7 +99,7 @@ public class AisFilter {
         if (filename != null) {
             aisReader = AisReaders.createReaderFromInputStream(new FileInputStream(filename));
         } else {
-            AisTcpReader rrAisReader = AisReaders.createForHosts(hostPort);
+            AisTcpReader rrAisReader = AisReaders.createReader(hostPort);
             rrAisReader.setTimeout(timeout);
             aisReader = rrAisReader;
         }

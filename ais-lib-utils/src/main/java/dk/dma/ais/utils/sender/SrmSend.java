@@ -35,7 +35,7 @@ public final class SrmSend implements Consumer<Abk> {
     private AisReader aisReader;
 
     private SrmSend(String hostPort) {
-        aisReader = AisReaders.createForHosts(hostPort);
+        aisReader = AisReaders.createReader(hostPort);
         // Start reader thread
         aisReader.start();
     }

@@ -38,7 +38,7 @@ public class SendAsmTest {
         int destination = 992199100; // SOK
 
         // Make AisReader instance and start
-        AisReader aisReader = AisReaders.createForHosts(hostPort);
+        AisReader aisReader = AisReaders.createReader(hostPort);
         aisReader.start();
         Thread.sleep(3000);
         if (aisReader.getStatus() != Status.CONNECTED) {

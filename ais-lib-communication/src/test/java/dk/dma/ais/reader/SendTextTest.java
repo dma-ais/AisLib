@@ -102,7 +102,7 @@ public class SendTextTest {
     private void sendAddressedWithPrefix(String hostPort, int destination, String message, List<String> prefixSentences)
             throws InterruptedException, SendException {
         // Make AisReader instance and start
-        AisReader aisReader = AisReaders.createForHosts(hostPort);
+        AisReader aisReader = AisReaders.createReader(hostPort);
         aisReader.start();
         Thread.sleep(3000);
         if (aisReader.getStatus() != Status.CONNECTED) {
@@ -134,7 +134,7 @@ public class SendTextTest {
     private void sendAddressedTextSimple(String hostPort, int destination, String message) throws InterruptedException,
             SendException {
         // Make AisReader instance and start
-        AisReader aisReader = AisReaders.createForHosts(hostPort);
+        AisReader aisReader = AisReaders.createReader(hostPort);
         aisReader.start();
         Thread.sleep(3000);
         if (aisReader.getStatus() != Status.CONNECTED) {

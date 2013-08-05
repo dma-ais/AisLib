@@ -55,8 +55,8 @@ public class DoubletFilterTest {
         });
 
         // Connect to unfiltered sources
-        AisTcpReader reader1 = AisReaders.createForHosts("ais163.sealan.dk:65262");
-        AisTcpReader reader2 = AisReaders.createForHosts("10.10.5.144:65061");
+        AisTcpReader reader1 = AisReaders.createReader("ais163.sealan.dk:65262");
+        AisTcpReader reader2 = AisReaders.createReader("10.10.5.144:65061");
 
         reader1.registerHandler(doubletFilter);
         reader2.registerHandler(doubletFilter);
@@ -91,7 +91,7 @@ public class DoubletFilterTest {
         });
 
         // Connect to unfiltered sources
-        AisTcpReader reader1 = AisReaders.createForHosts("ais163.sealan.dk:4712");
+        AisTcpReader reader1 = AisReaders.createReader("ais163.sealan.dk:4712");
 
         reader1.registerHandler(filter);
         reader1.start();

@@ -1,26 +1,31 @@
-/*
- * Copyright (c) 2008 Kasper Nielsen.
+/* Copyright (c) 2011 Danish Maritime Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 package dk.dma.ais.reader;
 
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
+import javax.management.JMException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -33,6 +38,61 @@ import com.google.common.net.HostAndPort;
  * @author Kasper Nielsen
  */
 public class AisReaders {
+
+    /**
+     * Equivalent to {@link #parseSource(String)} except that it will parse an array of sources. Returning a map making
+     * sure there all source names are unique
+     */
+    public static AisReaderGroup createGroup(String name, List<String> sources) {
+        Map<String, AisTcpReader> readers = new HashMap<>();
+        for (String s : sources) {
+            AisTcpReader r = parseSource(s);
+            if (readers.put(r.getSourceId(), r) != null) {
+                // Make sure its unique
+                throw new Error("More than one reader specified with the same source id (id =" + r.getSourceId()
+                        + "), source string = " + sources);
+            }
+        }
+        AisReaderGroup g = new AisReaderGroup(name);
+        for (AisTcpReader r : readers.values()) {
+            g.add(r);
+        }
+        return g;
+    }
+
+    /**
+     * Creates a default group from reader available in the system property ais.default.sources
+     * 
+     * @return a new reader group
+     * @see #getDefaultSources()
+     */
+    public static AisReaderGroup createGroupFromDefaultsSource() {
+        return createGroup("defaults", Arrays.asList(getDefaultSources()));
+    }
+
+    /**
+     * Creates a {@link AisTcpReader} from a list of one or more hosts. On the form: host1:port1,...,hostN:portN
+     * 
+     * @param commaHostPort
+     */
+    public static AisTcpReader createReader(String commaHostPort) {
+        AisTcpReader r = new AisTcpReader();
+        String[] hostPorts = StringUtils.split(commaHostPort, ",");
+        for (String hp : hostPorts) {
+            r.addHostPort(HostAndPort.fromString(hp));
+        }
+        return r;
+    }
+
+    public static AisTcpReader createReader(String hostname, int port) {
+        AisTcpReader r = new AisTcpReader();
+        r.addHostPort(HostAndPort.fromParts(hostname, port));
+        return r;
+    }
+
+    public static AisReader createReaderFromInputStream(InputStream inputStream) {
+        return new AisStreamReader(inputStream);
+    }
 
     /**
      * Returns the default sources configured for the system. The default sources can be set using enviroment variable
@@ -51,35 +111,15 @@ public class AisReaders {
         return p.split(";");
     }
 
-    /**
-     * Creates a default group from reader available in the system property ais.default.sources
-     * 
-     * @return a new reader group
-     * @see #getDefaultSources()
-     */
-    public static AisReaderGroup createGroupWithDefaultsSource() {
-        return createGroup("defaults", Arrays.asList(getDefaultSources()));
-    }
+    public static void manageGroup(AisReaderGroup group) throws JMException {
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ObjectName mxbeanName = new ObjectName("dk.dma.ais.readers.group." + group.name + ":name=Group");
+        mbs.registerMBean(new AisReaderGroupMXBeanImpl(group), mxbeanName);
+        for (AisTcpReader r : group.readers.values()) {
+            mxbeanName = new ObjectName("dk.dma.ais.readers.group." + group.name + ":source=Source-" + r.getSourceId());
+            mbs.registerMBean(new AisReaderMXBeanImpl(r), mxbeanName);
 
-    /**
-     * Equivalent to {@link #parseSource(String)} except that it will parse an array of sources. Returning a map making
-     * sure there all source names are unique
-     */
-    public static AisReaderGroup createGroup(String name, List<String> sources) {
-        Map<String, AisTcpReader> readers = new HashMap<>();
-        for (String s : sources) {
-            AisTcpReader r = parseSource(s);
-            if (readers.put(r.getSourceId(), r) != null) {
-                // Make sure its unique
-                throw new Error("More than one reader specified with the same source id (id =" + r.getSourceId()
-                        + "), source string = " + sources);
-            }
         }
-        AisReaderGroup g = new AisReaderGroup();
-        for (AisTcpReader r : readers.values()) {
-            g.add(r);
-        }
-        return g;
     }
 
     /**
@@ -121,29 +161,4 @@ public class AisReaders {
             return r;
         }
     }
-
-    public static AisReader createReaderFromInputStream(InputStream inputStream) {
-        return new AisStreamReader(inputStream);
-    }
-
-    public static AisTcpReader createReader(String hostname, int port) {
-        AisTcpReader r = new AisTcpReader();
-        r.addHostPort(HostAndPort.fromParts(hostname, port));
-        return r;
-    }
-
-    /**
-     * Set hosts and ports from a comma separated list on the form: host1:port1,...,hostN:portN
-     * 
-     * @param commaHostPort
-     */
-    public static AisTcpReader createForHosts(String commaHostPort) {
-        AisTcpReader r = new AisTcpReader();
-        String[] hostPorts = StringUtils.split(commaHostPort, ",");
-        for (String hp : hostPorts) {
-            r.addHostPort(HostAndPort.fromString(hp));
-        }
-        return r;
-    }
-
 }

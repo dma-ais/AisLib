@@ -56,7 +56,10 @@ public class AisPacket implements Comparable<AisPacket> {
         this.receiveTimestamp = receiveTimestamp;
     }
 
-    // Use static factory AisPacket from(String stringMessage) {
+    /**
+     * @param stringMessage
+     * @deprecated Use static factory AisPacket from(String stringMessage)
+     */
     @Deprecated
     public AisPacket(String stringMessage) {
         this(stringMessage, System.currentTimeMillis());

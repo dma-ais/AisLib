@@ -15,6 +15,8 @@
  */
 package dk.dma.ais.reader;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,7 +31,6 @@ import com.google.common.util.concurrent.Service;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketStream;
-import dk.dma.ais.packet.AisPacketStream.Subscription;
 import dk.dma.ais.packet.AisPacketStreams;
 import dk.dma.enav.util.function.Consumer;
 
@@ -48,16 +49,23 @@ public class AisReaderGroup implements Iterable<AisReader> {
     final ReentrantLock lock = new ReentrantLock();
 
     /** All readers configured for this group. */
-    final ConcurrentHashMapV8<String, AisReader> readers = new ConcurrentHashMapV8<>();
+    final ConcurrentHashMapV8<String, AisTcpReader> readers = new ConcurrentHashMapV8<>();
 
     /** All current subscriptions. */
     final ConcurrentHashMapV8<AisReader, AisPacketStream.Subscription> subscriptions = new ConcurrentHashMapV8<>();
 
-    void add(AisReader reader) {
+    final String name;
+
+    AisReaderGroup(String name) {
+        this.name = requireNonNull(name);
+    }
+
+    void add(AisTcpReader reader) {
         lock.lock();
         try {
             if (readers.containsKey(reader.getSourceId())) {
-
+                throw new IllegalArgumentException("A reader with the specified source has already been added, id = "
+                        + reader.getSourceId());
             }
             readers.put(reader.getSourceId(), reader);
             subscriptions.put(reader, reader.stream().subscribe(new Consumer<AisPacket>() {
@@ -70,48 +78,61 @@ public class AisReaderGroup implements Iterable<AisReader> {
         }
     }
 
-    public void addReader(String url) {
-
-    }
-
     public Service asService() {
         return new AbstractIdleService() {
             @Override
             protected void shutDown() throws Exception {
-                for (AisReader r : readers.values()) {
-                    LOG.info("Trying to stop reader " + r);
-                    r.stopReader();
-                }
-                for (AisReader r : readers.values()) {
-                    try {
-                        LOG.info("Trying to join reader thread" + r);
-                        r.join();
-                    } catch (InterruptedException e) {
-                        LOG.error("Interrupted while waiting for shutdown", e);
+                lock.lock();
+                try {
+                    for (AisReader r : readers.values()) {
+                        LOG.info("Trying to stop reader " + r);
+                        r.stopReader();
                     }
+                    for (AisReader r : readers.values()) {
+                        try {
+                            LOG.info("Trying to join reader thread" + r);
+                            r.join();
+                        } catch (InterruptedException e) {
+                            LOG.error("Interrupted while waiting for shutdown", e);
+                        }
+                    }
+                } finally {
+                    lock.unlock();
                 }
             }
 
             @Override
             protected void startUp() throws Exception {
-                for (AisReader r : readers.values()) {
-                    r.start();
+                lock.lock();
+                try {
+                    for (AisReader r : readers.values()) {
+                        r.start();
+                    }
+                } finally {
+                    lock.unlock();
                 }
             }
         };
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Iterator<AisReader> iterator() {
-        return Collections.unmodifiableCollection(readers.values()).iterator();
+        return (Iterator) Collections.unmodifiableCollection(readers.values()).iterator();
     }
 
-    void remove(String name) {
-        AisReader reader = readers.get(name);
-        if (reader != null) {
-            Subscription s = subscriptions.remove(reader);
-            s.cancel();
+    boolean remove(String name) {
+        lock.lock();
+        try {
+            AisReader reader = readers.get(name);
+            if (reader != null) {
+                subscriptions.remove(reader).cancel();
+            }
+            reader.stopReader();
+            return reader != null;
+        } finally {
+            lock.unlock();
         }
     }
 
