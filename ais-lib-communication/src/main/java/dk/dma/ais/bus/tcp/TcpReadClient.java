@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.enav.util.function.Consumer;
 
 /**
@@ -36,9 +37,10 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
     private static final Logger LOG = LoggerFactory.getLogger(TcpReadClient.class);
 
     private final Consumer<AisPacket> packetConsumer;
-    private final AtomicReference<AisStreamReader> reader = new AtomicReference<>();
+    private final AtomicReference<AisReader> reader = new AtomicReference<>();
 
-    public TcpReadClient(Consumer<AisPacket> packetConsumer, IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
+    public TcpReadClient(Consumer<AisPacket> packetConsumer, IClientStoppedListener stopListener, Socket socket,
+            TcpClientConf conf) {
         super(stopListener, socket, conf);
         this.packetConsumer = packetConsumer;
     }
@@ -54,7 +56,7 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
             } else {
                 inputStream = socket.getInputStream();
             }
-            reader.set(new AisStreamReader(inputStream));
+            reader.set(AisReaders.createReaderFromInputStream(inputStream));
             reader.get().registerPacketHandler(this);
             reader.get().start();
             reader.get().join();
@@ -62,22 +64,20 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
             if (!isInterrupted()) {
                 LOG.info(e.getMessage());
             }
-        } catch (InterruptedException e) {
-        }
+        } catch (InterruptedException e) {}
 
         try {
             socket.close();
-        } catch (IOException e) {
-        }
+        } catch (IOException e) {}
 
         stopping();
 
         LOG.info("Stopped");
     }
-    
+
     @Override
     public void cancel() {
-        AisStreamReader r = reader.get();
+        AisReader r = reader.get();
         if (r != null) {
             r.stopReader();
         }

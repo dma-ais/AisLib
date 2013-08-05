@@ -28,17 +28,17 @@ public class AisReaderGroupTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void parseFailNoHostNamePorts1() {
-        AisReaderGroup.parseSource("sdsd");
+        AisReaders.parseSource("sdsd");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void parseFailNoHostNamePorts2() {
-        AisReaderGroup.parseSource("sdsd=");
+        AisReaders.parseSource("sdsd=");
     }
 
     @Test
     public void parseOneHost() {
-        AisTcpReader r = AisReaderGroup.parseSource("sdsd=ff:123");
+        AisTcpReader r = AisReaders.parseSource("sdsd=ff:123");
         assertSame(AisTcpReader.class, r.getClass());
         assertEquals("ff", r.getHostname());
         assertEquals(123, r.getPort());
@@ -47,15 +47,13 @@ public class AisReaderGroupTest {
 
     @Test
     public void parseTwoHosts() {
-        AisTcpReader r = AisReaderGroup.parseSource("sdsd=ff:123, dd:1235");
-        assertSame(RoundRobinAisTcpReader.class, r.getClass());
-        RoundRobinAisTcpReader tr = (RoundRobinAisTcpReader) r;
+        AisTcpReader tr = AisReaders.parseSource("sdsd=ff:123, dd:1235");
         assertEquals("ff", tr.hosts.get(0).getHostText());
         assertEquals("dd", tr.hosts.get(1).getHostText());
         assertEquals(123, tr.hosts.get(0).getPort());
         assertEquals(1235, tr.hosts.get(1).getPort());
         assertEquals(2, tr.getHostCount());
-        assertEquals("sdsd", r.getSourceId());
+        assertEquals("sdsd", tr.getSourceId());
     }
 
 }

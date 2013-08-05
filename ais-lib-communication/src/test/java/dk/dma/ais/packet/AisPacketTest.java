@@ -28,7 +28,8 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
-import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.enav.util.function.Consumer;
 
@@ -43,7 +44,7 @@ public class AisPacketTest {
         Assert.assertNotNull(inputStream);
 
         // Make AIS reader instance
-        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
         // Set the source name
         aisReader.setSourceId("some_file_dump");
 
@@ -90,10 +91,11 @@ public class AisPacketTest {
         Assert.assertNotNull(inputStream);
 
         // Make AIS reader instance
-        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
         aisReader.registerPacketHandler(new Consumer<AisPacket>() {
-            final int[] senders = {563510000, 211235220, 2655619, 246250000, 205634000, 211462260};
+            final int[] senders = { 563510000, 211235220, 2655619, 246250000, 205634000, 211462260 };
             int count;
+
             @Override
             public void accept(AisPacket aisPacket) {
                 AisMessage message = null;

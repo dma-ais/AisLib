@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.message.AisMessage12;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisTcpReader;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.SendException;
 import dk.dma.ais.reader.SendRequest;
 import dk.dma.ais.sentence.Abk;
@@ -35,7 +35,7 @@ public final class SrmSend implements Consumer<Abk> {
     private AisReader aisReader;
 
     private SrmSend(String hostPort) {
-        aisReader = new AisTcpReader(hostPort);
+        aisReader = AisReaders.createForHosts(hostPort);
         // Start reader thread
         aisReader.start();
     }

@@ -18,6 +18,7 @@ package dk.dma.ais.configuration.reader;
 import java.io.FileNotFoundException;
 
 import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.AisTcpReader;
 
 public class AisTcpReaderConfiguration extends AisReaderConfiguration {
@@ -29,7 +30,7 @@ public class AisTcpReaderConfiguration extends AisReaderConfiguration {
 
     @Override
     public AisReader getInstance() throws FileNotFoundException {
-        AisTcpReader aisTcpReader = new AisTcpReader(hostname, port);
+        AisTcpReader aisTcpReader = AisReaders.createReader(hostname, port);
         aisTcpReader.setReconnectInterval(reconnectInterval);
         aisTcpReader.setTimeout(timeout);
 

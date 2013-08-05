@@ -42,7 +42,8 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.proprietary.ProprietaryFactory;
-import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
@@ -78,7 +79,7 @@ public class DecodeTest {
         Assert.assertNotNull(inputStream);
 
         // Make AIS reader instance
-        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
         // Register handlers
         aisReader.registerHandler(baseHandler);
         aisReader.registerHandler(posHandler);
@@ -180,7 +181,7 @@ public class DecodeTest {
         Assert.assertNotNull(inputStream);
 
         // Make AIS reader instance
-        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
         aisReader.start();
         aisReader.join();
     }
@@ -194,7 +195,7 @@ public class DecodeTest {
         Assert.assertNotNull(inputStream);
 
         // Make AIS reader instance
-        AisStreamReader aisReader = new AisStreamReader(inputStream);
+        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
         aisReader.registerHandler(new Consumer<AisMessage>() {
             @Override
             public void accept(AisMessage message) {
@@ -259,7 +260,7 @@ public class DecodeTest {
         try (FileInputStream inputStream = new FileInputStream(filename)) {
 
             // Make AIS reader instance
-            AisStreamReader aisReader = new AisStreamReader(inputStream);
+            AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
             aisReader.registerPacketHandler(new Consumer<AisPacket>() {
                 @Override
                 public void accept(AisPacket packet) {

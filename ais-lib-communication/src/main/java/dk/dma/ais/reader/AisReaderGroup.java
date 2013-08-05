@@ -15,14 +15,8 @@
  */
 package dk.dma.ais.reader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
 import jsr166e.ConcurrentHashMapV8;
@@ -30,7 +24,6 @@ import jsr166e.ConcurrentHashMapV8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.net.HostAndPort;
 import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.common.util.concurrent.Service;
 
@@ -49,19 +42,16 @@ public class AisReaderGroup implements Iterable<AisReader> {
     /** The logger. */
     static final Logger LOG = LoggerFactory.getLogger(AisReaderGroup.class);
 
-    final ConcurrentHashMapV8<String, AisReader> readers = new ConcurrentHashMapV8<>();
-
-    final ConcurrentHashMapV8<AisReader, AisPacketStream.Subscription> subscriptions = new ConcurrentHashMapV8<>();
-
+    /** A stream of all incoming packets. */
     final AisPacketStream stream = AisPacketStreams.newStream();
-
-    final AisPacketStream immutableStream = AisPacketStreams.immutableStream(stream);
 
     final ReentrantLock lock = new ReentrantLock();
 
-    public void addReader(String url) {
+    /** All readers configured for this group. */
+    final ConcurrentHashMapV8<String, AisReader> readers = new ConcurrentHashMapV8<>();
 
-    }
+    /** All current subscriptions. */
+    final ConcurrentHashMapV8<AisReader, AisPacketStream.Subscription> subscriptions = new ConcurrentHashMapV8<>();
 
     void add(AisReader reader) {
         lock.lock();
@@ -80,34 +70,12 @@ public class AisReaderGroup implements Iterable<AisReader> {
         }
     }
 
-    void remove(String name) {
-        AisReader reader = readers.get(name);
-        if (reader != null) {
-            Subscription s = subscriptions.remove(reader);
-            s.cancel();
-        }
-    }
+    public void addReader(String url) {
 
-    public AisPacketStream stream() {
-        return immutableStream;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Iterator<AisReader> iterator() {
-        return Collections.unmodifiableCollection(readers.values()).iterator();
     }
 
     public Service asService() {
         return new AbstractIdleService() {
-
-            @Override
-            protected void startUp() throws Exception {
-                for (AisReader r : readers.values()) {
-                    r.start();
-                }
-            }
-
             @Override
             protected void shutDown() throws Exception {
                 for (AisReader r : readers.values()) {
@@ -123,93 +91,36 @@ public class AisReaderGroup implements Iterable<AisReader> {
                     }
                 }
             }
+
+            @Override
+            protected void startUp() throws Exception {
+                for (AisReader r : readers.values()) {
+                    r.start();
+                }
+            }
         };
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public Iterator<AisReader> iterator() {
+        return Collections.unmodifiableCollection(readers.values()).iterator();
+    }
+
+    void remove(String name) {
+        AisReader reader = readers.get(name);
+        if (reader != null) {
+            Subscription s = subscriptions.remove(reader);
+            s.cancel();
+        }
+    }
+
     /**
-     * Parses the string and returns either an {@link AisTcpReader} if only one hostname is found or a
-     * {@link RoundRobinAisTcpReader} if more than 1 host name is found. Example
-     * "mySource=ais163.sealan.dk:65262,ais167.sealan.dk:65261" will return a RoundRobinAisTcpReader alternating between
-     * the two sources if one is down.
+     * Returns a stream of all incoming packets.
      * 
-     * @param fullSource
-     *            the full source
-     * @return a ais reader
+     * @return a stream of all incoming packets
      */
-    static AisTcpReader parseSource(String fullSource) {
-        try (Scanner s = new Scanner(fullSource);) {
-            s.useDelimiter("\\s*=\\s*");
-            if (!s.hasNext()) {
-                throw new IllegalArgumentException("Source must be of the format src=host:port,host:port, was "
-                        + fullSource);
-            }
-            String src = s.next();
-            List<String> hosts = new ArrayList<>();
-            if (!s.hasNext()) {
-                throw new IllegalArgumentException(
-                        "A list of hostname:ports must follow the source (format src=host:port,host:port), was "
-                                + fullSource);
-            }
-            try (Scanner s1 = new Scanner(s.next())) {
-                s1.useDelimiter("\\s*,\\s*");
-                if (!s1.hasNext()) {
-                    throw new IllegalArgumentException(
-                            "Source must have at least one host:port (format src=host:port,host:port), was "
-                                    + fullSource);
-                }
-                while (s1.hasNext()) {
-                    String hostPort = s1.next();
-                    HostAndPort hap = HostAndPort.fromString(hostPort);
-                    hosts.add(hap.toString());
-                }
-            }
-
-            final AisTcpReader r = hosts.size() == 1 ? new AisTcpReader(hosts.get(0)) : new RoundRobinAisTcpReader(
-                    hosts);
-            r.setSourceId(src);
-            return r;
-        }
+    public AisPacketStream stream() {
+        return AisPacketStreams.immutableStream(stream);
     }
-
-    public static String[] getDefaultSources() {
-        String p = System.getenv("AIS_DEFAULT_SOURCES");
-        if (p == null) {
-            p = System.getProperty("AIS_DEFAULT_SOURCES");
-            if (p == null) {
-                throw new IllegalStateException("The property AIS_DEFAULT_SOURCES has not been set");
-            }
-        }
-        return p.split(";");
-    }
-
-    /**
-     * Creates a default group from reader available in the system property ais.default.sources
-     * 
-     * @return
-     */
-    public static AisReaderGroup create() {
-        return create(Arrays.asList(getDefaultSources()));
-    }
-
-    /**
-     * Equivalent to {@link #parseSource(String)} except that it will parse an array of sources. Returning a map making
-     * sure there all source names are unique
-     */
-    public static AisReaderGroup create(List<String> sources) {
-        Map<String, AisTcpReader> readers = new HashMap<>();
-        for (String s : sources) {
-            AisTcpReader r = parseSource(s);
-            if (readers.put(r.getSourceId(), r) != null) {
-                // Make sure its unique
-                throw new Error("More than one reader specified with the same source id (id =" + r.getSourceId()
-                        + "), source string = " + sources);
-            }
-        }
-        AisReaderGroup g = new AisReaderGroup();
-        for (AisTcpReader r : readers.values()) {
-            g.add(r);
-        }
-        return g;
-    }
-
 }

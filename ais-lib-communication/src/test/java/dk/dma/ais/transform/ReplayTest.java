@@ -24,11 +24,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.enav.util.function.Consumer;
 
 public class ReplayTest {
-    
+
     @Test
     public void replayTest() throws IOException, InterruptedException {
         // Open input stream
@@ -37,13 +38,14 @@ public class ReplayTest {
         InputStream inputStream = new GZIPInputStream(url.openStream());
         Assert.assertNotNull(inputStream);
         // Make AIS reader instance
-        AisStreamReader aisReader = new AisStreamReader(inputStream);
-        
+        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
+
         final ReplayTransformer trans = new ReplayTransformer();
         trans.setSpeedup(100);
-        
+
         aisReader.registerPacketHandler(new Consumer<AisPacket>() {
-            Long origOffset;            
+            Long origOffset;
+
             @Override
             public void accept(AisPacket aisPacket) {
                 trans.transform(aisPacket);
@@ -52,15 +54,15 @@ public class ReplayTest {
                 if (origOffset == null) {
                     origOffset = now - ts;
                 }
-                long offset = now - ts;                
+                long offset = now - ts;
                 long diff = offset - origOffset;
                 System.out.println("diff: " + diff);
                 System.out.println(aisPacket.getStringMessage());
             }
         });
-        
+
         aisReader.start();
-        aisReader.join();        
+        aisReader.join();
     }
 
 }

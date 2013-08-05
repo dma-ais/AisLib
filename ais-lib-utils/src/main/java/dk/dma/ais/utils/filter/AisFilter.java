@@ -24,8 +24,8 @@ import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.DuplicateFilter;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
-import dk.dma.ais.reader.AisStreamReader;
-import dk.dma.ais.reader.RoundRobinAisTcpReader;
+import dk.dma.ais.reader.AisReaders;
+import dk.dma.ais.reader.AisTcpReader;
 
 /**
  * Simple application to filter AIS messages based on various filters
@@ -97,9 +97,9 @@ public class AisFilter {
         // Use TCP or file
         AisReader aisReader;
         if (filename != null) {
-            aisReader = new AisStreamReader(new FileInputStream(filename));
+            aisReader = AisReaders.createReaderFromInputStream(new FileInputStream(filename));
         } else {
-            RoundRobinAisTcpReader rrAisReader = new RoundRobinAisTcpReader(hostPort);
+            AisTcpReader rrAisReader = AisReaders.createForHosts(hostPort);
             rrAisReader.setTimeout(timeout);
             aisReader = rrAisReader;
         }
@@ -151,7 +151,7 @@ public class AisFilter {
         while (true) {
             Thread.sleep(1000);
 
-            if (aisReader instanceof AisStreamReader && aisReader.getStatus() == Status.DISCONNECTED) {
+            if (!(aisReader instanceof AisTcpReader) && aisReader.getStatus() == Status.DISCONNECTED) {
                 System.exit(0);
             }
 

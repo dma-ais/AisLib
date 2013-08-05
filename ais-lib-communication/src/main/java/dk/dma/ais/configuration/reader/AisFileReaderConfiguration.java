@@ -19,15 +19,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.ais.reader.AisReaders;
 
 public class AisFileReaderConfiguration extends AisReaderConfiguration {
     private String filePath;
 
     @Override
     public AisReader getInstance() throws FileNotFoundException {
-        AisReader aisStreamReader = new AisStreamReader(new FileInputStream(
-                filePath));
+        AisReader aisStreamReader = AisReaders.createReaderFromInputStream(new FileInputStream(filePath));
         return aisStreamReader;
     }
 

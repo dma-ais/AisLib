@@ -28,6 +28,7 @@ import com.google.inject.Injector;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketOutputStreamSinks;
 import dk.dma.ais.reader.AisReaderGroup;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.commons.app.AbstractDaemon;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedOperation;
@@ -73,7 +74,7 @@ public class FileDump extends AbstractDaemon {
         LOGGER.info("Starting file archiver with sources = " + sources);
         LOGGER.info("Archived files are written to " + backup.toPath().toAbsolutePath());
         // setup a reader group
-        AisReaderGroup g = AisReaderGroup.create(sources);
+        AisReaderGroup g = AisReaders.createGroup("filedump", sources);
 
         // Starts the backup service that will write files to disk if disconnected
         final AbstractBatchedStage<AisPacket> fileWriter = start(MessageToFileService.dateTimeService(backup.toPath(),

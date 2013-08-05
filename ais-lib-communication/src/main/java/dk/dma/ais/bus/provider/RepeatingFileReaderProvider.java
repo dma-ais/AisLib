@@ -29,31 +29,31 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.ReplayTransformer;
 import dk.dma.enav.util.function.Consumer;
 
 /**
- * Provider that reads repeatedly from the same file 
+ * Provider that reads repeatedly from the same file
  */
 @ThreadSafe
 public class RepeatingFileReaderProvider extends AisBusProvider implements Consumer<AisPacket>, Runnable {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(RepeatingFileReaderProvider.class);
-    
+
     /**
      * The AIS reader to provide packets
      */
     private AtomicReference<AisReader> aisReader = new AtomicReference<>();
     private final String filename;
     private final boolean gzip;
-    
+
     public RepeatingFileReaderProvider(String filename, boolean gzip) {
         this.filename = filename;
         this.gzip = gzip;
     }
-    
+
     @Override
     public void start() {
         super.start();
@@ -78,25 +78,25 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
             getThread().join(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }        
+        }
     }
-    
+
     @Override
     public void run() {
         InputStream stream;
-        while (true) {  
+        while (true) {
             try {
                 stream = new FileInputStream(filename);
                 if (gzip) {
                     stream = new GZIPInputStream(stream);
-                }                
+                }
             } catch (IOException e) {
                 if (!getThread().isInterrupted()) {
                     LOG.error("Failed to open stream: " + e.getMessage());
                 }
                 return;
             }
-            aisReader.set(new AisStreamReader(stream));            
+            aisReader.set(AisReaders.createReaderFromInputStream(stream));
             aisReader.get().registerPacketHandler(this);
             aisReader.get().start();
             try {
@@ -104,27 +104,26 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
             } catch (InterruptedException e) {
                 return;
             }
-            
+
             try {
                 stream.close();
-            } catch (IOException e) {
-            }
-            
+            } catch (IOException e) {}
+
             // Special handling for possible replay transformers that needs to be reset
             for (IAisPacketTransformer transformer : getPacketTransformers()) {
                 if (transformer instanceof ReplayTransformer) {
                     ((ReplayTransformer) transformer).reset();
-                }                
+                }
             }
-            
+
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 return;
             }
-            
+
         }
-        
+
     }
 
     /**
@@ -133,7 +132,7 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
     @Override
     public void accept(AisPacket packet) {
         // Push to bus
-        push(packet);        
+        push(packet);
     }
 
 }

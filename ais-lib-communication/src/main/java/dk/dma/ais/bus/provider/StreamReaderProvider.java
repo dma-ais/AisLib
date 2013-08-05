@@ -17,10 +17,9 @@ package dk.dma.ais.bus.provider;
 
 import java.io.InputStream;
 
-import dk.dma.ais.reader.AisStreamReader;
-
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
+import dk.dma.ais.reader.AisReaders;
 
 /**
  * Provider reading from stream
@@ -46,7 +45,7 @@ public class StreamReaderProvider extends AisReaderProvider {
 
     @Override
     public synchronized void init() {
-        setAisReader(new AisStreamReader(stream));
+        setAisReader(AisReaders.createReaderFromInputStream(stream));
         super.init();
     }
 
