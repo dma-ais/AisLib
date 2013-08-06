@@ -34,11 +34,11 @@ import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.Position;
 
 /**
- * Common utility methods for {@link AisPacket}.
+ * Common sink that can be used to convert AIS packets to text.
  * 
  * @author Kasper Nielsen
  */
-public class AisPacketOutputStreamSinks {
+public class AisPacketOutputSinks {
 
     /** A thread local with a default text format. */
     static final ThreadLocal<SimpleDateFormat> DEFAULT_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
@@ -164,7 +164,7 @@ public class AisPacketOutputStreamSinks {
     static List<AisPacket> readFromFile(Path p) throws IOException {
         final ConcurrentLinkedQueue<AisPacket> list = new ConcurrentLinkedQueue<>();
         AisPacket packet;
-        try (AisPacketInputStream r = new AisPacketInputStream(Files.newInputStream(p))) {
+        try (AisPacketReader r = new AisPacketReader(Files.newInputStream(p))) {
             while ((packet = r.readPacket()) != null) {
                 list.add(packet);
             }
@@ -173,10 +173,10 @@ public class AisPacketOutputStreamSinks {
     }
 
     public static OutputStreamSink<AisPacket> newTableSink(String columns, boolean writeHeader) {
-        return new TableOutputStreamSink(columns, writeHeader);
+        return new AisPacketOutputSinkTable(columns, writeHeader);
     }
 
     public static OutputStreamSink<AisPacket> newTableSink(String columns, boolean writeHeader, String seperator) {
-        return new TableOutputStreamSink(columns, writeHeader, seperator);
+        return new AisPacketOutputSinkTable(columns, writeHeader, seperator);
     }
 }

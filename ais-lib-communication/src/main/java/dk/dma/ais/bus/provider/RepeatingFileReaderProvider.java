@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.ReplayTransformer;
 import dk.dma.enav.util.function.Consumer;
@@ -96,14 +96,11 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
                 }
                 return;
             }
-            aisReader.set(AisReaders.createReaderFromInputStream(stream));
-            aisReader.get().registerPacketHandler(this);
-            aisReader.get().start();
             try {
-                aisReader.get().join();
-            } catch (InterruptedException e) {
-                return;
-            }
+                try (AisPacketReader r = new AisPacketReader(stream)) {
+                    r.forEachRemaining(this);
+                }
+            } catch (IOException e) {}
 
             try {
                 stream.close();

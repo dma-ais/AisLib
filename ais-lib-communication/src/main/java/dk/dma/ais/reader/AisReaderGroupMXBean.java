@@ -35,6 +35,20 @@ public interface AisReaderGroupMXBean {
     void addReader(String sourceId, String oneOrMorHosts);
 
     /**
+     * Returns the number of bytes received.
+     * 
+     * @return the number of bytes received
+     */
+    long getBytesReceived();
+
+    /**
+     * Returns the number of bytes received.
+     * 
+     * @return the number of bytes received
+     */
+    long getPacketsReceived();
+
+    /**
      * Returns the number of readers.
      * 
      * @return the number of readers
@@ -79,5 +93,25 @@ class AisReaderGroupMXBeanImpl implements AisReaderGroupMXBean {
     @Override
     public boolean removeReader(String sourceId) {
         return group.remove(sourceId);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public long getBytesReceived() {
+        long sum = 0;
+        for (AisTcpReader r : group.readers.values()) {
+            sum += r.getNumberOfBytesRead();
+        }
+        return sum;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public long getPacketsReceived() {
+        long sum = 0;
+        for (AisTcpReader r : group.readers.values()) {
+            sum += r.getNumberOfLinesRead();
+        }
+        return sum;
     }
 }

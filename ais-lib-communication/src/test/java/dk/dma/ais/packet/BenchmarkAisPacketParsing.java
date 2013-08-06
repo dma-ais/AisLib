@@ -13,12 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package benchmark;
+package dk.dma.ais.packet;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -26,13 +25,13 @@ import org.junit.Assert;
 import com.google.common.io.Files;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketReader;
+import dk.dma.ais.packet.AisPacketParser;
 
 /**
  * 
  * @author Kasper Nielsen
  */
-public class BenchmarkAisPacketParsingFromByteArray {
+public class BenchmarkAisPacketParsing {
 
     public static void main(String[] args) throws Exception {
         URL url = ClassLoader.getSystemResource("replay_dump.txt");
@@ -42,34 +41,29 @@ public class BenchmarkAisPacketParsingFromByteArray {
         System.out.println(f);
         List<String> list = Files.readLines(f, StandardCharsets.US_ASCII);
 
-        List<byte[]> data = new ArrayList<>();
-        AisPacketReader apr = new AisPacketReader();
-        for (String s : list) {
-            AisPacket p = apr.readLine(s);
-            if (p != null) {
-                data.add(p.toByteArray());
-            }
-        }
         // Warm up
-
+        AisPacketParser apr = new AisPacketParser();
         for (int i = 0; i < 100; i++) {
-            for (byte[] b : data) {
-                AisPacket p = AisPacket.fromByteArray(b);
-                p.getAisMessage();
+            for (String s : list) {
+                AisPacket p = apr.readLine(s);
+                if (p != null) {
+                    p.getAisMessage();
+                }
             }
         }
         Thread.sleep(100);
         long l = 0;
         long now = System.nanoTime();
         for (int i = 0; i < 10000; i++) {
-            for (byte[] b : data) {
-                AisPacket p = AisPacket.fromByteArray(b);
-                l++;
-                p.getAisMessage();
+            for (String s : list) {
+                AisPacket p = apr.readLine(s);
+                if (p != null) {
+                    l++;
+                    p.getAisMessage();
+                }
             }
         }
-        double totalTime = System.nanoTime() - now;
-        double total = totalTime / 1000d / 1000d / 1000d;
+        double total = (System.nanoTime() - now) / 1000d / 1000 / 1000;
         System.out.println("Total processed:" + l + ", " + l / total + " packets/second");
     }
 }

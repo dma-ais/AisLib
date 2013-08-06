@@ -32,9 +32,8 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketInputStream;
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketStream;
-import dk.dma.ais.packet.AisPacketStreams;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.IQueueEntryHandler;
@@ -151,7 +150,7 @@ public abstract class AisReader extends Thread {
      * @throws IOException
      */
     protected void readLoop(InputStream stream) throws IOException {
-        try (AisPacketInputStream s = new AisPacketInputStream(stream) {
+        try (AisPacketReader s = new AisPacketReader(stream) {
             @Override
             protected void handleAbk(Abk abk) {
                 sendThreadPool.handleAbk(abk);
@@ -293,13 +292,13 @@ public abstract class AisReader extends Thread {
      * @return the stream
      */
     public AisPacketStream stream() {
-        final AisPacketStream s = AisPacketStreams.newStream();
+        final AisPacketStream s = AisPacketStream.newStream();
         registerPacketHandler(new Consumer<AisPacket>() {
             public void accept(AisPacket p) {
                 s.add(p);
             }
         });
-        return AisPacketStreams.immutableStream(s);// Only adds from reader
+        return s.immutableStream();// Only adds from reader
     }
 
     public enum Status {

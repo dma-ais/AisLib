@@ -47,10 +47,10 @@ import dk.dma.commons.util.io.OutputStreamSink;
  * 
  * @author Kasper Nielsen
  */
-class TableOutputStreamSink extends OutputStreamSink<AisPacket> {
+class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
 
     /** Just a placeholder for NULL in the methods map. */
-    private static final Method NULL = TableOutputStreamSink.class.getDeclaredMethods()[0];
+    private static final Method NULL = AisPacketOutputSinkTable.class.getDeclaredMethods()[0];
 
     /** The column we are writing. */
     private final String[] columns;
@@ -72,11 +72,11 @@ class TableOutputStreamSink extends OutputStreamSink<AisPacket> {
 
     final boolean writeHeader;
 
-    public TableOutputStreamSink(String format, boolean writeHeader) {
+    public AisPacketOutputSinkTable(String format, boolean writeHeader) {
         this(format, writeHeader, ";");
     }
 
-    public TableOutputStreamSink(String format, boolean writeHeader, String separator) {
+    public AisPacketOutputSinkTable(String format, boolean writeHeader, String separator) {
         columns = format.split(";");
         this.writeHeader = writeHeader;
         this.separator = requireNonNull(separator).getBytes(StandardCharsets.US_ASCII);

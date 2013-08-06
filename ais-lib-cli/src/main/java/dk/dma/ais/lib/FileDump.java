@@ -26,7 +26,7 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketOutputStreamSinks;
+import dk.dma.ais.packet.AisPacketOutputSinks;
 import dk.dma.ais.reader.AisReaderGroup;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.commons.app.AbstractDaemon;
@@ -78,7 +78,7 @@ public class FileDump extends AbstractDaemon {
 
         // Starts the backup service that will write files to disk if disconnected
         final AbstractBatchedStage<AisPacket> fileWriter = start(MessageToFileService.dateTimeService(backup.toPath(),
-                backupFormat, AisPacketOutputStreamSinks.OUTPUT_TO_TEXT));
+                backupFormat, AisPacketOutputSinks.OUTPUT_TO_TEXT));
 
         start(g.asService());// connects to all sources
         g.stream().subscribe(new Consumer<AisPacket>() {

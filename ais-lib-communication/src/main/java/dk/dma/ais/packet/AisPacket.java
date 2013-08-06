@@ -218,7 +218,7 @@ public class AisPacket implements Comparable<AisPacket> {
      */
     public static AisPacket readFromString(String messageString) throws SentenceException {
         AisPacket packet = null;
-        AisPacketReader packetReader = new AisPacketReader();
+        AisPacketParser packetReader = new AisPacketParser();
         // String[] lines = StringUtils.split(messageString, "\n");
         String[] lines = messageString.split("\\r?\\n");
         for (String line : lines) {

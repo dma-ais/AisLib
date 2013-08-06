@@ -25,8 +25,7 @@ import org.junit.Test;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisReaders;
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.enav.util.function.Consumer;
 
 public class AnonymousTransformTest implements Consumer<AisPacket> {
@@ -55,20 +54,16 @@ public class AnonymousTransformTest implements Consumer<AisPacket> {
     }
 
     @Test
-    public void anonymizeTest() throws IOException, InterruptedException {
+    public void anonymizeTest() throws IOException {
         // Open input stream
         URL url = ClassLoader.getSystemResource("replay_dump.txt.gz");
         Assert.assertNotNull(url);
         InputStream inputStream = new GZIPInputStream(url.openStream());
         Assert.assertNotNull(inputStream);
 
-        // Make AIS reader instance
-        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
-        // AisReader aisReader = new AisTcpReader("ais163.sealan.dk:65262");
-
-        aisReader.registerPacketHandler(this);
-        aisReader.start();
-        aisReader.join();
+        try (AisPacketReader r = new AisPacketReader(inputStream)) {
+            r.forEachRemaining(this);
+        }
     }
 
 }

@@ -83,32 +83,25 @@ public class AisPacketTest {
     }
 
     @Test
-    public void retryTest() throws IOException, InterruptedException {
-        // Open input stream
-        URL url = ClassLoader.getSystemResource("retry_example.txt");
-        Assert.assertNotNull(url);
-        InputStream inputStream = url.openStream();
-        Assert.assertNotNull(inputStream);
+    public void retryTest() throws IOException {
 
-        // Make AIS reader instance
-        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
-        aisReader.registerPacketHandler(new Consumer<AisPacket>() {
-            final int[] senders = { 563510000, 211235220, 2655619, 246250000, 205634000, 211462260 };
-            int count;
+        try (AisPacketReader r = AisPacketReader.createFromSystemResource("retry_example.txt", false)) {
+            r.forEachRemaining(new Consumer<AisPacket>() {
+                final int[] senders = { 563510000, 211235220, 2655619, 246250000, 205634000, 211462260 };
+                int count;
 
-            @Override
-            public void accept(AisPacket aisPacket) {
-                AisMessage message = null;
-                try {
-                    message = aisPacket.getAisMessage();
-                } catch (AisMessageException | SixbitException e) {
-                    Assert.fail(e.getMessage());
+                @Override
+                public void accept(AisPacket aisPacket) {
+                    AisMessage message = null;
+                    try {
+                        message = aisPacket.getAisMessage();
+                    } catch (AisMessageException | SixbitException e) {
+                        Assert.fail(e.getMessage());
+                    }
+                    Assert.assertEquals(senders[count++], message.getUserId());
                 }
-                Assert.assertEquals(senders[count++], message.getUserId());
-            }
-        });
-        aisReader.start();
-        aisReader.join();
+            });
+        }
     }
 
     @Test

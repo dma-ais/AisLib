@@ -31,7 +31,6 @@ import com.google.common.util.concurrent.Service;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketStream;
-import dk.dma.ais.packet.AisPacketStreams;
 import dk.dma.enav.util.function.Consumer;
 
 /**
@@ -44,7 +43,7 @@ public class AisReaderGroup implements Iterable<AisReader> {
     static final Logger LOG = LoggerFactory.getLogger(AisReaderGroup.class);
 
     /** A stream of all incoming packets. */
-    final AisPacketStream stream = AisPacketStreams.newStream();
+    final AisPacketStream stream = AisPacketStream.newStream();
 
     final ReentrantLock lock = new ReentrantLock();
 
@@ -142,6 +141,6 @@ public class AisReaderGroup implements Iterable<AisReader> {
      * @return a stream of all incoming packets
      */
     public AisPacketStream stream() {
-        return AisPacketStreams.immutableStream(stream);
+        return stream.immutableStream();
     }
 }

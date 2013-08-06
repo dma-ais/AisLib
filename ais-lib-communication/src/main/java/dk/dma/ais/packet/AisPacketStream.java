@@ -15,8 +15,12 @@
  */
 package dk.dma.ais.packet;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.commons.util.io.OutputStreamSink;
@@ -28,18 +32,22 @@ import dk.dma.enav.util.function.Predicate;
  * 
  * @author Kasper Nielsen
  */
-public interface AisPacketStream {
+public abstract class AisPacketStream {
 
     /** Thrown by a subscriber to indicate that the subscription should be cancelled. */
-    RuntimeException CANCEL = new RuntimeException();
+    public static final RuntimeException CANCEL = new RuntimeException();
 
     /**
      * Adds the specified packet to the stream
      * 
      * @param packet
      *            the packet to add
+     * @throws UnsupportedOperationException
+     *             if the stream is immutable
      */
-    void add(AisPacket packet);
+    public void add(AisPacket p) {
+        throw new UnsupportedOperationException("Stream is immutable");// default stream is immutable.
+    }
 
     /**
      * Returns a new stream that only streams packets accepted by the specified predicate.
@@ -48,21 +56,113 @@ public interface AisPacketStream {
      *            the predicate to test against each element
      * @return the new stream
      */
-    AisPacketStream filter(Predicate<? super AisPacket> predicate);
+    public abstract AisPacketStream filter(Predicate<? super AisPacket> predicate);
 
-    AisPacketStream filter(String expression);
+    public AisPacketStream filter(String expression) {
+        return filter(AisPacketFilters.parseSourceFilter(expression));
+    }
 
-    AisPacketStream filterOnMessageType(int... messageTypes);
+    public AisPacketStream filterOnMessageType(int... messageTypes) {
+        return filter(AisPacketFilters.filterOnMessageType(messageTypes));
+    }
 
-    AisPacketStream limit(long limit);
+    public final AisPacketStream immutableStream() {
+        return this instanceof ImmutableAisPacketStream ? this : new ImmutableAisPacketStream(this);
+    }
 
-    Subscription subscribeMessages(Consumer<AisMessage> c);
+    public AisPacketStream limit(long limit) {
+        if (limit < 1) {
+            throw new IllegalArgumentException("Limit must be at least 1, was: " + limit);
+        }
+        final AtomicLong l = new AtomicLong(limit);
+        return filter(new Predicate<AisPacket>() {
+            public boolean test(AisPacket element) {
+                if (l.getAndDecrement() <= 0) {
+                    throw AisPacketStream.CANCEL;
+                }
+                return true;
+            }
+        });
+    }
 
-    Subscription subscribe(Consumer<AisPacket> c);
+    public abstract Subscription subscribe(Consumer<AisPacket> c);
 
-    Subscription subscribeSink(OutputStreamSink<AisPacket> sink, OutputStream os);
+    public Subscription subscribeMessages(final Consumer<AisMessage> c) {
+        requireNonNull(c);
+        if (c instanceof AisPacketStream.StreamConsumer) {
+            final AisPacketStream.StreamConsumer<AisMessage> sc = (StreamConsumer<AisMessage>) c;
+            return subscribe(new AisPacketStream.StreamConsumer<AisPacket>() {
+                public void accept(AisPacket t) {
+                    AisMessage m = t.tryGetAisMessage();
+                    if (m != null) {
+                        c.accept(m);
+                    }
+                }
 
-    public abstract class StreamConsumer<T> implements Consumer<T> {
+                public void begin() {
+                    sc.begin();
+                }
+
+                public void end(Throwable cause) {
+                    sc.end(cause);
+                }
+            });
+        } else {
+            return subscribe(new Consumer<AisPacket>() {
+                public void accept(AisPacket t) {
+                    AisMessage m = t.tryGetAisMessage();
+                    if (m != null) {
+                        c.accept(m);
+                    }
+                }
+            });
+        }
+    }
+
+    public Subscription subscribeSink(final OutputStreamSink<AisPacket> sink, final OutputStream os) {
+        requireNonNull(sink);
+        requireNonNull(os);
+        final AtomicLong l = new AtomicLong();
+        return subscribe(new StreamConsumer<AisPacket>() {
+            @Override
+            public void accept(AisPacket t) {
+                try {
+                    sink.process(os, t, l.incrementAndGet());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public void begin() {
+                try {
+                    sink.header(os);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public void end(Throwable cause) {
+                try {
+                    sink.footer(os, l.get());
+                } catch (IOException e) {
+                    if (cause == null) {// dont throw if already on exception path
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Returns a new stream.
+     * 
+     * @return the new stream
+     */
+    public static AisPacketStream newStream() {
+        return new AisPacketStreamImpl();
+    }
+
+    public static abstract class StreamConsumer<T> implements Consumer<T> {
         /** Invoked immediately before the first message is delivered. */
         public void begin() {}
 
@@ -76,7 +176,7 @@ public interface AisPacketStream {
     }
 
     /** A subcription is created each time a new consumer is added to the stream. */
-    interface Subscription {
+    public interface Subscription {
         void awaitCancelled() throws InterruptedException;
 
         boolean awaitCancelled(long timeout, TimeUnit unit) throws InterruptedException;
@@ -89,5 +189,66 @@ public interface AisPacketStream {
 
         /** Returns whether or not the subscription has been cancelled. */
         boolean isCancelled();
+    }
+
+    static class DelegatingAisPacketStream extends AisPacketStream {
+        final AisPacketStream stream;
+
+        /**
+         * @param stream
+         */
+        public DelegatingAisPacketStream(AisPacketStream stream) {
+            this.stream = requireNonNull(stream);
+        }
+
+        public void add(AisPacket p) {
+            stream.add(p);
+        }
+
+        public AisPacketStream filter(Predicate<? super AisPacket> predicate) {
+            return stream.filter(predicate);
+        }
+
+        public AisPacketStream filter(String expression) {
+            return stream.filter(expression);
+        }
+
+        public AisPacketStream filterOnMessageType(int... messageTypes) {
+            return stream.filterOnMessageType(messageTypes);
+        }
+
+        public AisPacketStream limit(long limit) {
+            return stream.limit(limit);
+        }
+
+        public Subscription subscribe(Consumer<AisPacket> c) {
+            return stream.subscribe(c);
+        }
+
+        public Subscription subscribeMessages(Consumer<AisMessage> c) {
+            return stream.subscribeMessages(c);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public Subscription subscribeSink(OutputStreamSink<AisPacket> sink, OutputStream os) {
+            return stream.subscribeSink(sink, os);
+        }
+    }
+
+    static class ImmutableAisPacketStream extends DelegatingAisPacketStream {
+
+        /**
+         * @param stream
+         */
+        public ImmutableAisPacketStream(AisPacketStream stream) {
+            super(stream);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void add(AisPacket p) {
+            throw new UnsupportedOperationException("Stream is immutable");
+        }
     }
 }

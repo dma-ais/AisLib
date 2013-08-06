@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisReaders;
 import dk.dma.enav.util.function.Consumer;
 
 /**
@@ -56,15 +56,14 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
             } else {
                 inputStream = socket.getInputStream();
             }
-            reader.set(AisReaders.createReaderFromInputStream(inputStream));
-            reader.get().registerPacketHandler(this);
-            reader.get().start();
-            reader.get().join();
+            try (AisPacketReader r = new AisPacketReader(inputStream)) {
+                r.forEachRemaining(this);
+            }
         } catch (IOException e) {
             if (!isInterrupted()) {
                 LOG.info(e.getMessage());
             }
-        } catch (InterruptedException e) {}
+        }
 
         try {
             socket.close();

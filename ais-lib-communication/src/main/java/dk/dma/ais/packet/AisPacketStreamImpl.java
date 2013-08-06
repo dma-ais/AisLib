@@ -32,27 +32,29 @@ import dk.dma.enav.util.function.Consumer;
 import dk.dma.enav.util.function.Predicate;
 
 /**
+ * The default implements of {@link AisPacketStream}.
  * 
  * @author Kasper Nielsen
  */
-class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
+class AisPacketStreamImpl extends AisPacketStream {
+
     /** The logger */
-    static final Logger LOG = LoggerFactory.getLogger(DefaultAisPacketStream.class);
+    static final Logger LOG = LoggerFactory.getLogger(AisPacketStreamImpl.class);
 
     final ConcurrentHashMapV8<SubscriptionImpl, SubscriptionImpl> map;
 
     final Predicate<? super AisPacket> predicate;
-    final DefaultAisPacketStream root;
+    final AisPacketStreamImpl root;
 
     final Object lock = new Object();
 
-    DefaultAisPacketStream() {
+    AisPacketStreamImpl() {
         this.predicate = null;
         map = new ConcurrentHashMapV8<>();
         root = null;
     }
 
-    DefaultAisPacketStream(DefaultAisPacketStream parent, Predicate<? super AisPacket> predicate) {
+    AisPacketStreamImpl(AisPacketStreamImpl parent, Predicate<? super AisPacket> predicate) {
         this.root = requireNonNull(parent);
         this.predicate = requireNonNull(predicate);
         this.map = parent.map;
@@ -81,7 +83,7 @@ class DefaultAisPacketStream extends AisPacketStreams.AbstractAisPacketStream {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public AisPacketStream filter(Predicate<? super AisPacket> predicate) {
         requireNonNull(predicate);
-        return new DefaultAisPacketStream(root == null ? this : root,
+        return new AisPacketStreamImpl(root == null ? this : root,
                 (Predicate<? super AisPacket>) (this.predicate == null ? predicate
                         : this.predicate.and((Predicate) predicate)));
     }

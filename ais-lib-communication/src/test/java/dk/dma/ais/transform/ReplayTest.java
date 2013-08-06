@@ -24,45 +24,43 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisReaders;
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.enav.util.function.Consumer;
 
 public class ReplayTest {
 
     @Test
-    public void replayTest() throws IOException, InterruptedException {
+    public void replayTest() throws IOException {
         // Open input stream
         URL url = ClassLoader.getSystemResource("replay_dump.txt.gz");
         Assert.assertNotNull(url);
         InputStream inputStream = new GZIPInputStream(url.openStream());
         Assert.assertNotNull(inputStream);
-        // Make AIS reader instance
-        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
 
+        // Make AIS reader instance
         final ReplayTransformer trans = new ReplayTransformer();
         trans.setSpeedup(100);
 
-        aisReader.registerPacketHandler(new Consumer<AisPacket>() {
-            Long origOffset;
+        try (AisPacketReader r = new AisPacketReader(inputStream)) {
+            r.forEachRemaining(new Consumer<AisPacket>() {
+                Long origOffset;
 
-            @Override
-            public void accept(AisPacket aisPacket) {
-                trans.transform(aisPacket);
-                long now = System.currentTimeMillis();
-                long ts = aisPacket.getTimestamp().getTime();
-                if (origOffset == null) {
-                    origOffset = now - ts;
+                @Override
+                public void accept(AisPacket aisPacket) {
+                    trans.transform(aisPacket);
+                    long now = System.currentTimeMillis();
+                    long ts = aisPacket.getTimestamp().getTime();
+                    if (origOffset == null) {
+                        origOffset = now - ts;
+                    }
+                    long offset = now - ts;
+                    long diff = offset - origOffset;
+                    System.out.println("diff: " + diff);
+                    System.out.println(aisPacket.getStringMessage());
                 }
-                long offset = now - ts;
-                long diff = offset - origOffset;
-                System.out.println("diff: " + diff);
-                System.out.println(aisPacket.getStringMessage());
-            }
-        });
+            });
 
-        aisReader.start();
-        aisReader.join();
+        }
     }
 
 }

@@ -18,7 +18,6 @@ package dk.dma.ais.decode;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -39,11 +38,10 @@ import dk.dma.ais.message.AisMessage6;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.binary.RouteSuggestionReply;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.proprietary.ProprietaryFactory;
-import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
@@ -66,29 +64,15 @@ public class DecodeTest {
      * @throws InterruptedException
      * 
      */
-    // @Test
+    @Test
     public void aisStreamReaderTest() throws IOException, InterruptedException {
         // Make handler instances
         BaseReportHandler baseHandler = new BaseReportHandler();
         PositionHandler posHandler = new PositionHandler();
 
-        // Open input stream
-        URL url = ClassLoader.getSystemResource("stream_example.txt");
-        Assert.assertNotNull(url);
-        InputStream inputStream = url.openStream();
-        Assert.assertNotNull(inputStream);
-
-        // Make AIS reader instance
-        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
-        // Register handlers
-        aisReader.registerHandler(baseHandler);
-        aisReader.registerHandler(posHandler);
-
-        // Start thread
-        aisReader.start();
-
-        // Wait for thread to finish
-        aisReader.join();
+        try (AisPacketReader r = AisPacketReader.createFromSystemResource("stream_example.txt", true)) {
+            r.forEachRemainingMessage(baseHandler, posHandler);
+        }
 
         // There should be 70 base stations in file
         Assert.assertEquals("Expected 70 base stations", 70, baseHandler.getBaseStations().size());
@@ -173,37 +157,23 @@ public class DecodeTest {
     }
 
     @Test
-    public void simpleDecodeTest() throws IOException, InterruptedException {
-        // Open input stream
-        URL url = ClassLoader.getSystemResource("small_example.txt");
-        Assert.assertNotNull(url);
-        InputStream inputStream = url.openStream();
-        Assert.assertNotNull(inputStream);
-
-        // Make AIS reader instance
-        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
-        aisReader.start();
-        aisReader.join();
+    public void simpleDecodeTest() throws IOException {
+        try (AisPacketReader r = AisPacketReader.createFromSystemResource("small_example.txt", true)) {
+            r.forEachRemaining(new Consumer<AisPacket>() {
+                public void accept(AisPacket t) {}
+            });
+        }
     }
 
     @Test
-    public void decodeWithCommentBlocks() throws IOException, InterruptedException {
-        // Open input stream
-        URL url = ClassLoader.getSystemResource("small_cb_example.txt");
-        Assert.assertNotNull(url);
-        InputStream inputStream = url.openStream();
-        Assert.assertNotNull(inputStream);
-
-        // Make AIS reader instance
-        AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
-        aisReader.registerHandler(new Consumer<AisMessage>() {
-            @Override
-            public void accept(AisMessage message) {
-                System.out.println(message.getVdm().getCommentBlock());
-            }
-        });
-        aisReader.start();
-        aisReader.join();
+    public void decodeWithCommentBlocks() throws IOException {
+        try (AisPacketReader r = AisPacketReader.createFromSystemResource("small_cb_example.txt", false)) {
+            r.forEachRemainingMessage(new Consumer<AisMessage>() {
+                public void accept(AisMessage t) {
+                    System.out.println(t.getVdm().getCommentBlock());
+                }
+            });
+        }
     }
 
     @Test
@@ -247,7 +217,7 @@ public class DecodeTest {
     }
 
     // @Test
-    public void makeTrackTest() throws IOException, InterruptedException {
+    public void makeTrackTest() throws IOException {
         // Open input stream
         // URL url = ClassLoader.getSystemResource("small_cb_example.txt");
         // Assert.assertNotNull(url);
@@ -257,11 +227,11 @@ public class DecodeTest {
         // String filename = "/Users/oleborup/pride_of_rotterdam_244980000.txt";
         final ArrayList<AisPositionMessage> posMessages = new ArrayList<>();
 
-        try (FileInputStream inputStream = new FileInputStream(filename)) {
+        try (FileInputStream inputStream = new FileInputStream(filename);
+                AisPacketReader r = new AisPacketReader(inputStream);) {
 
             // Make AIS reader instance
-            AisReader aisReader = AisReaders.createReaderFromInputStream(inputStream);
-            aisReader.registerPacketHandler(new Consumer<AisPacket>() {
+            r.forEachRemaining(new Consumer<AisPacket>() {
                 @Override
                 public void accept(AisPacket packet) {
                     Date t = packet.getTimestamp();
@@ -287,8 +257,6 @@ public class DecodeTest {
                     posMessages.add((AisPositionMessage) message);
                 }
             });
-            aisReader.start();
-            aisReader.join();
         }
         System.out.println("Position messages: " + posMessages.size());
 

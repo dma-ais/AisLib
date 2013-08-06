@@ -223,7 +223,7 @@ public class AisPacketFilters {
     }
 
     public static Predicate<AisPacket> parseSourceFilter(String filter) {
-        return AisPacketFiltersParseHelper.parseSourceFilter(filter);
+        return AisPacketFiltersSourceFilterParser.parseSourceFilter(filter);
     }
 
     static String skipBrackets(String s) {
