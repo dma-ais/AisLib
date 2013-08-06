@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-      <version>${dependencies.slf4j.version}</version>
+      		<version>${dependencies.slf4j.version}</version>
 		</dependency>
 	</dependencies>
 	

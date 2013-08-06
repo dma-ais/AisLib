@@ -58,7 +58,6 @@
       <artifactId>ais-lib-messages</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>dk.dma.commons</groupId>
       <artifactId>dma-commons-util</artifactId>
@@ -69,7 +68,6 @@
       <artifactId>jsr166e</artifactId>
       <version>${dependencies.jsr166e.version}</version>
     </dependency>
-
     <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
