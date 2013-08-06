@@ -38,7 +38,7 @@ import dk.dma.ais.sentence.Vdm;
  * associated comment blocks and proprietary tags.
  */
 @NotThreadSafe
-class AisPacketParser {
+public class AisPacketParser {
 
     /** The logger */
     private static final Logger LOG = LoggerFactory.getLogger(AisPacketParser.class);
@@ -70,7 +70,7 @@ class AisPacketParser {
      * @throws SentenceException
      * @throws SixbitException
      */
-    AisPacket readLine(String line) throws SentenceException {
+    public AisPacket readLine(String line) throws SentenceException {
         return readLine(line, false);
     }
 

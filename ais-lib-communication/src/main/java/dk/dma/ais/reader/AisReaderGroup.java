@@ -34,6 +34,7 @@ import dk.dma.ais.packet.AisPacketStream;
 import dk.dma.enav.util.function.Consumer;
 
 /**
+ * A reader group organizes a group of readers.
  * 
  * @author Kasper Nielsen
  */
@@ -53,6 +54,7 @@ public class AisReaderGroup implements Iterable<AisReader> {
     /** All current subscriptions. */
     final ConcurrentHashMapV8<AisReader, AisPacketStream.Subscription> subscriptions = new ConcurrentHashMapV8<>();
 
+    /** The name of the group. */
     final String name;
 
     AisReaderGroup(String name) {
@@ -136,9 +138,9 @@ public class AisReaderGroup implements Iterable<AisReader> {
     }
 
     /**
-     * Returns a stream of all incoming packets.
+     * Returns a stream of incoming packets for all the readers this group is managing.
      * 
-     * @return a stream of all incoming packets
+     * @return a stream of incoming packets for all the readers this group is managing
      */
     public AisPacketStream stream() {
         return stream.immutableStream();
