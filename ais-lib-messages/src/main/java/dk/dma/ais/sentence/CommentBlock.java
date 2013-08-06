@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.StringUtils;
-
 import net.jcip.annotations.NotThreadSafe;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Class to hold a comment block
@@ -37,10 +37,6 @@ public class CommentBlock {
     private int totalLines = -1;
     private int lastLine = -1;
     private String lastGroupId;
-
-    public CommentBlock() {
-
-    }
 
     /**
      * Add line containing comment block
@@ -161,9 +157,10 @@ public class CommentBlock {
     public Long getTimestamp() {
         return getLong("c");
     }
-    
+
     /**
      * Determine if parameter exists in comment block
+     * 
      * @param parameter
      * @return
      */
@@ -216,7 +213,7 @@ public class CommentBlock {
     public boolean isEmpty() {
         return parameterMap.size() == 0;
     }
-    
+
     /**
      * Encode comment block in 80 character lines
      * 
@@ -237,17 +234,17 @@ public class CommentBlock {
         // Get all pairs
         List<String> pairs = new ArrayList<>();
         for (Entry<String, String> pair : parameterMap.entrySet()) {
-            // Skip grouping tags 
-            if (!pair.getKey().equals("g") && !pair.getKey().matches("\\d+G\\d+")) {  
+            // Skip grouping tags
+            if (!pair.getKey().equals("g") && !pair.getKey().matches("\\d+G\\d+")) {
                 pairs.add(pair.getKey() + ":" + pair.getValue());
             }
         }
 
         // List of lines
         List<List<String>> lines = new ArrayList<>();
-        
+
         // Max len when accommodating for wrapping
-        int actualMaxLen = maxLen - 5; 
+        int actualMaxLen = maxLen - 5;
 
         List<String> currentLine = new ArrayList<>();
         lines.add(currentLine);
@@ -269,13 +266,13 @@ public class CommentBlock {
             }
         }
 
-        return wrapLines(lines);        
+        return wrapLines(lines);
     }
-    
+
     private String wrapLines(List<List<String>> lines) {
         List<String> strLines = new ArrayList<>();
         for (List<String> line : lines) {
-            String lineStr = StringUtils.join(line, ",");            
+            String lineStr = StringUtils.join(line, ",");
             int checksum = 0;
             for (int i = 0; i < lineStr.length(); i++) {
                 checksum ^= lineStr.charAt(i);

@@ -27,7 +27,6 @@ import dk.dma.ais.message.AisMessage8;
 public class Bbm extends SendSentence {
 
     public Bbm() {
-        super();
         formatter = "BBM";
         channel = '0';
     }

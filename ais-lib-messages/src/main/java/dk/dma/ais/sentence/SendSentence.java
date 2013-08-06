@@ -32,10 +32,6 @@ public abstract class SendSentence extends EncapsulatedSentence {
      */
     private static final int DATA_SENTENCE_MAX_LENGTH = 47;
 
-    public SendSentence() {
-        super();
-    }
-
     protected void encode() {
         super.encode();
         encodedFields.add(5, Integer.toString(msgId));
@@ -100,7 +96,7 @@ public abstract class SendSentence extends EncapsulatedSentence {
             sequence = 0;
         }
 
-        int sentenceCount = (sixbitString.length() / DATA_SENTENCE_MAX_LENGTH) + 1;
+        int sentenceCount = sixbitString.length() / DATA_SENTENCE_MAX_LENGTH + 1;
         SendSentence[] sentences = new SendSentence[sentenceCount];
         // Split the string
         for (int i = 0; i < sentenceCount; i++) {

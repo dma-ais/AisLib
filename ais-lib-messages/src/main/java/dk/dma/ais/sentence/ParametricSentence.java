@@ -20,10 +20,6 @@ package dk.dma.ais.sentence;
  */
 public abstract class ParametricSentence extends Sentence {
 
-    public ParametricSentence() {
-        super();
-    }
-
     /**
      * Base parse method to be used by extending classes
      */

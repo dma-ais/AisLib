@@ -32,9 +32,9 @@ import dk.dma.ais.proprietary.IProprietaryTag;
  */
 public abstract class Sentence {
 
-    protected String talker;
+    protected String talker = "AI";
     protected String formatter;
-    protected String delimiter;
+    protected String delimiter = "!";
     protected int checksum;
     protected String msgChecksum;
     protected String[] fields;
@@ -45,11 +45,6 @@ public abstract class Sentence {
     protected LinkedList<String> encodedFields;
     protected CommentBlock commentBlock;
     protected LinkedList<IProprietaryTag> tags; // Possible proprietary source tags for the message
-
-    public Sentence() {
-        talker = "AI";
-        delimiter = "!";
-    }
 
     /**
      * Abstract method that all sentence classes must implement
@@ -210,6 +205,7 @@ public abstract class Sentence {
 
     /**
      * Get checksum string representation
+     * 
      * @param checksum
      * @return
      */
@@ -221,9 +217,9 @@ public abstract class Sentence {
         return strChecksum;
     }
 
-
     /**
      * Try to get the proprietary MSSIS timestamp appended to the NMEA sentence
+     * 
      * @return
      */
     public Date getMssisTimestamp() {
@@ -239,14 +235,14 @@ public abstract class Sentence {
         for (String stamp : stamps) {
             try {
                 return new Date(Long.parseLong(stamp) * 1000);
-            } catch (NumberFormatException e) { }
+            } catch (NumberFormatException e) {}
         }
         return null;
     }
 
     /**
-     * Try to get timestamp in this order:
-     * Comment block timestamp, proprietary tag timestamp and MSSIS timestamp
+     * Try to get timestamp in this order: Comment block timestamp, proprietary tag timestamp and MSSIS timestamp
+     * 
      * @return
      */
     public Date getTimestamp() {
@@ -338,6 +334,7 @@ public abstract class Sentence {
 
     /**
      * Get original raw sentences without any prefix
+     * 
      * @return
      */
     public List<String> getRawSentences() {
@@ -346,6 +343,7 @@ public abstract class Sentence {
 
     /**
      * Get original raw sentences without any prefix joined by carriage return line feed
+     * 
      * @return
      */
     public String getRawSentencesJoined() {
@@ -381,6 +379,7 @@ public abstract class Sentence {
 
     /**
      * Get possible comment block
+     * 
      * @return
      */
     public CommentBlock getCommentBlock() {

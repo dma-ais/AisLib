@@ -36,11 +36,6 @@ public abstract class EncapsulatedSentence extends Sentence {
     protected String sixbitString = "";
     protected int padBits;
 
-    public EncapsulatedSentence() {
-        super();
-        channel = null;
-    }
-
     /**
      * Base parse method to be used by extending classes
      */

@@ -21,8 +21,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * Class representing a single comment block line
- * The parsing is somewhat relaxed
+ * Class representing a single comment block line The parsing is somewhat relaxed
  */
 public class CommentBlockLine {
 
@@ -32,17 +31,13 @@ public class CommentBlockLine {
     private String groupId;
     private int checksum;
 
-    public CommentBlockLine() {
-
-    }
-
     public void parse(String line) throws CommentBlockException {
         parameterMap = new HashMap<>();
         int start = -1;
         int end = -1;
         checksum = 0;
         // Find start, end and checksum
-        for (int i=0; i < line.length(); i++) {
+        for (int i = 0; i < line.length(); i++) {
             char c = line.charAt(i);
             if (c == '*') {
                 end = i;
@@ -86,12 +81,12 @@ public class CommentBlockLine {
             }
             String parameterCode = field.substring(0, sep);
             String value = field.substring(sep + 1);
-            
+
             // Check for grouping parameter code
             int groupCharIndex;
             if ((groupCharIndex = parameterCode.indexOf('G')) >= 0) {
                 try {
-                    lineNumber = Integer.parseInt(parameterCode.substring(0,groupCharIndex));
+                    lineNumber = Integer.parseInt(parameterCode.substring(0, groupCharIndex));
                     totalLines = Integer.parseInt(parameterCode.substring(groupCharIndex + 1, parameterCode.length()));
                 } catch (NumberFormatException e) {
                     throw new CommentBlockException("Invalid group tag: " + parameterCode);
