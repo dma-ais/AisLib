@@ -24,9 +24,6 @@ import org.junit.Assert;
 
 import com.google.common.io.Files;
 
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketParser;
-
 /**
  * 
  * @author Kasper Nielsen

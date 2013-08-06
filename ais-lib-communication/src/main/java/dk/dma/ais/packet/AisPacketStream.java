@@ -162,7 +162,7 @@ public abstract class AisPacketStream {
         return new AisPacketStreamImpl();
     }
 
-    public static abstract class StreamConsumer<T> implements Consumer<T> {
+    public abstract static class StreamConsumer<T> implements Consumer<T> {
         /** Invoked immediately before the first message is delivered. */
         public void begin() {}
 
