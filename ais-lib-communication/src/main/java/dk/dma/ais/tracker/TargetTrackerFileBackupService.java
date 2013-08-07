@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.transform.tracker;
+package dk.dma.ais.tracker;
 
 import static java.util.Objects.requireNonNull;
 
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.AbstractScheduledService;
 
 import dk.dma.ais.packet.AisPacketSource;
-import dk.dma.ais.transform.tracker.TargetTracker.MmsiTarget;
+import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
 import dk.dma.commons.util.io.IoUtil;
 
 /**
