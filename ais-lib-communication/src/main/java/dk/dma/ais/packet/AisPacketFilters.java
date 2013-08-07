@@ -28,6 +28,7 @@ import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Area;
 import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.model.geometry.PositionTime;
 import dk.dma.enav.util.function.Predicate;
 
 /**
@@ -222,6 +223,10 @@ public class AisPacketFilters {
         };
     }
 
+    public static Predicate<AisPacket> samplingFilter(Integer minDistanceInMeters, Long minDurationInMS) {
+        return new SamplerFilter(minDistanceInMeters, minDurationInMS);
+    }
+
     public static Predicate<AisPacket> parseSourceFilter(String filter) {
         return AisPacketFiltersSourceFilterParser.parseSourceFilter(filter);
     }
@@ -242,4 +247,49 @@ public class AisPacketFilters {
         }
     }
 
+    /**
+     * A non thread-safe predicate (statefull) that can be used sample duration/distance.
+     */
+    static class SamplerFilter extends Predicate<AisPacket> {
+
+        /** The latest received position that was accepted, or null if no position has been received. */
+        Position latestPosition;
+
+        /** The latest time stamp that was accepted, or null if no packets has been received. */
+        Long latestTimestamp;
+
+        /** If non-null the minimum distance traveled in meters between updates. */
+        final Integer minDistanceInMeters;
+
+        /** If non-null the minimum duration in milliseconds between updates. */
+        final Long minDurationInMS;
+
+        SamplerFilter(Integer minDistanceInMeters, Long minDurationInMS) {
+            if (minDistanceInMeters == null && minDurationInMS == null) {
+                throw new IllegalArgumentException("minDistanceInMeters and minDurationInMS cannot both be null");
+            }
+            this.minDistanceInMeters = minDistanceInMeters;
+            this.minDurationInMS = minDurationInMS;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public boolean test(AisPacket p) {
+            PositionTime pos = p.tryGetPositionTime();
+            if (pos == null) {
+                return false;
+            }
+            boolean updateDistance = minDistanceInMeters != null
+                    && (latestPosition == null || latestPosition.rhumbLineDistanceTo(pos) >= minDistanceInMeters);
+            boolean updateDuration = minDurationInMS != null
+                    && (latestTimestamp == null || pos.getTime() - latestTimestamp >= minDurationInMS);
+            if (!updateDistance && !updateDuration) {
+                return false;
+            }
+            // update latest positions
+            latestPosition = pos;
+            latestTimestamp = pos.getTime();
+            return true;
+        }
+    }
 }
