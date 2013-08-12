@@ -31,22 +31,25 @@ public class TargetInfo implements Serializable {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    /** The MMSI number of the target. */
     final int mmsi;
 
+    /** The latest positionPacket that was received. */
+    final byte[] positionPacket;
     final long positionTimestamp;
+
     final float latitude;
     final float longitude;
+
     final int heading;
     final float cog;
     final float sog;
     final byte navStatus;
-    ShipTypeColor color = ShipTypeColor.GREY;
-
-    final byte[] positionData;
 
     final long staticTimestamp;
     final byte[] staticData1;
     final byte[] staticData2;
+    ShipTypeColor color = ShipTypeColor.GREY;
 
     transient volatile boolean isBackedUp; /* = false */
 
@@ -57,8 +60,9 @@ public class TargetInfo implements Serializable {
      * @param heading
      */
     TargetInfo(int mmsi, long positionTimestamp, float latitude, float longitude, int heading, float cog, float sog,
-            byte navStatus, byte[] positionData, long staticTimestamp, byte[] staticData1, byte[] staticData2) {
+            byte navStatus, byte[] positionPacket, long staticTimestamp, byte[] staticData1, byte[] staticData2) {
         this.mmsi = mmsi;
+        // Position data
         this.positionTimestamp = positionTimestamp;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -66,25 +70,37 @@ public class TargetInfo implements Serializable {
         this.cog = cog;
         this.sog = sog;
         this.navStatus = navStatus;
-        this.positionData = positionData;
+        this.positionPacket = positionPacket;
+
+        // Static Data
         this.staticTimestamp = staticTimestamp;
         this.staticData1 = staticData1;
         this.staticData2 = staticData2;
     }
 
     public AisPacket getPositionPacket() {
-        return positionData == null ? null : AisPacket.fromByteArray(positionData);
+        return positionPacket == null ? null : AisPacket.fromByteArray(positionPacket);
     }
 
     public AisPositionMessage getPositionMessage() {
-        return positionData == null ? null : (AisPositionMessage) getPositionPacket().tryGetAisMessage();
+        return positionPacket == null ? null : (AisPositionMessage) getPositionPacket().tryGetAisMessage();
     }
 
-    public boolean hasPosition() {
-        return positionData != null;
+    /**
+     * Returns true if we have positional information.
+     * 
+     * @return true if we have positional information
+     */
+    public boolean hasPositionInfo() {
+        return positionPacket != null;
     }
 
-    public boolean hasStatic() {
+    /**
+     * Returns true if we have static information.
+     * 
+     * @return true if we have static information
+     */
+    public boolean hasStaticInfo() {
         return staticData1 != null;
     }
 
@@ -105,8 +121,8 @@ public class TargetInfo implements Serializable {
      * @return the new target
      */
     private TargetInfo updateStatic(TargetInfo other) {
-        return new TargetInfo(mmsi, positionTimestamp, latitude, longitude, heading, cog, sog, navStatus, positionData,
-                other.staticTimestamp, other.staticData1, other.staticData2);
+        return new TargetInfo(mmsi, positionTimestamp, latitude, longitude, heading, cog, sog, navStatus,
+                positionPacket, other.staticTimestamp, other.staticData1, other.staticData2);
     }
 
     static TargetInfo updatePosition(int mmsi, TargetInfo existing, long timestamp, final AisPacket packet,

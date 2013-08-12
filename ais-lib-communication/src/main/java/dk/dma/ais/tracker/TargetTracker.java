@@ -15,8 +15,11 @@
  */
 package dk.dma.ais.tracker;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import jsr166e.ConcurrentHashMapV8;
 import jsr166e.ConcurrentHashMapV8.Action;
@@ -28,8 +31,10 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
+import dk.dma.ais.packet.AisPacketStream;
 import dk.dma.ais.packet.AisPacketStream.Subscription;
 import dk.dma.ais.reader.AisReaderGroup;
+import dk.dma.enav.util.function.BiPredicate;
 import dk.dma.enav.util.function.Consumer;
 import dk.dma.enav.util.function.Predicate;
 
@@ -42,16 +47,43 @@ public class TargetTracker {
     /** All targets we are currently monitoring. */
     final ConcurrentHashMapV8<Integer, MmsiTarget> targets = new ConcurrentHashMapV8<>();
 
-    /** Cleans up old targets according to the timeout policy. Must be called regular by users of this class. */
-    public void clean() {
+    public int countNumberOfReports(final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+        requireNonNull(predicate);
+        final LongAdder la = new LongAdder();
         targets.forEachValueInParallel(new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
-                if (t.isEmpty()) {
-                    targets.remove(t.mmsi, t);
+                for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
+                    if (predicate.test(e.getKey(), e.getValue())) {
+                        la.increment();
+                    }
                 }
-                t.purgeOldEntries(1);
             }
         });
+        return la.intValue();
+    }
+
+    /**
+     * Returns the number of tracked targets.
+     * 
+     * @param sourcePredicate
+     *            a predicate that can be used on the source
+     * @return the number of tracked targets
+     */
+    public int countNumberOfTargets(final Predicate<? super AisPacketSource> sourcePredicate,
+            final Predicate<? super TargetInfo> targetPredicate) {
+        requireNonNull(sourcePredicate);
+        requireNonNull(targetPredicate);
+        final LongAdder la = new LongAdder();
+        targets.forEachValueInParallel(new Action<MmsiTarget>() {
+            public void apply(MmsiTarget t) {
+                TargetInfo best = t.getBest(sourcePredicate);
+                if (best != null && targetPredicate.test(best)) {
+                    la.increment();
+                    return;
+                }
+            }
+        });
+        return la.intValue();
     }
 
     /**
@@ -63,8 +95,10 @@ public class TargetTracker {
      *            the predicate on targets
      * @return a map of matching targets
      */
-    public Map<Integer, TargetInfo> findTargets(final Predicate<AisPacketSource> sourcePredicate,
-            final Predicate<TargetInfo> targetPredicate) {
+    public Map<Integer, TargetInfo> findTargets(final Predicate<? super AisPacketSource> sourcePredicate,
+            final Predicate<? super TargetInfo> targetPredicate) {
+        requireNonNull(sourcePredicate);
+        requireNonNull(targetPredicate);
         final ConcurrentHashMapV8<Integer, TargetInfo> result = new ConcurrentHashMapV8<>();
         targets.forEachValueInParallel(new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
@@ -77,38 +111,29 @@ public class TargetTracker {
         return result;
     }
 
-    public int countNumberOfReports(final Predicate<? super AisPacketSource> sourcePredicate) {
-        final LongAdder la = new LongAdder();
-        targets.forEachValueInParallel(new Action<MmsiTarget>() {
-            public void apply(MmsiTarget e) {
-                for (AisPacketSource s : e.keySet()) {
-                    if (sourcePredicate.test(s)) {
-                        la.increment();
-                    }
-                }
-            }
-        });
-        return la.intValue();
-    }
-
     /**
-     * Returns the number of tracked targets.
+     * Removes all targets that are accepted by the specified predicate. Is typically used to remove targets based on
+     * time stamps.
      * 
-     * @return the number of tracked targets
+     * @param predicate
+     *            the predicate that selects which items to remove
      */
-    public int countNumberOfTargets(final Predicate<? super AisPacketSource> sourcePredicate) {
-        final LongAdder la = new LongAdder();
+    public void removeAll(final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+        requireNonNull(predicate);
         targets.forEachValueInParallel(new Action<MmsiTarget>() {
-            public void apply(MmsiTarget e) {
-                for (AisPacketSource s : e.keySet()) {
-                    if (sourcePredicate.test(s)) {
-                        la.increment();
-                        return;
+            public void apply(MmsiTarget t) {
+                for (Map.Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
+                    if (predicate.test(e.getKey(), e.getValue())) {
+                        t.remove(e.getKey(), e.getValue());
                     }
+                }
+                // if there are no more targets just remove it
+                // tryUpdate contains functionality to make sure we do not have any consistency issues.
+                if (t.isEmpty()) {
+                    targets.remove(t.mmsi, t);
                 }
             }
         });
-        return la.intValue();
     }
 
     void tryUpdate(final int mmsi, Consumer<MmsiTarget> c) {
@@ -135,7 +160,7 @@ public class TargetTracker {
      * @param packet
      *            the packet to update the trigger with
      */
-    public void update(final AisPacket packet) {
+    void update(final AisPacket packet) {
         final AisMessage message = packet.tryGetAisMessage();
         final Date date = packet.getTags().getTimestamp();
         // We only want to handle messages containing targets data
@@ -149,6 +174,14 @@ public class TargetTracker {
         }
     }
 
+    /**
+     * Used by the backup routine to restore data.
+     * 
+     * @param sb
+     *            the source
+     * @param ti
+     *            the target info
+     */
     void update(final AisPacketSource sb, final TargetInfo ti) {
         tryUpdate(ti.mmsi, new Consumer<MmsiTarget>() {
             public void accept(MmsiTarget t) {
@@ -168,18 +201,19 @@ public class TargetTracker {
      *            the group
      * @return the subscription
      */
-    public Subscription updateFrom(AisReaderGroup g) {
-        return g.stream().subscribe(new Consumer<AisPacket>() {
-            @Override
+    public Subscription readFrom(AisPacketStream stream) {
+        return stream.subscribe(new Consumer<AisPacket>() {
             public void accept(AisPacket p) {
                 update(p);
             }
         });
     }
 
+    /** A single ship containing multiple reports for different combinations of sources. */
     @SuppressWarnings("serial")
     static class MmsiTarget extends ConcurrentHashMapV8<AisPacketSource, TargetInfo> {
-        /** The mmsi number */
+
+        /** The MMSI number */
         final int mmsi;
 
         MmsiTarget(int mmsi) {
@@ -194,19 +228,6 @@ public class TargetTracker {
                 }
             }
             return best;
-        }
-
-        boolean hasAny(Predicate<? super AisPacketSource> predicate) {
-            for (AisPacketSource s : keySet()) {
-                if (predicate.test(s)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        void purgeOldEntries(long before) {
-            // TODO implement
         }
 
         /** {@inheritDoc} */

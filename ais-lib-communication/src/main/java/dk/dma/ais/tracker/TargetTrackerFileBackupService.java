@@ -134,10 +134,6 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
         }
         Path p = f.toPath(backupFolder, prefix);
         try {
-            // clean if we are making a full backup
-            if (f.isFull()) {
-                tracker.clean();
-            }
             writeBackupFile(p, f.isFull());
             f = f.next();
         } catch (Exception e) {
@@ -191,34 +187,36 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
         }
     }
 
+    /** Wrapping the versioning */
     static class BackupFile {
-        final int major;
-        final int minor;
+        final int majorBackupVersion;
+        final int minorBackupVersion;
 
         BackupFile() {
             this(1, 0);
         }
 
         private BackupFile(int major, int minor) {
-            this.major = major;
-            this.minor = minor;
+            this.majorBackupVersion = major;
+            this.minorBackupVersion = minor;
         }
 
         boolean isFull() {
-            return minor == 0;
+            return minorBackupVersion == 0;
         }
 
         BackupFile next() {
-            return minor == 99 ? nextFull() : new BackupFile(major, minor + 1);
+            return minorBackupVersion == 99 ? nextFull() : new BackupFile(majorBackupVersion, minorBackupVersion + 1);
         }
 
         BackupFile nextFull() {
-            return new BackupFile((major + 1) % 100000, 0);
+            return new BackupFile((majorBackupVersion + 1) % 100000, 0);
         }
 
         Path toPath(Path directory, String prefix) {
-            return directory.resolve("aisviewer_backup-" + prefix + "-" + new DecimalFormat("00000").format(major)
-                    + "-" + new DecimalFormat("00").format(minor));
+            return directory.resolve("aisviewer_backup-" + prefix + "-"
+                    + new DecimalFormat("00000").format(majorBackupVersion) + "-"
+                    + new DecimalFormat("00").format(minorBackupVersion));
         }
     }
 }

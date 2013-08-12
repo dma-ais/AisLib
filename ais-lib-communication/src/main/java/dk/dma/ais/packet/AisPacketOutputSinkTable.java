@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -54,8 +53,6 @@ class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
 
     /** The column we are writing. */
     private final String[] columns;
-
-    private final AtomicLong counter = new AtomicLong();
 
     /** A cache of methods. */
     private final ConcurrentHashMap<Map.Entry<Class<?>, String>, Method> methods = new ConcurrentHashMap<>();
@@ -87,12 +84,11 @@ class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
     public void process(OutputStream stream, AisPacket packet, long count) throws IOException {
         AisMessage m = packet.tryGetAisMessage();
         if (m != null) {
-            long n = counter.incrementAndGet();
             for (int i = 0; i < columns.length; i++) {
                 String c = columns[i];
                 // Special columns
                 if (c.equals("n")) {
-                    stream.write(Long.toString(n).getBytes(StandardCharsets.US_ASCII));
+                    stream.write(Long.toString(count).getBytes(StandardCharsets.US_ASCII));
                 } else if (c.equals("timestamp")) {
                     stream.write(Long.toString(packet.getBestTimestamp()).getBytes(StandardCharsets.US_ASCII));
                 } else if (c.equals("utc")) {
@@ -135,6 +131,10 @@ class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
             }
             stream.write('\n');
         }
+    }
+
+    private void print() {
+
     }
 
     /** {@inheritDoc} */
