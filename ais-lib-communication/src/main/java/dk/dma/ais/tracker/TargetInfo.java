@@ -18,7 +18,7 @@ package dk.dma.ais.tracker;
 import java.io.Serializable;
 
 import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.ais.message.ShipTypeColor;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.enav.model.geometry.Position;
 
@@ -37,7 +37,6 @@ public class TargetInfo implements Serializable {
     /** The latest positionPacket that was received. */
     final byte[] positionPacket;
     final long positionTimestamp;
-
     final float latitude;
     final float longitude;
 
@@ -46,12 +45,36 @@ public class TargetInfo implements Serializable {
     final float sog;
     final byte navStatus;
 
+    // The latest static info
     final long staticTimestamp;
     final byte[] staticData1;
     final byte[] staticData2;
-    ShipTypeColor color = ShipTypeColor.GREY;
+    final int staticShipType;
 
     transient volatile boolean isBackedUp; /* = false */
+
+    TargetInfo(int mmsi, long positionTimestamp, float latitude, float longitude, int heading, float cog, float sog,
+            byte navStatus, byte[] positionPacket) {
+        this(mmsi, positionTimestamp, latitude, longitude, heading, cog, sog, navStatus, positionPacket, -1, null,
+                null, -1);
+    }
+
+    TargetInfo(int mmsi, long positionTimestamp, float latitude, float longitude, int heading, float cog, float sog,
+            byte navStatus, byte[] positionPacket, TargetInfo statics) {
+        this(mmsi, positionTimestamp, latitude, longitude, heading, cog, sog, navStatus, positionPacket,
+                statics.staticTimestamp, statics.staticData1, statics.staticData2, statics.staticShipType);
+    }
+
+    TargetInfo(int mmsi, TargetInfo positional, long staticTimestamp, byte[] staticData1, byte[] staticData2,
+            int staticShipType) {
+        this(mmsi, positional.positionTimestamp, positional.latitude, positional.longitude, positional.heading,
+                positional.cog, positional.sog, positional.navStatus, positional.positionPacket, staticTimestamp,
+                staticData1, staticData2, staticShipType);
+    }
+
+    TargetInfo(int mmsi, long staticTimestamp, byte[] staticData1, byte[] staticData2, int staticShipType) {
+        this(mmsi, -1, -1, -1, -1, -1, -1, (byte) -1, null, staticTimestamp, staticData1, staticData2, staticShipType);
+    }
 
     /**
      * @param timestamp
@@ -60,7 +83,8 @@ public class TargetInfo implements Serializable {
      * @param heading
      */
     TargetInfo(int mmsi, long positionTimestamp, float latitude, float longitude, int heading, float cog, float sog,
-            byte navStatus, byte[] positionPacket, long staticTimestamp, byte[] staticData1, byte[] staticData2) {
+            byte navStatus, byte[] positionPacket, long staticTimestamp, byte[] staticData1, byte[] staticData2,
+            int staticShipType) {
         this.mmsi = mmsi;
         // Position data
         this.positionTimestamp = positionTimestamp;
@@ -76,6 +100,7 @@ public class TargetInfo implements Serializable {
         this.staticTimestamp = staticTimestamp;
         this.staticData1 = staticData1;
         this.staticData2 = staticData2;
+        this.staticShipType = staticShipType;
     }
 
     public AisPacket getPositionPacket() {
@@ -110,7 +135,8 @@ public class TargetInfo implements Serializable {
         } else if (other.positionTimestamp >= positionTimestamp && other.staticTimestamp >= staticTimestamp) {
             return other;
         }
-        return positionTimestamp >= other.positionTimestamp ? updateStatic(other) : other.updateStatic(this);
+        return positionTimestamp >= other.positionTimestamp ? mergeWithStaticFrom(other) : other
+                .mergeWithStaticFrom(this);
     }
 
     /**
@@ -120,19 +146,27 @@ public class TargetInfo implements Serializable {
      * @param other
      * @return the new target
      */
-    private TargetInfo updateStatic(TargetInfo other) {
+    private TargetInfo mergeWithStaticFrom(TargetInfo other) {
         return new TargetInfo(mmsi, positionTimestamp, latitude, longitude, heading, cog, sog, navStatus,
-                positionPacket, other.staticTimestamp, other.staticData1, other.staticData2);
+                positionPacket, other);
+    }
+
+    static TargetInfo updateStatic(int mmsi, TargetInfo existing, long timestamp, byte[] staticData1,
+            byte[] staticData2, int staticShipType) {
+        if (existing == null) {
+            return new TargetInfo(mmsi, timestamp, staticData1, staticData2, staticShipType);
+        } else if (timestamp <= existing.staticTimestamp) {
+            return existing;
+        }
+        return new TargetInfo(mmsi, existing, timestamp, staticData1, staticData2, staticShipType);
     }
 
     static TargetInfo updatePosition(int mmsi, TargetInfo existing, long timestamp, final AisPacket packet,
-            final AisPositionMessage message) {
-        if (existing != null) {
-            if (timestamp <= existing.positionTimestamp) {
-                return existing;
-            }
+            final IVesselPositionMessage message) {
+        // if an existing target exist with a timestamp higher or equal to this, do not replace the target
+        if (existing != null && timestamp <= existing.positionTimestamp) {
+            return existing;
         }
-
         Position p = message.getValidPosition();
         if (p != null) {
             float lat = (float) p.getLatitude();
@@ -141,8 +175,12 @@ public class TargetInfo implements Serializable {
             float cog = message.getCog();
             float sog = message.getSog();
             byte navStatus = -1;
-            return new TargetInfo(mmsi, timestamp, lat, lon, heading, cog, sog, navStatus, packet.toByteArray(), 0,
-                    null, null);
+            if (existing == null) {
+                return new TargetInfo(mmsi, timestamp, lat, lon, heading, cog, sog, navStatus, packet.toByteArray());
+            } else {
+                return new TargetInfo(mmsi, timestamp, lat, lon, heading, cog, sog, navStatus, packet.toByteArray(),
+                        existing);
+            }
         }
         return existing;
     }

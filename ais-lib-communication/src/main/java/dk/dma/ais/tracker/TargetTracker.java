@@ -28,7 +28,9 @@ import jsr166e.ConcurrentHashMapV8.Fun;
 import jsr166e.LongAdder;
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.message.AisPositionMessage;
+import dk.dma.ais.message.AisMessage24;
+import dk.dma.ais.message.AisStaticCommon;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
 import dk.dma.ais.packet.AisPacketStream;
@@ -213,6 +215,9 @@ public class TargetTracker {
     @SuppressWarnings("serial")
     static class MmsiTarget extends ConcurrentHashMapV8<AisPacketSource, TargetInfo> {
 
+        /** A cache of AIS messages 24 part 0. */
+        final ConcurrentHashMapV8<AisPacketSource, byte[]> msg24Part0 = new ConcurrentHashMapV8<>();
+
         /** The MMSI number */
         final int mmsi;
 
@@ -237,13 +242,39 @@ public class TargetTracker {
         }
 
         void update(final AisPacket packet, final AisMessage message, final long timestamp) {
-            AisPacketSource sb = AisPacketSource.create(packet);
+            final AisPacketSource sb = AisPacketSource.create(packet);
             compute(sb, new BiFun<AisPacketSource, TargetInfo, TargetInfo>() {
-                public TargetInfo apply(AisPacketSource source, TargetInfo info) {
-                    if (message instanceof AisPositionMessage) {
-                        return TargetInfo.updatePosition(mmsi, info, timestamp, packet, (AisPositionMessage) message);
+                public TargetInfo apply(AisPacketSource source, final TargetInfo existing) {
+                    TargetInfo result = null;
+                    // TODO check target type of existing, if same type keep it
+                    if (System.currentTimeMillis() > 1) {
+                        result = existing;
                     }
-                    return info;
+
+                    if (message instanceof IVesselPositionMessage) {
+                        result = TargetInfo.updatePosition(mmsi, result, timestamp, packet,
+                                (IVesselPositionMessage) message);
+                    }
+
+                    if (message instanceof AisStaticCommon) {
+                        AisStaticCommon c = (AisStaticCommon) message;
+                        if (c instanceof AisMessage24) {
+                            if (((AisMessage24) c).getPartNumber() == 0) {
+                                msg24Part0.put(sb, packet.toByteArray());
+                                return existing; // the target is updated when received part 2
+                            } else {
+                                byte[] part0 = msg24Part0.remove(sb);
+                                if (part0 != null) {
+                                    result = TargetInfo.updateStatic(mmsi, result, timestamp, part0,
+                                            packet.toByteArray(), c.getShipType());
+                                }
+                            }
+                        } else {
+                            result = TargetInfo.updateStatic(mmsi, result, timestamp, packet.toByteArray(), null,
+                                    c.getShipType());
+                        }
+                    }
+                    return result;
                 }
             });
         }

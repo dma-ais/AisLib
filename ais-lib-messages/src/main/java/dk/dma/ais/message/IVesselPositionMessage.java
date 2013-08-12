@@ -15,6 +15,8 @@
  */
 package dk.dma.ais.message;
 
+import dk.dma.enav.model.geometry.Position;
+
 /**
  * Interface to capture the communalities between message 1,2,3 and 18
  */
@@ -38,6 +40,13 @@ public interface IVesselPositionMessage extends IPositionMessage {
      * @return
      */
     int getTrueHeading();
+
+    /**
+     * Returns a valid position if this message has a valid position, otherwise null.
+     * 
+     * @return a valid position if this message has a valid position, otherwise null
+     */
+    Position getValidPosition();
 
     /**
      * UTC sec
