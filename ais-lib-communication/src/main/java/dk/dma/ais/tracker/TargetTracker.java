@@ -26,11 +26,8 @@ import jsr166e.ConcurrentHashMapV8.Action;
 import jsr166e.ConcurrentHashMapV8.BiFun;
 import jsr166e.ConcurrentHashMapV8.Fun;
 import jsr166e.LongAdder;
-import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.message.AisMessage24;
-import dk.dma.ais.message.AisStaticCommon;
-import dk.dma.ais.message.IVesselPositionMessage;
+import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
 import dk.dma.ais.packet.AisPacketStream;
@@ -46,7 +43,7 @@ import dk.dma.enav.util.function.Predicate;
  */
 public class TargetTracker {
 
-    /** All targets we are currently monitoring. */
+    /** All targets that we are currently monitoring. */
     final ConcurrentHashMapV8<Integer, MmsiTarget> targets = new ConcurrentHashMapV8<>();
 
     public int countNumberOfReports(final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
@@ -78,7 +75,7 @@ public class TargetTracker {
         final LongAdder la = new LongAdder();
         targets.forEachValueInParallel(new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
-                TargetInfo best = t.getBest(sourcePredicate);
+                TargetInfo best = t.getNewest(sourcePredicate);
                 if (best != null && targetPredicate.test(best)) {
                     la.increment();
                     return;
@@ -104,13 +101,28 @@ public class TargetTracker {
         final ConcurrentHashMapV8<Integer, TargetInfo> result = new ConcurrentHashMapV8<>();
         targets.forEachValueInParallel(new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
-                TargetInfo best = t.getBest(sourcePredicate);
+                TargetInfo best = t.getNewest(sourcePredicate);
                 if (best != null && targetPredicate.test(best)) {
                     result.put(best.mmsi, best);
                 }
             }
         });
         return result;
+    }
+
+    /**
+     * Subscribes to all packets via {@link AisReaderGroup#stream()} from the specified group.
+     * 
+     * @param g
+     *            the group
+     * @return the subscription
+     */
+    public Subscription readFrom(AisPacketStream stream) {
+        return stream.subscribe(new Consumer<AisPacket>() {
+            public void accept(AisPacket p) {
+                update(p);
+            }
+        });
     }
 
     /**
@@ -138,7 +150,16 @@ public class TargetTracker {
         });
     }
 
-    void tryUpdate(final int mmsi, Consumer<MmsiTarget> c) {
+    /**
+     * A little helper method that makes sure we do not get lost updates when updating a target. While the MMSI target
+     * is being cleaned.
+     * 
+     * @param mmsi
+     *            the MMSI number
+     * @param c
+     *            a consumer that can use the MMSI target
+     */
+    private void tryUpdate(final int mmsi, Consumer<MmsiTarget> c) {
         for (;;) {
             // Lets first get the target. Or create a new target if it does not currently exist
             MmsiTarget t = targets.computeIfAbsent(mmsi, new Fun<Integer, MmsiTarget>() {
@@ -167,12 +188,23 @@ public class TargetTracker {
         final Date date = packet.getTags().getTimestamp();
         // We only want to handle messages containing targets data
         // #1-#3, #4, #5, #18, #21, #24 and a valid timestamp
-        if (message != null && date != null && AisTarget.isTargetDataMessage(message)) {
-            tryUpdate(message.getUserId(), new Consumer<MmsiTarget>() {
-                public void accept(MmsiTarget t) {
-                    t.update(packet, message, date.getTime());
-                }
-            });
+        if (message != null && date != null) {
+            // find the target type
+            final AisTargetType targetType = message.getTargetType();
+            // only update if there is a target type
+            if (targetType != null) {
+                tryUpdate(message.getUserId(), new Consumer<MmsiTarget>() {
+                    public void accept(final MmsiTarget t) {
+                        // lazy compute the new target info
+                        t.compute(AisPacketSource.create(packet), new BiFun<AisPacketSource, TargetInfo, TargetInfo>() {
+                            public TargetInfo apply(AisPacketSource source, TargetInfo existing) {
+                                return TargetInfo.updateTarget(t.mmsi, packet, targetType, message, date.getTime(),
+                                        source, existing, t.msg24Part0);
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 
@@ -196,87 +228,38 @@ public class TargetTracker {
         });
     }
 
-    /**
-     * Subscribes to all packets via {@link AisReaderGroup#stream()} from the specified group.
-     * 
-     * @param g
-     *            the group
-     * @return the subscription
-     */
-    public Subscription readFrom(AisPacketStream stream) {
-        return stream.subscribe(new Consumer<AisPacket>() {
-            public void accept(AisPacket p) {
-                update(p);
-            }
-        });
-    }
-
     /** A single ship containing multiple reports for different combinations of sources. */
     @SuppressWarnings("serial")
     static class MmsiTarget extends ConcurrentHashMapV8<AisPacketSource, TargetInfo> {
 
-        /** A cache of AIS messages 24 part 0. */
-        final ConcurrentHashMapV8<AisPacketSource, byte[]> msg24Part0 = new ConcurrentHashMapV8<>();
-
         /** The MMSI number */
         final int mmsi;
+
+        /** A cache of AIS messages 24 part 0. */
+        final ConcurrentHashMapV8<AisPacketSource, byte[]> msg24Part0 = new ConcurrentHashMapV8<>();
 
         MmsiTarget(int mmsi) {
             this.mmsi = mmsi;
         }
 
-        TargetInfo getBest(Predicate<? super AisPacketSource> predicate) {
+        /**
+         * Returns the newest position and static data.
+         * 
+         * @param predicate
+         *            a predicate for filtering on the sources
+         * @return the newest position and static data
+         */
+        TargetInfo getNewest(Predicate<? super AisPacketSource> predicate) {
             TargetInfo best = null;
             for (Entry<AisPacketSource, TargetInfo> i : entrySet()) {
                 if (predicate.test(i.getKey())) {
+                    // if more than one target matches the predicate
+                    // we merge two at a. Taking the newest static information from one or the other.
+                    // and merges it with the newest position information from one or the other (if needed).
                     best = best == null ? i.getValue() : best.merge(i.getValue());
                 }
             }
             return best;
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public String toString() {
-            return "MmsiTarget [mmsi=" + mmsi + ", targetSize = " + size() + ", targets=" + super.toString() + "]";
-        }
-
-        void update(final AisPacket packet, final AisMessage message, final long timestamp) {
-            final AisPacketSource sb = AisPacketSource.create(packet);
-            compute(sb, new BiFun<AisPacketSource, TargetInfo, TargetInfo>() {
-                public TargetInfo apply(AisPacketSource source, final TargetInfo existing) {
-                    TargetInfo result = null;
-                    // TODO check target type of existing, if same type keep it
-                    if (System.currentTimeMillis() > 1) {
-                        result = existing;
-                    }
-
-                    if (message instanceof IVesselPositionMessage) {
-                        result = TargetInfo.updatePosition(mmsi, result, timestamp, packet,
-                                (IVesselPositionMessage) message);
-                    }
-
-                    if (message instanceof AisStaticCommon) {
-                        AisStaticCommon c = (AisStaticCommon) message;
-                        if (c instanceof AisMessage24) {
-                            if (((AisMessage24) c).getPartNumber() == 0) {
-                                msg24Part0.put(sb, packet.toByteArray());
-                                return existing; // the target is updated when received part 2
-                            } else {
-                                byte[] part0 = msg24Part0.remove(sb);
-                                if (part0 != null) {
-                                    result = TargetInfo.updateStatic(mmsi, result, timestamp, part0,
-                                            packet.toByteArray(), c.getShipType());
-                                }
-                            }
-                        } else {
-                            result = TargetInfo.updateStatic(mmsi, result, timestamp, packet.toByteArray(), null,
-                                    c.getShipType());
-                        }
-                    }
-                    return result;
-                }
-            });
         }
     }
 }

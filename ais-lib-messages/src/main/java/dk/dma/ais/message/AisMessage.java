@@ -189,6 +189,30 @@ public abstract class AisMessage implements Serializable {
     }
 
     /**
+     * Returns the target type of the message or <code>null</code> if the message does not have a target type.
+     * 
+     * @return the target type of the message or <code>null</code> if the message does not have a target type
+     */
+    public AisTargetType getTargetType() {
+        // TODO do we need to check target type also, or is the mmsi number enough???
+        if (userId >= 970_000_000 || userId <= 970_999_999) {
+            return AisTargetType.SART;
+        }
+        Class<? extends AisMessage> type = getClass();
+        if (AisMessage4.class.isAssignableFrom(type)) {
+            return AisTargetType.BS;
+        } else if (AisMessage21.class.isAssignableFrom(type)) {
+            return AisTargetType.ATON;
+        } else if (AisMessage18.class.isAssignableFrom(type) || AisMessage19.class.isAssignableFrom(type)
+                || AisMessage24.class.isAssignableFrom(type)) {
+            return AisTargetType.B;
+        } else if (AisPositionMessage.class.isAssignableFrom(type) || AisMessage5.class.isAssignableFrom(type)) {
+            return AisTargetType.A;
+        }
+        return null;
+    }
+
+    /**
      * Given VDM return the encapsulated AIS message. To determine which message is returned use instanceof operator or
      * getMsgId() before casting.
      * 
