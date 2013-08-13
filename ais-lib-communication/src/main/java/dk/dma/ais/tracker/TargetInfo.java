@@ -36,7 +36,7 @@ import dk.dma.enav.model.geometry.Position;
  * 
  * @author Kasper Nielsen
  */
-public class TargetInfo implements Serializable {
+public final class TargetInfo implements Serializable {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
