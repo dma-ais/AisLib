@@ -24,13 +24,14 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage24;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.AisStaticCommon;
-import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.message.AisTargetType;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
 import dk.dma.enav.model.geometry.Position;
 
 /**
+ * Information about a target
  * 
  * @author Kasper Nielsen
  */
@@ -42,17 +43,18 @@ public class TargetInfo implements Serializable {
     /** The MMSI number of the target. */
     final int mmsi;
 
+    /** The target type of the info, is never null. */
     final AisTargetType targetType;
 
     /** The latest positionPacket that was received. */
-    final byte[] positionPacket;
     final long positionTimestamp;
+    final byte[] positionPacket;
     final Position position;
 
-    final int heading;
     final float cog;
-    final float sog;
+    final int heading;
     final byte navStatus;
+    final float sog;
 
     // The latest static info
     final long staticTimestamp;
@@ -60,52 +62,14 @@ public class TargetInfo implements Serializable {
     final byte[] staticData2;
     final int staticShipType;
 
-    transient volatile boolean isBackedUp; /* = false */
-
-    /** Used by Basestation and ATON targets. */
-    TargetInfo(int mmsi, AisTargetType targetType, long positionTimestamp, Position position, byte[] positionPacket) {
-        this(mmsi, targetType, positionTimestamp, position, -1, -1, -1, (byte) -1, positionPacket, -1, null, null, -1);
-    }
-
-    TargetInfo(int mmsi, AisTargetType targetType, long positionTimestamp, Position position, int heading, float cog,
-            float sog, byte navStatus, byte[] positionPacket) {
-        this(mmsi, targetType, positionTimestamp, position, heading, cog, sog, navStatus, positionPacket, -1, null,
-                null, -1);
-    }
-
-    TargetInfo(int mmsi, long positionTimestamp, Position position, int heading, float cog, float sog, byte navStatus,
-            byte[] positionPacket, TargetInfo statics) {
-        this(mmsi, statics.targetType, positionTimestamp, position, heading, cog, sog, navStatus, positionPacket,
-                statics.staticTimestamp, statics.staticData1, statics.staticData2, statics.staticShipType);
-    }
-
-    TargetInfo(int mmsi, TargetInfo positional, long staticTimestamp, byte[] staticData1, byte[] staticData2,
-            int staticShipType) {
-        this(mmsi, positional.targetType, positional.positionTimestamp, positional.position, positional.heading,
-                positional.cog, positional.sog, positional.navStatus, positional.positionPacket, staticTimestamp,
-                staticData1, staticData2, staticShipType);
-    }
-
-    TargetInfo(int mmsi, AisTargetType targetType, long staticTimestamp, byte[] staticData1, byte[] staticData2,
-            int staticShipType) {
-        this(mmsi, targetType, -1, null, -1, -1, -1, (byte) -1, null, staticTimestamp, staticData1, staticData2,
-                staticShipType);
-    }
-
-    /**
-     * @param timestamp
-     * @param latitude
-     * @param longitude
-     * @param heading
-     */
-    TargetInfo(int mmsi, AisTargetType targetType, long positionTimestamp, Position p, int heading, float cog, float sog,
-            byte navStatus, byte[] positionPacket, long staticTimestamp, byte[] staticData1, byte[] staticData2,
-            int staticShipType) {
+    private TargetInfo(int mmsi, AisTargetType targetType, long positionTimestamp, Position p, int heading, float cog,
+            float sog, byte navStatus, byte[] positionPacket, long staticTimestamp, byte[] staticData1,
+            byte[] staticData2, int staticShipType) {
         this.mmsi = mmsi;
         this.targetType = requireNonNull(targetType);
+
         // Position data
         this.positionTimestamp = positionTimestamp;
-
         this.position = p;
         this.heading = heading;
         this.cog = cog;
@@ -124,8 +88,8 @@ public class TargetInfo implements Serializable {
         return positionPacket == null ? null : AisPacket.fromByteArray(positionPacket);
     }
 
-    public AisPositionMessage getPositionMessage() {
-        return positionPacket == null ? null : (AisPositionMessage) getPositionPacket().tryGetAisMessage();
+    public int getStaticCount() {
+        return staticData1 == null ? 0 : staticData2 == null ? 1 : 2;
     }
 
     /**
@@ -146,7 +110,7 @@ public class TargetInfo implements Serializable {
         return staticData1 != null;
     }
 
-    public TargetInfo merge(TargetInfo other) {
+    TargetInfo merge(TargetInfo other) {
         if (positionTimestamp >= other.positionTimestamp && staticTimestamp >= other.staticTimestamp) {
             return this;
         } else if (other.positionTimestamp >= positionTimestamp && other.staticTimestamp >= staticTimestamp) {
@@ -164,98 +128,103 @@ public class TargetInfo implements Serializable {
      * @return the new target
      */
     private TargetInfo mergeWithStaticFrom(TargetInfo other) {
-        return new TargetInfo(mmsi, positionTimestamp, position, heading, cog, sog, navStatus, positionPacket, other);
+        return new TargetInfo(mmsi, targetType, positionTimestamp, position, heading, cog, sog, navStatus,
+                positionPacket, other.staticTimestamp, other.staticData1, other.staticData2, other.staticShipType);
     }
 
-    static TargetInfo updateStatic(int mmsi, AisTargetType targetType, TargetInfo existing, long timestamp,
-            byte[] staticData1, byte[] staticData2, int staticShipType) {
-        if (existing == null) {
-            return new TargetInfo(mmsi, targetType, timestamp, staticData1, staticData2, staticShipType);
+    static TargetInfo updateTarget(TargetInfo existing, AisPacket packet, AisTargetType targetType, long timestamp,
+            AisPacketSource source, Map<AisPacketSource, byte[]> msg24Part0) {
+        AisMessage message = packet.tryGetAisMessage();// is non-null
+        int mmsi = message.getUserId();
+        // ATON and BS targets are easy to handle because they do not contain much other than a position
+        if (targetType == AisTargetType.ATON || targetType == AisTargetType.BS) {
+
+            // make sure it has a never timestamp
+            if (existing != null && timestamp <= existing.positionTimestamp) {
+                return existing;
+            }
+
+            return new TargetInfo(mmsi, targetType, timestamp, message.getValidPosition(), -1, -1, -1, (byte) -1,
+                    packet.toByteArray(), -1, null, null, -1);
         }
-        return new TargetInfo(mmsi, existing, timestamp, staticData1, staticData2, staticShipType);
+        TargetInfo result = updateTargetWithPosition(existing, packet, message, mmsi, targetType, timestamp, source);
+        return updateTargetWithStatic(packet, message, mmsi, targetType, timestamp, source, result, msg24Part0);
     }
 
-    static TargetInfo updatePosition(int mmsi, AisTargetType targetType, TargetInfo existing, long timestamp,
-            final AisPacket packet, final IVesselPositionMessage message) {
-        Position p = message.getValidPosition();
-        if (p != null) {
-            int heading = 0;
-            float cog = message.getCog();
-            float sog = message.getSog();
-            byte navStatus = -1;
-            if (existing == null) {
-                return new TargetInfo(mmsi, targetType, timestamp, p, heading, cog, sog, navStatus,
-                        packet.toByteArray());
-            } else {
-                return new TargetInfo(mmsi, timestamp, p, heading, cog, sog, navStatus, packet.toByteArray(), existing);
+    static TargetInfo updateTargetWithPosition(TargetInfo existing, AisPacket packet, AisMessage message, int mmsi,
+            AisTargetType targetType, long timestamp, AisPacketSource source) {
+        if (message instanceof IVesselPositionMessage) {
+            // only update if never timestamp
+            if (existing == null || timestamp >= existing.positionTimestamp) {
+                // check if another targetType in which case we drop the existing one
+                // we need to have this check, after having checked the timestamp
+                if (existing != null && existing.targetType != targetType) {
+                    existing = null;
+                }
+                IVesselPositionMessage ivm = (IVesselPositionMessage) message;
+                Position p = message.getValidPosition();
+                int heading = 0;
+                float cog = ivm.getCog();
+                float sog = ivm.getSog();
+                byte navStatus = message instanceof AisPositionMessage ? (byte) ((AisPositionMessage) message)
+                        .getNavStatus() : (byte) -1;
+
+                if (existing == null) {
+                    return new TargetInfo(mmsi, targetType, timestamp, p, heading, cog, sog, navStatus,
+                            packet.toByteArray(), -1, null, null, -1);
+                } else {
+                    return new TargetInfo(mmsi, targetType, timestamp, p, heading, cog, sog, navStatus,
+                            packet.toByteArray(), existing.staticTimestamp, existing.staticData1, existing.staticData2,
+                            existing.staticShipType);
+                }
             }
         }
         return existing;
     }
 
-    static TargetInfo updateTarget(int mmsi, AisPacket packet, AisTargetType targetType, AisMessage message,
-            long timestamp, AisPacketSource source, final TargetInfo existing, Map<AisPacketSource, byte[]> msg24Part0) {
-        // Handle ATON and BS targets are easy to handle
-        if (targetType == AisTargetType.ATON || targetType == AisTargetType.BS) {
-            // make sure it has a never timestamp
-            if (existing != null && timestamp <= existing.positionTimestamp) {
-                return existing;
-            }
-            return new TargetInfo(mmsi, targetType, timestamp, message.getValidPosition(), packet.toByteArray());
-        }
-
-        // Some messages might contain both a static and position message
-        TargetInfo result = existing;
-
-        // check if target type is different from existing, in which case we will never keep some of the old
-        // value. For example, keep the static part, but update the position
-
-        // Handles Position messages
-        if (message instanceof IVesselPositionMessage) {
-            // only update if never timestamp
-            if (existing == null || timestamp >= existing.positionTimestamp) {
-                // check if another targetType in which case we drop it
-                // we need to have this check, after having checked the timestamp
-                if (existing != null && existing.targetType != targetType) {
-                    result = null;
-                }
-                result = TargetInfo.updatePosition(mmsi, targetType, result, timestamp, packet,
-                        (IVesselPositionMessage) message);
-            }
-        }
-
+    static TargetInfo updateTargetWithStatic(AisPacket packet, AisMessage message, int mmsi, AisTargetType targetType,
+            long timestamp, AisPacketSource source, TargetInfo existing, Map<AisPacketSource, byte[]> msg24Part0) {
         if (message instanceof AisStaticCommon) {
             // only update if never timestamp
             if (existing == null || timestamp >= existing.staticTimestamp) {
-                // check if another targetType in which case we drop it
+                // check if another targetType in which case we drop the existing one
                 // we need to have this check, after having checked the timestamp
-
-                // we check on result, to make sure we do not replace positional updates
-                // with previous results.
-                if (result != null && result.targetType != targetType) {
-                    result = null;
+                if (existing != null && existing.targetType != targetType) {
+                    existing = null;
                 }
 
                 AisStaticCommon c = (AisStaticCommon) message;
-                // AisMessage24 is split into 2 parts, if we get a part 0.
-                // Save in a hashtable, where it is kept, until we receive part 1
+                byte[] static0;
+                byte[] static1 = null;
                 if (c instanceof AisMessage24) {
+                    // AisMessage24 is split into 2 parts, if we get a part 0.
+                    // Save in a hashtable, where it is kept, until we receive part 1
                     if (((AisMessage24) c).getPartNumber() == 0) {
                         msg24Part0.put(source, packet.toByteArray());
+                        // we know that existing have not been updated by updateTargetWithPosition because
+                        // AisMessage24 only contains static information, so existing=original
                         return existing; // the target is updated when we receive part 1
                     } else {
-                        byte[] part0 = msg24Part0.remove(source);
-                        if (part0 != null) {
-                            result = TargetInfo.updateStatic(mmsi, targetType, result, timestamp, part0,
-                                    packet.toByteArray(), c.getShipType());
+                        static0 = msg24Part0.remove(source);
+                        if (static0 == null) {
+                            return existing;// We do not have the first part:(
                         }
+                        static1 = packet.toByteArray();
                     }
                 } else {
-                    result = TargetInfo.updateStatic(mmsi, targetType, result, timestamp, packet.toByteArray(), null,
-                            c.getShipType());
+                    static0 = packet.toByteArray();
+                }
+
+                if (existing == null) {
+                    return new TargetInfo(mmsi, targetType, -1, null, -1, -1, -1, (byte) -1, null, timestamp, static0,
+                            static1, c.getShipType());
+                } else {
+                    return new TargetInfo(mmsi, existing.targetType, existing.positionTimestamp, existing.position,
+                            existing.heading, existing.cog, existing.sog, existing.navStatus, existing.positionPacket,
+                            timestamp, static0, static1, c.getShipType());
                 }
             }
         }
-        return result;
+        return existing;
     }
 }

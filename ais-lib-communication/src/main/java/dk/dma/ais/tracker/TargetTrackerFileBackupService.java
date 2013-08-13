@@ -30,8 +30,10 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
@@ -67,6 +69,10 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
 
     /** The tracker that we are make backups and restoring from. */
     private final TargetTracker tracker;
+
+    /** A list of those targets that have been backed up */
+    private final Set<TargetInfo> backedUpTargets = Collections
+            .newSetFromMap(new IdentityHashMap<TargetInfo, Boolean>());
 
     /**
      * Creates a new backup service.
@@ -134,7 +140,10 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
         }
         Path p = f.toPath(backupFolder, prefix);
         try {
-            writeBackupFile(p, f.isFull());
+            if (f.isFull()) {
+                backedUpTargets.clear(); // clear all backed up files
+            }
+            writeBackupFile(p);
             f = f.next();
         } catch (Exception e) {
             LOG.error("Failed to write backup to " + p, e);
@@ -148,10 +157,10 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
         return Scheduler.newFixedRateSchedule(0, 1, TimeUnit.SECONDS);
     }
 
-    private void writeBackupFile(Path p, boolean isFull) throws IOException {
+    private void writeBackupFile(Path p) throws IOException {
         // We write to a temporary file, to make sure we only have complete valid backup files in the folder
         Path temporaryFile = Files.createTempFile(p.getFileName().toString(), ".tmp");
-
+        boolean isFull = true;
         // Serialize all sourceBundle->TargetInfo mappings
         try (OutputStream fos = Files.newOutputStream(temporaryFile);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -160,10 +169,11 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
             for (MmsiTarget t : tracker.targets.values()) {
                 for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
                     // Serialize it, if it is a full backup or if the backup flag has not yet been set
-                    if (isFull || !e.getValue().isBackedUp) {
+                    if (backedUpTargets.add(e.getValue())) {
                         oos.writeObject(e.getKey());
                         oos.writeObject(e.getValue());
-                        e.getValue().isBackedUp = true; // set the backup flag
+                    } else {
+                        isFull = false; // set that target has already been backed up
                     }
                 }
             }

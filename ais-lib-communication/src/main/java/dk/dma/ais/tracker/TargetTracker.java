@@ -184,7 +184,7 @@ public class TargetTracker {
      *            the packet to update the trigger with
      */
     void update(final AisPacket packet) {
-        final AisMessage message = packet.tryGetAisMessage();
+        AisMessage message = packet.tryGetAisMessage();
         final Date date = packet.getTags().getTimestamp();
         // We only want to handle messages containing targets data
         // #1-#3, #4, #5, #18, #21, #24 and a valid timestamp
@@ -198,8 +198,8 @@ public class TargetTracker {
                         // lazy compute the new target info
                         t.compute(AisPacketSource.create(packet), new BiFun<AisPacketSource, TargetInfo, TargetInfo>() {
                             public TargetInfo apply(AisPacketSource source, TargetInfo existing) {
-                                return TargetInfo.updateTarget(t.mmsi, packet, targetType, message, date.getTime(),
-                                        source, existing, t.msg24Part0);
+                                return TargetInfo.updateTarget(existing, packet, targetType, date.getTime(), source,
+                                        t.msg24Part0);
                             }
                         });
                     }
