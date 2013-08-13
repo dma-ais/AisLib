@@ -163,7 +163,7 @@ public class AisPacketParser {
         }
 
         // Make packet
-        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"), System.currentTimeMillis());
+        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"));
 
         newVdm();
 

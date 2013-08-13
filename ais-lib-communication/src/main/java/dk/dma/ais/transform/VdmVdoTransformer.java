@@ -29,8 +29,8 @@ import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
 
 /**
- * Transformer that changes VDM/VDO to either VDM or VDO based on a given MMSI. If talker is given the talker is also changed for
- * own messages.
+ * Transformer that changes VDM/VDO to either VDM or VDO based on a given MMSI. If talker is given the talker is also
+ * changed for own messages.
  */
 @ThreadSafe
 public class VdmVdoTransformer implements IAisPacketTransformer {
@@ -96,7 +96,7 @@ public class VdmVdoTransformer implements IAisPacketTransformer {
             lines.set(i, line);
         }
 
-        return AisPacket.from(StringUtils.join(lines, "\r\n"), packet.getReceiveTimestamp());
+        return AisPacket.from(StringUtils.join(lines, "\r\n"));
     }
 
 }

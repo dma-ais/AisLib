@@ -40,7 +40,7 @@ public class CropVdmTransformer implements IAisPacketTransformer {
                 newLines.add(line);
             }
         }
-        return AisPacket.from(StringUtils.join(newLines, "\r\n"), packet.getReceiveTimestamp());
+        return AisPacket.from(StringUtils.join(newLines, "\r\n"));
     }
 
 }

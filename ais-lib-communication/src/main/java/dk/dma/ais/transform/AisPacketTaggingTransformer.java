@@ -243,7 +243,7 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
     }
 
     private AisPacket newPacket(AisPacket oldPacket, String newRawMessage) {
-        return AisPacket.from(newRawMessage, oldPacket.getReceiveTimestamp());
+        return AisPacket.from(newRawMessage);
     }
 
 }

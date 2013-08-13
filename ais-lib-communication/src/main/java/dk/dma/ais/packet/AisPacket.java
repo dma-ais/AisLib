@@ -45,28 +45,18 @@ import dk.dma.enav.model.geometry.PositionTime;
 @NotThreadSafe
 public class AisPacket implements Comparable<AisPacket> {
 
-    private final transient long receiveTimestamp;
     private final String rawMessage;
     private transient Vdm vdm;
     private transient AisPacketTags tags;
     private AisMessage message;
+    private volatile long timestamp = Long.MIN_VALUE;
 
-    private AisPacket(String stringMessage, long receiveTimestamp) {
+    private AisPacket(String stringMessage) {
         this.rawMessage = requireNonNull(stringMessage);
-        this.receiveTimestamp = receiveTimestamp;
     }
 
-    /**
-     * @param stringMessage
-     * @deprecated Use static factory AisPacket from(String stringMessage)
-     */
-    @Deprecated
-    public AisPacket(String stringMessage) {
-        this(stringMessage, System.currentTimeMillis());
-    }
-
-    AisPacket(Vdm vdm, String stringMessage, long receiveTimestamp) {
-        this(stringMessage, receiveTimestamp);
+    AisPacket(Vdm vdm, String stringMessage) {
+        this(stringMessage);
         this.vdm = vdm;
     }
 
@@ -87,20 +77,25 @@ public class AisPacket implements Comparable<AisPacket> {
     }
 
     public static AisPacket fromByteArray(byte[] array) {
-        return from(new String(array, StandardCharsets.US_ASCII), -1);
+        return from(new String(array, StandardCharsets.US_ASCII));
     }
 
     public byte[] toByteArray() {
         return rawMessage.getBytes(StandardCharsets.US_ASCII);
     }
 
+    /**
+     * Returns the timestamp of the packet, or -1 if no timestamp is available.
+     * 
+     * @return the timestamp of the packet, or -1 if no timestamp is available
+     */
     public long getBestTimestamp() {
-        Date date = getTimestamp();
-        return date == null ? receiveTimestamp : date.getTime();
-    }
-
-    public long getReceiveTimestamp() {
-        return receiveTimestamp;
+        long timestamp = this.timestamp;
+        if (timestamp == Long.MIN_VALUE) {
+            Date date = getTimestamp();
+            this.timestamp = timestamp = date == null ? -1 : date.getTime();
+        }
+        return timestamp;
     }
 
     public String getStringMessage() {
@@ -199,12 +194,8 @@ public class AisPacket implements Comparable<AisPacket> {
 
     }
 
-    public static AisPacket from(String stringMessage, long receiveTimestamp) {
-        return new AisPacket(stringMessage, receiveTimestamp);
-    }
-
     public static AisPacket from(String stringMessage) {
-        return new AisPacket(stringMessage, System.currentTimeMillis());
+        return new AisPacket(stringMessage);
     }
 
     /**

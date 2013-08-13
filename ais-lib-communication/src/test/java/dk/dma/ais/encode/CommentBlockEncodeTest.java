@@ -50,7 +50,7 @@ public class CommentBlockEncodeTest {
         String str = cb.encode(maxLen) + "\r\n";
         str += "!AIVDM,1,1,,A,H39LOOQUQPD0000000000000000,4*6D";
 
-        AisPacket packet = AisPacket.from(str, System.currentTimeMillis());
+        AisPacket packet = AisPacket.from(str);
         cb = packet.getVdm().getCommentBlock();
 
         for (Entry<String, String> pair : map.entrySet()) {

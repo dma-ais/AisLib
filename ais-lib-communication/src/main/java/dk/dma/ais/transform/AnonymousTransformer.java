@@ -57,7 +57,6 @@ public class AnonymousTransformer implements IAisPacketTransformer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AnonymousTransformer.class);
 
-
     /**
      * List of available MID's
      */
@@ -71,7 +70,8 @@ public class AnonymousTransformer implements IAisPacketTransformer {
     /**
      * Location of random names file
      */
-    private static final String LOCATION = AnonymousTransformer.class.getPackage().getName().replace(".", "/") + "/names.txt";
+    private static final String LOCATION = AnonymousTransformer.class.getPackage().getName().replace(".", "/")
+            + "/names.txt";
 
     /**
      * Load names and make random order
@@ -92,7 +92,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
             Set<String> names = new HashSet<>();
             while ((line = reader.readLine()) != null) {
                 names.add(line.trim().toUpperCase());
-            }            
+            }
             NAME_LIST.addAll(names);
             Collections.shuffle(NAME_LIST);
         } catch (IOException e) {
@@ -156,7 +156,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
         }
         // Make anonymized data
         String name = makeName(counter);
-        int mmsi = makeMmsi(counter++);        
+        int mmsi = makeMmsi(counter++);
         String callsign = makeCallsign();
         String destination = makeDestination();
         int imoNo = counter;
@@ -175,17 +175,19 @@ public class AnonymousTransformer implements IAisPacketTransformer {
     private int makeMmsi(int id) {
         return MID_LIST.get(rand.nextInt(MID_LIST.size())) * 1000000 + id;
     }
-    
+
     /**
      * Get random name from list of names
+     * 
      * @return
      */
     private String makeName(int id) {
         return NAME_LIST.get(id % NAME_LIST.size());
     }
-    
+
     /**
      * Make random callsign
+     * 
      * @return
      */
     private String makeCallsign() {
@@ -207,7 +209,7 @@ public class AnonymousTransformer implements IAisPacketTransformer {
     private void anonymize(AisMessage message, AnonData anonData) {
         message.setUserId(anonData.getMmsi());
     }
-    
+
     /**
      * 
      * @param posMessage
@@ -278,9 +280,9 @@ public class AnonymousTransformer implements IAisPacketTransformer {
             lines.add(sentence);
         }
 
-        return AisPacket.from(StringUtils.join(lines, "\r\n"), packet.getReceiveTimestamp());
+        return AisPacket.from(StringUtils.join(lines, "\r\n"));
     }
-    
+
     /**
      * Class holding anonymized data for target
      */
