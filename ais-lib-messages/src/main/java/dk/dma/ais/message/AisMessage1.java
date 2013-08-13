@@ -75,6 +75,10 @@ public class AisMessage1 extends AisPositionMessage {
         super(1);
     }
 
+    AisMessage1(int msgType) {
+        super(msgType);
+    }
+
     public AisMessage1(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();

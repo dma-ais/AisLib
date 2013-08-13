@@ -154,6 +154,10 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
      */
     private int spare3; // 4 bits
 
+    public AisMessage19() {
+        super(19);
+    }
+
     public AisMessage19(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse(vdm.getBinArray());

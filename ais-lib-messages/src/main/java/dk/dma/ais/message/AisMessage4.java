@@ -53,6 +53,10 @@ public class AisMessage4 extends AisMessage implements IPositionMessage {
     private int slotTimeout; // 3 bits : SOTDMA Slot Timeout
     private int subMessage; // 14 bits : SOTDMA sub-message
 
+    public AisMessage4() {
+        super(4);
+    }
+
     public AisMessage4(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();

@@ -51,6 +51,10 @@ public class AisMessage21 extends AisMessage implements IPositionMessage {
     String nameExt; // 0-84 bits : Extended name in ASCII
     int spare2; // 0-6 bits : Spare
 
+    public AisMessage21() {
+        super(21);
+    }
+
     public AisMessage21(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();

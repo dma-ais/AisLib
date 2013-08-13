@@ -39,6 +39,10 @@ public class AisMessage3 extends AisPositionMessage {
     private int numSlots; // 3 bits : ITDMA Number of Slots
     private int keep; // 1 bit : ITDMA Keep Flag
 
+    public AisMessage3() {
+        super(3);
+    }
+
     public AisMessage3(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();

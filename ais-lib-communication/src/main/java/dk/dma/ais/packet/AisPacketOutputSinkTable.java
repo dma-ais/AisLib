@@ -133,10 +133,6 @@ class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private void print() {
-
-    }
-
     /** {@inheritDoc} */
     @Override
     public void header(OutputStream stream) throws IOException {

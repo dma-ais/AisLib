@@ -51,6 +51,10 @@ public class AisMessage24 extends AisStaticCommon {
      */
     int spare; // 6 bits
 
+    public AisMessage24() {
+        super(24);
+    }
+
     public AisMessage24(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();

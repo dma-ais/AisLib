@@ -85,6 +85,10 @@ public class AisMessage5 extends AisStaticCommon {
      */
     int spare; // 1 bit : spare
 
+    public AisMessage5() {
+        super(5);
+    }
+
     public AisMessage5(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();

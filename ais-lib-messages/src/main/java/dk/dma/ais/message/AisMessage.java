@@ -104,10 +104,6 @@ public abstract class AisMessage implements Serializable {
         return msgId;
     }
 
-    public void setMsgId(int msgId) {
-        this.msgId = msgId;
-    }
-
     public int getRepeat() {
         return repeat;
     }
@@ -195,7 +191,7 @@ public abstract class AisMessage implements Serializable {
      */
     public AisTargetType getTargetType() {
         // TODO do we need to check target type also, or is the mmsi number enough???
-        if (userId >= 970_000_000 || userId <= 970_999_999) {
+        if (userId >= 970_000_000 && userId <= 970_999_999) {
             return AisTargetType.SART;
         }
         Class<? extends AisMessage> type = getClass();

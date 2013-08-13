@@ -125,6 +125,10 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
      */
     private int commState; // 19 bits : SOTDMA sync state
 
+    public AisMessage18() {
+        super(18);
+    }
+
     public AisMessage18(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         this.parse();

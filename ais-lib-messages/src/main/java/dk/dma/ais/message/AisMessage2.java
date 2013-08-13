@@ -31,6 +31,10 @@ public class AisMessage2 extends AisMessage1 {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    public AisMessage2() {
+        super(2);
+    }
+
     public AisMessage2(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
     }
