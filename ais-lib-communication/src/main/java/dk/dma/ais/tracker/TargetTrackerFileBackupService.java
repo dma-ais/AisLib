@@ -70,7 +70,7 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
     /** The tracker that we are make backups and restoring from. */
     private final TargetTracker tracker;
 
-    /** A list of those targets that have been backed up */
+    /** A list of those targets that have been backed up. */
     private final Set<TargetInfo> backedUpTargets = Collections
             .newSetFromMap(new IdentityHashMap<TargetInfo, Boolean>());
 
@@ -160,7 +160,7 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
     private void writeBackupFile(Path p) throws IOException {
         // We write to a temporary file, to make sure we only have complete valid backup files in the folder
         Path temporaryFile = Files.createTempFile(p.getFileName().toString(), ".tmp");
-        boolean isFull = true;
+        boolean isFullBackup = true;
         // Serialize all sourceBundle->TargetInfo mappings
         try (OutputStream fos = Files.newOutputStream(temporaryFile);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -173,7 +173,7 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
                         oos.writeObject(e.getKey());
                         oos.writeObject(e.getValue());
                     } else {
-                        isFull = false; // set that target has already been backed up
+                        isFullBackup = false; // at least one file has already been backed up elsewhere
                     }
                 }
             }
@@ -186,7 +186,7 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
         Files.move(temporaryFile, p);
 
         // If this backup is a full backup, delete old backup files
-        if (isFull) {
+        if (isFullBackup) {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(backupFolder)) {
                 for (Path path : stream) {
                     if (!path.equals(p)) { // delete all files but the full backup we just wrote

@@ -28,6 +28,7 @@ import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
+import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Position;
 
 /**
@@ -82,6 +83,10 @@ public class TargetInfo implements Serializable {
         this.staticData1 = staticData1;
         this.staticData2 = staticData2;
         this.staticShipType = staticShipType;
+    }
+
+    public Country getCountry() {
+        return Country.getCountryForMmsi(mmsi);
     }
 
     public AisPacket getPositionPacket() {
