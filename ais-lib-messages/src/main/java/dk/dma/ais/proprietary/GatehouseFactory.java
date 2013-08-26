@@ -15,14 +15,14 @@
  */
 package dk.dma.ais.proprietary;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.enav.model.Country;
 
 /**
@@ -39,44 +39,36 @@ public class GatehouseFactory extends ProprietaryFactory {
 
     /** {@inheritDoc} */
     @Override
-    public IProprietaryTag getTag(String line) {
-        int start = line.indexOf("$PGHP,1");
-        if (start < 0) {
+    public IProprietaryTag getTag(SentenceLine sl) {
+        // Check checksum
+        if (!sl.isChecksumMatch()) {
+            LOG.error("Error in Gatehouse proprietary tag wrong checksum: " + sl.getChecksum());
             return null;
         }
-        line = line.substring(start);
-        String[] elems = StringUtils.splitByWholeSeparatorPreserveAllTokens(line, ",");
-        if (elems.length < 14) {
-            LOG.error("Error in Gatehouse proprietary message: wrong number of fields " + elems.length + " in line: "
-                    + line);
+        
+        List<String> fields = sl.getFields();
+        
+        if (fields == null || fields.size() < 14) {
+            LOG.error("Error in Gatehouse proprietary tag: wrong number of fields " + fields.size() + " in line: " + sl.getLine());
             return null;
         }
         Integer baseMmsi = null;
-        if (elems[11].length() > 0) {
+        if (fields.get(11).length() > 0) {
             try {
-                baseMmsi = Integer.parseInt(elems[11]);
+                baseMmsi = Integer.parseInt(fields.get(11));
             } catch (NumberFormatException e) {
-                LOG.error("Error in Gatehouse proprietary message: wrong base mmsi: " + elems[11] + " line: " + line);
+                LOG.error("Error in Gatehouse proprietary tag: wrong base mmsi: " + fields.get(11) + " line: " + sl.getLine());
                 return null;
             }
         }
-        String country = elems[9];
-        String region = elems[10];
-        String[] dateParts = new String[7];
+        String country = fields.get(9);
+        String region = fields.get(10);
+        int[] dateParts = new int[7];
         for (int i = 2; i < 9; i++) {
-            dateParts[i - 2] = elems[i];
+            dateParts[i - 2] = Integer.parseInt(fields.get(i));
         }
-        String dateStr = StringUtils.join(dateParts, ",") + " +0000";
-        String dateFormat = "yyyy,M,d,H,m,s,S Z";
-        SimpleDateFormat format = new SimpleDateFormat(dateFormat);
-        Date timestamp;
-
-        try {
-            timestamp = format.parse(dateStr);
-        } catch (ParseException e) {
-            LOG.error("Error in Gatehouse proprietary message: wrong date: " + dateStr + " line: " + line);
-            return null;
-        }
+        DateTime datetime = new DateTime(dateParts[0], dateParts[1], dateParts[2], dateParts[3], dateParts[4], dateParts[5],
+                dateParts[6], DateTimeZone.UTC);
 
         Country midCountry = null;
         if (country.length() > 0) {
@@ -86,8 +78,7 @@ public class GatehouseFactory extends ProprietaryFactory {
             }
         }
 
-        return new GatehouseSourceTag(baseMmsi, midCountry, region, timestamp, line);
-
+        return new GatehouseSourceTag(baseMmsi, midCountry, region, datetime.toDate(), sl.getLine());
     }
 
 }

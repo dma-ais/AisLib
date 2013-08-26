@@ -15,8 +15,6 @@
  */
 package dk.dma.ais.sentence;
 
-import java.util.regex.Pattern;
-
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
@@ -27,15 +25,10 @@ import dk.dma.ais.message.AisMessage;
 public class Vdm extends EncapsulatedSentence {
 
     /**
-     * The number of six bit characters to allow in each message part. Number based on the maximum size of resulting
-     * sentence part which may not exceed 80 characters.
+     * The number of six bit characters to allow in each message part. Number based on the maximum size of resulting sentence part
+     * which may not exceed 80 characters.
      */
     private static final int DATA_SENTENCE_MAX_LENGTH = 61;
-
-    /**
-     * Pattern for recognizing VDM/VDO sentences
-     */
-    private static final Pattern VDM_PATTERN = Pattern.compile("^.*!..VD(M|O).*$", Pattern.DOTALL);
 
     /**
      * Determines is this is VDM or VDO
@@ -43,44 +36,54 @@ public class Vdm extends EncapsulatedSentence {
     private boolean ownMessage;
 
     /**
+     * Helper method parsing line to SentenceLine and passing to parse
+     * 
+     * @param line
+     * @return
+     * @throws SentenceException
+     */
+    public int parse(String line) throws SentenceException {
+        return parse(new SentenceLine(line));
+    }
+
+    /**
      * Implemented parse method. See {@link EncapsulatedSentence}
      */
     @Override
-    public int parse(String line) throws SentenceException {
-
+    public int parse(SentenceLine sl) throws SentenceException {
         // Do common parsing
-        super.baseParse(line);
+        super.baseParse(sl);
 
         // Check VDM / VDO
-        if (this.formatter.equals("VDO")) {
+        if (sl.isFormatter("VDO")) {
             this.ownMessage = true;
         } else {
-            if (!this.formatter.equals("VDM")) {
+            if (!sl.isFormatter("VDM")) {
                 throw new SentenceException("Not VDM or VDO sentence");
             }
         }
 
         // Check that there at least 8 fields
-        if (fields.length < 8) {
+        if (sl.getFields().size() < 8) {
             throw new SentenceException("Sentence does not have at least 8 fields");
         }
 
         // Channel, relaxed may be null
-        if (fields[4].length() > 0) {
-            this.channel = fields[4].charAt(0);
+        if (sl.getFields().get(4).length() > 0) {
+            this.channel = sl.getFields().get(4).charAt(0);
         } else {
             this.channel = 0;
         }
 
         // Padding bits
-        int padBits = Sentence.parseInt(fields[6]);
+        int padBits = Sentence.parseInt(sl.getFields().get(6));
 
         // Six bit field
-        this.sixbitString += fields[5];
+        this.sixbitString.append(sl.getFields().get(5));
         try {
-            binArray.appendSixbit(fields[5], padBits);
+            binArray.appendSixbit(sl.getFields().get(5), padBits);
         } catch (SixbitException e) {
-            throw new SentenceException("Invalid sixbit in VDM: " + e.getMessage() + ": " + line);
+            throw new SentenceException("Invalid sixbit in VDM: " + e.getMessage() + ": " + sl.getLine());
         }
 
         // Complete packet?
@@ -90,7 +93,6 @@ public class Vdm extends EncapsulatedSentence {
             } catch (SixbitException e) {
                 throw new SentenceException("Not enough bits for msgid");
             }
-
             return 0;
         }
 
@@ -104,7 +106,15 @@ public class Vdm extends EncapsulatedSentence {
      * @return
      */
     public static boolean isVdm(String line) {
-        return VDM_PATTERN.matcher(line).matches();
+        int sentenceStart = line.indexOf('!');
+        if (sentenceStart < 0) {
+            return false;
+        }
+        int formatterStart = line.indexOf("VDM");
+        if (formatterStart < 0) {
+            formatterStart = line.indexOf("VDO");
+        }
+        return formatterStart == sentenceStart + 3;
     }
 
     /**

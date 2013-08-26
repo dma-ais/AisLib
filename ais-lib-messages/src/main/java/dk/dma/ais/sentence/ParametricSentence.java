@@ -24,11 +24,11 @@ public abstract class ParametricSentence extends Sentence {
      * Base parse method to be used by extending classes
      */
     @Override
-    protected void baseParse(String line) throws SentenceException {
-        super.baseParse(line);
+    protected void baseParse(SentenceLine sl) throws SentenceException {
+        super.baseParse(sl);
 
         // Should at least have three fields
-        if (fields.length < 3) {
+        if (sl.getFields().size() < 3) {
             throw new SentenceException("Sentence have less than three fields");
         }
 

@@ -34,7 +34,7 @@ public class TcpWriteServer extends TcpServer {
     /**
      * Send message to all clients
      * 
-     * @param msg
+     * @param sentenceStr
      */
     public void send(String msg) {
         for (TcpClient client : clients) {

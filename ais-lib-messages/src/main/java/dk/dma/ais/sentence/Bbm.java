@@ -43,15 +43,20 @@ public class Bbm extends SendSentence {
         super.encode();
         return finalEncode();
     }
+        
+    public int parse(String line) throws SentenceException, SixbitException {
+        return parse(new SentenceLine(line));
+    }
 
     /**
      * Implemented parse method. See {@link EncapsulatedSentence}
+     * @throws SixbitException 
      */
     @Override
-    public int parse(String line) throws SentenceException, SixbitException {
+    public int parse(SentenceLine sl) throws SentenceException, SixbitException {
 
         // Do common parsing
-        super.baseParse(line);
+        super.baseParse(sl);
 
         // Check VDM / VDO
         if (!this.formatter.equals("BBM")) {
@@ -59,19 +64,19 @@ public class Bbm extends SendSentence {
         }
 
         // Check that there at least 8 fields
-        if (fields.length < 9) {
+        if (sl.getFields().size() < 9) {
             throw new SentenceException("Sentence does not have at least 8 fields");
         }
 
         // Message id
-        this.msgId = Integer.parseInt(fields[5]);
+        this.msgId = Integer.parseInt(sl.getFields().get(5));
 
         // Padding bits
-        int padBits = Sentence.parseInt(fields[7]);
+        int padBits = Sentence.parseInt(sl.getFields().get(7));
 
         // Six bit field
-        this.sixbitString += fields[6];
-        binArray.appendSixbit(fields[6], padBits);
+        this.sixbitString.append(sl.getFields().get(6));
+        binArray.appendSixbit(sl.getFields().get(6), padBits);
 
         if (completePacket) {
             return 0;

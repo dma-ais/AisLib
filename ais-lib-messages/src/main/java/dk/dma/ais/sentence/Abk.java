@@ -15,7 +15,6 @@
  */
 package dk.dma.ais.sentence;
 
-import dk.dma.ais.binary.SixbitException;
 
 /**
  * Addressed Binary Acknowledgement as defined by IEC 61162
@@ -75,9 +74,9 @@ public class Abk extends ParametricSentence {
      * Parse method. Will always return 0 as sentence will always be in a single line.
      */
     @Override
-    public int parse(String line) throws SentenceException, SixbitException {
+    public int parse(SentenceLine sl) throws SentenceException {
         // Do common parsing
-        super.baseParse(line);
+        super.baseParse(sl);
 
         // Check ABK formatter
         if (!this.formatter.equals("ABK")) {
@@ -85,30 +84,30 @@ public class Abk extends ParametricSentence {
         }
 
         // Check that there at least 5 fields
-        if (fields.length < 5) {
+        if (sl.getFields().size() < 5) {
             throw new SentenceException("Sentence does not have at least 5 fields");
         }
 
         // Destination, may be null for broadcasts
-        if (fields[1].length() > 0) {
-            destination = Sentence.parseInt(fields[1]);
+        if (sl.getFields().get(1).length() > 0) {
+            destination = Sentence.parseInt(sl.getFields().get(1));
         }
 
         // Channel, relaxed may be null
-        if (fields[2].length() > 0) {
-            this.channel = fields[2].charAt(0);
+        if (sl.getFields().get(2).length() > 0) {
+            this.channel = sl.getFields().get(2).charAt(0);
         } else {
             this.channel = 0;
         }
 
         // Message id
-        msgId = Sentence.parseInt(fields[3]);
+        msgId = Sentence.parseInt(sl.getFields().get(3));
 
         // Sequence
-        sequence = Sentence.parseInt(fields[4]);
+        sequence = Sentence.parseInt(sl.getFields().get(4));
 
         // Result
-        result = Result.parseInt(Sentence.parseInt(fields[5]));
+        result = Result.parseInt(Sentence.parseInt(sl.getFields().get(5)));
 
         return 0;
     }

@@ -24,11 +24,14 @@ import org.junit.Assert;
 
 import com.google.common.io.Files;
 
+import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
+
 /**
  * 
  * @author Kasper Nielsen
  */
-public class BenchmarkAisPacketParsing {
+public class BenchmarkSentenceLineParsing {
 
     public static void main(String[] args) throws Exception {
         URL url = ClassLoader.getSystemResource("replay_dump.txt");
@@ -39,30 +42,28 @@ public class BenchmarkAisPacketParsing {
         List<String> list = Files.readLines(f, StandardCharsets.US_ASCII);
 
         // Warm up
-        AisPacketParser apr = new AisPacketParser();
         for (int i = 0; i < 100; i++) {
             for (String s : list) {
-                AisPacket p = apr.readLine(s);
-                if (p != null) {
-                    p.getAisMessage();
+                SentenceLine sl = new SentenceLine(s);
+                if (!sl.isChecksumMatch()) {
+                    throw new SentenceException("Checksum failed");
                 }
             }
         }
         Thread.sleep(100);
-        long packets = 0;
-        long lines = 0;
+
+        long l = 0;
         long now = System.nanoTime();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100000; i++) {
             for (String s : list) {
-                AisPacket p = apr.readLine(s);
-                if (p != null) {
-                    packets++;
-                    p.getAisMessage();
+                SentenceLine sl = new SentenceLine(s);
+                l++;
+                if (!sl.isChecksumMatch()) {
+                    throw new SentenceException("Checksum failed");
                 }
-                lines++;
             }
         }
         double total = (System.nanoTime() - now) / 1000d / 1000 / 1000;
-        System.out.println("Total processed:" + packets + " (lines: " + lines + "), " + packets / total + " packets/second");
+        System.out.println("Total processed:" + l + ", " + l / total + " lines/second");
     }
 }

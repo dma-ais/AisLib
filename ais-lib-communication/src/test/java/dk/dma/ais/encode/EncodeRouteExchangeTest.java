@@ -31,6 +31,7 @@ import dk.dma.ais.message.binary.AisApplicationMessage;
 import dk.dma.ais.message.binary.BroadcastIntendedRoute;
 import dk.dma.ais.sentence.Bbm;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
 
@@ -83,7 +84,7 @@ public class EncodeRouteExchangeTest {
         // Decode VDM sentences
         Vdm vdm = new Vdm();
         for (int i = 0; i < vdms.length; i++) {
-            int result = vdm.parse(vdms[i]);
+            int result = vdm.parse(new SentenceLine(vdms[i]));
             if (i < vdms.length - 1) {
                 Assert.assertEquals(result, 1);
             } else {
@@ -97,7 +98,7 @@ public class EncodeRouteExchangeTest {
         // Get the ASM
         AisApplicationMessage appMsg = msg8.getApplicationMessage();
         BroadcastIntendedRoute parsedRoute = (BroadcastIntendedRoute) appMsg;
-        System.out.println("msg 8 application: " + appMsg);
+        System.out.println("sentenceStr 8 application: " + appMsg);
 
         // Assert if mathes original
         Assert.assertEquals(parsedRoute.getWaypointCount(), waypoints.size());

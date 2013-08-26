@@ -48,7 +48,7 @@ public class TcpWriteClient extends TcpClient {
     /**
      * Send message
      * 
-     * @param msg
+     * @param sentenceStr
      */
     public boolean send(String msg) {
         status.receive();

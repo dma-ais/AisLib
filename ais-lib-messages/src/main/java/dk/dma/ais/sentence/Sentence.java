@@ -32,14 +32,13 @@ import dk.dma.ais.proprietary.IProprietaryTag;
  */
 public abstract class Sentence {
 
-    protected String talker = "AI";
-    protected String formatter;
     protected String delimiter = "!";
+    protected String talker;
+    protected String formatter;
     protected int checksum;
     protected String msgChecksum;
-    protected String[] fields;
-    protected String msg;
-    protected String prefix;
+    protected String sentenceStr;
+    protected SentenceLine sentenceLine;
     protected List<String> orgLines = new ArrayList<>();
     protected List<String> rawSentences = new ArrayList<>();
     protected LinkedList<String> encodedFields;
@@ -49,16 +48,14 @@ public abstract class Sentence {
     /**
      * Abstract method that all sentence classes must implement
      * 
-     * The method handles assembly and extraction of the 6-bit data from sentences. The sentence is expected to be in
-     * order.
+     * The method handles assembly and extraction of the 6-bit data from sentences. The sentence is expected to be in order.
      * 
-     * It will return an error if received line is out of order or from a new sequence before the previous one is
-     * finished.
+     * It will return an error if received line is out of order or from a new sequence before the previous one is finished.
      * 
      * @param line
      * @return 0 Complete packet - 1 Incomplete packet
      */
-    public abstract int parse(String line) throws SentenceException, SixbitException;
+    public abstract int parse(SentenceLine sl) throws SentenceException, SixbitException;
 
     /**
      * Get an encoded sentence
@@ -73,38 +70,32 @@ public abstract class Sentence {
      * @param line
      * @throws SentenceException
      */
-    protected void baseParse(String line) throws SentenceException {
-        this.orgLines.add(line);
-
-        // Split into prefix and sentence
-        splitLine(line);
+    protected void baseParse(SentenceLine sl) throws SentenceException {
+        sentenceLine = sl;
+        this.orgLines.add(sl.getLine());
 
         // Save raw sentence
-        rawSentences.add(this.msg);
+        rawSentences.add(sl.getSentence());
 
         // Check for comment block
-        if (prefix.length() > 0 && CommentBlock.hasCommentBlock(prefix)) {
-            addCommentBlock(prefix);
+        if (sl.getPrefix().length() > 0 && CommentBlock.hasCommentBlock(sl.getPrefix())) {
+            addCommentBlock(sl.getPrefix());
         }
 
-        // Calculate checksum
-        calculateChecksum();
-
         // Check checksum
-        checkChecksum();
+        if (!sl.isChecksumMatch()) {
+            throw new SentenceException("Invalid checksum: " + sl.getChecksumField() + " should have been: "
+                    + sl.getChecksumString());
+        }
 
-        // Split into fields
-        fields = msg.split(",|\\*");
-        if (fields.length < 2) {
+        if (sl.getFields().size() < 2) {
             throw new SentenceException("Invalid sentence, less than two fields");
         }
 
-        // Get talker/formatter
-        if (fields[0].length() != 6) {
-            throw new SentenceException("Invalid sentence, wrong talker/formatter: " + fields[0]);
+        // Check talker/formatter
+        if (sl.getTalker() == null || sl.getFormatter() == null) {
+            throw new SentenceException("Invalid sentence, wrong talker/formatter: " + sl.getFields().get(0));
         }
-        talker = fields[0].substring(1, 3);
-        formatter = fields[0].substring(3, 6);
     }
 
     public void addSingleCommentBlock(String line) throws SentenceException {
@@ -140,7 +131,7 @@ public abstract class Sentence {
         // Join fields
         String encoded = StringUtils.join(encodedFields.iterator(), ',');
 
-        this.msg = encoded;
+        this.sentenceStr = encoded;
         try {
             calculateChecksum();
         } catch (SentenceException e) {
@@ -153,32 +144,12 @@ public abstract class Sentence {
     }
 
     /**
-     * Split line into prefix and message part. Message will start at first ! or $ character
-     * 
-     * @param line
-     * @throws SentenceException
-     */
-    private void splitLine(String line) throws SentenceException {
-        char[] lineArray = line.toCharArray();
-        int i = 0;
-        for (char x : lineArray) {
-            if (x == '!' || x == '$') {
-                this.prefix = line.substring(0, i);
-                this.msg = line.substring(i);
-                return;
-            }
-            i++;
-        }
-        throw new SentenceException("NMEA Start Not Found");
-    }
-
-    /**
      * Calculate checksum of this sentence
      * 
      * @throws SentenceException
      */
     private void calculateChecksum() throws SentenceException {
-        this.checksum = getChecksum(msg);
+        this.checksum = getChecksum(sentenceStr);
     }
 
     /**
@@ -223,19 +194,20 @@ public abstract class Sentence {
      * @return
      */
     public Date getMssisTimestamp() {
-        int i = this.msg.indexOf('*');
-        if (i < 0 || i + 4 > this.msg.length()) {
+        if (sentenceLine == null) {
             return null;
         }
-        String postfix = this.msg.substring(i + 4).trim();
-        String[] stamps = StringUtils.split(postfix, ',');
-        if (stamps.length == 0) {
+        // Go through postfix fields
+        int start = sentenceLine.getPostfixStart();
+        if (start < 0) {
             return null;
         }
-        for (String stamp : stamps) {
+        for (int i = start; i < sentenceLine.getFields().size(); i++) {
+            String field = sentenceLine.getFields().get(i);
             try {
-                return new Date(Long.parseLong(stamp) * 1000);
-            } catch (NumberFormatException e) {}
+                return new Date(Long.parseLong(field) * 1000);
+            } catch (NumberFormatException e) {
+            }
         }
         return null;
     }
@@ -267,30 +239,6 @@ public abstract class Sentence {
         }
         // Try to get proprietary MSSIS timestamp
         return getMssisTimestamp();
-    }
-
-    /**
-     * Check calculated checksum with checksum indicated in sentence line
-     * 
-     * @throws SentenceException
-     */
-    private void checkChecksum() throws SentenceException {
-        int ptr = this.msg.indexOf('*');
-        if (ptr < 0) {
-            throw new SentenceException("Invalid sentence, no checksum");
-        }
-        try {
-            this.msgChecksum = this.msg.substring(ptr + 1, ptr + 3);
-        } catch (IndexOutOfBoundsException e) {
-            throw new SentenceException("Invalid sentence, invalid checksum not two bytes");
-        }
-        try {
-            if (Integer.parseInt(this.msgChecksum, 16) != this.checksum) {
-                throw new SentenceException("Checksum failed, should have been: " + Integer.toString(this.checksum, 16));
-            }
-        } catch (NumberFormatException e) {
-            throw new SentenceException("Invalid message checksum: " + this.msgChecksum);
-        }
     }
 
     public static int parseInt(String str) throws SentenceException {

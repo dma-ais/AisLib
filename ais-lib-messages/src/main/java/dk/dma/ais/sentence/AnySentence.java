@@ -28,9 +28,9 @@ public class AnySentence extends Sentence {
     List<String> anyFields = new ArrayList<>();
 
     @Override
-    public int parse(String line) throws SentenceException, SixbitException {
+    public int parse(SentenceLine sl) throws SentenceException, SixbitException {
         // Do common parsing
-        super.baseParse(line);
+        super.baseParse(sl);
         return 0;
     }
 

@@ -70,5 +70,5 @@ public class VdmTest {
         Assert.assertEquals("Wrong user id", 992199007, msg.getUserId());
 
     }
-
+    
 }

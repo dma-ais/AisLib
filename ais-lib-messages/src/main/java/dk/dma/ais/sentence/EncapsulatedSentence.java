@@ -33,30 +33,28 @@ public abstract class EncapsulatedSentence extends Sentence {
     protected Character channel;
     protected BinArray binArray = new BinArray();
     protected boolean completePacket;
-    protected String sixbitString = "";
+    protected StringBuilder sixbitString = new StringBuilder();
     protected int padBits;
 
     /**
      * Base parse method to be used by extending classes
      */
     @Override
-    protected void baseParse(String line) throws SentenceException {
-
-        super.baseParse(line);
+    protected void baseParse(SentenceLine sl) throws SentenceException {
+        super.baseParse(sl);
 
         // Should at least have four fields
-        if (fields.length < 4) {
+        if (sl.getFields().size() < 4) {
             throw new SentenceException("Sentence have less than four fields");
         }
 
         // Get sentence count properties
-        int thisTotal = Sentence.parseInt(fields[1]);
-        int thisNum = Sentence.parseInt(fields[2]);
+        int thisTotal = Sentence.parseInt(sl.getFields().get(1));
+        int thisNum = Sentence.parseInt(sl.getFields().get(2));
         int thisSeq = 0;
-        try {
-            thisSeq = Sentence.parseInt(fields[3]);
-        } catch (SentenceException e) {
+        if (sl.getFields().get(3).length() > 0) {
             // null sequence is not fatal
+            thisSeq = Sentence.parseInt(sl.getFields().get(3));
         }
 
         if (lastSeq < 0) {
@@ -66,12 +64,12 @@ public abstract class EncapsulatedSentence extends Sentence {
             sequence = thisSeq;
             lastSeq = thisSeq;
             if (num != 1 || num > total) {
-                throw new SentenceException("Out of sequence sentence: " + line);
+                throw new SentenceException("Out of sequence sentence: " + sl.getLine());
             }
         } else {
             // Sentence part of existing group
             if (total != thisTotal || thisNum != num + 1 || thisSeq != lastSeq) {
-                throw new SentenceException("Out of sequence sentence: " + line);
+                throw new SentenceException("Out of sequence sentence: " + sl.getLine());
             }
             num = thisNum;
         }
@@ -94,7 +92,7 @@ public abstract class EncapsulatedSentence extends Sentence {
         String seq = sequence == null ? "" : Integer.toString(sequence);
         encodedFields.add(seq);
         encodedFields.add(channel != null ? Character.toString(channel) : "");
-        encodedFields.add(sixbitString);
+        encodedFields.add(sixbitString.toString());
         encodedFields.add(Integer.toString(padBits));
     }
 
@@ -173,7 +171,7 @@ public abstract class EncapsulatedSentence extends Sentence {
      * @throws SixbitException
      */
     public void setEncodedMessage(SixbitEncoder encoder) throws SixbitException {
-        sixbitString = encoder.encode();
+        sixbitString = new StringBuilder(encoder.encode());
         padBits = encoder.getPadBits();
     }
 
@@ -186,7 +184,7 @@ public abstract class EncapsulatedSentence extends Sentence {
     public void setMessageData(AisMessage aisMessage) throws SixbitException {
         this.msgId = aisMessage.getMsgId();
         SixbitEncoder encoder = aisMessage.getEncoded();
-        sixbitString = encoder.encode();
+        sixbitString = new StringBuilder(encoder.encode());
         padBits = encoder.getPadBits();
     }
 
@@ -207,7 +205,7 @@ public abstract class EncapsulatedSentence extends Sentence {
      * @param sixbitString
      */
     public void setSixbitString(String sixbitString) {
-        this.sixbitString = sixbitString;
+        this.sixbitString = new StringBuilder(sixbitString);
     }
 
     public void setPadBits(int padBits) {
@@ -215,7 +213,7 @@ public abstract class EncapsulatedSentence extends Sentence {
     }
 
     public String getSixbitString() {
-        return sixbitString;
+        return sixbitString.toString();
     }
 
 }

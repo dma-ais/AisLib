@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.transform.AisPacketTaggingTransformer;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 import dk.dma.commons.util.io.CountingInputStream;
@@ -152,7 +153,7 @@ public class AisPacketReader implements AutoCloseable {
             }
             Abk abk = new Abk();
             try {
-                abk.parse(line);
+                abk.parse(new SentenceLine(line));
                 handleAbk(abk);
             } catch (Exception e) {
                 if (throwExceptions) {

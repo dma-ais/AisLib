@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import dk.dma.ais.sentence.SentenceLine;
+
 /**
  * 
  * @author Kasper Nielsen
@@ -59,19 +61,19 @@ public abstract class ProprietaryFactory {
      * @param line
      * @return
      */
-    public abstract IProprietaryTag getTag(String line);
+    public abstract IProprietaryTag getTag(SentenceLine sl);
 
     public static Collection<ProprietaryFactory> getAllFactories() {
         return ALL_FACTORIES.values();
     }
 
-    public static IProprietaryTag parseTag(String str) {
-        ProprietaryFactory psf = match(str);
-        return psf == null ? null : psf.getTag(str);
+    public static IProprietaryTag parseTag(SentenceLine sl) {
+        ProprietaryFactory psf = match(sl.getSentenceHead());
+        return psf == null ? null : psf.getTag(sl);
     }
 
     public static boolean isProprietaryTag(String line) {
-        return line.length() >= 5 && line.startsWith("$P");
+        return line != null && line.length() >= 5 && line.startsWith("$P");
     }
 
     public static ProprietaryFactory match(String line) {

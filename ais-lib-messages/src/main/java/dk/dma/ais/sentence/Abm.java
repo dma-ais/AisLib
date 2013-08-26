@@ -48,6 +48,17 @@ public class Abm extends SendSentence {
         encodedFields.add(4, Integer.toString(destination));
         return finalEncode();
     }
+    
+    /**
+     * Helper method parsing line to SentenceLine and passing to parse
+     * @param line
+     * @return
+     * @throws SentenceException
+     * @throws SixbitException 
+     */
+    public int parse(String line) throws SentenceException, SixbitException {
+        return parse(new SentenceLine(line));
+    }
 
     /**
      * Implemented parse method. See {@link EncapsulatedSentence}
@@ -56,9 +67,9 @@ public class Abm extends SendSentence {
      * @throws SixbitException
      */
     @Override
-    public int parse(String line) throws SentenceException, SixbitException {
+    public int parse(SentenceLine sl) throws SentenceException, SixbitException {
         // Do common parsing
-        super.baseParse(line);
+        super.baseParse(sl);
 
         // Check ABM
         if (!this.formatter.equals("ABM")) {
@@ -66,28 +77,28 @@ public class Abm extends SendSentence {
         }
 
         // Check that there at least 9 fields
-        if (fields.length < 9) {
+        if (sl.getFields().size() < 9) {
             throw new SentenceException("Sentence does not have at least 9 fields");
         }
 
-        this.destination = Integer.parseInt(fields[4]);
+        this.destination = Integer.parseInt(sl.getFields().get(4));
 
         // Channel, relaxed may be null
-        if (fields[5].length() > 0) {
-            this.channel = fields[5].charAt(0);
+        if (sl.getFields().get(5).length() > 0) {
+            this.channel = sl.getFields().get(5).charAt(0);
         } else {
             this.channel = 0;
         }
 
         // Message id
-        this.msgId = Integer.parseInt(fields[6]);
+        this.msgId = Integer.parseInt(sl.getFields().get(6));
 
         // Padding bits
-        int padBits = Sentence.parseInt(fields[8]);
+        int padBits = Sentence.parseInt(sl.getFields().get(8));
 
         // Six bit field
-        this.sixbitString = fields[7];
-        binArray.appendSixbit(fields[7], padBits);
+        this.sixbitString = new StringBuilder(sl.getFields().get(7));
+        binArray.appendSixbit(sl.getFields().get(7), padBits);
 
         if (completePacket) {
             return 0;

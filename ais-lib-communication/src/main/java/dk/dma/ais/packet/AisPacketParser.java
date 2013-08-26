@@ -25,12 +25,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.proprietary.ProprietaryFactory;
 import dk.dma.ais.sentence.CommentBlock;
-import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 
 /**
@@ -55,6 +54,11 @@ public class AisPacketParser {
 
     /** A received VDO/VDM */
     private Vdm vdm = new Vdm();
+    
+    /**
+     * Sentence line parser
+     */
+    private SentenceLine sentenceLine = new SentenceLine();
 
     void newVdm() {
         vdm = new Vdm();
@@ -68,7 +72,6 @@ public class AisPacketParser {
      * @param line
      * @return
      * @throws SentenceException
-     * @throws SixbitException
      */
     public AisPacket readLine(String line) throws SentenceException {
         return readLine(line, false);
@@ -91,9 +94,11 @@ public class AisPacketParser {
             }
             sentenceTrace.addLast(line);
         }
+        
+        sentenceLine.parse(line);
 
         // Ignore everything else than sentences
-        if (!Sentence.hasSentence(line)) {
+        if (!sentenceLine.hasSentence()) {
             // Gracefully ignore empty lines
             if (line.length() == 0) {
                 newVdm();
@@ -120,10 +125,10 @@ public class AisPacketParser {
         packetLines.add(line);
 
         // Check if proprietary line
-        if (ProprietaryFactory.isProprietaryTag(line)) {
+        if (sentenceLine.isProprietary()) {
             // Try to parse with one of the registered factories in
             // META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
-            IProprietaryTag tag = ProprietaryFactory.parseTag(line);
+            IProprietaryTag tag = ProprietaryFactory.parseTag(sentenceLine);
             if (tag != null) {
                 tags.add(tag);
             }
@@ -131,7 +136,7 @@ public class AisPacketParser {
         }
 
         // Check if VDM. If not the possible current VDM is broken.
-        if (!Vdm.isVdm(line)) {
+        if (!sentenceLine.isFormatter("VDM", "VDO")) {
             newVdm();
             return null;
         }
@@ -139,7 +144,7 @@ public class AisPacketParser {
         // Parse VDM
         int result;
         try {
-            result = vdm.parse(line);
+            result = vdm.parse(sentenceLine);
         } catch (SentenceException e) {
             newVdm();
             // Do a single retry with the current line. The faulty sentence may be the last, not this one.

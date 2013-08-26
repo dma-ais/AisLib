@@ -90,7 +90,7 @@ public class SendThreadPool {
      * Static method to generate hash from send request
      * 
      * @param sendRequest
-     * @return seq+msg id+dest
+     * @return seq+sentenceStr id+dest
      */
     public static String sendHash(SendRequest sendRequest) {
         int seq = sendRequest.getSequence();
@@ -103,7 +103,7 @@ public class SendThreadPool {
      * Static method to generate hash from ABK
      * 
      * @param abk
-     * @return seq+msg id+dest
+     * @return seq+sentenceStr id+dest
      */
     public static String abkHash(Abk abk) {
         int seq = abk.getSequence();

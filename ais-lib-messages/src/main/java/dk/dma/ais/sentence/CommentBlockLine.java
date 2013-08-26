@@ -15,7 +15,9 @@
  */
 package dk.dma.ais.sentence;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -36,7 +38,7 @@ public class CommentBlockLine {
         int start = -1;
         int end = -1;
         checksum = 0;
-        // Find start, end and checksum
+        // Find start, end, checksum and fields
         for (int i = 0; i < line.length(); i++) {
             char c = line.charAt(i);
             if (c == '*') {
@@ -73,14 +75,27 @@ public class CommentBlockLine {
         }
 
         // Split into fields
-        String[] fields = StringUtils.split(line.substring(start + 1, end), ',');
-        for (String field : fields) {
-            int sep = field.indexOf(':');
-            if (sep < 0) {
-                throw new CommentBlockException("Malformed comment block field: " + field);
+        StringBuilder tmpStr = new StringBuilder(16);
+        List<String> fields = new ArrayList<>();
+        for (int i = start + 1; i < end; i++) {
+            if (line.charAt(i) == ',' || line.charAt(i) == ':') {
+                fields.add(tmpStr.toString());
+                tmpStr.setLength(0);
+            } else {
+                tmpStr.append(line.charAt(i));
             }
-            String parameterCode = field.substring(0, sep);
-            String value = field.substring(sep + 1);
+        }
+        if (start + 1 < end) {
+            fields.add(tmpStr.toString());
+        }
+
+        if (fields.size() % 2 != 0) {
+            throw new CommentBlockException("Malformed comment block");
+        }
+
+        for (int i = 0; i < fields.size(); i += 2) {
+            String parameterCode = fields.get(i);
+            String value = fields.get(i + 1);
 
             // Check for grouping parameter code
             int groupCharIndex;

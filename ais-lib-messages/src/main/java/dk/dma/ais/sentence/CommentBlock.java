@@ -81,6 +81,14 @@ public class CommentBlock {
     }
 
     /**
+     * Get number of entries in comment block
+     * @return
+     */
+    public int getSize() {
+        return parameterMap.size();
+    }
+    
+    /**
      * Get string value for parameter code
      * 
      * @param parameter

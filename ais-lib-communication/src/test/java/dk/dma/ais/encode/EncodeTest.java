@@ -40,6 +40,7 @@ import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.AisStaticCommon;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
 
@@ -89,7 +90,7 @@ public class EncodeTest {
             String line;
             Vdm vdm = new Vdm();
             while ((line = in.readLine()) != null) {
-                int res = vdm.parse(line);
+                int res = vdm.parse(new SentenceLine(line));
                 if (res != 0) {
                     continue;
                 }

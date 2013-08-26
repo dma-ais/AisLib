@@ -166,13 +166,13 @@ public class MessageTest {
 
         Vdm vdm = new Vdm();
         int result = vdm.parse(line1);
-        Assert.assertEquals("Failed to parse msg 5 first line", result, 1);
+        Assert.assertEquals("Failed to parse sentenceStr 5 first line", result, 1);
 
         result = vdm.parse(line2);
-        Assert.assertEquals("Failed to parse msg 5 second line", result, 0);
+        Assert.assertEquals("Failed to parse sentenceStr 5 second line", result, 0);
 
         AisMessage msg = AisMessage.getInstance(vdm);
-        Assert.assertEquals("Not msg 5", msg.getMsgId(), 5);
+        Assert.assertEquals("Not sentenceStr 5", msg.getMsgId(), 5);
 
     }
 
@@ -181,13 +181,13 @@ public class MessageTest {
         String line = "!BSVDM,1,1,,A,H3uFAjTT653hhhiC;1GPPP1`0220,0*62";
         Vdm vdm = new Vdm();
         int result = vdm.parse(line);
-        Assert.assertEquals("Failed to parse msg 24", result, 0);
+        Assert.assertEquals("Failed to parse sentenceStr 24", result, 0);
         AisMessage msg = AisMessage.getInstance(vdm);
-        Assert.assertEquals("Not msg 24", msg.getMsgId(), 24);
+        Assert.assertEquals("Not sentenceStr 24", msg.getMsgId(), 24);
     }
 
     @Test
-    public void decodeMssisTimestamp() throws SentenceException {
+    public void decodeMssisTimestamp() throws SentenceException, SixbitException {
         String sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E,1357134218\r\n";
         Vdm vdm = new Vdm();
         int result = vdm.parse(sentence);
@@ -217,7 +217,7 @@ public class MessageTest {
         int result = vdm.parse(sentence);
         Assert.assertEquals("Failed to parse", result, 0);
         AisMessage msg = AisMessage.getInstance(vdm);
-        System.out.println("msg: " + msg);
+        System.out.println("sentenceStr: " + msg);
     }
 
     @Test
@@ -227,7 +227,7 @@ public class MessageTest {
         int result = vdm.parse(sentence);
         Assert.assertEquals("Failed to parse", result, 0);
         AisMessage msg = AisMessage.getInstance(vdm);
-        System.out.println("msg: " + msg);
+        System.out.println("sentenceStr: " + msg);
     }
 
 }

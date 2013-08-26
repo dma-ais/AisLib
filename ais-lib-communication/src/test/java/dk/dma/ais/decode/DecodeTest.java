@@ -45,6 +45,7 @@ import dk.dma.ais.proprietary.ProprietaryFactory;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Position;
@@ -115,7 +116,7 @@ public class DecodeTest {
                 if (ProprietaryFactory.isProprietaryTag(line)) {
                     // Try to parse with one the registered factories in
                     // META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
-                    IProprietaryTag tag = ProprietaryFactory.parseTag(line);
+                    IProprietaryTag tag = ProprietaryFactory.parseTag(new SentenceLine(line));
                     if (tag != null) {
                         tags.add(tag);
                     }
@@ -124,7 +125,7 @@ public class DecodeTest {
 
                 // Handle VDM/VDO line
                 try {
-                    int result = vdm.parse(line);
+                    int result = vdm.parse(new SentenceLine(line));
                     // LOG.info("result = " + result);
                     if (result == 0) {
                         message = AisMessage.getInstance(vdm);
@@ -180,7 +181,7 @@ public class DecodeTest {
     public void decodeAbmTest() throws SentenceException, SixbitException {
         String sentence = "!AIABM,1,1,0,219997000,0,12,<>j?1GhlLplPD5CDP6B?=P6BF,0*5F";
         Abm abm = new Abm();
-        int result = abm.parse(sentence);
+        int result = abm.parse(new SentenceLine(sentence));
         Assert.assertEquals("ABM parse failed", 0, result);
         Assert.assertEquals("Message ID wrong", 12, abm.getMsgId());
     }
@@ -189,7 +190,7 @@ public class DecodeTest {
     public void decodeRouteReplyAbm() throws SentenceException, SixbitException {
         String sentence = "!AIABM,1,1,1,990219000,0,6,0200<b1,0*16";
         Abm abm = new Abm();
-        int result = abm.parse(sentence);
+        int result = abm.parse(new SentenceLine(sentence));
         Assert.assertEquals("ABM parse failed", 0, result);
         AisMessage6 msg6 = (AisMessage6) abm.getAisMessage(377085000, 0, 0);
         RouteSuggestionReply routeSuggestionReply = (RouteSuggestionReply) msg6.getApplicationMessage();
@@ -200,7 +201,7 @@ public class DecodeTest {
     public void decodeAbkTest() throws SentenceException, SixbitException {
         String line = "$AIABK,219012679,B,12,1,0*1D";
         Abk abk = new Abk();
-        abk.parse(line);
+        abk.parse(new SentenceLine(line));
         Assert.assertEquals(abk.getDestination(), 219012679);
         Assert.assertEquals(abk.getChannel().charValue(), 'B');
         Assert.assertEquals(abk.getMsgId(), 12);
@@ -209,7 +210,7 @@ public class DecodeTest {
 
         line = "$AIABK,,,8,3,3*54";
         abk = new Abk();
-        abk.parse(line);
+        abk.parse(new SentenceLine(line));
         Assert.assertEquals(abk.getChannel().charValue(), '\0');
         Assert.assertEquals(abk.getMsgId(), 8);
         Assert.assertEquals(abk.getSequence(), 3);

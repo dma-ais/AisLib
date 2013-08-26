@@ -27,6 +27,7 @@ import dk.dma.ais.message.binary.AsmAcknowledge;
 import dk.dma.ais.message.binary.Capability;
 import dk.dma.ais.sentence.Abm;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 
 public class EncodeBinaryTest {
@@ -96,7 +97,7 @@ public class EncodeBinaryTest {
         String[] sentences = Vdm.createSentences(msg6, 0);
         Assert.assertEquals(1, sentences.length);
         Vdm vdm = new Vdm();
-        int res = vdm.parse(sentences[0]);
+        int res = vdm.parse(new SentenceLine(sentences[0]));
         Assert.assertEquals(0, res);
         msg6 = (AisMessage6) AisMessage.getInstance(vdm);
         acknowledge = (AsmAcknowledge) msg6.getApplicationMessage();

@@ -30,6 +30,7 @@ import dk.dma.ais.message.binary.AreaNotice;
 import dk.dma.ais.message.binary.BroadcastAreaNotice;
 import dk.dma.ais.message.binary.SubArea;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 
 /**
@@ -112,7 +113,7 @@ public class EncodeAreaNoticeTest {
         // Decode VDM sentences
         Vdm vdm = new Vdm();
         for (int i = 0; i < vdms.length; i++) {
-            int result = vdm.parse(vdms[i]);
+            int result = vdm.parse(new SentenceLine(vdms[i]));
             if (i < vdms.length - 1) {
                 Assert.assertEquals(result, 1);
             } else {
@@ -126,7 +127,7 @@ public class EncodeAreaNoticeTest {
         // Get the ASM
         AisApplicationMessage appMsg = msg8.getApplicationMessage();
         AreaNotice parsedAreNotice = (AreaNotice) appMsg;
-        System.out.println("msg 8 application: " + appMsg);
+        System.out.println("sentenceStr 8 application: " + appMsg);
 
         // Assert if mathes original
         Assert.assertEquals(parsedAreNotice.getDac(), 1);

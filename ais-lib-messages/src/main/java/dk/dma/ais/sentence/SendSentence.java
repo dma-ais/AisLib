@@ -40,7 +40,7 @@ public abstract class SendSentence extends EncapsulatedSentence {
     /**
      * Set binary content from binary application specific message
      * 
-     * @param msg
+     * @param sentenceStr
      * @throws SixbitException
      */
     public void setBinaryData(AisBinaryMessage msg) throws SixbitException {
@@ -53,7 +53,7 @@ public abstract class SendSentence extends EncapsulatedSentence {
     /**
      * Set binary content from AIS message 12
      * 
-     * @param msg
+     * @param sentenceStr
      * @throws SixbitException
      */
     public void setTextData(AisMessage12 msg) throws SixbitException {
@@ -64,7 +64,7 @@ public abstract class SendSentence extends EncapsulatedSentence {
     /**
      * Set binary content from AIS message 14
      * 
-     * @param msg
+     * @param sentenceStr
      * @throws SixbitException
      */
     public void setTextData(AisMessage14 msg) throws SixbitException {
