@@ -22,13 +22,13 @@ import java.util.Arrays;
  */
 public class BinArray {
 
+    /** Precompiled list of int to six bit mappings. */
+    private static final int[] INT_TO_SIX_BIT;
+
     private boolean[] bitSet = new boolean[1024];
 
     private int length;
     private int readPtr;
-
-    /** Precompiled list of int to six bit mappings. */
-    private final static int[] INT_TO_SIX_BIT;
 
     static {
         int[] toSixbit = new int[256 * 256]; // we actually only use 256, but we parse chars around instead of bytes

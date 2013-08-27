@@ -25,6 +25,12 @@ import dk.dma.ais.proprietary.ProprietaryFactory;
  */
 public class SentenceLine {
 
+    /** Cache of all ASCII strings with length 1 */
+    private static final String[] S1 = new String[256];
+
+    /** Cache of all ASCII strings with length 2 */
+    private static final String[] S2 = new String[256 * 256];
+
     private String line;
     private String talker;
     private String formatter;
@@ -34,12 +40,6 @@ public class SentenceLine {
     private ArrayList<String> fields = new ArrayList<>();
     private int checksum;
     private int checksumField = -1;
-
-    /** Cache of all ASCII strings with length 1 */
-    private final static String[] S1 = new String[256];
-
-    /** Cache of all ASCII strings with length 2 */
-    private final static String[] S2 = new String[256 * 256];
 
     static {
         for (int i = 0; i < 256; i++) {
