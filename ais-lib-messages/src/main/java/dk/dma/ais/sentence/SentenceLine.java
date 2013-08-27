@@ -35,6 +35,23 @@ public class SentenceLine {
     private int checksum;
     private int checksumField = -1;
 
+    /** Cache of all ASCII strings with length 1 */
+    private final static String[] S1 = new String[256];
+
+    /** Cache of all ASCII strings with length 2 */
+    private final static String[] S2 = new String[256 * 256];
+
+    static {
+        for (int i = 0; i < 256; i++) {
+            S1[i] = Character.toString((char) i);
+        }
+        for (int i = 0; i < 256; i++) {
+            for (int j = 0; j < 256; j++) {
+                S2[i * 256 + j] = new String(new char[] { (char) i, (char) j });
+            }
+        }
+    }
+
     public SentenceLine() {}
 
     public SentenceLine(String line) {
@@ -75,7 +92,7 @@ public class SentenceLine {
             }
             ptr++;
         }
-        this.prefix = line.substring(0, ptr);
+        this.prefix = convertString(line, 0, ptr);
 
         if (this.delimiter == null) {
             return;
@@ -87,11 +104,11 @@ public class SentenceLine {
         while (ptr < len) {
             char ch = line.charAt(ptr);
             if (ch == '*') {
-                fields.add(line.substring(ps, ptr));
+                fields.add(convertString(line, ps, ptr));
                 this.checksumField = fields.size();
                 ps = ptr + 1;
             } else if (ch == ',') {
-                fields.add(line.substring(ps, ptr));
+                fields.add(convertString(line, ps, ptr));
                 ps = ptr + 1;
             }
             if (ptr > checksumStart && this.checksumField < 0) {
@@ -100,14 +117,27 @@ public class SentenceLine {
             ptr++;
         }
         if (ps < len) {
-            fields.add(line.substring(ps, len));
+            fields.add(convertString(line, ps, len));
         }
-        sentence = line.substring(ptrStart, len);
+        sentence = convertString(line, ptrStart, len);
         // Parse talker and formatter
         String f = fields.get(0);
         if (f.length() == 6) {
-            talker = f.substring(1, 3);
-            formatter = f.substring(3, 6);
+            talker = convertString(f, 1, 3);
+            formatter = convertString(f, 3, 6);
+        }
+    }
+
+    private static String convertString(String f, int start, int end) {
+        switch (end - start) {
+        case 0:
+            return "";
+        case 1:
+            return S1[f.charAt(start)];
+        case 2:
+            return S2[(f.charAt(start) << 8) + f.charAt(start + 1)];
+        default:
+            return f.substring(start, end);
         }
     }
 
