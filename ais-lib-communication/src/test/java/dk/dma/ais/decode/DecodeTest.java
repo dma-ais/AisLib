@@ -198,7 +198,7 @@ public class DecodeTest {
     }
 
     @Test
-    public void decodeAbkTest() throws SentenceException, SixbitException {
+    public void decodeAbkTest() throws Exception {
         String line = "$AIABK,219012679,B,12,1,0*1D";
         Abk abk = new Abk();
         abk.parse(new SentenceLine(line));

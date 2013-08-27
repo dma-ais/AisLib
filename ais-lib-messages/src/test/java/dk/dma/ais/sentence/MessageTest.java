@@ -187,7 +187,7 @@ public class MessageTest {
     }
 
     @Test
-    public void decodeMssisTimestamp() throws SentenceException, SixbitException {
+    public void decodeMssisTimestamp() throws Exception {
         String sentence = "!AIVDM,1,1,,B,14pWHb?P03rwO<F:RQOnROw<25bd,0*3E,1357134218\r\n";
         Vdm vdm = new Vdm();
         int result = vdm.parse(sentence);
