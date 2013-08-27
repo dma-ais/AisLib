@@ -42,7 +42,7 @@ public class BenchmarkSentenceLineParsing {
         List<String> list = Files.readLines(f, StandardCharsets.US_ASCII);
 
         // Warm up
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             for (String s : list) {
                 SentenceLine sl = new SentenceLine(s);
                 if (!sl.isChecksumMatch()) {

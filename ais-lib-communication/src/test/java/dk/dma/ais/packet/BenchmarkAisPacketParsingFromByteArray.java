@@ -49,7 +49,7 @@ public class BenchmarkAisPacketParsingFromByteArray {
         }
         // Warm up
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             for (byte[] b : data) {
                 AisPacket p = AisPacket.fromByteArray(b);
                 p.getAisMessage();
@@ -58,7 +58,7 @@ public class BenchmarkAisPacketParsingFromByteArray {
         Thread.sleep(100);
         long l = 0;
         long now = System.nanoTime();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 20000; i++) {
             for (byte[] b : data) {
                 AisPacket p = AisPacket.fromByteArray(b);
                 l++;
