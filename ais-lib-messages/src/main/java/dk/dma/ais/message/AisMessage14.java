@@ -65,7 +65,7 @@ public class AisMessage14 extends AisMessage {
      * @throws SixbitException
      */
     public void setMessage(BinArray binArray) throws SixbitException {
-        message = binArray.getString(binArray.length() / 6);
+        message = binArray.getString(binArray.getLength() / 6);
     }
 
     public int getSpare() {

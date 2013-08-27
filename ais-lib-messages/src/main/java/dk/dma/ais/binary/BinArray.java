@@ -20,9 +20,9 @@ import java.util.BitSet;
 /**
  * Class to represent a binary array with utility methods to add and extract values
  */
-public class BinArray extends BitSet {
+public class BinArray {
 
-    private static final long serialVersionUID = 1L;
+    private final BitSet bitSet = new BitSet();
 
     private int length;
     private int readPtr;
@@ -52,7 +52,7 @@ public class BinArray extends BitSet {
      */
     public void append(BinArray binArray) {
         for (int i = 0; i < binArray.getLength(); i++) {
-            set(length, binArray.get(i));
+            bitSet.set(length, binArray.bitSet.get(i));
             length++;
         }
     }
@@ -66,7 +66,7 @@ public class BinArray extends BitSet {
     public void append(long value, int bits) {
         long powMask = 1;
         for (int i = length + bits - 1; i >= length; i--) {
-            set(i, (value & powMask) > 0);
+            bitSet.set(i, (value & powMask) > 0);
             powMask <<= 1;
         }
         length += bits;
@@ -116,7 +116,7 @@ public class BinArray extends BitSet {
         long val = 0;
         long powMask = 1;
         for (int i = to; i >= from; i--) {
-            if (get(i)) {
+            if (bitSet.get(i)) {
                 val += powMask;
             }
             powMask <<= 1;
@@ -133,11 +133,6 @@ public class BinArray extends BitSet {
         return length;
     }
 
-    @Override
-    public int length() {
-        return getLength();
-    }
-
     /**
      * Get the position of the read ptr within the array
      * 
@@ -145,6 +140,10 @@ public class BinArray extends BitSet {
      */
     public int getReadPtr() {
         return readPtr;
+    }
+
+    public int size() {
+        return bitSet.size();
     }
 
     /**
