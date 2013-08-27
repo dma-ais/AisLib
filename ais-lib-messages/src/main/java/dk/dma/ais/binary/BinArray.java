@@ -27,6 +27,23 @@ public class BinArray {
     private int length;
     private int readPtr;
 
+    /** Precompiled list of int to six bit mappings. */
+    private final static int[] INT_TO_SIX_BIT;
+
+    static {
+        int[] toSixbit = new int[256 * 256];
+        for (int chr = 0; chr < toSixbit.length; chr++) {
+            if (chr < 48 || chr > 119 || chr > 87 && chr < 96) {
+                toSixbit[chr] = -1;
+            } else if (chr < 0x60) {
+                toSixbit[chr] = chr - 48 & 0x3F;
+            } else {
+                toSixbit[chr] = chr - 56 & 0x3F;
+            }
+        }
+        INT_TO_SIX_BIT = toSixbit;
+    }
+
     /**
      * Ensures that the BinArray can hold enough bits.
      * 
@@ -49,14 +66,49 @@ public class BinArray {
      * @throws SixbitException
      */
     public void appendSixbit(String str, int padBits) throws SixbitException {
-        for (int i = 0; i < str.length(); i++) {
-            int binVal = sixbitToInt(str.charAt(i));
-            int bits = 6;
-            if (i == str.length() - 1) {
-                bits -= padBits;
+        int len = str.length() * 6 - padBits;
+        int length = this.length;
+        ensureCapacity(length + len);
+        boolean[] bitSet = this.bitSet; // store it in a local variable
+
+        int slen = str.length() - 1;
+        for (int i = 0; i < slen; i++) {
+            char chr = str.charAt(i);
+            int binVal = INT_TO_SIX_BIT[chr];
+            if (binVal == -1) {
+                throw new SixbitException("Illegal sixbit ascii char: " + chr);
             }
-            append(binVal, bits);
+            bitSet[length] = (binVal & 32) > 0;
+            bitSet[length + 1] = (binVal & 16) > 0;
+            bitSet[length + 2] = (binVal & 8) > 0;
+            bitSet[length + 3] = (binVal & 4) > 0;
+            bitSet[length + 4] = (binVal & 2) > 0;
+            bitSet[length + 5] = (binVal & 1) > 0;
+            length += 6;
         }
+
+        // Process the last char which might be padded
+        char chr = str.charAt(slen);
+        int binVal = INT_TO_SIX_BIT[chr];
+        if (binVal == -1) {
+            throw new SixbitException("Illegal sixbit ascii char: " + chr);
+        }
+        int bits = 6 - padBits;
+        switch (bits) {
+        case 0:
+            bitSet[length + 5] = (binVal & 1) > 0;
+        case 1:
+            bitSet[length + 4] = (binVal & 2) > 0;
+        case 2:
+            bitSet[length + 3] = (binVal & 4) > 0;
+        case 3:
+            bitSet[length + 2] = (binVal & 8) > 0;
+        case 4:
+            bitSet[length + 1] = (binVal & 16) > 0;
+        case 5:
+            bitSet[length] = (binVal & 32) > 0;
+        }
+        this.length = length + bits;
     }
 
     /**
@@ -177,15 +229,12 @@ public class BinArray {
      * @return
      * @throws SixbitException
      */
-    public static int sixbitToInt(int chr) throws SixbitException {
-        if (chr < 48 || chr > 119 || chr > 87 && chr < 96) {
+    static int sixbitToInt(int chr) throws SixbitException {
+        int c = INT_TO_SIX_BIT[chr];
+        if (c == -1) {
             throw new SixbitException("Illegal sixbit ascii char: " + chr);
         }
-        if (chr < 0x60) {
-            return chr - 48 & 0x3F;
-        } else {
-            return chr - 56 & 0x3F;
-        }
+        return c;
     }
 
     /**
