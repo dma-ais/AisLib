@@ -31,7 +31,7 @@ public class BinArray {
     private final static int[] INT_TO_SIX_BIT;
 
     static {
-        int[] toSixbit = new int[256 * 256];
+        int[] toSixbit = new int[256 * 256]; // we actually only use 256, but we parse chars around instead of bytes
         for (int chr = 0; chr < toSixbit.length; chr++) {
             if (chr < 48 || chr > 119 || chr > 87 && chr < 96) {
                 toSixbit[chr] = -1;
@@ -95,17 +95,17 @@ public class BinArray {
         }
         int bits = 6 - padBits;
         switch (bits) {
-        case 0:
+        case 6:
             bitSet[length + 5] = (binVal & 1) > 0;
-        case 1:
+        case 5:
             bitSet[length + 4] = (binVal & 2) > 0;
-        case 2:
+        case 4:
             bitSet[length + 3] = (binVal & 4) > 0;
         case 3:
             bitSet[length + 2] = (binVal & 8) > 0;
-        case 4:
+        case 2:
             bitSet[length + 1] = (binVal & 16) > 0;
-        case 5:
+        case 1:
             bitSet[length] = (binVal & 32) > 0;
         }
         this.length = length + bits;
@@ -126,14 +126,14 @@ public class BinArray {
     /**
      * Append value with number of bits bits
      * 
-     * @param value
+     * @param val
      * @param bits
      */
-    public void append(long value, int bits) {
+    public void append(long val, int bits) {
         long powMask = 1;
         ensureCapacity(length + bits);
         for (int i = length + bits - 1; i >= length; i--) {
-            bitSet[i] = (value & powMask) > 0;
+            bitSet[i] = (val & powMask) > 0;
             powMask <<= 1;
         }
         length += bits;
@@ -220,21 +220,6 @@ public class BinArray {
      */
     public boolean hasMoreBits() {
         return readPtr < length - 1;
-    }
-
-    /**
-     * Convert sixbit ascii char to integer value
-     * 
-     * @param chr
-     * @return
-     * @throws SixbitException
-     */
-    static int sixbitToInt(int chr) throws SixbitException {
-        int c = INT_TO_SIX_BIT[chr];
-        if (c == -1) {
-            throw new SixbitException("Illegal sixbit ascii char: " + chr);
-        }
-        return c;
     }
 
     /**

@@ -40,7 +40,7 @@ public class BenchmarkAisPacketParsing {
 
         // Warm up
         AisPacketParser apr = new AisPacketParser();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             for (String s : list) {
                 AisPacket p = apr.readLine(s);
                 if (p != null) {
@@ -49,10 +49,12 @@ public class BenchmarkAisPacketParsing {
             }
         }
         Thread.sleep(100);
+        System.in.read();
+        System.out.println("ok");
         long packets = 0;
         long lines = 0;
         long now = System.nanoTime();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 200000; i++) {
             for (String s : list) {
                 AisPacket p = apr.readLine(s);
                 if (p != null) {
@@ -63,6 +65,7 @@ public class BenchmarkAisPacketParsing {
             }
         }
         double total = (System.nanoTime() - now) / 1000d / 1000 / 1000;
-        System.out.println("Total processed:" + packets + " (lines: " + lines + "), " + packets / total + " packets/second");
+        System.out.println("Total processed:" + packets + " (lines: " + lines + "), " + packets / total
+                + " packets/second");
     }
 }
