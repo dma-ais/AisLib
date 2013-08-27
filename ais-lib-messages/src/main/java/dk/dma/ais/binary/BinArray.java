@@ -15,17 +15,31 @@
  */
 package dk.dma.ais.binary;
 
-import java.util.BitSet;
+import java.util.Arrays;
 
 /**
  * Class to represent a binary array with utility methods to add and extract values
  */
 public class BinArray {
 
-    private final BitSet bitSet = new BitSet();
+    private boolean[] bitSet = new boolean[1024];
 
     private int length;
     private int readPtr;
+
+    /**
+     * Ensures that the BinArray can hold enough bits.
+     * 
+     * @param bitsRequired
+     *            the minimum acceptable number of bits.
+     */
+    private void ensureCapacity(int bitsRequired) {
+        if (bitSet.length < bitsRequired) {
+            // Allocate larger of doubled size or required size
+            int request = Math.max(2 * bitSet.length, bitsRequired);
+            bitSet = Arrays.copyOf(bitSet, request);
+        }
+    }
 
     /**
      * Append bits from a sixbit encoded string
@@ -51,10 +65,10 @@ public class BinArray {
      * @param binArray
      */
     public void append(BinArray binArray) {
-        for (int i = 0; i < binArray.getLength(); i++) {
-            bitSet.set(length, binArray.bitSet.get(i));
-            length++;
-        }
+        int len = binArray.length;
+        ensureCapacity(length + len);
+        System.arraycopy(binArray.bitSet, 0, bitSet, length, len);
+        length += len;
     }
 
     /**
@@ -65,8 +79,9 @@ public class BinArray {
      */
     public void append(long value, int bits) {
         long powMask = 1;
+        ensureCapacity(length + bits);
         for (int i = length + bits - 1; i >= length; i--) {
-            bitSet.set(i, (value & powMask) > 0);
+            bitSet[i] = (value & powMask) > 0;
             powMask <<= 1;
         }
         length += bits;
@@ -116,7 +131,7 @@ public class BinArray {
         long val = 0;
         long powMask = 1;
         for (int i = to; i >= from; i--) {
-            if (bitSet.get(i)) {
+            if (bitSet[i]) {
                 val += powMask;
             }
             powMask <<= 1;
@@ -143,7 +158,7 @@ public class BinArray {
     }
 
     public int size() {
-        return bitSet.size();
+        return bitSet.length;
     }
 
     /**
