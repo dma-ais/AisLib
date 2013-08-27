@@ -31,7 +31,7 @@ public class SentenceLine {
     private Character delimiter;
     private String prefix;
     private String sentence;
-    private ArrayList<String> fields = new ArrayList<>();
+    private List<String> fields = new ArrayList<>();
     private int checksum;
     private int checksumField = -1;
 
@@ -59,67 +59,6 @@ public class SentenceLine {
     }
 
     public void parse(String line) {
-        clear();
-        this.line = line;
-        int len = line.length();
-        int checksumStart = 0;
-        int ptr = 0;
-
-        // Find len without CR LF
-        char[] cha = line.toCharArray();
-        while (len > 0 && (cha[len - 1] == '\r' || cha[len - 1] == '\n')) {
-            len--;
-        }
-
-        // Find prefix and start of sentence
-        while (ptr < len) {
-            char ch = cha[ptr];
-            if (ch == '!' || ch == '$') {
-                delimiter = ch;
-                checksumStart = ptr;
-                break;
-            }
-            tmpStr.append(ch);
-            ptr++;
-        }
-        this.prefix = tmpStr.toString();
-        tmpStr.setLength(0);
-
-        if (this.delimiter == null) {
-            return;
-        }
-
-        // Parse into fields
-        while (ptr < len) {
-            char ch = cha[ptr];
-            sentenceStr.append(ch);
-            if (ch == '*') {
-                fields.add(tmpStr.toString());
-                tmpStr.setLength(0);
-                this.checksumField = fields.size();
-            } else if (ch == ',') {
-                fields.add(tmpStr.toString());
-                tmpStr.setLength(0);
-            } else {
-                tmpStr.append(ch);
-            }
-            if (ptr > checksumStart && this.checksumField < 0) {
-                checksum ^= ch;
-            }
-            ptr++;
-        }
-        fields.add(tmpStr.toString());
-        sentence = sentenceStr.toString();
-
-        // Parse talker and formatter
-        if (fields.get(0).length() == 6) {
-            tmpStr.setLength(0);
-            talker = fields.get(0).substring(1, 3);
-            formatter = fields.get(0).substring(3, 6);
-        }
-    }
-
-    public void parse2(String line) {
         clear();
         this.line = line;
         int len = line.length();
@@ -291,6 +230,10 @@ public class SentenceLine {
 
     public List<String> getFields() {
         return fields;
+    }
+
+    public void setFields(List<String> fields) {
+        this.fields = fields;
     }
 
     @Override
