@@ -66,6 +66,9 @@ public class BinArray {
      * @throws SixbitException
      */
     public void appendSixbit(String str, int padBits) throws SixbitException {
+        if (str.length() == 0) {
+            return;
+        }
         int len = str.length() * 6 - padBits;
         int length = this.length;
         ensureCapacity(length + len);
