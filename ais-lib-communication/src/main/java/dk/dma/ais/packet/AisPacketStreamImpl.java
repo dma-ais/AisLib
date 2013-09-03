@@ -125,6 +125,9 @@ class AisPacketStreamImpl extends AisPacketStream {
         synchronized void cancel(Throwable e) {
             lock.lock();
             try {
+                if (e != null) {
+                    LOG.error("Cancelling subscription, because of error", e);
+                }
                 if (cancelled.getCount() > 0) {
                     map.remove(this);
                     cancelled.countDown();

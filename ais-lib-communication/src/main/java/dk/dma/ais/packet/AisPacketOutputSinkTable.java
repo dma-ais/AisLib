@@ -101,7 +101,7 @@ class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
                     stream.write(str.getBytes(StandardCharsets.US_ASCII));
                 } else if (c.equals("mmsi")) {
 
-                } else if (c.equals("lat") || c.equals("lon") && m instanceof IPositionMessage) {
+                } else if ((c.equals("lat") || c.equals("lon")) && m instanceof IPositionMessage) {
                     AisPosition pos = ((IPositionMessage) m).getPos();
                     if (pos != null) {
                         if (c.equals("lat")) {
