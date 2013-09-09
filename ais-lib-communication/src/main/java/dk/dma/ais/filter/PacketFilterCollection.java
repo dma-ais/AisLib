@@ -29,8 +29,8 @@ import dk.dma.ais.packet.AisPacket;
 public class PacketFilterCollection implements IPacketFilter {
 
     private final CopyOnWriteArrayList<IPacketFilter> packetFilters = new CopyOnWriteArrayList<>();
-    static final int TYPE_AND = 0;
-    static final int TYPE_OR = 1;
+    public static final int TYPE_AND = 0;
+    public static final int TYPE_OR = 1;
     
     private int filterType = TYPE_AND;
     
