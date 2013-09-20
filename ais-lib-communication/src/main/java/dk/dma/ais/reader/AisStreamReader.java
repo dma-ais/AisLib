@@ -45,7 +45,7 @@ public class AisStreamReader extends AisReader {
 
     private final InputStream stream;
 
-    AisStreamReader(InputStream stream) {
+    public AisStreamReader(InputStream stream) {
         this.stream = requireNonNull(stream);
     }
 
