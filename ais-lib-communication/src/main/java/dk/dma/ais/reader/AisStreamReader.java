@@ -39,7 +39,7 @@ import dk.dma.enav.util.function.Consumer;
  * aisReader.addProprietaryFactory(new GatehouseFactory()); aisReader.start(); aisReader.join();
  * 
  */
-class AisStreamReader extends AisReader {
+public class AisStreamReader extends AisReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisStreamReader.class);
 
