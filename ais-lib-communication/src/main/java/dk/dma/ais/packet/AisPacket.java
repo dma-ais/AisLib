@@ -24,9 +24,6 @@ import java.util.Date;
 import java.util.List;
 
 import net.jcip.annotations.NotThreadSafe;
-
-import com.google.common.hash.Hashing;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
@@ -58,15 +55,6 @@ public class AisPacket implements Comparable<AisPacket> {
     AisPacket(Vdm vdm, String stringMessage) {
         this(stringMessage);
         this.vdm = vdm;
-    }
-
-    /**
-     * Calculates a 128 bit hash on the received package.
-     * 
-     * @return a 128 hash on the received package
-     */
-    public byte[] calculateHash128() {
-        return Hashing.murmur3_128().hashString(rawMessage).asBytes();
     }
 
     public static AisPacket fromByteBuffer(ByteBuffer buffer) {
