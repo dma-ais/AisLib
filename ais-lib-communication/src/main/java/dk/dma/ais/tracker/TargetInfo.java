@@ -32,7 +32,8 @@ import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Position;
 
 /**
- * Information about a target
+ * Immutable information about a target. Whenever we receive a new message from the target. We create a new TargetInfo
+ * instance via {@link #updateTarget(TargetInfo, AisPacket, AisTargetType, long, AisPacketSource, Map)}.
  * 
  * @author Kasper Nielsen
  */
@@ -85,16 +86,46 @@ public final class TargetInfo implements Serializable {
         this.staticShipType = staticShipType;
     }
 
+    /**
+     * Returns the country of the vessel based on its MMSI number.
+     * 
+     * @return the country of the vessel based on its MMSI number
+     */
     public Country getCountry() {
         return Country.getCountryForMmsi(mmsi);
     }
 
+    /**
+     * Returns the latest received position packet. Or <code>null</code> if no position has been received from the
+     * vessel.
+     * 
+     * @return the latest received position packet
+     */
     public AisPacket getPositionPacket() {
         return positionPacket == null ? null : AisPacket.fromByteArray(positionPacket);
     }
 
+    /**
+     * Returns the number of static packets we have received. Either return 0 if we have received 0 packets. 1 if we
+     * have received a single packet. Or 2 we if have received two packets (AisMessage type 24).
+     * 
+     * @return the number of static packets we have received
+     */
     public int getStaticCount() {
         return staticData1 == null ? 0 : staticData2 == null ? 1 : 2;
+    }
+
+    /**
+     * Returns any static packets we have received from the target.
+     */
+    public AisPacket[] getStaticPackets() {
+        if (staticData1 == null) {
+            return new AisPacket[0];
+        } else if (staticData2 == null) {
+            return new AisPacket[] { AisPacket.fromByteArray(staticData1) };
+        } else {
+            return new AisPacket[] { AisPacket.fromByteArray(staticData1), AisPacket.fromByteArray(staticData2) };
+        }
     }
 
     /**
@@ -137,6 +168,23 @@ public final class TargetInfo implements Serializable {
                 positionPacket, other.staticTimestamp, other.staticData1, other.staticData2, other.staticShipType);
     }
 
+    /**
+     * We have received a new AIS message from a target.
+     * 
+     * @param existing
+     *            non-null if an existing target with the same MMSI number already exists
+     * @param packet
+     *            the packet that was received
+     * @param targetType
+     *            the type of target
+     * @param timestamp
+     *            the timestamp of the packet
+     * @param source
+     *            the source of the packet
+     * @param msg24Part0
+     *            a map of cached message type 24 static part 0 messages
+     * @return a new target info
+     */
     static TargetInfo updateTarget(TargetInfo existing, AisPacket packet, AisTargetType targetType, long timestamp,
             AisPacketSource source, Map<AisPacketSource, byte[]> msg24Part0) {
         AisMessage message = packet.tryGetAisMessage();// is non-null
@@ -203,7 +251,7 @@ public final class TargetInfo implements Serializable {
                 byte[] static1 = null;
                 if (c instanceof AisMessage24) {
                     // AisMessage24 is split into 2 parts, if we get a part 0.
-                    // Save in a hashtable, where it is kept, until we receive part 1
+                    // Save in a hash table, where we keep it until we receive part 1
                     if (((AisMessage24) c).getPartNumber() == 0) {
                         msg24Part0.put(source, packet.toByteArray());
                         // we know that existing have not been updated by updateTargetWithPosition because

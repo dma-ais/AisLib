@@ -49,7 +49,7 @@ public class TargetTracker {
     public int countNumberOfReports(final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
         requireNonNull(predicate);
         final LongAdder la = new LongAdder();
-        targets.forEachValueInParallel(new Action<MmsiTarget>() {
+        targets.forEachValue(10, new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
                 for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
                     if (predicate.test(e.getKey(), e.getValue())) {
@@ -73,7 +73,7 @@ public class TargetTracker {
         requireNonNull(sourcePredicate);
         requireNonNull(targetPredicate);
         final LongAdder la = new LongAdder();
-        targets.forEachValueInParallel(new Action<MmsiTarget>() {
+        targets.forEachValue(10, new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
                 TargetInfo best = t.getNewest(sourcePredicate);
                 if (best != null && targetPredicate.test(best)) {
@@ -99,7 +99,7 @@ public class TargetTracker {
         requireNonNull(sourcePredicate);
         requireNonNull(targetPredicate);
         final ConcurrentHashMapV8<Integer, TargetInfo> result = new ConcurrentHashMapV8<>();
-        targets.forEachValueInParallel(new Action<MmsiTarget>() {
+        targets.forEachValue(10, new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
                 TargetInfo best = t.getNewest(sourcePredicate);
                 if (best != null && targetPredicate.test(best)) {
@@ -117,7 +117,7 @@ public class TargetTracker {
      *            the group
      * @return the subscription
      */
-    public Subscription readFrom(AisPacketStream stream) {
+    public Subscription readFromStream(AisPacketStream stream) {
         return stream.subscribe(new Consumer<AisPacket>() {
             public void accept(AisPacket p) {
                 update(p);
@@ -134,7 +134,7 @@ public class TargetTracker {
      */
     public void removeAll(final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
         requireNonNull(predicate);
-        targets.forEachValueInParallel(new Action<MmsiTarget>() {
+        targets.forEachValue(10, new Action<MmsiTarget>() {
             public void apply(MmsiTarget t) {
                 for (Map.Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
                     if (predicate.test(e.getKey(), e.getValue())) {
