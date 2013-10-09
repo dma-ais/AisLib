@@ -9,7 +9,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -41,37 +41,39 @@ class AisPacketStreamImpl extends AisPacketStream {
     /** The logger */
     static final Logger LOG = LoggerFactory.getLogger(AisPacketStreamImpl.class);
 
-    final ConcurrentHashMapV8<SubscriptionImpl, SubscriptionImpl> map;
+    /** A lock we use to make sure packets are delivered in order. */
+    private final Object deliveryLock = new Object();
+
+    final ConcurrentHashMapV8<SubscriptionImpl, SubscriptionImpl> subscriptions;
 
     final Predicate<? super AisPacket> predicate;
+
     final AisPacketStreamImpl root;
 
-    final Object lock = new Object();
-
     AisPacketStreamImpl() {
-        this.predicate = null;
-        map = new ConcurrentHashMapV8<>();
+        predicate = null;
+        subscriptions = new ConcurrentHashMapV8<>();
         root = null;
     }
 
     AisPacketStreamImpl(AisPacketStreamImpl parent, Predicate<? super AisPacket> predicate) {
         this.root = requireNonNull(parent);
         this.predicate = requireNonNull(predicate);
-        this.map = parent.map;
+        this.subscriptions = parent.subscriptions;
     }
 
-    public void add(final AisPacket p) {
+    public void add(AisPacket p) {
         requireNonNull(p);
         if (root != null) {
             throw new UnsupportedOperationException("Can only add elements to the root stream");
         }
-        synchronized (lock) {
-            for (SubscriptionImpl s : map.keySet()) {
+        synchronized (deliveryLock) {
+            for (SubscriptionImpl s : subscriptions.keySet()) {
                 s.packets.add(p);
                 s.deliver();
             }
         }
-        //
+        // This approach does not work, as we cannot guarantee in-order delivery
         // map.forEachKeyInParallel(new Action<SubscriptionImpl>() {
         // @Override
         // public void apply(SubscriptionImpl s) {
@@ -98,21 +100,33 @@ class AisPacketStreamImpl extends AisPacketStream {
     @Override
     public Subscription subscribe(Consumer<AisPacket> c) {
         SubscriptionImpl s = new SubscriptionImpl(predicate, c);
-        map.put(s, s);
+        subscriptions.put(s, s);
         return s;
     }
 
     class SubscriptionImpl implements Subscription {
+        final CountDownLatch cancelled = new CountDownLatch(1);
+        final Consumer<? super AisPacket> consumer;
         final AtomicLong count = new AtomicLong();
         final ReentrantLock lock = new ReentrantLock();
-        final Consumer<? super AisPacket> consumer;
-        final Predicate<? super AisPacket> predicate;
         final ConcurrentLinkedQueue<AisPacket> packets = new ConcurrentLinkedQueue<>();
-        final CountDownLatch cancelled = new CountDownLatch(1);
+        final Predicate<? super AisPacket> predicate;
 
         SubscriptionImpl(Predicate<? super AisPacket> predicate, Consumer<? super AisPacket> consumer) {
             this.predicate = predicate;
             this.consumer = requireNonNull(consumer);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void awaitCancelled() throws InterruptedException {
+            cancelled.await();
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public boolean awaitCancelled(long timeout, TimeUnit unit) throws InterruptedException {
+            return cancelled.await(timeout, unit);
         }
 
         /** {@inheritDoc} */
@@ -129,7 +143,7 @@ class AisPacketStreamImpl extends AisPacketStream {
                     LOG.error("Cancelling subscription, because of error", e);
                 }
                 if (cancelled.getCount() > 0) {
-                    map.remove(this);
+                    subscriptions.remove(this);
                     cancelled.countDown();
                     if (consumer instanceof AisPacketStream.StreamConsumer) {
                         try {
@@ -146,7 +160,8 @@ class AisPacketStreamImpl extends AisPacketStream {
             }
         }
 
-        public void deliver() {
+        /** This method delivers the actual event. */
+        void deliver() {
             while (lock.tryLock()) {
                 try {
                     if (packets.isEmpty()) {
@@ -177,23 +192,7 @@ class AisPacketStreamImpl extends AisPacketStream {
         /** {@inheritDoc} */
         @Override
         public boolean isCancelled() {
-            return !map.containsKey(this);
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public void awaitCancelled() throws InterruptedException {
-            cancelled.await();
-        }
-
-        /**
-         * {@inheritDoc}
-         * 
-         * @return
-         */
-        @Override
-        public boolean awaitCancelled(long timeout, TimeUnit unit) throws InterruptedException {
-            return cancelled.await(timeout, unit);
+            return !subscriptions.containsKey(this);
         }
     }
 
