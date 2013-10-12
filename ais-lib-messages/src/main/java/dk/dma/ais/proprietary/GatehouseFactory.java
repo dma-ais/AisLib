@@ -48,7 +48,18 @@ public class GatehouseFactory extends ProprietaryFactory {
         
         List<String> fields = sl.getFields();
         
-        if (fields == null || fields.size() < 14) {
+        if (fields == null || fields.size() < 2) {
+            LOG.error("Error in Gatehouse proprietary tag: no fields in line: " + sl.getLine());
+            return null;
+        }
+        
+        // Only handle source tag
+        Integer type = Integer.parseInt(fields.get(1));
+        if (type == null || type.intValue() != 1) {
+            return null;
+        }
+        
+        if (fields.size() < 14) {
             LOG.error("Error in Gatehouse proprietary tag: wrong number of fields " + fields.size() + " in line: " + sl.getLine());
             return null;
         }
