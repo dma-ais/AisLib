@@ -38,12 +38,12 @@ public abstract class Sentence {
     protected int checksum;
     protected String msgChecksum;
     protected String sentenceStr;
-    protected SentenceLine sentenceLine;
     protected List<String> orgLines = new ArrayList<>();
     protected List<String> rawSentences = new ArrayList<>();
     protected LinkedList<String> encodedFields;
     protected CommentBlock commentBlock;
     protected LinkedList<IProprietaryTag> tags; // Possible proprietary source tags for the message
+    protected Date mssisTimestamp;
 
     /**
      * Abstract method that all sentence classes must implement
@@ -71,7 +71,6 @@ public abstract class Sentence {
      * @throws SentenceException
      */
     protected void baseParse(SentenceLine sl) throws SentenceException {
-        sentenceLine = sl;
         this.orgLines.add(sl.getLine());
 
         // Save raw sentence
@@ -96,6 +95,9 @@ public abstract class Sentence {
         if (sl.getTalker() == null || sl.getFormatter() == null) {
             throw new SentenceException("Invalid sentence, wrong talker/formatter: " + sl.getFields().get(0));
         }
+        
+        // Try to get MSSIS timestamp
+        mssisTimestamp = findMssisTimestamp(sl);
     }
 
     public void addSingleCommentBlock(String line) throws SentenceException {
@@ -193,7 +195,7 @@ public abstract class Sentence {
      * 
      * @return
      */
-    public Date getMssisTimestamp() {
+    public static Date findMssisTimestamp(SentenceLine sentenceLine) {
         if (sentenceLine == null) {
             return null;
         }
@@ -210,6 +212,14 @@ public abstract class Sentence {
             }
         }
         return null;
+    }
+    
+    /**
+     * Get found MSSIS timestamp
+     * @return
+     */
+    public Date getMssisTimestamp() {
+        return mssisTimestamp;
     }
 
     /**
@@ -237,8 +247,8 @@ public abstract class Sentence {
                 }
             }
         }
-        // Try to get proprietary MSSIS timestamp
-        return getMssisTimestamp();
+        // Return MSSIS timestamp
+        return mssisTimestamp;
     }
 
     public static int parseInt(String str) throws SentenceException {
