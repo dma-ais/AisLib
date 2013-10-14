@@ -31,7 +31,7 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
     private final double lon;
     private final double cog;
     private final double sog;
-    private final Date time;
+    private final long time;
 
     public PastTrackPoint(AisVesselPosition vesselPosition) {
         Position pos = vesselPosition.getPos();
@@ -41,14 +41,14 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
         this.sog = vesselPosition.getSog() != null ? vesselPosition.getSog() : 0;
         Date ts = vesselPosition.getSourceTimestamp();
         if (ts == null) {
-            this.time = vesselPosition.received;
+            this.time = vesselPosition.received.getTime();
         } else {
-            this.time = ts;
+            this.time = ts.getTime();
         }
     }
 
     public boolean isDead(int ttl) {
-        int elapsed = (int) ((System.currentTimeMillis() - this.time.getTime()) / 1000);
+        int elapsed = (int) ((System.currentTimeMillis() - time) / 1000);
         return elapsed > ttl;
     }
 
@@ -68,18 +68,27 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
         return sog;
     }
 
-    public Date getTime() {
+    public long getTime() {
         return time;
+    }
+    
+    public Date getDate() {
+        return new Date(time);
     }
 
     @Override
     public int compareTo(PastTrackPoint p2) {
-        if (this.time.getTime() < p2.time.getTime()) {
+        if (this.time < p2.time) {
             return -1;
-        } else if (this.time.getTime() > p2.time.getTime()) {
+        } else if (this.time > p2.time) {
             return 1;
         }
         return 0;
+    }
+    
+    @Override
+    public boolean equals(Object p2) {
+        return time == ((PastTrackPoint)p2).getTime();
     }
 
     @Override
@@ -89,7 +98,7 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
 
     @Override
     public int hashCode() {
-        return (int) getTime().getTime();
+        return (int) time;
     }
 
 }

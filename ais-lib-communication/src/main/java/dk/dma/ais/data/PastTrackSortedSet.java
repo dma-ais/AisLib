@@ -45,18 +45,53 @@ public class PastTrackSortedSet implements IPastTrack, Serializable {
 
         // Create new point
         PastTrackPoint newPoint = new PastTrackPoint(vesselPosition);
-        points.add(newPoint);
+        if (!points.add(newPoint)) {
+            return;
+        }
 
-        // Get the previous neighbor
-        PastTrackPoint lastPoint = points.lower(newPoint);
-        if (lastPoint != null) {
-            // Downsample on distance
-            Position lastPos = Position.create(lastPoint.getLat(), lastPoint.getLon());
-            Position newPos = Position.create(newPoint.getLat(), newPoint.getLon());
-            if (newPos.rhumbLineDistanceTo(lastPos) < minDist) {
-                points.remove(lastPoint);
+        if (minDist <= 0) {
+            return;
+        }
+
+        // Determine if the new point is the most recent point
+        boolean newest = newPoint == points.last();
+
+        // Remove neighbors until minimum distance to next neighbor is satisfied
+        if (newest) {
+            while (true) {
+                PastTrackPoint neighbor = points.lower(newPoint);
+                if (neighbor == null) {
+                    break;
+                }
+                PastTrackPoint nextNeighbor = points.lower(neighbor);
+                if (nextNeighbor == null) {
+                    break;
+                }
+                if (isTooClose(newPoint, nextNeighbor, minDist)) {
+                    points.remove(neighbor);
+                } else {
+                    break;
+                }
+            }
+        } else {
+            // Remove new point if it is too close to either neighbor
+            PastTrackPoint beforeNeighbor = points.lower(newPoint);
+            if (beforeNeighbor != null && isTooClose(newPoint, beforeNeighbor, minDist)) {
+                points.remove(newPoint);
+            } else {
+                PastTrackPoint afterNeighbor = points.ceiling(newPoint);
+                if (afterNeighbor != null && isTooClose(newPoint, afterNeighbor, minDist)) {
+                    points.remove(newPoint);
+                }
             }
         }
+
+    }
+
+    private static boolean isTooClose(PastTrackPoint p1, PastTrackPoint p2, int minDist) {
+        Position pos1 = Position.create(p1.getLat(), p1.getLon());
+        Position pos2 = Position.create(p2.getLat(), p2.getLon());
+        return pos1.rhumbLineDistanceTo(pos2) < minDist;
     }
 
     public void cleanup(int ttl) {

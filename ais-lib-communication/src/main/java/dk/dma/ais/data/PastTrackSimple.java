@@ -46,7 +46,7 @@ public class PastTrackSimple implements IPastTrack, Serializable {
         PastTrackPoint newPoint = new PastTrackPoint(vesselPosition);
 
         // No previous points allowed
-        if (lastPoint != null && lastPoint.getTime().after(newPoint.getTime())) {
+        if (lastPoint != null && lastPoint.getDate().after(newPoint.getDate())) {
             return;
         }
 
