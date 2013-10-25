@@ -110,7 +110,7 @@ public class CommentBlockLine {
             }
             // Check for tag block group
             if (parameterCode.equals("g")) {
-                String[] tagGroupParts = StringUtils.split(value, '-');
+                String[] tagGroupParts = StringUtils.splitPreserveAllTokens(value, '-');
                 if (tagGroupParts.length != 3) {
                     throw new CommentBlockException("Invalid TAG block g parameter: " + value);
                 }
@@ -121,9 +121,6 @@ public class CommentBlockLine {
                     throw new CommentBlockException("Invalid TAG block g parameter: " + value);
                 }
                 groupId = tagGroupParts[2];
-            }
-            if (groupId != null && groupId.length() == 0) {
-                throw new CommentBlockException("Invalid group id in TAG block: " + value);
             }
             parameterMap.put(parameterCode, value);
         }
