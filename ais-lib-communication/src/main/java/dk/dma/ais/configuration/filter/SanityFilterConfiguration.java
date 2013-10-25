@@ -15,15 +15,23 @@
  */
 package dk.dma.ais.configuration.filter;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import dk.dma.ais.filter.IPacketFilter;
+import dk.dma.ais.filter.SanityFilter;
 
-@XmlSeeAlso({ PacketFilterCollectionConfiguration.class, DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class,
-        GatehouseSourceFilterConfiguration.class, TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class,
-        LocationFilterConfiguration.class, MessageTypeFilterConfiguration.class, ExpressionFilterConfiguration.class, SanityFilterConfiguration.class})
-public abstract class FilterConfiguration {
+@XmlRootElement
+public class SanityFilterConfiguration extends FilterConfiguration {
 
-    public abstract IPacketFilter getInstance();
+    public SanityFilterConfiguration() {
+
+    }
+
+    @Override
+    @XmlTransient
+    public IPacketFilter getInstance() {
+        return new SanityFilter();
+    }
 
 }

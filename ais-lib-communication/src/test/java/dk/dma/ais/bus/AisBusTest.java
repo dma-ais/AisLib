@@ -39,6 +39,7 @@ import dk.dma.ais.configuration.filter.FilterConfiguration;
 import dk.dma.ais.configuration.filter.GatehouseSourceFilterConfiguration;
 import dk.dma.ais.configuration.filter.LocationFilterConfiguration;
 import dk.dma.ais.configuration.filter.PacketFilterCollectionConfiguration;
+import dk.dma.ais.configuration.filter.SanityFilterConfiguration;
 import dk.dma.ais.configuration.filter.TaggingFilterConfiguration;
 import dk.dma.ais.configuration.filter.TargetCountryFilterConfiguration;
 import dk.dma.ais.configuration.filter.geometry.CircleGeometryConfiguration;
@@ -59,6 +60,7 @@ public class AisBusTest {
         // Bus Filters
         conf.getFilters().add(new DownSampleFilterConfiguration());
         conf.getFilters().add(new DuplicateFilterConfiguration());
+        conf.getFilters().add(new SanityFilterConfiguration());
 
         SourceTypeSatTransformerConfiguration satSourceConf = new SourceTypeSatTransformerConfiguration();
         satSourceConf.getSatGhRegions().add("802");
