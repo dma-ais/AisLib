@@ -119,6 +119,12 @@ public class SentenceLine {
         if (ps < len) {
             fields.add(convertString(line, ps, len));
         }
+        
+        // Make sure that a checksum field was actually added
+        if (this.checksumField >= fields.size()) {
+            this.checksumField = -1;
+        }
+        
         sentence = convertString(line, ptrStart, len);
         // Parse talker and formatter
         String f = fields.get(0);

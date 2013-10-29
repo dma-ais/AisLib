@@ -53,6 +53,12 @@ public class SentenceLineTest {
         Assert.assertTrue(sl.isChecksumMatch());
         Assert.assertTrue(sl.getPrefix().length() > 0);
         Assert.assertEquals(sl.getFields().size(), 8);
+        
+        sl = new SentenceLine("!AIVDM,2,1,6,B,55ArUT02:nkG<I8GB20nuJ0p5HTu>0hT9860TV16000006420BDi@E53,0*\r\n");
+        System.out.println("sl: " + sl.toString());
+        Assert.assertFalse(sl.isChecksumMatch());
+        Assert.assertEquals(sl.getPrefix(), "");
+        Assert.assertEquals(sl.getFields().size(), 7);
     }
 
    
