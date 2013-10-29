@@ -165,7 +165,7 @@ public class MessageHandler implements Consumer<AisPacket> {
                 } catch (SixbitException e) {
                 }
             }
-            System.out.println("---------------------------");
+            out.println("---------------------------");
         }
 
     }
