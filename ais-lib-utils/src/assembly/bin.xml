@@ -11,6 +11,7 @@
 			<includes>
 				<include>*.sh</include>
 				<include>*.pl</include>
+				<include>*.bat</include>
 			</includes>
 			<fileMode>755</fileMode>
 		</fileSet>
