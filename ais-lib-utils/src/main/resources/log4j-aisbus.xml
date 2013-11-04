@@ -55,7 +55,7 @@
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="LOGFILE" />
 		<appender-ref ref="ERRORFILE" />
-		<appender-ref ref="DEBUGFILE" />
+		<!--  <appender-ref ref="DEBUGFILE" />  -->
 	</root>
 
 </log4j:configuration>
