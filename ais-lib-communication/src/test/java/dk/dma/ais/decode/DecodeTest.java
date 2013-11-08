@@ -16,6 +16,7 @@
 package dk.dma.ais.decode;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -58,8 +59,7 @@ public class DecodeTest {
     /**
      * Test the AisStreamReader class
      * 
-     * Notice that inputStream could be any InputStream. TCP, file, pipe etc. For fail tolerant TCP reading use
-     * AisTcpReader
+     * Notice that inputStream could be any InputStream. TCP, file, pipe etc. For fail tolerant TCP reading use AisTcpReader
      * 
      * @throws IOException
      * @throws InterruptedException
@@ -161,7 +161,8 @@ public class DecodeTest {
     public void simpleDecodeTest() throws IOException {
         try (AisPacketReader r = AisPacketReader.createFromSystemResource("small_example.txt", true)) {
             r.forEachRemaining(new Consumer<AisPacket>() {
-                public void accept(AisPacket t) {}
+                public void accept(AisPacket t) {
+                }
             });
         }
     }
@@ -228,8 +229,7 @@ public class DecodeTest {
         // String filename = "/Users/oleborup/pride_of_rotterdam_244980000.txt";
         final ArrayList<AisPositionMessage> posMessages = new ArrayList<>();
 
-        try (FileInputStream inputStream = new FileInputStream(filename);
-                AisPacketReader r = new AisPacketReader(inputStream);) {
+        try (FileInputStream inputStream = new FileInputStream(filename); AisPacketReader r = new AisPacketReader(inputStream);) {
 
             // Make AIS reader instance
             r.forEachRemaining(new Consumer<AisPacket>() {
@@ -295,6 +295,14 @@ public class DecodeTest {
         buf.append("\n</coordinates></LineString></Placemark></Folder></Document></kml>");
         try (PrintWriter out = new PrintWriter(filename + ".kml")) {
             out.print(buf);
+        }
+    }
+
+    @Test
+    public void testCharset() throws IOException {
+        byte[] b = new byte[] { -1, '!', '\n' };
+        try (AisPacketReader apr = new AisPacketReader(new ByteArrayInputStream(b))) {
+            apr.readPacket();
         }
     }
 

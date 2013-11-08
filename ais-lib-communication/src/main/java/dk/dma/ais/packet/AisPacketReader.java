@@ -173,6 +173,12 @@ public class AisPacketReader implements AutoCloseable {
             }
             LOG.info("Sentence error: " + se.getMessage() + " line: " + line);
             return null;
+        } catch (Exception e) {
+            if (throwExceptions) {
+                throw new IOException(e);
+            }
+            LOG.error("Sentence line error: " + e.getMessage() + " line: " + line);
+            return null;
         }
     }
 
