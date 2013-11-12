@@ -44,6 +44,7 @@ public class AisStreamReader extends AisReader {
     private static final Logger LOG = LoggerFactory.getLogger(AisStreamReader.class);
 
     private final InputStream stream;
+    private volatile boolean done;
 
     public AisStreamReader(InputStream stream) {
         this.stream = requireNonNull(stream);
@@ -58,6 +59,7 @@ public class AisStreamReader extends AisReader {
                 LOG.error("Failed to read stream: " + e.getMessage());
             }
         }
+        done = true;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class AisStreamReader extends AisReader {
 
     @Override
     public Status getStatus() {
-        return stream != null ? Status.CONNECTED : Status.DISCONNECTED;
+        return done ? Status.DISCONNECTED : Status.CONNECTED;
     }
 
     @Override
