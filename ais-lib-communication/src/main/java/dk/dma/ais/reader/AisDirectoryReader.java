@@ -64,9 +64,10 @@ public class AisDirectoryReader extends AisReader {
     public void run() {
         final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
         final FileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
+            boolean firstDir = true;
+            
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
-                LOG.info("Reading file: " + file);
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {                
                 if (matcher.matches(file.getFileName())) {
                     try {
                         InputStream in = AisReaders.createFileInputStream(file.toString());
@@ -84,7 +85,11 @@ public class AisDirectoryReader extends AisReader {
             
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                return recursive ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;                
+                if (recursive || firstDir) {
+                    firstDir = false;
+                    return FileVisitResult.CONTINUE;
+                }
+                return FileVisitResult.SKIP_SUBTREE;
             }
         };
         try {
