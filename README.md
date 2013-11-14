@@ -72,7 +72,7 @@ reader.join();
 Reading using a TCP connection is just as easy
 
 ```java
-AisTcpReader reader = AisReaders.createReader("localhost", 4001);
+AisReader reader = AisReaders.createReader("localhost", 4001);
 reader.registerHandler(new Consumer<AisMessage>() {			
 	@Override
 	public void accept(AisMessage aisMessage) {
@@ -99,7 +99,7 @@ with unparsed raw message packets (proprietary tags, comment blocks and VDM's).
 A packet consumer is registred in a reader.
 
 ```java
-AisTcpReader reader = AisReaders.createReader("localhost", 4001);
+AisReader reader = AisReaders.createReader("localhost", 4001);
 reader.registerPacketHandler(new Consumer<AisPacket>() {			
 	@Override
 	public void accept(AisPacket packet) {
@@ -141,14 +141,11 @@ If the filename has '.zip' suffix decompression will automatically be applied.
 An `AisReader` instance is created using factory methods in `AisReaders`. The following
 methods can be used.
 
-`createReader(String hostname, int port)` - Creates a reader connection to host:port.
-
-`createReader(String commaHostPort)` - Creates a {@link AisTcpReader} from a list of one or more hosts on the 
+   * `createReader(String hostname, int port)` - Creates a reader connection to host:port.
+   * `createReader(String commaHostPort)` - Creates a {@link AisTcpReader} from a list of one or more hosts on the 
 form: host1:port1,...,hostN:portN. If more than one host/port round robin will be used.
-
-`createReaderFromInputStream(InputStream inputStream)` - Creates a reader reading from an input stream.
-
-`createReaderFromFile(String filename)` - Creates a reader reading from a file. If the filename suffix is '.zip' or '.gz',
+   * `createReaderFromInputStream(InputStream inputStream)` - Creates a reader reading from an input stream.
+   * `createReaderFromFile(String filename)` - Creates a reader reading from a file. If the filename suffix is '.zip' or '.gz',
 zip or gzip decompression will be applied respectively.
 
 
@@ -275,7 +272,7 @@ and handlers. In the example below two filters are used. A doublet
 filter and a down sampling filter.
 
 ```java
-IAisHandler handler = new Consumer<AisMessage>() {
+Consumer<AisMessage> handler = new Consumer<AisMessage>() {
 	@Override
 	public void accept(AisMessage aisMessage) {
 		// Handle doublet filtered down sampled messages
