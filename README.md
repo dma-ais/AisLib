@@ -205,7 +205,7 @@ handler.
 
 ```java
 // Make a handler
-IAisHandler handler = new Consumer<AisMessage>() {			
+Consumer<AisMessage> handler = new Consumer<AisMessage>() {			
 	@Override
 	public void accept(AisMessage aisMessage) {
 		System.out.println("aisMessage: " + aisMessage);				
