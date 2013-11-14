@@ -25,9 +25,9 @@ the use.
 
 ## Building ##
 
-To build everything
+To build
  
-	mvn install
+	mvn clean install
  
 To run tests
 
@@ -96,13 +96,24 @@ the connection will be closed and a reconnect will be tried.
 
 Instead of working with AisMessage objects, it is possible to work
 with unparsed raw message packets (proprietary tags, comment blocks and VDM's).
+A packet consumer is registred in a reader.
 
 ```java
 AisTcpReader reader = AisReaders.createReader("localhost", 4001);
 reader.registerPacketHandler(new Consumer<AisPacket>() {			
 	@Override
-	public void accept(AisPacket aisPacket) {
+	public void accept(AisPacket packet) {
+		try {
+			AisMessage message = packet.getAisMessage();
+		} catch (AisMessageException | SixbitException e) {
+			// Handle
+            		return;
+		}
+		// Alternative returning null if no valid AIS message
+		AisMessage message = packet.tryGetAisMessage();
 		
+		Date timestamp = packet.getTimestamp();
+		CommentBlock cb = packet.getVdm().getCommentBlock();
 	}
 });
 reader.start();
@@ -215,6 +226,8 @@ reader3.registerHandler(handler);
 // Start readers
 reader1.start(); reader2.start(); reader3.start();
 ```
+
+Alternatively an `AisReaderGroup` can be used.
 
 ### Round robin reading ###
 
