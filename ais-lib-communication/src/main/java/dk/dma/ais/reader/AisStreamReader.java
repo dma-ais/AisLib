@@ -46,7 +46,7 @@ public class AisStreamReader extends AisReader {
     private final InputStream stream;
     private volatile boolean done;
 
-    public AisStreamReader(InputStream stream) {
+    AisStreamReader(InputStream stream) {
         this.stream = requireNonNull(stream);
     }
 
