@@ -31,13 +31,6 @@ import dk.dma.enav.util.function.Consumer;
  * 
  * For fail tolerant TCP reading use AisTcpReader
  * 
- * Example of use:
- * 
- * IAisHandler handler = new SomeHandler(); InputStream inputStream = new SomeInputStream();
- * 
- * AisStreamReader aisReader = new AisStreamReader(inputStream); aisReader.registerHandler(handler);
- * aisReader.addProprietaryFactory(new GatehouseFactory()); aisReader.start(); aisReader.join();
- * 
  */
 public class AisStreamReader extends AisReader {
 
