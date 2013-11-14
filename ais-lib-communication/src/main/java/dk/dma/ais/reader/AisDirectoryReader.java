@@ -36,10 +36,9 @@ import dk.dma.ais.sentence.Abk;
 import dk.dma.enav.util.function.Consumer;
 
 /**
- * AIS reader that recursively iterates over every file from a given base directory. If a file matches a given pattern it will be
- * read.
+ * AIS reader that iterates over every file from a given base directory. If a file matches a given pattern it will be read.
  * 
- * The reader uses depth first search but guarantees no ordering of directories and files.
+ * If recursive used all sub directories will also be scanned using depth first. No guarantees no ordering of directories and files.
  */
 public class AisDirectoryReader extends AisReader {
 
@@ -48,12 +47,14 @@ public class AisDirectoryReader extends AisReader {
     private volatile boolean done;
     private final String pattern;
     private final Path dir;
+    private final boolean recursive;
 
-    AisDirectoryReader(String dir, String pattern) throws IOException {
+    AisDirectoryReader(String dir, String pattern, boolean recursive) throws IOException {
         requireNonNull(dir);
         requireNonNull(pattern);
         this.pattern = pattern;
         this.dir = Paths.get(dir);
+        this.recursive = recursive;
         if (!Files.exists(this.dir) || !Files.isDirectory(this.dir)) {
             throw new IOException("No such directory: " + dir);
         }
@@ -65,6 +66,7 @@ public class AisDirectoryReader extends AisReader {
         final FileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
+                LOG.info("Reading file: " + file);
                 if (matcher.matches(file.getFileName())) {
                     try {
                         InputStream in = AisReaders.createFileInputStream(file.toString());
@@ -78,6 +80,11 @@ public class AisDirectoryReader extends AisReader {
                     }
                 }
                 return FileVisitResult.CONTINUE;
+            }
+            
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                return recursive ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;                
             }
         };
         try {

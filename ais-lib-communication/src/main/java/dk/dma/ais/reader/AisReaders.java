@@ -115,11 +115,12 @@ public class AisReaders {
      * Reader that recursively reads files matching pattern in directories with root dir  
      * @param dir
      * @param pattern E.g. *.txt or *.gz
+     * @param recursive Apply to all sub directories depth first
      * @return
      * @throws IOException 
      */
-    public static AisReader createDirectoryReader(String dir, String pattern) throws IOException {
-        return new AisDirectoryReader(dir, pattern);
+    public static AisReader createDirectoryReader(String dir, String pattern, boolean recursive) throws IOException {
+        return new AisDirectoryReader(dir, pattern, recursive);
     }
 
     /**

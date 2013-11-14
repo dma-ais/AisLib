@@ -26,7 +26,7 @@ public class AisReaderTest {
 
     @Test
     public void dirReaderTest() throws InterruptedException, IOException {
-        AisReader reader = AisReaders.createDirectoryReader("src/test/resources", "s*.txt");
+        AisReader reader = AisReaders.createDirectoryReader("src/test/resources", "s*.txt", true);
         reader.registerPacketHandler(new Consumer<AisPacket>() {
             @Override
             public void accept(AisPacket packet) {
