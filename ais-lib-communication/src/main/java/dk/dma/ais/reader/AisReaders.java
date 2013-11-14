@@ -118,7 +118,7 @@ public class AisReaders {
      * @return
      * @throws IOException 
      */
-    public static AisReader createdDirectoryReader(String dir, String pattern) throws IOException {
+    public static AisReader createDirectoryReader(String dir, String pattern) throws IOException {
         return new AisDirectoryReader(dir, pattern);
     }
 
