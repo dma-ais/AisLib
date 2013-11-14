@@ -15,6 +15,10 @@
  */
 package dk.dma.ais.reader;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
@@ -22,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 import javax.management.JMException;
 import javax.management.MBeanServer;
@@ -92,6 +98,24 @@ public class AisReaders {
 
     public static AisReader createReaderFromInputStream(InputStream inputStream) {
         return new AisStreamReader(inputStream);
+    }
+    
+    /**
+     * Creates a {@link AisReader} from a file. If the file has '.zip' or '.gz' suffix the file will treated as a zip file or 
+     * gzip file respectively. 
+     * @param filename
+     * @return
+     * @throws IOException
+     */
+    public static AisReader createReaderFromFile(String filename) throws IOException {
+        requireNonNull(filename);
+        InputStream in = new FileInputStream(filename);
+        if (filename.endsWith(".gz")) {
+            in = new GZIPInputStream(in);
+        } else if (filename.endsWith(".zip")) {
+            in = new ZipInputStream(in);
+        }
+        return new AisStreamReader(in);
     }
 
     /**
