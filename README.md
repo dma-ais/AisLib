@@ -60,7 +60,7 @@ Reading from files or TCP connections is very simple with AisLib. In the example
 are read from a file.
 
 ```java
-AisReader reader = new AisStreamReader(new FileInputStream("sentences.txt"));
+AisReader reader = AisReader.createReaderFromInputStream(new FileInputStream("sentences.txt"));
 reader.registerHandler(new Consumer<AisMessage>() {			
 	@Override
 	public void accept(AisMessage aisMessage) {
@@ -74,7 +74,7 @@ reader.join();
 Reading using a TCP connection is just as easy
 
 ```java
-AisTcpReader reader = new AisTcpReader("localhost", 4001);
+AisTcpReader reader = AisReaders.createReader("localhost", 4001);
 reader.registerHandler(new Consumer<AisMessage>() {			
 	@Override
 	public void accept(AisMessage aisMessage) {
@@ -100,7 +100,7 @@ Instead of working with AisMessage objects, it is possible to work
 with unparsed raw message packets (proprietary tags, comment blocks and VDM's).
 
 ```java
-AisTcpReader reader = new AisTcpReader("localhost", 4001);
+AisTcpReader reader = AisReaders.createReader("localhost", 4001);
 reader.registerPacketHandler(new Consumer<AisPacket>() {			
 	@Override
 	public void accept(AisPacket aisPacket) {
@@ -111,6 +111,54 @@ reader.start();
 reader.join();
 ```
 
+Alternatively packets can be read as a packet stream.
+
+```java
+Path path = ...
+try (AisPacketReader pReader = AisPacketReader.createFromFile(path, true)) {
+	AisPacket p;
+	while ((p = pReader.readPacket()) != null) {
+		count++;
+		// Handle packet
+		...
+	}
+}
+```
+
+If the filename has '.zip' suffix decompression will automatically be applied.
+
+### Reader factory methods ###
+
+An `AisReader` instance is created using factory methods in `AisReaders`. The following
+methods can be used.
+
+`createReader(String hostname, int port)` - Creates a reader connection to host:port.
+
+`createReader(String commaHostPort)` - Creates a {@link AisTcpReader} from a list of one or more hosts on the 
+form: host1:port1,...,hostN:portN. If more than one host/port round robin will be used.
+
+`createReaderFromInputStream(InputStream inputStream)` - Creates a reader reading from an input stream.
+
+`createReaderFromFile(String filename)` - Creates a reader reading from a file. If the filename suffix is '.zip' or '.gz',
+zip or gzip decompression will be applied respectively.
+
+
+### Reader group ###
+
+A collection of readers can be organized in an `AisReaderGroup` that will deliver packets in a
+single join packet stream. Sources are defined by a commaseparated list of host:port. If more than 
+one host for each source, round robin reading is used.
+
+```java
+List<String> sources = ...
+sources.add("s1host1:s1port1,s1host2:s1port2,s1host3:s1port3);
+sources.add("s2host1:s1port1,s2host2:s2port2);
+...
+AisReaderGroup g = AisReaders.createGroup("name", sources);
+
+TBD
+
+```
 
 ### Working with messages ###
 
@@ -159,9 +207,9 @@ IAisHandler handler = new Consumer<AisMessage>() {
 };
 
 // Make readers and register handler
-AisReader reader1 = new AisTcpReader("host1", 4001);
-AisReader reader2 = new AisTcpReader("host2", 4001);
-AisReader reader3 = new AisTcpReader("host3", 4001);
+AisReader reader1 = AisReaders.createReader("host1", 4001);
+AisReader reader2 = AisReaders.createReader("host2", 4001);
+AisReader reader3 = AisReaders.createReader("host3", 4001);
 reader1.registerHandler(handler);
 reader2.registerHandler(handler);
 reader3.registerHandler(handler);
@@ -176,10 +224,7 @@ The example below shows how to round robin between TCP hosts. If
 one goes down, the re-connect will be to the next on the list.
 
 ```java
-RoundRobinAisTcpReader reader = new RoundRobinAisTcpReader();
-reader.addHostPort("host1:4001");
-reader.addHostPort("host2:4001");
-reader.addHostPort("host3:4001");
+AisReader reader = AisReaders.createReader("host1:port1,host2:port2,host3:port3");
 reader.registerHandler(new Consumer<AisMessage>() {			
 	@Override
 	public void accept(AisMessage aisMessage) {
@@ -199,8 +244,7 @@ Message filters implement a single method
 Down sample example:
 
 ```java
-RoundRobinAisTcpReader reader = new RoundRobinAisTcpReader();
-reader.setCommaseparatedHostPort("ais163.sealan.dk:4712");
+AisReader reader = AisReaders.createReader("ais163.sealan.dk:4712");
 reader.registerHandler(new Consumer<AisMessage>() {			
 	DownSampleFilter downSampleFilter = new DownSampleFilter(60);
 	@Override
@@ -238,10 +282,15 @@ MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilte
 doubletFilter.registerReceiver(doubletFilter);
 
 // Make reader
-AisReader reader = new AisTcpReader(host, port);
+AisReader reader = AisReaders.createReader(host, port);
 reader.registerHandler(doubletFilter);
 reader.start();
 ```
+
+### Packet transformers ###
+
+TBD. See `dk.dma.ais.transform.*`, `dk.dma.ais.transform.TransformTest` and
+`dk.dma.ais.packet.AisPacketTagsTest`.
 
 ### Reading proprietary tags ###
 
@@ -254,7 +303,7 @@ Proprietary factories are defined in the file
     ais-lib-messages/src/main/resources/META-INF/services/dk.dma.ais.proprietary.ProprietaryFactory
 
 ```java
-AisReader reader = new AisStreamReader(new FileInputStream("sentences.txt"));
+AisReader reader = AisReaders.createReaderFromInputStream(new FileInputStream("sentences.txt"));
 reader.registerHandler(new Consumer<AisMessage>() {
 	@Override
 	public void accept(AisMessage aisMessage) {
@@ -266,6 +315,66 @@ reader.registerHandler(new Consumer<AisMessage>() {
 });
 reader.start();
 reader.join();
+```
+
+### AIS metadata ###
+
+Besides from propritary tags, comment blocks carry metadata about
+the VDM sentences carrying the AIS message.
+
+The example below shows how to handle comment blocks.
+
+```java
+AisReader reader = ...
+reader.registerPacketHandler(new Consumer<AisPacket>() {            
+    @Override
+    public void accept(AisPacket aisPacket) {
+    	Vdm vdm = packet.getVdm();
+        if (vdm == null) {
+            return;
+        }
+        CommentBlock cb = vdm.getCommentBlock();
+        if (cb != null) {
+        	String source = cb.getString();
+        	Long cbTimestamp = cb.getTimestamp();
+        }
+    }
+});
+reader.start();
+reader.join();
+```
+
+Common metadata has been standardized in the class `AisPacketTags`. The 
+following attributes are used:
+
+   * Timestamp
+   * Source id
+   * Source basestation
+   * Source country (ISO three letter)
+   * Source type SAT | LIVE
+
+Example
+
+```java
+AisPacketTags tags = packet.getTags();
+Assert.assertEquals(tags.getTimestamp().getTime(), 1354719387000L);
+Assert.assertEquals(tags.getSourceId(), "SISSM");
+Assert.assertEquals(tags.getSourceBs().intValue(), 2190047);
+Assert.assertEquals(tags.getSourceCountry().getThreeLetter(), "DNK");
+```
+
+Full timestamp of VDM sentences are done in different proprietary fashions. AisLib
+tries to get the timestamp in three ways
+
+   1. Comment block key 'c'
+   2. Gatehouse propritary source tag
+   3. MSSIS timestamp appended to VDM sentence (the first occurence of a timestamp is used)
+
+The timestamp is retrived from a packet using the following
+
+```java
+Packet packet = ...
+Date timestamp = packet.getTimestamp();
 ```
 
 ### Sending a message ###
