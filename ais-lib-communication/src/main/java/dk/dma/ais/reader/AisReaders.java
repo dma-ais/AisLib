@@ -108,14 +108,18 @@ public class AisReaders {
      * @throws IOException
      */
     public static AisReader createReaderFromFile(String filename) throws IOException {
-        requireNonNull(filename);
-        InputStream in = new FileInputStream(filename);
-        if (filename.endsWith(".gz")) {
-            in = new GZIPInputStream(in);
-        } else if (filename.endsWith(".zip")) {
-            in = new ZipInputStream(in);
-        }
-        return new AisStreamReader(in);
+        return new AisStreamReader(createFileInputStream(requireNonNull(filename)));
+    }
+    
+    /**
+     * Reader that recursively reads files matching pattern in directories with root dir  
+     * @param dir
+     * @param pattern E.g. *.txt or *.gz
+     * @return
+     * @throws IOException 
+     */
+    public static AisReader createdDirectoryReader(String dir, String pattern) throws IOException {
+        return new AisDirectoryReader(dir, pattern);
     }
 
     /**
@@ -185,4 +189,15 @@ public class AisReaders {
             return r;
         }
     }
+    
+    static InputStream createFileInputStream(String filename) throws IOException {
+        InputStream in = new FileInputStream(filename);
+        if (filename.endsWith(".gz")) {
+            in = new GZIPInputStream(in);
+        } else if (filename.endsWith(".zip")) {
+            in = new ZipInputStream(in);
+        }
+        return in;
+    }
+    
 }
