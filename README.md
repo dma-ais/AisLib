@@ -18,14 +18,10 @@ DMA AisLib is a Java library for handling AIS messages. This include
 The library contains test code and utility applications demonstrating
 the use.
 
-The project is separated into three parts:
-
-
 ## Prerequisites ##
 
 * Java 1.7
 * Maven 3
-* e-Navigation https://github.com/dma-dk/e-Navigation
 
 ## Building ##
 
@@ -39,14 +35,16 @@ To run tests
 	
 ## Developing in Eclipse ##
 
+Use M2 plugin or 
+
 	mvn eclipse:eclipse
-	
-Import into Eclipse
+
+and import as regular project.
 
 ## Contributing ##
 
 You're encouraged to contribute to AisLib. Fork the code from 
-[https://github.com/dma-dk/AisLib](https://github.com/dma-dk/AisLib) and submit pull requests.
+[https://github.com/dma-ais/AisLib](https://github.com/dma-ais/AisLib) and submit pull requests.
 
 ## License ##
 
@@ -376,6 +374,10 @@ The timestamp is retrived from a packet using the following
 Packet packet = ...
 Date timestamp = packet.getTimestamp();
 ```
+
+### AisBus ###
+
+TBD. See `dk.dma.ais.bus.AisBusTest`.
 
 ### Sending a message ###
 
