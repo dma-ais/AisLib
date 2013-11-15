@@ -125,6 +125,15 @@ public class TargetTracker {
         });
     }
 
+    public TargetInfo getNewest(int mmsi) {
+        return getNewest(mmsi, Predicate.TRUE);
+    }
+
+    public TargetInfo getNewest(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
+        MmsiTarget target = targets.get(mmsi);
+        return target == null ? null : target.getNewest(sourcePredicate);
+    }
+
     /**
      * Removes all targets that are accepted by the specified predicate. Is typically used to remove targets based on
      * time stamps.
