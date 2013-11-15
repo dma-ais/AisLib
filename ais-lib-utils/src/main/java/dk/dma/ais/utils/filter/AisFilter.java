@@ -15,14 +15,13 @@
  */
 package dk.dma.ais.utils.filter;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Date;
-import java.util.zip.GZIPInputStream;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 import org.apache.commons.lang.StringUtils;
+
+import com.beust.jcommander.Parameter;
+import com.google.inject.Injector;
 
 import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.DuplicateFilter;
@@ -32,6 +31,7 @@ import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.AisTcpReader;
+import dk.dma.commons.app.AbstractCommandLineTool;
 import dk.dma.enav.model.geometry.Area;
 import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Circle;
@@ -39,96 +39,90 @@ import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
 
 /**
- * Simple application to filter AIS messages based on various filters
- * 
- * See usage() for usage
- * 
- * @throws InterruptedException
- * 
+ * Command line tool to do various AIS reading, filtering and writing
  */
-public class AisFilter {
+public class AisFilter extends AbstractCommandLineTool {
 
-    public static void main(String[] args) throws InterruptedException, IOException {
-        // Read command line arguments
-        String filename = null;
-        String hostPort = null;
-        String baseStations = null;
-        String countries = null;
-        String regions = null;
-        String runTimeStr = null;
-        boolean dumpParsed = false;
-        String starttimeStr = null;
-        String endtimeStr = null;
-        int timeout = 0;
-        long downsampleRate = 0;
-        PrintStream out = System.out;
-        boolean doubletFiltering = false;
-        String expression = null;
-        String geometry = null;
-        
-        if (args.length < 2) {
+    @Parameter(names = "-f", description = "Read from file filename (gzip or zip uncompression applied if filename ends with .gz or .zip respectively)")
+    String filename;
+
+    @Parameter(names = "-t", description = "TCP round robin connection to host1:port1 ... hostN:portN")
+    String hostPort;
+
+    @Parameter(names = "-d", description = "Directory to scan for files to read")
+    String dir;
+
+    @Parameter(names = "-name", description = "Glob pattern for files to read. '.zip' and '.gz' files are decompressed automatically")
+    String name;
+
+    @Parameter(names = "-r", description = "Recursive directory scan for files")
+    boolean recursive;
+
+    @Parameter(names = "-bs", description = "b1,...,bN comma separated list of base station MMSI's")
+    String baseStations;
+
+    @Parameter(names = "-country", description = "c1,...,cN comma separated list of country codes in two letter ISO 3166")
+    String countries;
+
+    @Parameter(names = "-region", description = "r1,...,rN comma separated list of regions")
+    String regions;
+
+    @Parameter(names = "-time", description = "time to run in seconds")
+    long runtime;
+
+    @Parameter(names = "-dump", description = "Dump message content (default false)")
+    boolean dumpParsed;
+
+    @Parameter(names = "-start", description = "Start time in format yyyy-MM-dd-HH:mm (Local time)")
+    String starttimeStr;
+
+    @Parameter(names = "-end", description = "End time in format yyyy-MM-dd-HH:mm (Local time)")
+    String endtimeStr;
+
+    @Parameter(names = "-timeout", description = "TCP read timeout in seconds, default none")
+    int timeout;
+
+    @Parameter(names = "-ds", description = "Down sample rate in seconds (default none)")
+    long downsampleRate;
+
+    @Parameter(names = "-df", description = "Do doublet filtering (default off)")
+    boolean doubletFiltering;
+
+    @Parameter(names = "-exp", description = "Filter by expression. See SourceFilter.g4")
+    String expression;
+
+    @Parameter(names = "-geo", description = "Filter by geometry. Circle: 'circle,lat,lon,radius' Bounding box: 'bb,lat1,lon1,lat2,lon2'")
+    String geometry;
+
+    @Parameter(names = "-o", description = "Output file. Default stdout.")
+    String outFile;
+    
+    MessageHandler messageHandler;
+
+    public AisFilter() {
+        super("AisFilter");
+    }
+
+    @Override
+    protected void run(Injector injector) throws Exception {
+        if (filename == null && hostPort == null && (dir == null || name == null)) {
             usage();
-            System.exit(1);
-        }
-        int i = 0;
-        while (i < args.length) {
-            if (args[i].indexOf("-t") >= 0) {
-                hostPort = args[++i];
-            } else if (args[i].indexOf("-f") >= 0) {
-                filename = args[++i];
-            } else if (args[i].indexOf("-C") >= 0) {
-                timeout = Integer.parseInt(args[++i]);
-            } else if (args[i].indexOf("-b") >= 0) {
-                baseStations = args[++i];
-            } else if (args[i].indexOf("-c") >= 0) {
-                countries = args[++i];
-            } else if (args[i].indexOf("-r") >= 0) {
-                regions = args[++i];
-            } else if (args[i].indexOf("-T") >= 0) {
-                runTimeStr = args[++i];
-            } else if (args[i].indexOf("-d") >= 0) {
-                dumpParsed = true;
-            } else if (args[i].indexOf("-S") >= 0) {
-                starttimeStr = args[++i];
-            } else if (args[i].indexOf("-E") >= 0) {
-                endtimeStr = args[++i];
-            } else if (args[i].indexOf("-D") >= 0) {
-                downsampleRate = Long.parseLong(args[++i]);
-            } else if (args[i].indexOf("-O") >= 0) {
-                out = new PrintStream(args[++i]);
-            } else if (args[i].indexOf("-e") >= 0) {
-                expression = args[++i];
-            } else if (args[i].indexOf("-g") >= 0) {
-                geometry = args[++i];
-            } else if (args[i].indexOf("-F") >= 0) {
-                doubletFiltering = true;
-            }
-            i++;
-        }
-        if (filename == null && hostPort == null) {
-            usage();
-            System.exit(1);
+            System.exit(-1);
         }
 
-        // Use TCP or file
+        // Create reader
         AisReader aisReader;
         if (filename != null) {
-            InputStream in = new FileInputStream(filename);
-            if (filename.endsWith(".gz")) {
-                in = new GZIPInputStream(in);
-            }
-            aisReader = AisReaders.createReaderFromInputStream(in);
-        } else {
+            aisReader = AisReaders.createReaderFromFile(filename);
+        } else if (hostPort != null) {
             AisTcpReader rrAisReader = AisReaders.createReader(hostPort);
             rrAisReader.setTimeout(timeout);
             aisReader = rrAisReader;
+        } else {
+            aisReader = AisReaders.createDirectoryReader(dir, name, recursive);
         }
 
-        // Run time
-        long runtime = 60 * 60 * 1000; // In ms
-        if (runTimeStr != null) {
-            runtime = Long.parseLong(runTimeStr) * 1000;
-        }
+        runtime *= 60 * 1000;
 
         // Create filter
         FilterSettings filterSettings = new FilterSettings();
@@ -145,8 +139,14 @@ public class AisFilter {
         // Add regions
         filterSettings.parseRegions(regions);
 
+        // Output stream
+        PrintStream out = System.out;
+        if (outFile != null) {
+            out = new PrintStream(outFile);
+        }
+
         // Message handler
-        MessageHandler messageHandler = new MessageHandler(filterSettings, out);
+        messageHandler = new MessageHandler(filterSettings, out);
         messageHandler.setDumpParsed(dumpParsed);
 
         // Add filters
@@ -165,32 +165,34 @@ public class AisFilter {
             Area a = getGeometry(geometry);
             locationFilter.addFilterGeometry(a.contains());
             messageHandler.getFilters().add(locationFilter);
-        }        
+        }
 
         // Register handler
         aisReader.registerPacketHandler(messageHandler);
 
         // Start reader thread
-        Date start = new Date();
+        long start = System.currentTimeMillis();
         aisReader.start();
 
-        // Shutdown hook
-        Runtime.getRuntime().addShutdownHook(new ShutdownThread(messageHandler));
-
         while (true) {
-            Thread.sleep(1000);
-
-            if (!(aisReader instanceof AisTcpReader) && aisReader.getStatus() == Status.DISCONNECTED) {
-                System.exit(0);
+            Thread.sleep(500);
+            if (aisReader.getStatus() == Status.DISCONNECTED) {
+                break;
             }
-
-            Date now = new Date();
-            if (now.getTime() - start.getTime() > runtime) {
-                System.exit(0);
+            if (System.currentTimeMillis() - start > runtime) {
+                break;
             }
-
         }
 
+        messageHandler.setStop(true);
+        messageHandler.printStats();
+
+    }
+    
+    @Override
+    public void shutdown() {
+        messageHandler.setStop(true);
+        messageHandler.printStats();
     }
 
     private static Area getGeometry(String geometry) {
@@ -207,28 +209,44 @@ public class AisFilter {
             Position pos2 = Position.create(numbers[2], numbers[3]);
             return BoundingBox.create(pos1, pos2, CoordinateSystem.GEODETIC);
         }
-        return null;        
+        return null;
     }
 
-    public static void usage() {
+    @Override
+    public void usage() {
+        System.out.println("Usage: AisFilter [options]");
+        System.out.println("\t-t        TCP round robin connection to host1:port1 ... hostN:portN");
         System.out
-                .println("Usage: AisFilter <-t|-f> <filename/host1:port1,...,hostN,portN> [-O filename] [-b b1,...,bN] [-c c1,...,cN] [-T seconds] [-d] [-C seconds] [-D seconds] [-F]");
-        System.out.println("\t-t TCP round robin connection to host1:port1 ... hostN:portN");
-        System.out.println("\t-f Read from file filename (gzip uncompression applied if filename ends with .gz)");
-        System.out.println("\t-O Write output to file");
-        System.out.println("\t-C TCP read timeout in seconds, default none");
-        System.out.println("\t-b b1,...,bN comma separated list of base station MMSI's");
-        System.out.println("\t-r r1,...,rN comma separated list of regions");
-        System.out.println("\t-c c1,...,cN comma separated list of country codes in two letter ISO 3166");
-        System.out.println("\t-T time to run in seconds (default 1 hour)");
-        System.out.println("\t-d Dump message content (default false)");
-        System.out.println("\t-S Start time in format yyyy-MM-dd-HH:mm (Local time)");
-        System.out.println("\t-E End time in format yyyy-MM-dd-HH:mm (Local time)");
-        System.out.println("\t-D Down sample rate in seconds (default none)");
-        System.out.println("\t-F Do doublet filtering (default off)");
-        System.out.println("\t-R Insert reply proprietary tag with time of reception");
-        System.out.println("\t-e Filter by expression. See SourceFilter.g4");
-        System.out.println("\t-g Filter by geometry. Circle: 'circle,lat,lon,radius' Bounding box: 'bb,lat1,lon1,lat2,lon2' ");
+                .println("\t-f        Read from file filename (gzip or zip uncompression applied if filename ends with .gz or .zip)");
+        System.out.println("\t-d        Directory to scan for files to read");
+        System.out.println("\t-r        Recursive directory scan for files");
+        System.out.println("\t-name     Glob pattern for files to read. '.zip' and '.gz' files are decompressed automatically");
+        System.out.println("\t-o        Write output to file");
+        System.out.println("\t-timeout  TCP read timeout in seconds, default none");
+        System.out.println("\t-bs       b1,...,bN comma separated list of base station MMSI's");
+        System.out.println("\t-region   r1,...,rN comma separated list of regions");
+        System.out.println("\t-country  c1,...,cN comma separated list of country codes in two letter ISO 3166");
+        System.out.println("\t-time     Time to run in seconds (default 1 hour)");
+        System.out.println("\t-dump     Dump message content (default false)");
+        System.out.println("\t-start    Start time in format yyyy-MM-dd-HH:mm (Local time)");
+        System.out.println("\t-end      End time in format yyyy-MM-dd-HH:mm (Local time)");
+        System.out.println("\t-ds       Down sample rate in seconds (default none)");
+        System.out.println("\t-df       Do doublet filtering (default off)");
+        System.out.println("\t-exp      Filter by expression. See SourceFilter.g4");
+        System.out
+                .println("\t-geo      Filter by geometry. Circle: 'circle,lat,lon,radius' Bounding box: 'bb,lat1,lon1,lat2,lon2' ");
+        System.out.println("\t-help     Show this help");
+    }
+
+    public static void main(String[] args) throws Exception {
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                System.err.println("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage());
+                System.exit(-1);
+            }
+        });
+        new AisFilter().execute(args);
     }
 
 }
