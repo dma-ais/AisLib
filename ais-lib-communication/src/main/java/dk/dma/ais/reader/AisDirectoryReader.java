@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -28,6 +29,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +69,7 @@ public class AisDirectoryReader extends AisReader {
             boolean firstDir = true;
             
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {                
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
                 if (matcher.matches(file.getFileName())) {
                     try {
                         InputStream in = AisReaders.createFileInputStream(file.toString());
@@ -93,7 +95,7 @@ public class AisDirectoryReader extends AisReader {
             }
         };
         try {
-            Files.walkFileTree(this.dir, fileVisitor);
+            Files.walkFileTree(this.dir, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, fileVisitor);
         } catch (IOException e) {
             LOG.error("Failed to read directory: " + e.getMessage());
         }
