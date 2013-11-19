@@ -15,11 +15,12 @@
  */
 package dk.dma.ais.lib;
 
+import dk.dma.ais.utils.aisbus.AisBusLauncher;
+import dk.dma.ais.utils.filter.AisFilter;
 import dk.dma.commons.app.CliCommandList;
-import dk.dma.commons.app.CliCommandList.Command;
 
 /**
- * The command line interface to AisStore.
+ * The command line interface to AIS utilities
  * 
  * @author Kasper Nielsen
  */
@@ -28,11 +29,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
         CliCommandList c = new CliCommandList("AisLib");
         c.add(FileDump.class, "filedump", "Reads data from AIS datasources and stores data into text files");
-        c.add("bus", "AisBus....", new Command() {
-            public void execute(String[] args) throws Exception {
-                FileDump.main(args);
-            }
-        });
+        c.add(AisFilter.class, "filter", "Command line tool to do various AIS reading, filtering and writing");
+        c.add(AisBusLauncher.class, "aisbus", "AisBus launcher application");
         c.invoke(args);
     }
 
