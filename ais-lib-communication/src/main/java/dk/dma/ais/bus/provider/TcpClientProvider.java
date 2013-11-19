@@ -53,6 +53,7 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
     private List<String> hostnames = new ArrayList<>();
     private List<Integer> ports = new ArrayList<>();
     private int currentHost = -1;
+    private volatile Socket socket;
 
     public TcpClientProvider() {
         super();
@@ -62,7 +63,7 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
     public void run() {        
         setNotConnected();
         while (true) {
-            Socket socket = new Socket();
+            socket = new Socket();
 
             // Get next host and port
             selectHost();
@@ -124,8 +125,16 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
     
     @Override
     public void cancel() {
+        // Close socket
+        Socket s = socket;
+        if (s != null) {
+            try {
+                s.close();
+            } catch (IOException ignore) {
+            }
+        }
         getThread().interrupt();   
-        try {
+        try {            
             getThread().join(THREAD_STOP_WAIT_MAX);
         } catch (InterruptedException e) {
             e.printStackTrace();
