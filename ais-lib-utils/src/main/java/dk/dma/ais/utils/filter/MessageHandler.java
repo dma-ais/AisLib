@@ -20,6 +20,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -138,6 +139,9 @@ public class MessageHandler implements Consumer<AisPacket> {
 
         // Print tag line packet
         out.println(packet.getStringMessage());
+        
+        // Count bytes
+        bytes += packet.getStringMessage().length();
 
         // Maybe print parsed
         if (dumpParsed) {
@@ -193,10 +197,10 @@ public class MessageHandler implements Consumer<AisPacket> {
         System.out.println("\n");
         System.out.println("Elapsed  : " + df.format(new Date(elapsed)));
         System.out.println("Messages : " + msgCount);
-        System.out.println("Msg/min  : " + String.format("%.2f", msgPerMin));
+        System.out.println("Msg/min  : " + String.format(Locale.US, "%.2f", msgPerMin));
         System.out.println("KBytes   : " + kbytes);
-        System.out.println("KB/s     : " + String.format("%.2f", kbytes / elapsedSecs));
-        System.out.println("Kbps     : " + String.format("%.2f", kbytes * 8.0 / elapsedSecs));
+        System.out.println("KB/s     : " + String.format(Locale.US, "%.2f", kbytes / elapsedSecs));
+        System.out.println("Kbps     : " + String.format(Locale.US, "%.2f", kbytes * 8.0 / elapsedSecs));
     }
 
 }

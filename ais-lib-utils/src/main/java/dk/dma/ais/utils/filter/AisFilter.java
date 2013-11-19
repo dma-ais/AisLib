@@ -97,7 +97,7 @@ public class AisFilter extends AbstractCommandLineTool {
     @Parameter(names = "-o", description = "Output file. Default stdout.")
     String outFile;
     
-    MessageHandler messageHandler;
+    volatile MessageHandler messageHandler;
 
     public AisFilter() {
         super("AisFilter");
@@ -122,7 +122,7 @@ public class AisFilter extends AbstractCommandLineTool {
             aisReader = AisReaders.createDirectoryReader(dir, name, recursive);
         }
 
-        runtime *= 60 * 1000;
+        runtime *= 1000;
 
         // Create filter
         FilterSettings filterSettings = new FilterSettings();
@@ -179,20 +179,21 @@ public class AisFilter extends AbstractCommandLineTool {
             if (aisReader.getStatus() == Status.DISCONNECTED) {
                 break;
             }
-            if (System.currentTimeMillis() - start > runtime) {
+            if (runtime > 0 && (System.currentTimeMillis() - start > runtime)) {
+                messageHandler.setStop(true);
+                aisReader.stopReader();
                 break;
             }
         }
-
-        messageHandler.setStop(true);
-        messageHandler.printStats();
-
     }
     
     @Override
     public void shutdown() {
-        messageHandler.setStop(true);
-        messageHandler.printStats();
+        MessageHandler mh = messageHandler;
+        if (mh != null) {
+            mh.setStop(true);
+            mh.printStats();
+        }
     }
 
     private static Area getGeometry(String geometry) {
@@ -226,7 +227,7 @@ public class AisFilter extends AbstractCommandLineTool {
         System.out.println("\t-bs       b1,...,bN comma separated list of base station MMSI's");
         System.out.println("\t-region   r1,...,rN comma separated list of regions");
         System.out.println("\t-country  c1,...,cN comma separated list of country codes in two letter ISO 3166");
-        System.out.println("\t-time     Time to run in seconds (default 1 hour)");
+        System.out.println("\t-time     Time to run in seconds (default indefinitely)");
         System.out.println("\t-dump     Dump message content (default false)");
         System.out.println("\t-start    Start time in format yyyy-MM-dd-HH:mm (Local time)");
         System.out.println("\t-end      End time in format yyyy-MM-dd-HH:mm (Local time)");
@@ -246,7 +247,13 @@ public class AisFilter extends AbstractCommandLineTool {
                 System.exit(-1);
             }
         });
-        new AisFilter().execute(args);
+        final AisFilter aisFilter = new AisFilter();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                aisFilter.shutdown();
+            }
+        });
+        aisFilter.execute(args);
     }
 
 }
