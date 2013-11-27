@@ -99,7 +99,7 @@ public class ReplayDownSampleFilter implements IPacketFilter {
             return false;
         }
 
-        Long now = packet.getBestTimestamp();
+        long now = packet.getBestTimestamp();
         Long lastReceived = null;
 
         // Get last received
