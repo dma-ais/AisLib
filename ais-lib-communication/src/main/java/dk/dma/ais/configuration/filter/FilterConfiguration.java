@@ -19,9 +19,10 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import dk.dma.ais.filter.IPacketFilter;
 
-@XmlSeeAlso({ PacketFilterCollectionConfiguration.class, DownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class,
-        GatehouseSourceFilterConfiguration.class, TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class,
-        LocationFilterConfiguration.class, MessageTypeFilterConfiguration.class, ExpressionFilterConfiguration.class, SanityFilterConfiguration.class})
+@XmlSeeAlso({ PacketFilterCollectionConfiguration.class, DownSampleFilterConfiguration.class,
+        ReplayDownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class, GatehouseSourceFilterConfiguration.class,
+        TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class, LocationFilterConfiguration.class,
+        MessageTypeFilterConfiguration.class, ExpressionFilterConfiguration.class, SanityFilterConfiguration.class })
 public abstract class FilterConfiguration {
 
     public abstract IPacketFilter getInstance();

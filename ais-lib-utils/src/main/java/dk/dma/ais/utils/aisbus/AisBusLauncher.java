@@ -106,11 +106,13 @@ public class AisBusLauncher extends AbstractDaemon {
     }
 
     @Override
-    public void shutdown() {
-        LOG.info("Shutting down ...");
-        aisBus.cancel();
-        super.shutdown();
-        LOG.info("Shutting down done!");
+    protected void preShutdown() {
+        if (aisBus != null) {
+            LOG.info("Shutting down AisBus");
+            aisBus.cancel();
+            LOG.info("Shutting down done!");
+        }
+        super.preShutdown();
     }
 
     public static void main(String[] args) throws Exception {
