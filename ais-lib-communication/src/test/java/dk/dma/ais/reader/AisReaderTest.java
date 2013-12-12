@@ -22,6 +22,8 @@ import org.junit.Test;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.enav.util.function.Consumer;
 
+import static org.junit.Assert.assertEquals;
+
 public class AisReaderTest {
 
     @Test
@@ -35,6 +37,20 @@ public class AisReaderTest {
         });
         reader.start();
         reader.join();
+        assertEquals(4062L, reader.getNumberOfLinesRead());
     }
 
+    @Test
+    public void dirReaderPercentageReadTest() throws InterruptedException, IOException {
+        AisDirectoryReader directoryReader = AisReaders.createDirectoryReader("src/test", "stream_example.txt", true);
+
+        assertEquals(0L, directoryReader.getNumberOfLinesRead());
+        assertEquals(0.0, directoryReader.getEstimatedFractionOfPacketsRead(), 1e-10);
+
+        directoryReader.start();
+        directoryReader.join();
+
+        assertEquals(4051L, directoryReader.getNumberOfLinesRead());
+        assertEquals(1.0, directoryReader.getEstimatedFractionOfPacketsRead(), 1e-10);
+    }
 }

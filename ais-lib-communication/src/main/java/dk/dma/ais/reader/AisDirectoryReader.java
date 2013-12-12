@@ -31,6 +31,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,8 @@ public class AisDirectoryReader extends AisReader {
     private final Path dir;
     private final boolean recursive;
 
+    private Long totalNumberOfPacketsToRead;
+
     AisDirectoryReader(String dir, String pattern, boolean recursive) throws IOException {
         requireNonNull(dir);
         requireNonNull(pattern);
@@ -60,45 +64,17 @@ public class AisDirectoryReader extends AisReader {
         if (!Files.exists(this.dir) || !Files.isDirectory(this.dir)) {
             throw new IOException("No such directory: " + dir);
         }
+        this.totalNumberOfPacketsToRead = -1L;
     }
 
     @Override
     public void run() {
-        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
-        final FileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
-            boolean firstDir = true;
-            
+        new MatchingFileIterator() {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
-                if (matcher.matches(file.getFileName())) {
-                    try {
-                        InputStream in = AisReaders.createFileInputStream(file.toString());
-                        readLoop(in);
-                        in.close();
-                    } catch (IOException e) {
-                        if (!isShutdown()) {
-                            LOG.error("Failed to read file: " + file.toString() + ": " + e.getMessage());
-                        }
-                        return FileVisitResult.TERMINATE;
-                    }
-                }
-                return FileVisitResult.CONTINUE;
+            protected void doWithInputStreamOfMatchingFile(InputStream in) throws IOException {
+                readLoop(in);
             }
-            
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                if (recursive || firstDir) {
-                    firstDir = false;
-                    return FileVisitResult.CONTINUE;
-                }
-                return FileVisitResult.SKIP_SUBTREE;
-            }
-        };
-        try {
-            Files.walkFileTree(this.dir, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, fileVisitor);
-        } catch (IOException e) {
-            LOG.error("Failed to read directory: " + e.getMessage());
-        }
+        }.iterate();
         done = true;
     }
 
@@ -113,4 +89,97 @@ public class AisDirectoryReader extends AisReader {
         resultListener.accept(null);
     }
 
+    /**
+     * Compute an estimate of the fraction of AIS packets which have been read, out of the total no. of AIS packets
+     * to read in the matching files. The first call to this method may be long-running as it will scan all the
+     * matching files to count AIS packets.
+     *
+     * @return Estimated fraction of AIS packets read as a floating point number between 0 and 1.
+     */
+    public float getEstimatedFractionOfPacketsRead() {
+        final long packetsRead = getNumberOfLinesRead();
+        final long packetsToRead = getTotalNumberOfPacketsToRead();
+        final float fractionRead = ((float) packetsRead) / ((float) packetsToRead);
+        return Math.min(fractionRead, 1.0f);
+    }
+
+    private long getTotalNumberOfPacketsToRead() {
+        if (totalNumberOfPacketsToRead < 0L) {
+            synchronized (totalNumberOfPacketsToRead) {
+                if (totalNumberOfPacketsToRead < 0L) {
+                    LOG.debug("Scanning all input files to count packets.");
+                    totalNumberOfPacketsToRead = 0L;
+                    new MatchingFileIterator() {
+                        @Override
+                        protected void doWithInputStreamOfMatchingFile(InputStream in) {
+                            try (AisPacketReader s = new AisPacketReader(in)) {
+                                AisPacket packet;
+                                while ((packet = s.readPacket(getSourceId())) != null) {
+                                    totalNumberOfPacketsToRead++;
+                                    if (totalNumberOfPacketsToRead % 1e6 == 0) {
+                                        if (totalNumberOfPacketsToRead % 1e7 == 0) {
+                                            LOG.info("Packets counted: " + totalNumberOfPacketsToRead);
+                                        } else {
+                                            LOG.debug("Packets counted: " + totalNumberOfPacketsToRead);
+                                        }
+                                    }
+                                }
+                            } catch (IOException e) {
+                                LOG.error("Failed to read packets: " + e.getMessage(), e);
+                            }
+                        }
+                    }.iterate();
+                }
+                LOG.info("AIS packets counted in matching files: " + totalNumberOfPacketsToRead);
+            }
+        }
+        return this.totalNumberOfPacketsToRead;
+    }
+
+    /**
+     * Walk through all matching files and hand their InputStream to the
+     * doWithInputStreamOfMatchingFile method.
+     */
+    private abstract class MatchingFileIterator {
+        protected abstract void doWithInputStreamOfMatchingFile(InputStream in) throws IOException;
+
+        public void iterate() {
+            final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+            final FileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
+                boolean firstDir = true;
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
+                    if (matcher.matches(file.getFileName())) {
+                        try {
+                            LOG.debug("Reading packets from file " + file.getFileName().toString());
+                            InputStream in = AisReaders.createFileInputStream(file.toString());
+                            doWithInputStreamOfMatchingFile(in);
+                            in.close();
+                        } catch (IOException e) {
+                            if (!isShutdown()) {
+                                LOG.error("Failed to read file: " + file.toString() + ": " + e.getMessage());
+                            }
+                            return FileVisitResult.TERMINATE;
+                        }
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    if (recursive || firstDir) {
+                        firstDir = false;
+                        return FileVisitResult.CONTINUE;
+                    }
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+            };
+            try {
+                Files.walkFileTree(dir, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, fileVisitor);
+            } catch (IOException e) {
+                LOG.error("Failed to read directory: " + e.getMessage());
+            }
+        }
+    }
 }

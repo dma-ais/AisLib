@@ -158,6 +158,8 @@ public abstract class AisReader extends Thread {
         }) {
             AisPacket packet = null;
             while ((packet = s.readPacket(sourceId)) != null) {
+                linesRead.incrementAndGet();
+
                 for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
                     packetHandler.accept(packet);
                 }

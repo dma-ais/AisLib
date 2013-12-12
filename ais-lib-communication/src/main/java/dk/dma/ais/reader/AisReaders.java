@@ -119,7 +119,7 @@ public class AisReaders {
      * @return
      * @throws IOException 
      */
-    public static AisReader createDirectoryReader(String dir, String pattern, boolean recursive) throws IOException {
+    public static AisDirectoryReader createDirectoryReader(String dir, String pattern, boolean recursive) throws IOException {
         return new AisDirectoryReader(dir, pattern, recursive);
     }
 
