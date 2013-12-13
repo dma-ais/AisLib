@@ -31,8 +31,15 @@ public abstract class AisBusSocket extends AisBusComponent {
     @GuardedBy("this")
     private String description;
     
+    protected final boolean blocking;
+    
     public AisBusSocket() {
+        this(false);
+    }
+    
+    public AisBusSocket(boolean blocking) {
         super();
+        this.blocking = blocking;
     }
     
     @Override

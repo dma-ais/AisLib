@@ -33,7 +33,7 @@ public class FileReaderProvider extends StreamReaderProvider {
     }
     
     public FileReaderProvider(String filename, boolean gzip) throws IOException {
-        super();
+        super(true);
         InputStream stream = new FileInputStream(filename);
         if (gzip) {
             stream = new GZIPInputStream(stream);

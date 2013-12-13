@@ -30,13 +30,17 @@ public class StreamReaderProvider extends AisReaderProvider {
     @GuardedBy("this")
     private InputStream stream;
 
-    public StreamReaderProvider() {
-        super();
+    public StreamReaderProvider(boolean blocking) {
+        super(blocking);
     }
 
-    public StreamReaderProvider(InputStream stream) {
-        super();
+    public StreamReaderProvider(InputStream stream, boolean blocking) {
+        super(blocking);
         this.stream = stream;
+    }
+    
+    public StreamReaderProvider(InputStream stream) {
+        this(stream, false);
     }
 
     protected synchronized void setStream(InputStream stream) {

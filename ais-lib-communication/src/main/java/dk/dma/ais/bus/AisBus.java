@@ -136,23 +136,46 @@ public class AisBus extends AisBusComponent implements Runnable {
             provider.cancel();
         }
     }
+        
+    /**
+     * Push packets non-blocking on to the bus
+     * @param packet
+     * @return if pushing was a success
+     */
+    public boolean push(AisPacket packet) {
+        return push(packet, false);
+    }
 
     /**
      * Push element onto the bus. Returns false if the bus is overflowing
      * 
      * @param packet
+     * @param blocking
      * @return if pushing was a success
      */
-    public boolean push(AisPacket packet) {
+    public boolean push(AisPacket packet, boolean blocking) {
         // Do filtering, transformation and filtering (the client thread)
         packet = handleReceived(packet);
         if (packet == null) {
             return true;
         }
+        
+        AisBusElement element = new AisBusElement(packet);
 
-        // Push to the bus
+        // Push to the bus blocking
+        if (blocking) {
+            try {
+                busQueue.put(element);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+            return true;
+        }
+
+        // Push to the bus non-blocking
         try {
-            busQueue.push(new AisBusElement(packet));
+            busQueue.push(element);
         } catch (MessageQueueOverflowException e) {
             overflowLogger.log("AisBus overflow [rate=" + avgOverflowRate() + " packet/sec]");
             return false;

@@ -34,8 +34,8 @@ public class AisReaderProvider extends AisBusProvider implements Consumer<AisPac
      */
     private AtomicReference<AisReader> aisReader = new AtomicReference<>();
     
-    public AisReaderProvider() {
-        super();
+    public AisReaderProvider(boolean blocking) {
+        super(blocking);
     }
     
     public AisReaderProvider(AisReader aisReader) {
