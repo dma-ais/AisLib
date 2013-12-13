@@ -31,11 +31,10 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.enav.util.function.Consumer;
 
@@ -113,8 +112,7 @@ public class AisDirectoryReader extends AisReader {
                         @Override
                         protected void doWithInputStreamOfMatchingFile(InputStream in) {
                             try (AisPacketReader s = new AisPacketReader(in)) {
-                                AisPacket packet;
-                                while ((packet = s.readPacket(getSourceId())) != null) {
+                                while ((s.readPacket(getSourceId())) != null) {
                                     totalNumberOfPacketsToRead++;
                                     if (totalNumberOfPacketsToRead % 1e6 == 0) {
                                         if (totalNumberOfPacketsToRead % 1e7 == 0) {
