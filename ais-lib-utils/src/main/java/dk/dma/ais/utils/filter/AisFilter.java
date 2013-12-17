@@ -23,10 +23,10 @@ import org.apache.commons.lang.StringUtils;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
-import dk.dma.ais.filter.DownSampleFilter;
-import dk.dma.ais.filter.DuplicateFilter;
 import dk.dma.ais.filter.ExpressionFilter;
 import dk.dma.ais.filter.LocationFilter;
+import dk.dma.ais.filter.ReplayDownSampleFilter;
+import dk.dma.ais.filter.ReplayDuplicateFilter;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisReaders;
@@ -152,10 +152,10 @@ public class AisFilter extends AbstractCommandLineTool {
         // Add filters
         // Maybe insert downsampling filter
         if (downsampleRate > 0) {
-            messageHandler.getFilters().add(new DownSampleFilter(downsampleRate));
+            messageHandler.getFilters().add(new ReplayDownSampleFilter(downsampleRate));
         }
         if (doubletFiltering) {
-            messageHandler.getFilters().add(new DuplicateFilter());
+            messageHandler.getFilters().add(new ReplayDuplicateFilter());
         }
         if (expression != null) {
             messageHandler.getFilters().add(new ExpressionFilter(expression));
