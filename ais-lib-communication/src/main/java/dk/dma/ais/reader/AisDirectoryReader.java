@@ -114,7 +114,7 @@ public class AisDirectoryReader extends AisReader {
         final long packetsRead = getNumberOfLinesRead();
         final long packetsToRead = getTotalNumberOfPacketsToRead();
         final float fractionRead = ((float) packetsRead) / ((float) packetsToRead);
-        return Math.min(fractionRead, 1.0f);
+        return Math.max(0.0f, Math.min(fractionRead, 1.0f));
     }
 
     private long getTotalNumberOfPacketsToRead() {
