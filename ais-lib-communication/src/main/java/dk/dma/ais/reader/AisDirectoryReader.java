@@ -15,8 +15,12 @@
  */
 package dk.dma.ais.reader;
 
-import static java.util.Objects.requireNonNull;
+import dk.dma.ais.sentence.Abk;
+import dk.dma.enav.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
@@ -35,12 +39,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import dk.dma.ais.packet.AisPacketReader;
-import dk.dma.ais.sentence.Abk;
-import dk.dma.enav.util.function.Consumer;
+import static java.util.Objects.requireNonNull;
 
 /**
  * AIS reader that iterates over every file from a given base directory. If a file matches a given pattern it will be read.
@@ -83,8 +82,11 @@ public class AisDirectoryReader extends AisReader {
     public void run() {
         new MatchingFileIterator(comparator) {
             @Override
-            protected void doWithInputStreamOfMatchingFile(InputStream in) throws IOException {
-                readLoop(in);
+            protected void doWithMatchingFile(Path file) throws IOException {
+                try (InputStream in = AisReaders.createFileInputStream(file.toString())) {
+                    LOG.debug("Reading packets from file " + file.getFileName().toString());
+                    readLoop(in);
+                }
             }
         }.iterate();
         done = true;
@@ -117,31 +119,33 @@ public class AisDirectoryReader extends AisReader {
 
     private long getTotalNumberOfPacketsToRead() {
         if (totalNumberOfPacketsToRead < 0L) {
-            synchronized (totalNumberOfPacketsToRead) {
+            synchronized (this) {
                 if (totalNumberOfPacketsToRead < 0L) {
                     LOG.debug("Scanning all input files to count packets.");
                     totalNumberOfPacketsToRead = 0L;
                     new MatchingFileIterator(comparator) {
                         @Override
-                        protected void doWithInputStreamOfMatchingFile(InputStream in) {
-                            try (AisPacketReader s = new AisPacketReader(in)) {
-                                while ((s.readPacket(getSourceId())) != null) {
-                                    totalNumberOfPacketsToRead++;
-                                    if (totalNumberOfPacketsToRead % 1e6 == 0) {
-                                        if (totalNumberOfPacketsToRead % 1e7 == 0) {
-                                            LOG.info("Packets counted: " + totalNumberOfPacketsToRead);
-                                        } else {
-                                            LOG.debug("Packets counted: " + totalNumberOfPacketsToRead);
-                                        }
-                                    }
+                        protected void doWithMatchingFile(Path path) {
+                            LOG.debug("Estimating no. of AIS packets in file " + path.getFileName().toString());
+                            File file = path.toFile();
+                            if (file.exists() && file.isFile() && file.canRead()) {
+                                long fileSize = file.length();
+                                boolean compressed = file.getName().endsWith(".gz");
+
+                                long estimatedNumberOfPacketsInFile;
+                                if (compressed) {
+                                    estimatedNumberOfPacketsInFile = (long) ((double) fileSize * 0.02354460042873);
+                                } else {
+                                    estimatedNumberOfPacketsInFile = (long) ((double) fileSize * 0.00629701469914);
                                 }
-                            } catch (IOException e) {
-                                LOG.error("Failed to read packets: " + e.getMessage(), e);
+
+                                LOG.debug("estimatedNumberOfPacketsInFile " + estimatedNumberOfPacketsInFile);
+                                totalNumberOfPacketsToRead += estimatedNumberOfPacketsInFile;
                             }
                         }
                     }.iterate();
                 }
-                LOG.info("AIS packets counted in matching files: " + totalNumberOfPacketsToRead);
+                LOG.info("Estimated no. of AIS packets in matching files: " + totalNumberOfPacketsToRead);
             }
         }
         return this.totalNumberOfPacketsToRead;
@@ -160,18 +164,14 @@ public class AisDirectoryReader extends AisReader {
             this.comparator = comparator;
         }
         
-        protected abstract void doWithInputStreamOfMatchingFile(InputStream in) throws IOException;
+        protected abstract void doWithMatchingFile(Path matchingFile) throws IOException;
 
-        // Open stream for file and hand of
         private void handleFile(Path file) {
             try {
-                LOG.debug("Reading packets from file " + file.getFileName().toString());
-                InputStream in = AisReaders.createFileInputStream(file.toString());
-                doWithInputStreamOfMatchingFile(in);
-                in.close();
+                doWithMatchingFile(file);
             } catch (IOException e) {
                 if (!isShutdown()) {
-                    LOG.error("Failed to read file: " + file.toString() + ": " + e.getMessage());
+                    LOG.error("Failed to work with file: " + file.toString() + ": " + e.getMessage());
                 }
             }
         }
