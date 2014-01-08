@@ -87,13 +87,6 @@ public class FileConvert extends AbstractCommandLineTool {
     protected void run(Injector injector) throws Exception {        
         @SuppressWarnings("unchecked")
         final OutputStreamSink<AisPacket> sink = (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
-        final LinkedList<IPacketFilter> filters = new LinkedList<>();
-        filters.add(new IPacketFilter() {
-            @Override
-            public boolean rejectedByFilter(AisPacket packet) {
-                return false;
-            }
-        });
 
         final long start = System.currentTimeMillis();
         final AtomicInteger count = new AtomicInteger();
@@ -101,13 +94,7 @@ public class FileConvert extends AbstractCommandLineTool {
         final EConsumer<String> consumer = new EConsumer<String>() {
             
             public void process(BufferedOutputStream bos, AisPacket p) throws IOException {
-                if (p != null && p.getBestTimestamp() > 0) {
-                    for (IPacketFilter filter : filters) {
-                        if (!filter.rejectedByFilter(p)) {
-                            sink.process(bos, p, count.get());
-                        }
-                    }
-                }
+                sink.process(bos, p, count.get());
             }
 
             @Override
