@@ -31,6 +31,8 @@ public class Main {
         c.add(FileDump.class, "filedump", "Reads data from AIS datasources and stores data into text files");
         c.add(AisFilter.class, "filter", "Command line tool to do various AIS reading, filtering and writing");
         c.add(AisBusLauncher.class, "aisbus", "AisBus launcher application");
+        c.add(FileConvert.class, "fileconvert", "converts a list of aisfiles into a different format");
+        c.add(AisGapsToCSV.class, "aisgapstocsv", "finds timegaps in a directory of aisdata and outputs a csv file with utc timestamps per every second of missing data");
         c.invoke(args);
     }
 
