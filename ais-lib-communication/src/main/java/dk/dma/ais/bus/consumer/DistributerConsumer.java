@@ -34,7 +34,11 @@ public class DistributerConsumer extends AisBusConsumer {
     private final List<Consumer<AisPacket>> consumers = new CopyOnWriteArrayList<>();
     
     public DistributerConsumer() {
-        
+        this(false);
+    }
+    
+    public DistributerConsumer(boolean blocking) {
+        super(blocking);
     }
 
     @Override

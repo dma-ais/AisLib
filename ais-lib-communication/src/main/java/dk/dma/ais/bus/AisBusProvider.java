@@ -22,21 +22,26 @@ import dk.dma.ais.packet.AisPacket;
 public abstract class AisBusProvider extends AisBusSocket {
 
     public AisBusProvider() {
-        super();
+        this(false);
     }
-    
+
+    public AisBusProvider(boolean blocking) {
+        super(blocking);
+    }
+
     @Override
     public void init() {
         super.init();
     }
-    
+
     @Override
     public void start() {
         super.start();
     }
-        
+
     /**
      * Helper method to push to bus
+     * 
      * @param packet
      */
     protected void push(AisPacket packet) {
@@ -45,12 +50,10 @@ public abstract class AisBusProvider extends AisBusSocket {
         if (packet == null) {
             return;
         }
-        
         // Push to the bus
-        if (!getAisBus().push(packet)) {
+        if (!getAisBus().push(packet, blocking)) {
             status.overflow();
         }
-        
     }
 
 }

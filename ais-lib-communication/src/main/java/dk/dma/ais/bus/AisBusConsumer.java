@@ -44,6 +44,10 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
         super();
     }
 
+    public AisBusConsumer(boolean blocking) {
+        super(blocking);
+    }
+
     /**
      * Receive elements from the queue
      */
@@ -57,20 +61,27 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
         queueElement.setPacket(packet);
         receiveFiltered(queueElement);
     }
-    
+
     /**
      * Push elements onto the queue
+     * 
      * @param element
      */
     public final void push(AisBusElement element) {
         try {
-            consumerThread.getQueue().push(element);
+            if (blocking) {
+                consumerThread.getQueue().put(element);
+            } else {
+                consumerThread.getQueue().push(element);
+            }
         } catch (MessageQueueOverflowException e) {
             status.overflow();
             overflowLogger.log("Consumer overflow [rate=" + status.getOverflowRate() + " packet/sec]");
+        } catch (InterruptedException e) {
+
         }
     }
-    
+
     @Override
     public synchronized void init() {
         // Create consumer queue
@@ -81,12 +92,12 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
     }
 
     @Override
-    public synchronized void start() {        
+    public synchronized void start() {
         // Start consumerThread
         consumerThread.start();
         super.start();
     }
-    
+
     @Override
     public void cancel() {
         // Stop consumer thread
@@ -99,6 +110,7 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
 
     /**
      * All consumers must implement a method to get the filtered packet
+     * 
      * @param queueElement
      */
     public abstract void receiveFiltered(AisBusElement queueElement);

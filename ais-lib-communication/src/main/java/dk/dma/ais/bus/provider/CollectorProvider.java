@@ -27,7 +27,7 @@ import dk.dma.enav.util.function.Consumer;
 public class CollectorProvider extends AisBusProvider implements Consumer<AisPacket> {
     
     public CollectorProvider() {
-        
+        super();
     }
     
     @Override

@@ -48,6 +48,12 @@ public class BlockingMessageQueue<T> implements IMessageQueue<T> {
         }
         return queue.size();
     }
+    
+    @Override
+    public int put(T content) throws InterruptedException {
+        queue.put(content);
+        return queue.size();
+    }
 
     @Override
     public T pull() throws InterruptedException {

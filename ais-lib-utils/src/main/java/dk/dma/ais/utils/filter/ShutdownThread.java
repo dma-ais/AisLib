@@ -17,15 +17,15 @@ package dk.dma.ais.utils.filter;
 
 public class ShutdownThread extends Thread {
 
-    private MessageHandler messageHandler;
+    private AisFilter aisFilter;
 
-    public ShutdownThread(MessageHandler messageHandler) {
-        this.messageHandler = messageHandler;
+    public ShutdownThread(AisFilter aisFilter) {
+        this.aisFilter = aisFilter;
     }
 
     public void run() {
-        messageHandler.setStop(true);
-        messageHandler.printStats();
+        aisFilter.setStop(true);
+        aisFilter.printStats();
     }
 
 }

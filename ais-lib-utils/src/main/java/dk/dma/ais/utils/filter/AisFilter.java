@@ -15,34 +15,56 @@
  */
 package dk.dma.ais.utils.filter;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
-import dk.dma.ais.filter.DownSampleFilter;
-import dk.dma.ais.filter.DuplicateFilter;
+import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.filter.ExpressionFilter;
+import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.LocationFilter;
+import dk.dma.ais.filter.ReplayDownSampleFilter;
+import dk.dma.ais.filter.ReplayDuplicateFilter;
+import dk.dma.ais.message.AisBinaryMessage;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.binary.AisApplicationMessage;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.proprietary.IProprietarySourceTag;
+import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReader.Status;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.AisTcpReader;
+import dk.dma.ais.sentence.Vdm;
 import dk.dma.commons.app.AbstractCommandLineTool;
 import dk.dma.enav.model.geometry.Area;
 import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Command line tool to do various AIS reading, filtering and writing
  */
-public class AisFilter extends AbstractCommandLineTool {
-
+public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPacket> {
+    
     @Parameter(names = "-f", description = "Read from file filename (gzip or zip uncompression applied if filename ends with .gz or .zip respectively)")
     String filename;
 
@@ -97,7 +119,25 @@ public class AisFilter extends AbstractCommandLineTool {
     @Parameter(names = "-o", description = "Output file. Default stdout.")
     String outFile;
     
-    volatile MessageHandler messageHandler;
+    @Parameter(names = "-split", description = "Split into multiple output files with this maximum size in bytes. Files will be postfixed with a running number.")
+    Long splitSize;
+    
+    @Parameter(names = "-z", description = "Compress output files")
+    boolean compress;
+
+    private final SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+    
+    private PrintStream out;
+    private long start;
+    private long end;
+    private long msgCount;
+    private long bytes;
+    private volatile boolean stop;
+    private final List<IPacketFilter> filters = new CopyOnWriteArrayList<>();
+    private final FilterSettings filter = new FilterSettings();
+    
+    private int fileCounter;
+    private int currentFileBytes;
 
     public AisFilter() {
         super("AisFilter");
@@ -124,51 +164,44 @@ public class AisFilter extends AbstractCommandLineTool {
 
         runtime *= 1000;
 
-        // Create filter
-        FilterSettings filterSettings = new FilterSettings();
-
         // Add times
-        filterSettings.parseStartAndEnd(starttimeStr, endtimeStr);
+        filter.parseStartAndEnd(starttimeStr, endtimeStr);
 
         // Add base stations
-        filterSettings.parseBaseStations(baseStations);
+        filter.parseBaseStations(baseStations);
 
         // Add countries
-        filterSettings.parseCountries(countries);
+        filter.parseCountries(countries);
 
         // Add regions
-        filterSettings.parseRegions(regions);
+        filter.parseRegions(regions);
 
-        // Output stream
-        PrintStream out = System.out;
-        if (outFile != null) {
-            out = new PrintStream(outFile);
+        // Output stream        
+        if (outFile == null) {
+            out = System.out;            
         }
 
         // Message handler
-        messageHandler = new MessageHandler(filterSettings, out);
-        messageHandler.setDumpParsed(dumpParsed);
-
         // Add filters
         // Maybe insert downsampling filter
         if (downsampleRate > 0) {
-            messageHandler.getFilters().add(new DownSampleFilter(downsampleRate));
+            filters.add(new ReplayDownSampleFilter(downsampleRate));
         }
         if (doubletFiltering) {
-            messageHandler.getFilters().add(new DuplicateFilter());
+            filters.add(new ReplayDuplicateFilter());
         }
         if (expression != null) {
-            messageHandler.getFilters().add(new ExpressionFilter(expression));
+            filters.add(new ExpressionFilter(expression));
         }
         if (geometry != null) {
             LocationFilter locationFilter = new LocationFilter();
             Area a = getGeometry(geometry);
             locationFilter.addFilterGeometry(a.contains());
-            messageHandler.getFilters().add(locationFilter);
+            filters.add(locationFilter);
         }
 
         // Register handler
-        aisReader.registerPacketHandler(messageHandler);
+        aisReader.registerPacketHandler(this);
 
         // Start reader thread
         long start = System.currentTimeMillis();
@@ -180,20 +213,206 @@ public class AisFilter extends AbstractCommandLineTool {
                 break;
             }
             if (runtime > 0 && (System.currentTimeMillis() - start > runtime)) {
-                messageHandler.setStop(true);
+                stop = true;
                 aisReader.stopReader();
                 break;
             }
         }
     }
     
+    private PrintStream getNextOutputStram() {
+        if (outFile == null) {
+            throw new Error("No output stream and no out file argument given");
+        }
+        String filename;
+        if (splitSize == null) {
+            filename = outFile;
+        } else {
+            Path path = Paths.get(outFile);
+            filename = String.format("%06d", fileCounter++) + "." + path.getFileName();
+            Path dir = path.getParent();
+            if (dir != null) {
+                filename = dir + "/" + filename;
+            }
+        }
+        if (compress) {
+            filename += ".gz";
+        }
+        try {
+            if (!compress) {
+                return new PrintStream(filename);
+            } else {
+                return new PrintStream(new GZIPOutputStream(new FileOutputStream(filename)));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to open output file: " + filename, e);
+        }        
+    }
+    
+    @Override
+    public void accept(AisPacket packet) {        
+        if (out == null) {
+            // Open new output stream
+            out = getNextOutputStram();
+        }
+        
+        end = System.currentTimeMillis();
+        if (start == 0) {
+            start = end;
+        }
+
+        for (IPacketFilter filter : filters) {
+            if (filter.rejectedByFilter(packet)) {
+                return;
+            }
+        }
+
+        Integer baseMMSI = -1;
+        String country = "";
+        String region = "";
+
+        Vdm vdm = packet.getVdm();
+        if (vdm == null) {
+            return;
+        }
+
+        // Get source tag properties
+        IProprietarySourceTag sourceTag = vdm.getSourceTag();
+        if (sourceTag != null) {
+            baseMMSI = sourceTag.getBaseMmsi();
+            if (sourceTag.getCountry() != null) {
+                country = sourceTag.getCountry().getTwoLetter();
+            }
+            if (sourceTag.getRegion() != null) {
+                region = sourceTag.getRegion();
+            }
+        }
+        if (region.equals("")) {
+            region = "0";
+        }
+
+        // Maybe check for start date
+        Date timestamp = vdm.getTimestamp();
+        if (filter.getStartDate() != null && timestamp != null) {
+            if (timestamp.before(filter.getStartDate())) {
+                return;
+            }
+        }
+
+        // Maybe check for end date
+        if (filter.getEndDate() != null && timestamp != null) {
+            if (timestamp.after(filter.getEndDate())) {
+                System.exit(0);
+            }
+        }
+
+        // Maybe check for base station MMSI
+        if (filter.getBaseStations().size() > 0) {
+            if (!filter.getBaseStations().contains(baseMMSI)) {
+                return;
+            }
+        }
+
+        // Maybe check for country
+        if (filter.getCountries().size() > 0) {
+            if (!filter.getCountries().contains(country)) {
+                return;
+            }
+        }
+
+        // Maybe check for region
+        if (filter.getRegions().size() > 0) {
+            if (!filter.getRegions().contains(region)) {
+                return;
+            }
+        }
+
+        if (stop) {
+            return;
+        }
+
+        // Count message
+        msgCount++;
+
+        // Print tag line packet
+        out.print(packet.getStringMessage() + "\r\n");
+        
+        // Count bytes
+        bytes += packet.getStringMessage().length() + 2;
+        currentFileBytes += packet.getStringMessage().length() + 2;
+
+        // Maybe print parsed
+        if (dumpParsed) {
+            if (timestamp != null) {
+                out.println("+ timetamp " + timestampFormat.format(timestamp));
+            }
+            if (vdm.getTags() != null) {
+                for (IProprietaryTag tag : vdm.getTags()) {
+                    out.println("+ " + tag.toString());
+                }
+            }
+            AisMessage aisMessage = packet.tryGetAisMessage();
+            if (aisMessage != null) {
+                out.println("+ " + aisMessage.toString());
+            } else {
+                out.println("+ AIS message could not be parsed");
+            }
+
+            // Check for binary message
+            if (aisMessage instanceof AisBinaryMessage) {
+                AisBinaryMessage binaryMessage = (AisBinaryMessage) aisMessage;
+                try {
+                    AisApplicationMessage appMessage = binaryMessage.getApplicationMessage();
+                    out.println(appMessage);
+                } catch (SixbitException e) {
+                }
+            }
+            out.println("---------------------------");
+        }
+        
+        // Maybe time for new outfile
+        if (splitSize != null && currentFileBytes >= splitSize) {            
+            out.close();
+            out = null;
+            currentFileBytes = 0;
+        }
+
+    }
+
+    public List<IPacketFilter> getFilters() {
+        return filters;
+    }
+
+    public void setDumpParsed(boolean dumpParsed) {
+        this.dumpParsed = dumpParsed;
+    }
+
+    public void setStop(boolean stop) {
+        this.stop = stop;
+    }
+
+    public void printStats() {
+        long elapsed = end - start;
+        double elapsedSecs = elapsed / 1000.0;
+        double msgPerMin = msgCount / (elapsedSecs / 60.0);
+        long kbytes = bytes / 1000;
+
+        DateFormat df = new SimpleDateFormat("HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+        System.out.println("\n");
+        System.out.println("Elapsed  : " + df.format(new Date(elapsed)));
+        System.out.println("Messages : " + msgCount);
+        System.out.println("Msg/min  : " + String.format(Locale.US, "%.2f", msgPerMin));
+        System.out.println("Msg/sec  : " + String.format(Locale.US, "%.2f", msgPerMin / 60.0));
+        System.out.println("KBytes   : " + kbytes);
+        System.out.println("KB/s     : " + String.format(Locale.US, "%.2f", kbytes / elapsedSecs));
+        System.out.println("Kbps     : " + String.format(Locale.US, "%.2f", kbytes * 8.0 / elapsedSecs));
+    }
+    
     @Override
     public void shutdown() {
-        MessageHandler mh = messageHandler;
-        if (mh != null) {
-            mh.setStop(true);
-            mh.printStats();
-        }
+        stop = true;
+        printStats();
     }
 
     private static Area getGeometry(String geometry) {
@@ -223,6 +442,8 @@ public class AisFilter extends AbstractCommandLineTool {
         System.out.println("\t-r        Recursive directory scan for files");
         System.out.println("\t-name     Glob pattern for files to read. '.zip' and '.gz' files are decompressed automatically");
         System.out.println("\t-o        Write output to file");
+        System.out.println("\t-split    Split into multiple output files with this maximum size in bytes, files will be postfixed with a running number");
+        System.out.println("\t-z        Compress output files with gzip");
         System.out.println("\t-timeout  TCP read timeout in seconds, default none");
         System.out.println("\t-bs       b1,...,bN comma separated list of base station MMSI's");
         System.out.println("\t-region   r1,...,rN comma separated list of regions");

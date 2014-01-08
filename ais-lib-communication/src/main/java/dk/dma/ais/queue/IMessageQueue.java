@@ -34,6 +34,14 @@ public interface IMessageQueue<T> {
      *             when capacity limit has been reached
      */
     int push(T content) throws MessageQueueOverflowException;
+    
+    /**
+     * Push the specified element on the queue, waiting if necessary for space to become availably
+     * @param content
+     * @return
+     * @throws InterruptedException
+     */
+    int put(T content) throws InterruptedException;
 
     /**
      * Pull message from the queue. This must be implemented as a blocking call.
