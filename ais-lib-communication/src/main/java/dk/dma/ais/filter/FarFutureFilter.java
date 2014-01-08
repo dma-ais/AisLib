@@ -17,7 +17,6 @@
 package dk.dma.ais.filter;
 
 import java.util.Date;
-
 import dk.dma.ais.packet.AisPacket;
 
 /**
