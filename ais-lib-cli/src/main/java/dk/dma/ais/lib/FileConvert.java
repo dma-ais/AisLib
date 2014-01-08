@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -89,6 +88,12 @@ public class FileConvert extends AbstractCommandLineTool {
         @SuppressWarnings("unchecked")
         final OutputStreamSink<AisPacket> sink = (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
         final LinkedList<IPacketFilter> filters = new LinkedList<>();
+        filters.add(new IPacketFilter() {
+            @Override
+            public boolean rejectedByFilter(AisPacket packet) {
+                return false;
+            }
+        });
 
         final long start = System.currentTimeMillis();
         final AtomicInteger count = new AtomicInteger();
@@ -135,7 +140,9 @@ public class FileConvert extends AbstractCommandLineTool {
                 
                 try (AisPacketReader apis = AisPacketReader
                         .createFromFile(path, true)) {
-                    
+                    /*
+                     * tested reading packets into a buffer before processing (no effect) 
+                     */
                     ArrayList<AisPacket> packets = new ArrayList<AisPacket>(128000);                  
                     while (true) {
                         try {
@@ -167,6 +174,8 @@ public class FileConvert extends AbstractCommandLineTool {
                         }
                     }
 
+                } finally {
+                    bos.close();
                 }
                 long ms = System.currentTimeMillis()
                         - start;
@@ -189,11 +198,7 @@ public class FileConvert extends AbstractCommandLineTool {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(FileConvert.getOutputSinks());
-//        
-//        FileConvert fc = new FileConvert();
-//        fc.execute(args);
-//        
-        
+        FileConvert fc = new FileConvert();
+        fc.execute(args);
     }
 }
