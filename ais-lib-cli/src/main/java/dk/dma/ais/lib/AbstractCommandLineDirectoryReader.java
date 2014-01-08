@@ -69,6 +69,6 @@ public abstract class AbstractCommandLineDirectoryReader extends AbstractCommand
      * whatever processing needs to be done
      * @param t
      */
-    abstract public void process(AisPacket t);
+    public abstract void process(AisPacket t);
 
 }
