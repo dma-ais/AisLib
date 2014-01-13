@@ -134,9 +134,9 @@ public class AisDirectoryReader extends AisReader {
 
                                 long estimatedNumberOfPacketsInFile;
                                 if (compressed) {
-                                    estimatedNumberOfPacketsInFile = (long) ((double) fileSize * 0.02354460042873);
+                                    estimatedNumberOfPacketsInFile = (long) ((double) fileSize * 0.030);
                                 } else {
-                                    estimatedNumberOfPacketsInFile = (long) ((double) fileSize * 0.00629701469914);
+                                    estimatedNumberOfPacketsInFile = (long) ((double) fileSize * 0.009);
                                 }
 
                                 LOG.debug("estimatedNumberOfPacketsInFile " + estimatedNumberOfPacketsInFile);
