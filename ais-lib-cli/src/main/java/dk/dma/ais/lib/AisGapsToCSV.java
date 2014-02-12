@@ -17,12 +17,20 @@
 package dk.dma.ais.lib;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +39,8 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketFilters;
+import dk.dma.enav.util.function.Predicate;
 
 /**
  * @author Jens Tuxen
@@ -40,43 +50,92 @@ public final class AisGapsToCSV extends AbstractCommandLineDirectoryReader {
     /** The logger. */
     static final Logger LOG = LoggerFactory.getLogger(AisGapsToCSV.class);
 
-    @Parameter(names = "-output", required = false, description = "output file path")
-    private String output = "gap.csv";
      
-    @Parameter(names = "-start", description = "Start date (inclusive), format == yyyy-MM-dd")
+    @Parameter(names = "-start", description = "Start date (inclusive), format == yyyy-MM-ddZ")
     private volatile Date start;
 
-    @Parameter(names = "-stop", description = "Stop date (exclusive), format == yyyy-MM-dd")
+    @Parameter(names = "-stop", description = "Stop date (exclusive), format == yyyy-MM-ddZ")
     private volatile Date stop;
     
-    private PrintWriter fos;
+    @Parameter(names = "-output")
+    private String output = ".";
     
+    @Parameter(names = "-filename", required = false, description = "output file path")
+    private String filename = new Date().toLocaleString()+"_GAP.csv";
+    
+    
+    @Parameter(names = "-sourceFilters", required = true, description = "List of sources to inspect")
+    private List<String> sourceFilters;
+    
+    private PrintWriter fos;
     private ConcurrentSkipListMap<Integer, Boolean> seconds = new ConcurrentSkipListMap<Integer, Boolean>();
     
+    private Predicate<AisPacket> sourceFiltersPredicate;
+
+
+
+    private ExecutorCompletionService<Void> completion;
     
     /* (non-Javadoc)
      * @see dk.dma.ais.lib.AbstractCommandLineDirectoryReader#run(com.google.inject.Injector)
      */
     @Override
-    protected void run(Injector injector) throws Exception {
-        
+    protected void run(Injector injector) throws Exception {        
         Integer startTime = (int) (start.getTime()/1000);
         Integer stopTime = (int) (stop.getTime()/1000);
         
-        fos = new PrintWriter(new BufferedWriter(new FileWriter(new File(output))));
+        fos = new PrintWriter(new BufferedWriter(new FileWriter(Paths.get(output,filename).toFile())));
         
         //initialize a very big collection of seconds
+        LOGGER.debug("Initializing HashMap");
         for (int i=startTime; i< stopTime; i++) {
             seconds.put(i,false);
         }
         
-        LOGGER.debug("Initialized HashMap");
+        sourceFiltersPredicate = AisPacketFilters.filterOnSourceId(sourceFilters.toArray(new String[0]));
         
+        //create a service to consume the aispackets: use minimum 1 cpu and at most ALL_CPUS-1
+        ExecutorService service = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()-1));
+        //ExecutorService service = Executors.newSingleThreadExecutor();
+        completion = new ExecutorCompletionService<>(service);
+        
+        Thread results = new Thread(new Runnable() {
+            
+            @Override
+            public void run() {
+                Logger log = LoggerFactory.getLogger(Thread.class);
+                long start = System.currentTimeMillis();
+                final AtomicInteger count = new AtomicInteger();
+                while(true) {
+                    try {
+                        Future<Void> result = completion.poll(10, TimeUnit.SECONDS);
+                        if (result == null) break;
+                        
+                        long ms = System.currentTimeMillis() - start;
+                        if (count.incrementAndGet() % 1000000 == 0) {
+                            log.info(count.get()
+                                    + " packets,  " + count.get()
+                                    / ((double) ms / 1000)
+                                    + " packets/s");
+                        }
+                        
+                        
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                
+            }
+        });
+        results.start();
+        
+        //start the reading (blocks until done)
         super.run(injector);
         
         
         for (Entry<Integer, Boolean> entry : seconds.entrySet()) {
-            System.out.println(entry.getKey().toString()+","+entry.getValue().toString());
+            //System.out.println(entry.getKey().toString()+","+entry.getValue().toString());
             fos.write(entry.getKey().toString()+","+entry.getValue().toString()+"\n");
         }
         
@@ -92,17 +151,29 @@ public final class AisGapsToCSV extends AbstractCommandLineDirectoryReader {
         new AisGapsToCSV().execute(args);
     }
 
-
-    /* (non-Javadoc)
-     * @see dk.dma.ais.lib.AbstractCommandLineDirectoryReader#process(dk.dma.ais.packet.AisPacket)
-     */
     @Override
-    public void process(AisPacket t) {
-        if (t != null && t.getBestTimestamp() > 0) {
-            //seconds.put((int) (t.getBestTimestamp()/1000),true);
-            seconds.remove((int) (t.getBestTimestamp()/1000));
-        }
-        
+    public void accept(final AisPacket t) {
+        //submit tasks for completion (result is a Void object since we're manipulating a common ConcurrentSkipListMap)
+        completion.submit(new Callable<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                final long timestamp = t.getBestTimestamp()/1000;
+                if (t != null && sourceFiltersPredicate.test(t) && timestamp > 0) {
+                    //seconds.put((int) (t.getBestTimestamp()/1000),true);
+                    seconds.remove((int) timestamp);
+                }
+                
+
+                return null;
+            }
+        });
+
     }
+    
+    
+
+    
+    
 
 }
