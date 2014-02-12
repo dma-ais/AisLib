@@ -23,6 +23,7 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.reader.AisDirectoryReader;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.commons.app.AbstractCommandLineTool;
@@ -32,7 +33,7 @@ import dk.dma.enav.util.function.Consumer;
  * @author Jens Tuxen
  *
  */
-public abstract class AbstractCommandLineDirectoryReader extends AbstractCommandLineTool implements Consumer<AisPacket> {
+public abstract class AbstractCommandLineDirectoryReader extends AbstractCommandLineTool implements Consumer<AisPacket>{
     
     /** The logger. */
     static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommandLineDirectoryReader.class);
@@ -44,7 +45,7 @@ public abstract class AbstractCommandLineDirectoryReader extends AbstractCommand
     @Parameter(names = "-pattern", description = "filepattern to look for")
     protected String pattern = "*";
 
-    protected AisReader aisDirectoryReader;
+    private AisReader aisDirectoryReader;
 
     /* (non-Javadoc)
      * @see dk.dma.commons.app.AbstractDmaApplication#run(com.google.inject.Injector)
@@ -56,19 +57,6 @@ public abstract class AbstractCommandLineDirectoryReader extends AbstractCommand
         aisDirectoryReader.start();
         aisDirectoryReader.join();
     }
-    
-    /* (non-Javadoc)
-     * @see dk.dma.enav.util.function.Consumer#accept(java.lang.Object)
-     */
-    @Override
-    public void accept(AisPacket t) {
-        this.process(t);
-    }
 
-    /**
-     * whatever processing needs to be done
-     * @param t
-     */
-    public abstract void process(AisPacket t);
 
 }
