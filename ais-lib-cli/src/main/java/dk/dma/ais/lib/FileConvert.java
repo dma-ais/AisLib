@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
-import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketOutputSinks;
 import dk.dma.ais.packet.AisPacketReader;
@@ -43,7 +42,7 @@ import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.EConsumer;
 
 /**
- * Converts a set of files into another sink format 
+ * Converts a set of files into another sink format
  * 
  * @author Jens Tuxen
  * 
@@ -66,17 +65,22 @@ public class FileConvert extends AbstractCommandLineTool {
 
     @Parameter(names = "-fileEnding", required = false, description = "File ending")
     String fileEnding = ".txt";
-    
+
     @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
-    
-    
+
+    /**
+     * getOutputSinks
+     * 
+     * @return
+     */
     static final List<String> getOutputSinks() {
         LinkedList<String> methods = new LinkedList<String>();
-        Field[] declaredMethods = AisPacketOutputSinks.class.getDeclaredFields();
-        for (Field m: declaredMethods) {
+        Field[] declaredMethods = AisPacketOutputSinks.class
+                .getDeclaredFields();
+        for (Field m : declaredMethods) {
             if (m.getName().startsWith("OUTPUT")) {
-                methods.add(m.getName());   
+                methods.add(m.getName());
             }
         }
         return methods;
@@ -94,13 +98,13 @@ public class FileConvert extends AbstractCommandLineTool {
         final EConsumer<String> consumer = new EConsumer<String>() {
             
             public void process(BufferedOutputStream bos, AisPacket p) throws IOException {
-                sink.process(bos, p, count.get());
+                sink.process(bos, p, count.getAndIncrement());
             }
 
             @Override
             public void accept(String s) throws IOException {
                 Path path = Paths.get(s);
-                System.out.println("Started processing file " + path);
+                LOG.debug("Started processing file " + path);
 
                 Path endPath;
                 if (keepFileStructure) {
@@ -127,52 +131,33 @@ public class FileConvert extends AbstractCommandLineTool {
                 
                 try (AisPacketReader apis = AisPacketReader
                         .createFromFile(path, true)) {
-                    /*
-                     * tested reading packets into a buffer before processing (no effect) 
-                     */
-                    ArrayList<AisPacket> packets = new ArrayList<AisPacket>(128000);                  
-                    while (true) {
-                        try {
-                            AisPacket p = null;
-                            for (int i = 0; i< 128000; i++) {
-                                count.incrementAndGet();
-                                p = apis.readPacket();
-                                if (p == null) {
-                                    break;
-                                } else {
-                                    packets.add(p);
-                                }
-                            }
-                            
-                            for (AisPacket aisPacket : packets) {
-                                process(bos, aisPacket);
-                            }
-                            packets.clear();
-                            
-                            if (p == null) {
-                                bos.close();
-                                break;
-                                
-                            }
-
-                        } catch (Exception e) {
-                            System.out.println("failed to read packet: "
-                                            + e.getMessage());
+                                      
+                    while (true) {            
+                        AisPacket p = null;
+                        p = apis.readPacket();
+                        if (p == null) {
+                            break;
                         }
+                        process(bos, p);
                     }
 
+                } catch (IOException e) {
+                    //continue, but log error
+                    LOG.error(e.toString());
+                    //throw e;
+                    
                 } finally {
                     bos.close();
                 }
                 long ms = System.currentTimeMillis()
                         - start;
                 
-                System.out.println(count.get()
+                LOG.debug(count.get()
                         + " packets,  " + count.get()
                         / ((double) ms / 1000)
                         + " packets/s");
                 
-                System.out.println("Finished processing file, " + count
+                LOG.debug("Finished processing file, " + count
                         + " packets was imported in total. Current Path: " + path);
 
             }
