@@ -26,6 +26,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -152,10 +160,6 @@ public class FileConvert extends AbstractCommandLineTool {
                 long ms = System.currentTimeMillis()
                         - start;
                 
-                LOG.debug(count.get()
-                        + " packets,  " + count.get()
-                        / ((double) ms / 1000)
-                        + " packets/s");
                 
                 LOG.debug("Finished processing file, " + count
                         + " packets was imported in total. Current Path: " + path);
@@ -164,9 +168,27 @@ public class FileConvert extends AbstractCommandLineTool {
 
         };
         
-        for (String s: sources) {
-            consumer.accept(s);
-        }   
+        /* Creates a pool of executors, 4 threads.
+         * Each thread will open a file using an aispacket reader, 10000 files can be submitted to the queue (memory limit)
+         * Afterwards, the calling thread will execute the job instead.
+         */
+        ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10000),new ThreadPoolExecutor.CallerRunsPolicy());
+        for (final String s: sources) {
+            threadpoolexecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        consumer.accept(s);
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    
+                }
+            });
+        }
+        
+        threadpoolexecutor.awaitTermination(999, TimeUnit.DAYS);
     }
 
     public static void main(String[] args) throws Exception {
