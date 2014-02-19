@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,136 +45,109 @@ import dk.dma.enav.util.function.Predicate;
 
 /**
  * @author Jens Tuxen
- *
+ * 
  */
 public final class AisGapsToCSV extends AbstractCommandLineDirectoryReader {
     /** The logger. */
     static final Logger LOG = LoggerFactory.getLogger(AisGapsToCSV.class);
 
-     
     @Parameter(names = "-start", description = "Start date (inclusive), format == yyyy-MM-ddZ")
     private volatile Date start;
 
     @Parameter(names = "-stop", description = "Stop date (exclusive), format == yyyy-MM-ddZ")
     private volatile Date stop;
-    
+
     @Parameter(names = "-output")
     private String output = ".";
-    
+
     @Parameter(names = "-filename", required = false, description = "output file path")
-    private String filename = new Date().toLocaleString()+"_GAP.csv";
-    
-    
-    @Parameter(names = "-sourceFilters", required = true, description = "List of sources to inspect")
+    private String filename = new Date().toLocaleString() + "_GAP.csv";
+
+    @Parameter(names = "-sourceFilters", required = false, description = "List of sources to inspect")
     private List<String> sourceFilters;
-    
+
     private PrintWriter fos;
     private ConcurrentSkipListMap<Integer, Boolean> seconds = new ConcurrentSkipListMap<Integer, Boolean>();
-    
+
     private Predicate<AisPacket> sourceFiltersPredicate;
 
+    /**
+     * start time of first processed packet
+     */
+    Long startTime;
+    public Long getStartTime() {
+        if (startTime == null) {
+            startTime = System.currentTimeMillis();
+        }
+        return startTime;
+    }
 
-
-    private ExecutorCompletionService<Void> completion;
+    private final AtomicInteger count = new AtomicInteger();
     
-    /* (non-Javadoc)
-     * @see dk.dma.ais.lib.AbstractCommandLineDirectoryReader#run(com.google.inject.Injector)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * dk.dma.ais.lib.AbstractCommandLineDirectoryReader#run(com.google.inject
+     * .Injector)
      */
     @Override
-    protected void run(Injector injector) throws Exception {        
-        Integer startTime = (int) (start.getTime()/1000);
-        Integer stopTime = (int) (stop.getTime()/1000);
-        
-        fos = new PrintWriter(new BufferedWriter(new FileWriter(Paths.get(output,filename).toFile())));
-        
-        //initialize a very big collection of seconds
-        LOGGER.debug("Initializing HashMap");
-        for (int i=startTime; i< stopTime; i++) {
-            seconds.put(i,false);
+    protected void run(Injector injector) throws Exception {
+        Integer startTime = (int) (start.getTime() / 1000);
+        Integer stopTime = (int) (stop.getTime() / 1000);
+
+        fos = new PrintWriter(new BufferedWriter(new FileWriter(Paths.get(
+                output, filename).toFile())));
+
+        // initialize a very big collection of seconds
+        LOG.debug("Initializing HashMap");
+        for (int i = startTime; i < stopTime; i++) {
+            seconds.put(i, false);
         }
-        
-        sourceFiltersPredicate = AisPacketFilters.filterOnSourceId(sourceFilters.toArray(new String[0]));
-        
-        //create a service to consume the aispackets: use minimum 1 cpu and at most ALL_CPUS-1
-        ExecutorService service = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()-1));
-        //ExecutorService service = Executors.newSingleThreadExecutor();
-        completion = new ExecutorCompletionService<>(service);
-        
-        Thread results = new Thread(new Runnable() {
-            
-            @Override
-            public void run() {
-                Logger log = LoggerFactory.getLogger(Thread.class);
-                long start = System.currentTimeMillis();
-                final AtomicInteger count = new AtomicInteger();
-                while(true) {
-                    try {
-                        Future<Void> result = completion.poll(10, TimeUnit.SECONDS);
-                        if (result == null) break;
-                        
-                        long ms = System.currentTimeMillis() - start;
-                        if (count.incrementAndGet() % 1000000 == 0) {
-                            log.info(count.get()
-                                    + " packets,  " + count.get()
-                                    / ((double) ms / 1000)
-                                    + " packets/s");
-                        }
-                        
-                        
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-                
-            }
-        });
-        results.start();
-        
-        //start the reading (blocks until done)
+        LOG.debug("Initialized HashMap");
+
+        if (sourceFilters != null) {
+            sourceFiltersPredicate = AisPacketFilters
+                    .filterOnSourceId(sourceFilters.toArray(new String[0]));
+        }
+
+        // start the reading (blocks until done)
+        LOG.debug("Starting Directory Reader");
         super.run(injector);
-        
-        
+
+        LOG.debug("Writing CSV file");
         for (Entry<Integer, Boolean> entry : seconds.entrySet()) {
-            //System.out.println(entry.getKey().toString()+","+entry.getValue().toString());
-            fos.write(entry.getKey().toString()+","+entry.getValue().toString()+"\n");
+            fos.write(entry.getKey().toString() + ","
+                    + entry.getValue().toString() + "\n");
         }
-        
-        fos.close();
     }
-    
+
     /**
      * @param args
-     * @throws Exception 
+     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-
         new AisGapsToCSV().execute(args);
     }
 
     @Override
     public void accept(final AisPacket t) {
-        //submit tasks for completion (result is a Void object since we're manipulating a common ConcurrentSkipListMap)
-        completion.submit(new Callable<Void>() {
-
-            @Override
-            public Void call() throws Exception {
-                final long timestamp = t.getBestTimestamp()/1000;
-                if (t != null && sourceFiltersPredicate.test(t) && timestamp > 0) {
-                    //seconds.put((int) (t.getBestTimestamp()/1000),true);
-                    seconds.remove((int) timestamp);
-                }
-                
-
-                return null;
+        Integer totalPackets = count.incrementAndGet();
+        if (totalPackets % 100000 == 0) {
+            Long start = getStartTime();
+            Long ms = System.currentTimeMillis() - start;
+            LOG.debug("Total Packets: "+totalPackets+" "+(totalPackets / ((double)ms / 1000))+ " packets/s");
+        }
+        
+        final long timestamp = t.getBestTimestamp() / 1000;
+        if (t != null && timestamp > 0) {
+            if (sourceFiltersPredicate != null && !sourceFiltersPredicate.test(t)) {
+                return;
             }
-        });
+            seconds.remove((int) timestamp);
+        }
 
     }
-    
-    
 
-    
-    
 
 }
