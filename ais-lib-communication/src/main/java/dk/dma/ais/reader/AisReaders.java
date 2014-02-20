@@ -196,8 +196,12 @@ public class AisReaders {
         if (filename.endsWith(".gz")) {
             in = new GZIPInputStream(in);
         } else if (filename.endsWith(".zip")) {
+            // TODO: currently only reads the first zip entry
             in = new ZipInputStream(in);
+            ((ZipInputStream)in).getNextEntry();            
         }
+        
+        
         return in;
     }
     
