@@ -23,15 +23,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -100,7 +94,7 @@ public class FileConvert extends AbstractCommandLineTool {
         @SuppressWarnings("unchecked")
         final OutputStreamSink<AisPacket> sink = (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
 
-        final long start = System.currentTimeMillis();
+        //final long start = System.currentTimeMillis();
         final AtomicInteger count = new AtomicInteger();
         
         final EConsumer<String> consumer = new EConsumer<String>() {
@@ -157,8 +151,7 @@ public class FileConvert extends AbstractCommandLineTool {
                 } finally {
                     bos.close();
                 }
-                long ms = System.currentTimeMillis()
-                        - start;
+                //long ms = System.currentTimeMillis() - start;
                 
                 
                 LOG.debug("Finished processing file, " + count

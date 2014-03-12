@@ -23,7 +23,6 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.reader.AisDirectoryReader;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.commons.app.AbstractCommandLineTool;
