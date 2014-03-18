@@ -6,3 +6,5 @@ target
 *.tokens
 ais-lib-communication/aisbus.xml
 *~
+.idea
+
