@@ -86,9 +86,12 @@ public class AisDirectoryReader extends AisReader {
                 try (InputStream in = AisReaders.createFileInputStream(file.toString())) {
                     LOG.debug("Reading packets from file " + file.getFileName().toString());
                     readLoop(in);
+                    LOG.debug("Completed reading packets from file " + file.getFileName().toString());
                 }
             }
         }.iterate();
+
+        LOG.debug("No more files to read.");
         done = true;
     }
 
