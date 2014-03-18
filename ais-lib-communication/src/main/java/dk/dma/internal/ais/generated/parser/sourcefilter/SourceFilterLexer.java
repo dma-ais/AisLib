@@ -1,18 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Authority
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Generated from SourceFilter.g4 by ANTLR 4.2
 package dk.dma.internal.ais.generated.parser.sourcefilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -29,20 +15,20 @@ public class SourceFilterLexer extends Lexer {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__7=1, T__6=2, T__5=3, T__4=4, T__3=5, T__2=6, T__1=7, T__0=8, EQUALS=9, 
-		NEQUALS=10, WS=11, AND=12, OR=13, ID=14;
+		T__9=1, T__8=2, T__7=3, T__6=4, T__5=5, T__4=6, T__3=7, T__2=8, T__1=9, 
+		T__0=10, EQUALS=11, NEQUALS=12, WS=13, AND=14, OR=15, ID=16;
 	public static String[] modeNames = {
 		"DEFAULT_MODE"
 	};
 
 	public static final String[] tokenNames = {
 		"<INVALID>",
-		"'country'", "'id'", "'('", "')'", "'bs'", "'region'", "','", "'type'", 
-		"'='", "'!='", "WS", "'&'", "'|'", "ID"
+		"'bs'", "'country'", "'id'", "'messagetype'", "'type'", "'mmsi'", "'('", 
+		"'region'", "')'", "','", "'='", "'!='", "WS", "'&'", "'|'", "ID"
 	};
 	public static final String[] ruleNames = {
-		"T__7", "T__6", "T__5", "T__4", "T__3", "T__2", "T__1", "T__0", "EQUALS", 
-		"NEQUALS", "WS", "AND", "OR", "ID"
+		"T__9", "T__8", "T__7", "T__6", "T__5", "T__4", "T__3", "T__2", "T__1", 
+		"T__0", "EQUALS", "NEQUALS", "WS", "AND", "OR", "ID"
 	};
 
 
@@ -61,48 +47,43 @@ public class SourceFilterLexer extends Lexer {
 	public String[] getRuleNames() { return ruleNames; }
 
 	@Override
+	public String getSerializedATN() { return _serializedATN; }
+
+	@Override
 	public String[] getModeNames() { return modeNames; }
 
 	@Override
 	public ATN getATN() { return _ATN; }
 
-	@Override
-	public void action(RuleContext _localctx, int ruleIndex, int actionIndex) {
-		switch (ruleIndex) {
-		case 10: WS_action((RuleContext)_localctx, actionIndex); break;
-		}
-	}
-	private void WS_action(RuleContext _localctx, int actionIndex) {
-		switch (actionIndex) {
-		case 0: skip();  break;
-		}
-	}
-
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\2\20T\b\1\4\2\t\2\4"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\2\22i\b\1\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
-		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\3\2\3\2\3\2\3\2\3\2\3\2\3\2\3"+
-		"\2\3\3\3\3\3\3\3\4\3\4\3\5\3\5\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\7\3\7"+
-		"\3\b\3\b\3\t\3\t\3\t\3\t\3\t\3\n\3\n\3\13\3\13\3\13\3\f\6\fF\n\f\r\f\16"+
-		"\fG\3\f\3\f\3\r\3\r\3\16\3\16\3\17\6\17Q\n\17\r\17\16\17R\2\20\3\3\1\5"+
-		"\4\1\7\5\1\t\6\1\13\7\1\r\b\1\17\t\1\21\n\1\23\13\1\25\f\1\27\r\2\31\16"+
-		"\1\33\17\1\35\20\1\3\2\4\4\2\13\13\"\"\5\2\62;C\\c|U\2\3\3\2\2\2\2\5\3"+
-		"\2\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13\3\2\2\2\2\r\3\2\2\2\2\17\3\2\2\2\2"+
-		"\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2\2\2\27\3\2\2\2\2\31\3\2\2\2\2\33\3"+
-		"\2\2\2\2\35\3\2\2\2\3\37\3\2\2\2\5\'\3\2\2\2\7*\3\2\2\2\t,\3\2\2\2\13"+
-		".\3\2\2\2\r\61\3\2\2\2\178\3\2\2\2\21:\3\2\2\2\23?\3\2\2\2\25A\3\2\2\2"+
-		"\27E\3\2\2\2\31K\3\2\2\2\33M\3\2\2\2\35P\3\2\2\2\37 \7e\2\2 !\7q\2\2!"+
-		"\"\7w\2\2\"#\7p\2\2#$\7v\2\2$%\7t\2\2%&\7{\2\2&\4\3\2\2\2\'(\7k\2\2()"+
-		"\7f\2\2)\6\3\2\2\2*+\7*\2\2+\b\3\2\2\2,-\7+\2\2-\n\3\2\2\2./\7d\2\2/\60"+
-		"\7u\2\2\60\f\3\2\2\2\61\62\7t\2\2\62\63\7g\2\2\63\64\7i\2\2\64\65\7k\2"+
-		"\2\65\66\7q\2\2\66\67\7p\2\2\67\16\3\2\2\289\7.\2\29\20\3\2\2\2:;\7v\2"+
-		"\2;<\7{\2\2<=\7r\2\2=>\7g\2\2>\22\3\2\2\2?@\7?\2\2@\24\3\2\2\2AB\7#\2"+
-		"\2BC\7?\2\2C\26\3\2\2\2DF\t\2\2\2ED\3\2\2\2FG\3\2\2\2GE\3\2\2\2GH\3\2"+
-		"\2\2HI\3\2\2\2IJ\b\f\2\2J\30\3\2\2\2KL\7(\2\2L\32\3\2\2\2MN\7~\2\2N\34"+
-		"\3\2\2\2OQ\t\3\2\2PO\3\2\2\2QR\3\2\2\2RP\3\2\2\2RS\3\2\2\2S\36\3\2\2\2"+
-		"\5\2GR";
+		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\3\2\3\2\3"+
+		"\2\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\4\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5"+
+		"\3\5\3\5\3\5\3\5\3\5\3\5\3\6\3\6\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\b\3"+
+		"\b\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\n\3\n\3\13\3\13\3\f\3\f\3\r\3\r\3\r\3"+
+		"\16\6\16[\n\16\r\16\16\16\\\3\16\3\16\3\17\3\17\3\20\3\20\3\21\6\21f\n"+
+		"\21\r\21\16\21g\2\2\22\3\3\5\4\7\5\t\6\13\7\r\b\17\t\21\n\23\13\25\f\27"+
+		"\r\31\16\33\17\35\20\37\21!\22\3\2\4\4\2\13\13\"\"\5\2\62;C\\c|j\2\3\3"+
+		"\2\2\2\2\5\3\2\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13\3\2\2\2\2\r\3\2\2\2\2"+
+		"\17\3\2\2\2\2\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2\2\2\27\3\2\2\2\2\31\3"+
+		"\2\2\2\2\33\3\2\2\2\2\35\3\2\2\2\2\37\3\2\2\2\2!\3\2\2\2\3#\3\2\2\2\5"+
+		"&\3\2\2\2\7.\3\2\2\2\t\61\3\2\2\2\13=\3\2\2\2\rB\3\2\2\2\17G\3\2\2\2\21"+
+		"I\3\2\2\2\23P\3\2\2\2\25R\3\2\2\2\27T\3\2\2\2\31V\3\2\2\2\33Z\3\2\2\2"+
+		"\35`\3\2\2\2\37b\3\2\2\2!e\3\2\2\2#$\7d\2\2$%\7u\2\2%\4\3\2\2\2&\'\7e"+
+		"\2\2\'(\7q\2\2()\7w\2\2)*\7p\2\2*+\7v\2\2+,\7t\2\2,-\7{\2\2-\6\3\2\2\2"+
+		"./\7k\2\2/\60\7f\2\2\60\b\3\2\2\2\61\62\7o\2\2\62\63\7g\2\2\63\64\7u\2"+
+		"\2\64\65\7u\2\2\65\66\7c\2\2\66\67\7i\2\2\678\7g\2\289\7v\2\29:\7{\2\2"+
+		":;\7r\2\2;<\7g\2\2<\n\3\2\2\2=>\7v\2\2>?\7{\2\2?@\7r\2\2@A\7g\2\2A\f\3"+
+		"\2\2\2BC\7o\2\2CD\7o\2\2DE\7u\2\2EF\7k\2\2F\16\3\2\2\2GH\7*\2\2H\20\3"+
+		"\2\2\2IJ\7t\2\2JK\7g\2\2KL\7i\2\2LM\7k\2\2MN\7q\2\2NO\7p\2\2O\22\3\2\2"+
+		"\2PQ\7+\2\2Q\24\3\2\2\2RS\7.\2\2S\26\3\2\2\2TU\7?\2\2U\30\3\2\2\2VW\7"+
+		"#\2\2WX\7?\2\2X\32\3\2\2\2Y[\t\2\2\2ZY\3\2\2\2[\\\3\2\2\2\\Z\3\2\2\2\\"+
+		"]\3\2\2\2]^\3\2\2\2^_\b\16\2\2_\34\3\2\2\2`a\7(\2\2a\36\3\2\2\2bc\7~\2"+
+		"\2c \3\2\2\2df\t\3\2\2ed\3\2\2\2fg\3\2\2\2ge\3\2\2\2gh\3\2\2\2h\"\3\2"+
+		"\2\2\5\2\\g\3\b\2\2";
 	public static final ATN _ATN =
-		ATNSimulator.deserialize(_serializedATN.toCharArray());
+		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
 		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];
 		for (int i = 0; i < _ATN.getNumberOfDecisions(); i++) {

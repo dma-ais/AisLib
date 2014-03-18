@@ -15,6 +15,11 @@
  */
 package dk.dma.ais.packet;
 
+import dk.dma.ais.packet.AisPacketTags.SourceType;
+import dk.dma.enav.model.Country;
+import org.junit.Before;
+import org.junit.Test;
+
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBaseStation;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
@@ -23,12 +28,6 @@ import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceType;
 import static dk.dma.ais.packet.AisPacketFilters.parseSourceFilter;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import dk.dma.ais.packet.AisPacketTags.SourceType;
-import dk.dma.enav.model.Country;
 
 /**
  * 
@@ -113,6 +112,9 @@ public class AisPacketFiltersTest {
         assertTrue(parseSourceFilter("(id = AISD, SD) | (country = DNK, NLD)").test(p2));
         assertTrue(parseSourceFilter("country = NLD & region = 0").test(p2));
         assertTrue(parseSourceFilter("country = DNK | region = 3,4,ERER,0").test(p2));
+
+        assertTrue(parseSourceFilter("mmsi = 002191000").test(p2));
+        assertTrue(parseSourceFilter("messagetype = 23").test(p2));
 
         assertFalse(parseSourceFilter("country = DNK & bs =2190047 & type = SAT").test(p1));
         p1.getTags().setSourceType(SourceType.SATELLITE);

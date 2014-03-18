@@ -1,1 +1,8 @@
-java -cp .:/Users/kasperni/Downloads/antlr-4.1-complete.jar -jar /Users/kasperni/Downloads/antlr-4.1-complete.jar -no-listener -visitor -package dk.dma.internal.ais.generated.parser.sourcefilter SourceFilter.g4
+#!/bin/sh
+
+if [ -z "$ANTLR_HOME" ] ; then
+    echo "ANTLR_HOME not set."
+    exit;
+fi
+
+java -jar ${ANTLR_HOME}/antlr-4.2-complete.jar -no-listener -visitor -package dk.dma.internal.ais.generated.parser.sourcefilter SourceFilter.g4

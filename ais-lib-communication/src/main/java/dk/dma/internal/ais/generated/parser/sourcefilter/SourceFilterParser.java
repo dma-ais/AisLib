@@ -1,27 +1,22 @@
-/* Copyright (c) 2011 Danish Maritime Authority
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Generated from SourceFilter.g4 by ANTLR 4.2
 package dk.dma.internal.ais.generated.parser.sourcefilter;
-import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.FailedPredicateException;
+import org.antlr.v4.runtime.NoViableAltException;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class SourceFilterParser extends Parser {
@@ -29,11 +24,11 @@ public class SourceFilterParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__7=1, T__6=2, T__5=3, T__4=4, T__3=5, T__2=6, T__1=7, T__0=8, EQUALS=9, 
-		NEQUALS=10, WS=11, AND=12, OR=13, ID=14;
+		T__9=1, T__8=2, T__7=3, T__6=4, T__5=5, T__4=6, T__3=7, T__2=8, T__1=9, 
+		T__0=10, EQUALS=11, NEQUALS=12, WS=13, AND=14, OR=15, ID=16;
 	public static final String[] tokenNames = {
-		"<INVALID>", "'country'", "'id'", "'('", "')'", "'bs'", "'region'", "','", 
-		"'type'", "'='", "'!='", "WS", "'&'", "'|'", "ID"
+		"<INVALID>", "'bs'", "'country'", "'id'", "'messagetype'", "'type'", "'mmsi'", 
+		"'('", "'region'", "')'", "','", "'='", "'!='", "WS", "'&'", "'|'", "ID"
 	};
 	public static final int
 		RULE_prog = 0, RULE_expr = 1, RULE_equalityTest = 2, RULE_idList = 3;
@@ -51,6 +46,9 @@ public class SourceFilterParser extends Parser {
 	public String[] getRuleNames() { return ruleNames; }
 
 	@Override
+	public String getSerializedATN() { return _serializedATN; }
+
+	@Override
 	public ATN getATN() { return _ATN; }
 
 	public SourceFilterParser(TokenStream input) {
@@ -58,10 +56,10 @@ public class SourceFilterParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class ProgContext extends ParserRuleContext {
-		public TerminalNode EOF() { return getToken(SourceFilterParser.EOF, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
+		public TerminalNode EOF() { return getToken(SourceFilterParser.EOF, 0); }
 		public ProgContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -95,18 +93,14 @@ public class SourceFilterParser extends Parser {
 	}
 
 	public static class ExprContext extends ParserRuleContext {
-		public int _p;
-		public ExprContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
-		public ExprContext(ParserRuleContext parent, int invokingState, int _p) {
+		public ExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
-			this._p = _p;
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
 	 
 		public ExprContext() { }
 		public void copyFrom(ExprContext ctx) {
 			super.copyFrom(ctx);
-			this._p = ctx._p;
 		}
 	}
 	public static class SourceIdContext extends ExprContext {
@@ -137,46 +131,6 @@ public class SourceFilterParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class SourceRegionContext extends ExprContext {
-		public EqualityTestContext equalityTest() {
-			return getRuleContext(EqualityTestContext.class,0);
-		}
-		public IdListContext idList() {
-			return getRuleContext(IdListContext.class,0);
-		}
-		public SourceRegionContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitSourceRegion(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class SourceBasestationContext extends ExprContext {
-		public EqualityTestContext equalityTest() {
-			return getRuleContext(EqualityTestContext.class,0);
-		}
-		public IdListContext idList() {
-			return getRuleContext(IdListContext.class,0);
-		}
-		public SourceBasestationContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitSourceBasestation(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class SourceTypeContext extends ExprContext {
-		public EqualityTestContext equalityTest() {
-			return getRuleContext(EqualityTestContext.class,0);
-		}
-		public TerminalNode ID() { return getToken(SourceFilterParser.ID, 0); }
-		public SourceTypeContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitSourceType(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 	public static class ParensContext extends ExprContext {
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
@@ -185,6 +139,46 @@ public class SourceFilterParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitParens(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class SourceTypeContext extends ExprContext {
+		public TerminalNode ID() { return getToken(SourceFilterParser.ID, 0); }
+		public EqualityTestContext equalityTest() {
+			return getRuleContext(EqualityTestContext.class,0);
+		}
+		public SourceTypeContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitSourceType(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class MmsiContext extends ExprContext {
+		public IdListContext idList() {
+			return getRuleContext(IdListContext.class,0);
+		}
+		public EqualityTestContext equalityTest() {
+			return getRuleContext(EqualityTestContext.class,0);
+		}
+		public MmsiContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitMmsi(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class SourceRegionContext extends ExprContext {
+		public IdListContext idList() {
+			return getRuleContext(IdListContext.class,0);
+		}
+		public EqualityTestContext equalityTest() {
+			return getRuleContext(EqualityTestContext.class,0);
+		}
+		public SourceRegionContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitSourceRegion(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -203,87 +197,139 @@ public class SourceFilterParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	public static class SourceBasestationContext extends ExprContext {
+		public IdListContext idList() {
+			return getRuleContext(IdListContext.class,0);
+		}
+		public EqualityTestContext equalityTest() {
+			return getRuleContext(EqualityTestContext.class,0);
+		}
+		public SourceBasestationContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitSourceBasestation(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class AisMessagetypeContext extends ExprContext {
+		public IdListContext idList() {
+			return getRuleContext(IdListContext.class,0);
+		}
+		public EqualityTestContext equalityTest() {
+			return getRuleContext(EqualityTestContext.class,0);
+		}
+		public AisMessagetypeContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitAisMessagetype(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-	public final ExprContext expr(int _p) throws RecognitionException {
+	public final ExprContext expr() throws RecognitionException {
+		return expr(0);
+	}
+
+	private ExprContext expr(int _p) throws RecognitionException {
 		ParserRuleContext _parentctx = _ctx;
 		int _parentState = getState();
-		ExprContext _localctx = new ExprContext(_ctx, _parentState, _p);
+		ExprContext _localctx = new ExprContext(_ctx, _parentState);
 		ExprContext _prevctx = _localctx;
 		int _startState = 2;
-		enterRecursionRule(_localctx, RULE_expr);
+		enterRecursionRule(_localctx, 2, RULE_expr, _p);
 		int _la;
 		try {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(36);
+			setState(44);
 			switch (_input.LA(1)) {
-			case 2:
+			case 3:
 				{
 				_localctx = new SourceIdContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 
-				setState(12); match(2);
+				setState(12); match(3);
 				setState(13); equalityTest();
 				setState(14); idList();
 				}
 				break;
-			case 5:
+			case 1:
 				{
 				_localctx = new SourceBasestationContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(16); match(5);
+				setState(16); match(1);
 				setState(17); equalityTest();
 				setState(18); idList();
 				}
 				break;
-			case 1:
+			case 2:
 				{
 				_localctx = new SourceCountryContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(20); match(1);
+				setState(20); match(2);
 				setState(21); equalityTest();
 				setState(22); idList();
 				}
 				break;
-			case 8:
+			case 5:
 				{
 				_localctx = new SourceTypeContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(24); match(8);
+				setState(24); match(5);
 				setState(25); equalityTest();
 				setState(26); match(ID);
 				}
 				break;
-			case 6:
+			case 8:
 				{
 				_localctx = new SourceRegionContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(28); match(6);
+				setState(28); match(8);
 				setState(29); equalityTest();
 				setState(30); idList();
 				}
 				break;
-			case 3:
+			case 6:
+				{
+				_localctx = new MmsiContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(32); match(6);
+				setState(33); equalityTest();
+				setState(34); idList();
+				}
+				break;
+			case 4:
+				{
+				_localctx = new AisMessagetypeContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(36); match(4);
+				setState(37); equalityTest();
+				setState(38); idList();
+				}
+				break;
+			case 7:
 				{
 				_localctx = new ParensContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(32); match(3);
-				setState(33); expr(0);
-				setState(34); match(4);
+				setState(40); match(7);
+				setState(41); expr(0);
+				setState(42); match(9);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(43);
+			setState(51);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,1,_ctx);
 			while ( _alt!=2 && _alt!=-1 ) {
@@ -292,22 +338,22 @@ public class SourceFilterParser extends Parser {
 					_prevctx = _localctx;
 					{
 					{
-					_localctx = new OrAndContext(new ExprContext(_parentctx, _parentState, _p));
+					_localctx = new OrAndContext(new ExprContext(_parentctx, _parentState));
 					pushNewRecursionContext(_localctx, _startState, RULE_expr);
-					setState(38);
-					if (!(2 >= _localctx._p)) throw new FailedPredicateException(this, "2 >= $_p");
-					setState(39);
+					setState(46);
+					if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
+					setState(47);
 					((OrAndContext)_localctx).op = _input.LT(1);
 					_la = _input.LA(1);
 					if ( !(_la==AND || _la==OR) ) {
 						((OrAndContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 					}
 					consume();
-					setState(40); expr(3);
+					setState(48); expr(3);
 					}
 					} 
 				}
-				setState(45);
+				setState(53);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,1,_ctx);
 			}
@@ -343,7 +389,7 @@ public class SourceFilterParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(46);
+			setState(54);
 			_la = _input.LA(1);
 			if ( !(_la==EQUALS || _la==NEQUALS) ) {
 			_errHandler.recoverInline(this);
@@ -385,20 +431,20 @@ public class SourceFilterParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(48); match(ID);
-			setState(53);
+			setState(56); match(ID);
+			setState(61);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
 			while ( _alt!=2 && _alt!=-1 ) {
 				if ( _alt==1 ) {
 					{
 					{
-					setState(49); match(7);
-					setState(50); match(ID);
+					setState(57); match(10);
+					setState(58); match(ID);
 					}
 					} 
 				}
-				setState(55);
+				setState(63);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
 			}
@@ -423,30 +469,32 @@ public class SourceFilterParser extends Parser {
 	}
 	private boolean expr_sempred(ExprContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: return 2 >= _localctx._p;
+		case 0: return precpred(_ctx, 2);
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\20;\4\2\t\2\4\3\t"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\22C\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3"+
-		"\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\5\3\'\n\3"+
-		"\3\3\3\3\3\3\7\3,\n\3\f\3\16\3/\13\3\3\4\3\4\3\5\3\5\3\5\7\5\66\n\5\f"+
-		"\5\16\59\13\5\3\5\2\6\2\4\6\b\2\4\3\2\16\17\3\2\13\f=\2\n\3\2\2\2\4&\3"+
-		"\2\2\2\6\60\3\2\2\2\b\62\3\2\2\2\n\13\5\4\3\2\13\f\7\2\2\3\f\3\3\2\2\2"+
-		"\r\16\b\3\1\2\16\17\7\4\2\2\17\20\5\6\4\2\20\21\5\b\5\2\21\'\3\2\2\2\22"+
-		"\23\7\7\2\2\23\24\5\6\4\2\24\25\5\b\5\2\25\'\3\2\2\2\26\27\7\3\2\2\27"+
-		"\30\5\6\4\2\30\31\5\b\5\2\31\'\3\2\2\2\32\33\7\n\2\2\33\34\5\6\4\2\34"+
-		"\35\7\20\2\2\35\'\3\2\2\2\36\37\7\b\2\2\37 \5\6\4\2 !\5\b\5\2!\'\3\2\2"+
-		"\2\"#\7\5\2\2#$\5\4\3\2$%\7\6\2\2%\'\3\2\2\2&\r\3\2\2\2&\22\3\2\2\2&\26"+
-		"\3\2\2\2&\32\3\2\2\2&\36\3\2\2\2&\"\3\2\2\2\'-\3\2\2\2()\6\3\2\3)*\t\2"+
-		"\2\2*,\5\4\3\2+(\3\2\2\2,/\3\2\2\2-+\3\2\2\2-.\3\2\2\2.\5\3\2\2\2/-\3"+
-		"\2\2\2\60\61\t\3\2\2\61\7\3\2\2\2\62\67\7\20\2\2\63\64\7\t\2\2\64\66\7"+
-		"\20\2\2\65\63\3\2\2\2\669\3\2\2\2\67\65\3\2\2\2\678\3\2\2\28\t\3\2\2\2"+
-		"9\67\3\2\2\2\5&-\67";
+		"\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3"+
+		"\3\3\3\3\3\3\3\3\3\3\3\5\3/\n\3\3\3\3\3\3\3\7\3\64\n\3\f\3\16\3\67\13"+
+		"\3\3\4\3\4\3\5\3\5\3\5\7\5>\n\5\f\5\16\5A\13\5\3\5\2\3\4\6\2\4\6\b\2\4"+
+		"\3\2\20\21\3\2\r\16G\2\n\3\2\2\2\4.\3\2\2\2\68\3\2\2\2\b:\3\2\2\2\n\13"+
+		"\5\4\3\2\13\f\7\2\2\3\f\3\3\2\2\2\r\16\b\3\1\2\16\17\7\5\2\2\17\20\5\6"+
+		"\4\2\20\21\5\b\5\2\21/\3\2\2\2\22\23\7\3\2\2\23\24\5\6\4\2\24\25\5\b\5"+
+		"\2\25/\3\2\2\2\26\27\7\4\2\2\27\30\5\6\4\2\30\31\5\b\5\2\31/\3\2\2\2\32"+
+		"\33\7\7\2\2\33\34\5\6\4\2\34\35\7\22\2\2\35/\3\2\2\2\36\37\7\n\2\2\37"+
+		" \5\6\4\2 !\5\b\5\2!/\3\2\2\2\"#\7\b\2\2#$\5\6\4\2$%\5\b\5\2%/\3\2\2\2"+
+		"&\'\7\6\2\2\'(\5\6\4\2()\5\b\5\2)/\3\2\2\2*+\7\t\2\2+,\5\4\3\2,-\7\13"+
+		"\2\2-/\3\2\2\2.\r\3\2\2\2.\22\3\2\2\2.\26\3\2\2\2.\32\3\2\2\2.\36\3\2"+
+		"\2\2.\"\3\2\2\2.&\3\2\2\2.*\3\2\2\2/\65\3\2\2\2\60\61\f\4\2\2\61\62\t"+
+		"\2\2\2\62\64\5\4\3\5\63\60\3\2\2\2\64\67\3\2\2\2\65\63\3\2\2\2\65\66\3"+
+		"\2\2\2\66\5\3\2\2\2\67\65\3\2\2\289\t\3\2\29\7\3\2\2\2:?\7\22\2\2;<\7"+
+		"\f\2\2<>\7\22\2\2=;\3\2\2\2>A\3\2\2\2?=\3\2\2\2?@\3\2\2\2@\t\3\2\2\2A"+
+		"?\3\2\2\2\5.\65?";
 	public static final ATN _ATN =
-		ATNSimulator.deserialize(_serializedATN.toCharArray());
+		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
 		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];
 		for (int i = 0; i < _ATN.getNumberOfDecisions(); i++) {

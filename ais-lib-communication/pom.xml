@@ -79,9 +79,9 @@
       <version>2.2.7</version>
     </dependency>
     <dependency>
-      <groupId>dk.dma.3rdparty</groupId>
-      <artifactId>antlr-runtime</artifactId>
-      <version>4.1</version>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>4.2</version>
     </dependency>
   </dependencies>
 </project>

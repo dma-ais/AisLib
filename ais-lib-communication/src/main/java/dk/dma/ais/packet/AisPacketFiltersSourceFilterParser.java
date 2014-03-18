@@ -15,23 +15,6 @@
  */
 package dk.dma.ais.packet;
 
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBaseStation;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegion;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceType;
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.util.function.Predicate;
@@ -47,6 +30,23 @@ import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.Sour
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceIdContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceRegionContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceTypeContext;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBaseStation;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegion;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceType;
+import static java.util.Objects.requireNonNull;
 
 /**
  * 
@@ -129,6 +129,26 @@ class AisPacketFiltersSourceFilterParser {
         @Override
         public Predicate<AisPacket> visitSourceType(SourceTypeContext ctx) {
             return checkNegate(ctx.equalityTest(), filterOnSourceType(SourceType.fromString(ctx.ID().getText())));
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMmsi(@NotNull SourceFilterParser.MmsiContext ctx) {
+            return new Predicate<AisPacket>() {
+                @Override
+                public boolean test(AisPacket element) {
+                    return true;
+                }
+            };
+        }
+
+        @Override
+        public Predicate<AisPacket> visitAisMessagetype(@NotNull SourceFilterParser.AisMessagetypeContext ctx) {
+            return new Predicate<AisPacket>() {
+                @Override
+                public boolean test(AisPacket element) {
+                    return true;
+                }
+            };
         }
 
         public Predicate<AisPacket> checkNegate(EqualityTestContext context, Predicate<AisPacket> p) {
