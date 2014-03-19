@@ -8,7 +8,9 @@ expr:   'id' equalityTest idList      # sourceId
     |   'type' equalityTest ID        # sourceType
     |   'region' equalityTest idList  # sourceRegion
     
-    |   'm.mmsi' comparison ID        # m_mmsi
+    |   'm.mmsi' comparison ID        # comparesToInt
+    |   'm.mmsi' inList idList        # inIntList
+
     |   'messagetype' equalityTest idList  # AisMessagetype
     |   expr op=('&'|'|') expr      # OrAnd
     |   '(' expr ')'                # parens
@@ -16,8 +18,9 @@ expr:   'id' equalityTest idList      # sourceId
 
 equalityTest : '!='|'=';
 comparison : '!='|'='|'>'|'>='|'<='|'<' ;
+inList : '@' | 'in' | 'IN' ;
 
-idList : ID (',' ID)* ;
+idList : '('? ID (',' ID)* ')'? ;
 
 EQUALS :   '=' ;
 NEQUALS :   '!=' ;

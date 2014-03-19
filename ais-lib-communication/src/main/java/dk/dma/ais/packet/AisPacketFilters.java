@@ -191,29 +191,30 @@ public class AisPacketFilters {
 
     public enum Operator {EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_OR_EQUALS, GREATER_THAN, GREATER_THAN_OR_EQUALS};
 
-    public static Predicate<AisPacket> filterOnMmsi(final Operator operator, final int mmsi) {
+    private static boolean compare(int lhs, int rhs, Operator operator) {
+        switch (operator) {
+            case EQUALS:
+                return lhs == rhs;
+            case NOT_EQUALS:
+                return lhs != rhs;
+            case GREATER_THAN:
+                return lhs > rhs;
+            case GREATER_THAN_OR_EQUALS:
+                return lhs >= rhs;
+            case LESS_THAN:
+                return lhs < rhs;
+            case LESS_THAN_OR_EQUALS:
+                return lhs <= rhs;
+            default:
+                throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+        }
+    }
+
+    public static Predicate<AisPacket> filterOnMessageMmsi(final Operator operator, final int mmsi) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage != null) {
-                    switch (operator) {
-                        case EQUALS:
-                            return aisMessage.getUserId() == mmsi;
-                        case NOT_EQUALS:
-                            return aisMessage.getUserId() != mmsi;
-                        case GREATER_THAN:
-                            return aisMessage.getUserId() > mmsi;
-                        case GREATER_THAN_OR_EQUALS:
-                            return aisMessage.getUserId() >= mmsi;
-                        case LESS_THAN:
-                            return aisMessage.getUserId() < mmsi;
-                        case LESS_THAN_OR_EQUALS:
-                            return aisMessage.getUserId() <= mmsi;
-                        default:
-                            throw new IllegalArgumentException("Operator " + operator + " not yet implemented.");
-                    }
-                }
-                return false;
+                return aisMessage == null ? false : compare(aisMessage.getUserId(), mmsi, operator);
             }
             public String toString() {
                 return "mmsi = " + mmsi;
@@ -221,7 +222,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnMmsiInSet(final int... mmsis) {
+    public static Predicate<AisPacket> filterOnMessageMmsiInList(int... mmsis) {
         final int[] m = mmsis.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {

@@ -40,11 +40,11 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitComparison(@NotNull SourceFilterParser.ComparisonContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#m_mmsi}.
+	 * Visit a parse tree produced by {@link SourceFilterParser#comparesToInt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitM_mmsi(@NotNull SourceFilterParser.M_mmsiContext ctx);
+	T visitComparesToInt(@NotNull SourceFilterParser.ComparesToIntContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#idList}.
@@ -94,6 +94,20 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitOrAnd(@NotNull SourceFilterParser.OrAndContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#inList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInList(@NotNull SourceFilterParser.InListContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#inIntList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInIntList(@NotNull SourceFilterParser.InIntListContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#AisMessagetype}.
