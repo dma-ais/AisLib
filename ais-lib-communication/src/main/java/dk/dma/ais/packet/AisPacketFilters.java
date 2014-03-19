@@ -235,7 +235,24 @@ public class AisPacketFilters {
                 return pass;
             }
             public String toString() {
-                return "messageType = " + skipBrackets(Arrays.toString(m));
+                return "mmsi = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnMessageMmsiInRange(final int min, final int max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = false;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage != null) {
+                    int mmsi = aisMessage.getUserId();
+                    pass = mmsi >= min && mmsi <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "mmsi = " + min + ".." + max;
             }
         };
     }

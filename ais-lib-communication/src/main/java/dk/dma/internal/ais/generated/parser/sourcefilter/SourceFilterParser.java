@@ -23,19 +23,20 @@ public class SourceFilterParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__16=1, T__15=2, T__14=3, T__13=4, T__12=5, T__11=6, T__10=7, T__9=8, 
-		T__8=9, T__7=10, T__6=11, T__5=12, T__4=13, T__3=14, T__2=15, T__1=16, 
-		T__0=17, EQUALS=18, NEQUALS=19, WS=20, AND=21, OR=22, ID=23;
+		T__17=1, T__16=2, T__15=3, T__14=4, T__13=5, T__12=6, T__11=7, T__10=8, 
+		T__9=9, T__8=10, T__7=11, T__6=12, T__5=13, T__4=14, T__3=15, T__2=16, 
+		T__1=17, T__0=18, EQUALS=19, NEQUALS=20, WS=21, AND=22, OR=23, ID=24;
 	public static final String[] tokenNames = {
-		"<INVALID>", "'bs'", "'country'", "'id'", "'messagetype'", "'>='", "'<'", 
-		"'>'", "'@'", "'m.mmsi'", "'type'", "'<='", "'IN'", "'in'", "'('", "'region'", 
-		"')'", "','", "'='", "'!='", "WS", "'&'", "'|'", "ID"
+		"<INVALID>", "'bs'", "'country'", "'id'", "'messagetype'", "'>='", "'..'", 
+		"'<'", "'>'", "'@'", "'m.mmsi'", "'type'", "'<='", "'IN'", "'in'", "'('", 
+		"'region'", "')'", "','", "'='", "'!='", "WS", "'&'", "'|'", "ID"
 	};
 	public static final int
 		RULE_prog = 0, RULE_expr = 1, RULE_equalityTest = 2, RULE_comparison = 3, 
-		RULE_inList = 4, RULE_idList = 5;
+		RULE_inListOrRange = 4, RULE_idList = 5, RULE_idRange = 6;
 	public static final String[] ruleNames = {
-		"prog", "expr", "equalityTest", "comparison", "inList", "idList"
+		"prog", "expr", "equalityTest", "comparison", "inListOrRange", "idList", 
+		"idRange"
 	};
 
 	@Override
@@ -79,8 +80,8 @@ public class SourceFilterParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(12); expr(0);
-			setState(13); match(EOF);
+			setState(14); expr(0);
+			setState(15); match(EOF);
 			}
 		}
 		catch (RecognitionException re) {
@@ -215,13 +216,27 @@ public class SourceFilterParser extends Parser {
 		public IdListContext idList() {
 			return getRuleContext(IdListContext.class,0);
 		}
-		public InListContext inList() {
-			return getRuleContext(InListContext.class,0);
+		public InListOrRangeContext inListOrRange() {
+			return getRuleContext(InListOrRangeContext.class,0);
 		}
 		public InIntListContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitInIntList(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class InIntRangeContext extends ExprContext {
+		public IdRangeContext idRange() {
+			return getRuleContext(IdRangeContext.class,0);
+		}
+		public InListOrRangeContext inListOrRange() {
+			return getRuleContext(InListOrRangeContext.class,0);
+		}
+		public InIntRangeContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitInIntRange(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -256,7 +271,7 @@ public class SourceFilterParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(52);
+			setState(58);
 			switch ( getInterpreter().adaptivePredict(_input,0,_ctx) ) {
 			case 1:
 				{
@@ -264,9 +279,9 @@ public class SourceFilterParser extends Parser {
 				_ctx = _localctx;
 				_prevctx = _localctx;
 
-				setState(16); match(3);
-				setState(17); equalityTest();
-				setState(18); idList();
+				setState(18); match(3);
+				setState(19); equalityTest();
+				setState(20); idList();
 				}
 				break;
 
@@ -275,9 +290,9 @@ public class SourceFilterParser extends Parser {
 				_localctx = new SourceBasestationContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(20); match(1);
-				setState(21); equalityTest();
-				setState(22); idList();
+				setState(22); match(1);
+				setState(23); equalityTest();
+				setState(24); idList();
 				}
 				break;
 
@@ -286,9 +301,9 @@ public class SourceFilterParser extends Parser {
 				_localctx = new SourceCountryContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(24); match(2);
-				setState(25); equalityTest();
-				setState(26); idList();
+				setState(26); match(2);
+				setState(27); equalityTest();
+				setState(28); idList();
 				}
 				break;
 
@@ -297,9 +312,9 @@ public class SourceFilterParser extends Parser {
 				_localctx = new SourceTypeContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(28); match(10);
-				setState(29); equalityTest();
-				setState(30); match(ID);
+				setState(30); match(11);
+				setState(31); equalityTest();
+				setState(32); match(ID);
 				}
 				break;
 
@@ -308,9 +323,9 @@ public class SourceFilterParser extends Parser {
 				_localctx = new SourceRegionContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(32); match(15);
-				setState(33); equalityTest();
-				setState(34); idList();
+				setState(34); match(16);
+				setState(35); equalityTest();
+				setState(36); idList();
 				}
 				break;
 
@@ -319,9 +334,9 @@ public class SourceFilterParser extends Parser {
 				_localctx = new ComparesToIntContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(36); match(9);
-				setState(37); comparison();
-				setState(38); match(ID);
+				setState(38); match(10);
+				setState(39); comparison();
+				setState(40); match(ID);
 				}
 				break;
 
@@ -330,36 +345,47 @@ public class SourceFilterParser extends Parser {
 				_localctx = new InIntListContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(40); match(9);
-				setState(41); inList();
-				setState(42); idList();
+				setState(42); match(10);
+				setState(43); inListOrRange();
+				setState(44); idList();
 				}
 				break;
 
 			case 8:
 				{
-				_localctx = new AisMessagetypeContext(_localctx);
+				_localctx = new InIntRangeContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(44); match(4);
-				setState(45); equalityTest();
-				setState(46); idList();
+				setState(46); match(10);
+				setState(47); inListOrRange();
+				setState(48); idRange();
 				}
 				break;
 
 			case 9:
 				{
+				_localctx = new AisMessagetypeContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(50); match(4);
+				setState(51); equalityTest();
+				setState(52); idList();
+				}
+				break;
+
+			case 10:
+				{
 				_localctx = new ParensContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(48); match(14);
-				setState(49); expr(0);
-				setState(50); match(16);
+				setState(54); match(15);
+				setState(55); expr(0);
+				setState(56); match(17);
 				}
 				break;
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(59);
+			setState(65);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,1,_ctx);
 			while ( _alt!=2 && _alt!=-1 ) {
@@ -370,20 +396,20 @@ public class SourceFilterParser extends Parser {
 					{
 					_localctx = new OrAndContext(new ExprContext(_parentctx, _parentState));
 					pushNewRecursionContext(_localctx, _startState, RULE_expr);
-					setState(54);
+					setState(60);
 					if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
-					setState(55);
+					setState(61);
 					((OrAndContext)_localctx).op = _input.LT(1);
 					_la = _input.LA(1);
 					if ( !(_la==AND || _la==OR) ) {
 						((OrAndContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 					}
 					consume();
-					setState(56); expr(3);
+					setState(62); expr(3);
 					}
 					} 
 				}
-				setState(61);
+				setState(67);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,1,_ctx);
 			}
@@ -419,7 +445,7 @@ public class SourceFilterParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(62);
+			setState(68);
 			_la = _input.LA(1);
 			if ( !(_la==EQUALS || _la==NEQUALS) ) {
 			_errHandler.recoverInline(this);
@@ -457,9 +483,9 @@ public class SourceFilterParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(64);
+			setState(70);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 5) | (1L << 6) | (1L << 7) | (1L << 11) | (1L << EQUALS) | (1L << NEQUALS))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 5) | (1L << 7) | (1L << 8) | (1L << 12) | (1L << EQUALS) | (1L << NEQUALS))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
@@ -476,28 +502,28 @@ public class SourceFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class InListContext extends ParserRuleContext {
-		public InListContext(ParserRuleContext parent, int invokingState) {
+	public static class InListOrRangeContext extends ParserRuleContext {
+		public InListOrRangeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_inList; }
+		@Override public int getRuleIndex() { return RULE_inListOrRange; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitInList(this);
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitInListOrRange(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final InListContext inList() throws RecognitionException {
-		InListContext _localctx = new InListContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_inList);
+	public final InListOrRangeContext inListOrRange() throws RecognitionException {
+		InListOrRangeContext _localctx = new InListOrRangeContext(_ctx, getState());
+		enterRule(_localctx, 8, RULE_inListOrRange);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(66);
+			setState(72);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 8) | (1L << 12) | (1L << 13))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 9) | (1L << 13) | (1L << 14))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
@@ -538,36 +564,91 @@ public class SourceFilterParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(69);
+			setState(75);
 			_la = _input.LA(1);
-			if (_la==14) {
+			if (_la==15) {
 				{
-				setState(68); match(14);
+				setState(74); match(15);
 				}
 			}
 
-			setState(71); match(ID);
-			setState(76);
+			setState(77); match(ID);
+			setState(82);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,3,_ctx);
 			while ( _alt!=2 && _alt!=-1 ) {
 				if ( _alt==1 ) {
 					{
 					{
-					setState(72); match(17);
-					setState(73); match(ID);
+					setState(78); match(18);
+					setState(79); match(ID);
 					}
 					} 
 				}
-				setState(78);
+				setState(84);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,3,_ctx);
 			}
-			setState(80);
+			setState(86);
 			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 			case 1:
 				{
-				setState(79); match(16);
+				setState(85); match(17);
+				}
+				break;
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class IdRangeContext extends ParserRuleContext {
+		public List<TerminalNode> ID() { return getTokens(SourceFilterParser.ID); }
+		public TerminalNode ID(int i) {
+			return getToken(SourceFilterParser.ID, i);
+		}
+		public IdRangeContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_idRange; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SourceFilterVisitor ) return ((SourceFilterVisitor<? extends T>)visitor).visitIdRange(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final IdRangeContext idRange() throws RecognitionException {
+		IdRangeContext _localctx = new IdRangeContext(_ctx, getState());
+		enterRule(_localctx, 12, RULE_idRange);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(89);
+			_la = _input.LA(1);
+			if (_la==15) {
+				{
+				setState(88); match(15);
+				}
+			}
+
+			setState(91); match(ID);
+			setState(92); match(6);
+			setState(93); match(ID);
+			setState(95);
+			switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+			case 1:
+				{
+				setState(94); match(17);
 				}
 				break;
 			}
@@ -598,29 +679,32 @@ public class SourceFilterParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\31U\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\32d\4\2\t\2\4\3\t"+
+		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\3\2\3\2\3\2\3\3\3\3\3\3\3\3"+
 		"\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3"+
-		"\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\5\3\67\n\3\3\3"+
-		"\3\3\3\3\7\3<\n\3\f\3\16\3?\13\3\3\4\3\4\3\5\3\5\3\6\3\6\3\7\5\7H\n\7"+
-		"\3\7\3\7\3\7\7\7M\n\7\f\7\16\7P\13\7\3\7\5\7S\n\7\3\7\2\3\4\b\2\4\6\b"+
-		"\n\f\2\6\3\2\27\30\3\2\24\25\5\2\7\t\r\r\24\25\4\2\n\n\16\17Z\2\16\3\2"+
-		"\2\2\4\66\3\2\2\2\6@\3\2\2\2\bB\3\2\2\2\nD\3\2\2\2\fG\3\2\2\2\16\17\5"+
-		"\4\3\2\17\20\7\2\2\3\20\3\3\2\2\2\21\22\b\3\1\2\22\23\7\5\2\2\23\24\5"+
-		"\6\4\2\24\25\5\f\7\2\25\67\3\2\2\2\26\27\7\3\2\2\27\30\5\6\4\2\30\31\5"+
-		"\f\7\2\31\67\3\2\2\2\32\33\7\4\2\2\33\34\5\6\4\2\34\35\5\f\7\2\35\67\3"+
-		"\2\2\2\36\37\7\f\2\2\37 \5\6\4\2 !\7\31\2\2!\67\3\2\2\2\"#\7\21\2\2#$"+
-		"\5\6\4\2$%\5\f\7\2%\67\3\2\2\2&\'\7\13\2\2\'(\5\b\5\2()\7\31\2\2)\67\3"+
-		"\2\2\2*+\7\13\2\2+,\5\n\6\2,-\5\f\7\2-\67\3\2\2\2./\7\6\2\2/\60\5\6\4"+
-		"\2\60\61\5\f\7\2\61\67\3\2\2\2\62\63\7\20\2\2\63\64\5\4\3\2\64\65\7\22"+
-		"\2\2\65\67\3\2\2\2\66\21\3\2\2\2\66\26\3\2\2\2\66\32\3\2\2\2\66\36\3\2"+
-		"\2\2\66\"\3\2\2\2\66&\3\2\2\2\66*\3\2\2\2\66.\3\2\2\2\66\62\3\2\2\2\67"+
-		"=\3\2\2\289\f\4\2\29:\t\2\2\2:<\5\4\3\5;8\3\2\2\2<?\3\2\2\2=;\3\2\2\2"+
-		"=>\3\2\2\2>\5\3\2\2\2?=\3\2\2\2@A\t\3\2\2A\7\3\2\2\2BC\t\4\2\2C\t\3\2"+
-		"\2\2DE\t\5\2\2E\13\3\2\2\2FH\7\20\2\2GF\3\2\2\2GH\3\2\2\2HI\3\2\2\2IN"+
-		"\7\31\2\2JK\7\23\2\2KM\7\31\2\2LJ\3\2\2\2MP\3\2\2\2NL\3\2\2\2NO\3\2\2"+
-		"\2OR\3\2\2\2PN\3\2\2\2QS\7\22\2\2RQ\3\2\2\2RS\3\2\2\2S\r\3\2\2\2\7\66"+
-		"=GNR";
+		"\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3"+
+		"\3\3\3\3\5\3=\n\3\3\3\3\3\3\3\7\3B\n\3\f\3\16\3E\13\3\3\4\3\4\3\5\3\5"+
+		"\3\6\3\6\3\7\5\7N\n\7\3\7\3\7\3\7\7\7S\n\7\f\7\16\7V\13\7\3\7\5\7Y\n\7"+
+		"\3\b\5\b\\\n\b\3\b\3\b\3\b\3\b\5\bb\n\b\3\b\2\3\4\t\2\4\6\b\n\f\16\2\6"+
+		"\3\2\30\31\3\2\25\26\6\2\7\7\t\n\16\16\25\26\4\2\13\13\17\20k\2\20\3\2"+
+		"\2\2\4<\3\2\2\2\6F\3\2\2\2\bH\3\2\2\2\nJ\3\2\2\2\fM\3\2\2\2\16[\3\2\2"+
+		"\2\20\21\5\4\3\2\21\22\7\2\2\3\22\3\3\2\2\2\23\24\b\3\1\2\24\25\7\5\2"+
+		"\2\25\26\5\6\4\2\26\27\5\f\7\2\27=\3\2\2\2\30\31\7\3\2\2\31\32\5\6\4\2"+
+		"\32\33\5\f\7\2\33=\3\2\2\2\34\35\7\4\2\2\35\36\5\6\4\2\36\37\5\f\7\2\37"+
+		"=\3\2\2\2 !\7\r\2\2!\"\5\6\4\2\"#\7\32\2\2#=\3\2\2\2$%\7\22\2\2%&\5\6"+
+		"\4\2&\'\5\f\7\2\'=\3\2\2\2()\7\f\2\2)*\5\b\5\2*+\7\32\2\2+=\3\2\2\2,-"+
+		"\7\f\2\2-.\5\n\6\2./\5\f\7\2/=\3\2\2\2\60\61\7\f\2\2\61\62\5\n\6\2\62"+
+		"\63\5\16\b\2\63=\3\2\2\2\64\65\7\6\2\2\65\66\5\6\4\2\66\67\5\f\7\2\67"+
+		"=\3\2\2\289\7\21\2\29:\5\4\3\2:;\7\23\2\2;=\3\2\2\2<\23\3\2\2\2<\30\3"+
+		"\2\2\2<\34\3\2\2\2< \3\2\2\2<$\3\2\2\2<(\3\2\2\2<,\3\2\2\2<\60\3\2\2\2"+
+		"<\64\3\2\2\2<8\3\2\2\2=C\3\2\2\2>?\f\4\2\2?@\t\2\2\2@B\5\4\3\5A>\3\2\2"+
+		"\2BE\3\2\2\2CA\3\2\2\2CD\3\2\2\2D\5\3\2\2\2EC\3\2\2\2FG\t\3\2\2G\7\3\2"+
+		"\2\2HI\t\4\2\2I\t\3\2\2\2JK\t\5\2\2K\13\3\2\2\2LN\7\21\2\2ML\3\2\2\2M"+
+		"N\3\2\2\2NO\3\2\2\2OT\7\32\2\2PQ\7\24\2\2QS\7\32\2\2RP\3\2\2\2SV\3\2\2"+
+		"\2TR\3\2\2\2TU\3\2\2\2UX\3\2\2\2VT\3\2\2\2WY\7\23\2\2XW\3\2\2\2XY\3\2"+
+		"\2\2Y\r\3\2\2\2Z\\\7\21\2\2[Z\3\2\2\2[\\\3\2\2\2\\]\3\2\2\2]^\7\32\2\2"+
+		"^_\7\b\2\2_a\7\32\2\2`b\7\23\2\2a`\3\2\2\2ab\3\2\2\2b\17\3\2\2\2\t<CM"+
+		"TX[a";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

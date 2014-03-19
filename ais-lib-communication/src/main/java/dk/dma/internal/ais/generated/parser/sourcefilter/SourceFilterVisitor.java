@@ -40,6 +40,13 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitComparison(@NotNull SourceFilterParser.ComparisonContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#idRange}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdRange(@NotNull SourceFilterParser.IdRangeContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#comparesToInt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -75,6 +82,13 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitEqualityTest(@NotNull SourceFilterParser.EqualityTestContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#inListOrRange}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInListOrRange(@NotNull SourceFilterParser.InListOrRangeContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#sourceType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -96,18 +110,18 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitOrAnd(@NotNull SourceFilterParser.OrAndContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#inList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInList(@NotNull SourceFilterParser.InListContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#inIntList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitInIntList(@NotNull SourceFilterParser.InIntListContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#inIntRange}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInIntRange(@NotNull SourceFilterParser.InIntRangeContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#AisMessagetype}.

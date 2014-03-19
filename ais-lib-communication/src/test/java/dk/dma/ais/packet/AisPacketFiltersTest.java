@@ -161,6 +161,19 @@ public class AisPacketFiltersTest {
         assertFalse(parseSourceFilter("m.mmsi@211235170,002191000").test(p1));
         assertFalse(parseSourceFilter("m.mmsi @ (211235170,002191000)").test(p1));
         assertFalse(parseSourceFilter("m.mmsi@(211235170,002191000)").test(p1));
+
+        // Test in-range operator
+        assertTrue(parseSourceFilter("m.mmsi in 220431000..220431010").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi in 220430000..220432000").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi in 220430999..220431001").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi in 220431000..220431000").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi in 222430000..222430099").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi in 1..2").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi in 999999990..999999999").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi in (220430000..220432000)").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi @ (220430000..220432000)").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi @ 220430000..220432000").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi@220430000..220432000").test(p1));
     }
 
     @Test

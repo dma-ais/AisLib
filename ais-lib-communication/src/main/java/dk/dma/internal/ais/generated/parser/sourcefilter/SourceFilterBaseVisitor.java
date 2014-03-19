@@ -50,6 +50,14 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitIdRange(@NotNull SourceFilterParser.IdRangeContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitComparesToInt(@NotNull SourceFilterParser.ComparesToIntContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -90,6 +98,14 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitInListOrRange(@NotNull SourceFilterParser.InListOrRangeContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitSourceType(@NotNull SourceFilterParser.SourceTypeContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -114,7 +130,7 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitInList(@NotNull SourceFilterParser.InListContext ctx) { return visitChildren(ctx); }
+	@Override public T visitInIntList(@NotNull SourceFilterParser.InIntListContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -122,7 +138,7 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitInIntList(@NotNull SourceFilterParser.InIntListContext ctx) { return visitChildren(ctx); }
+	@Override public T visitInIntRange(@NotNull SourceFilterParser.InIntRangeContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

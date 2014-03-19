@@ -180,6 +180,13 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitInIntRange(@NotNull SourceFilterParser.InIntRangeContext ctx) {
+            int min = Integer.valueOf(ctx.idRange().ID().get(0).getText());
+            int max = Integer.valueOf(ctx.idRange().ID().get(1).getText());
+            return AisPacketFilters.filterOnMessageMmsiInRange(min,max);
+        }
+
+        @Override
         public Predicate<AisPacket> visitAisMessagetype(@NotNull SourceFilterParser.AisMessagetypeContext ctx) {
             return new Predicate<AisPacket>() {
                 @Override
