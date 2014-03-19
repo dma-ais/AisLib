@@ -33,39 +33,18 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitParens(@NotNull SourceFilterParser.ParensContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#equalityTest}.
+	 * Visit a parse tree produced by {@link SourceFilterParser#comparison}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitEqualityTest(@NotNull SourceFilterParser.EqualityTestContext ctx);
+	T visitComparison(@NotNull SourceFilterParser.ComparisonContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#sourceType}.
+	 * Visit a parse tree produced by {@link SourceFilterParser#m_mmsi}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSourceType(@NotNull SourceFilterParser.SourceTypeContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#mmsi}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMmsi(@NotNull SourceFilterParser.MmsiContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#sourceRegion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#OrAnd}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOrAnd(@NotNull SourceFilterParser.OrAndContext ctx);
+	T visitM_mmsi(@NotNull SourceFilterParser.M_mmsiContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#idList}.
@@ -87,6 +66,34 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitProg(@NotNull SourceFilterParser.ProgContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#equalityTest}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEqualityTest(@NotNull SourceFilterParser.EqualityTestContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#sourceType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceType(@NotNull SourceFilterParser.SourceTypeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#sourceRegion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#OrAnd}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrAnd(@NotNull SourceFilterParser.OrAndContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#AisMessagetype}.

@@ -113,13 +113,40 @@ public class AisPacketFiltersTest {
         assertTrue(parseSourceFilter("country = NLD & region = 0").test(p2));
         assertTrue(parseSourceFilter("country = DNK | region = 3,4,ERER,0").test(p2));
 
-        assertTrue(parseSourceFilter("mmsi = 002191000").test(p2));
-        assertTrue(parseSourceFilter("messagetype = 23").test(p2));
-
         assertFalse(parseSourceFilter("country = DNK & bs =2190047 & type = SAT").test(p1));
         p1.getTags().setSourceType(SourceType.SATELLITE);
         assertTrue(parseSourceFilter("country = DNK & bs =2190047 & type = SAT").test(p1));
         assertTrue(parseSourceFilter("country = DNK & bs =3,4,4,5,5,2190047 & type = SAT").test(p1));
+
+        // Test = operator
+        assertTrue(parseSourceFilter("m.mmsi = 220431000").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi = 220431001").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi = 211235170").test(p2));
+        assertFalse(parseSourceFilter("m.mmsi = 220431000").test(p2));
+
+        // Test != operator
+        assertFalse(parseSourceFilter("m.mmsi != 220431000").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi != 220431001").test(p1));
+
+        // Test > operator
+        assertTrue(parseSourceFilter("m.mmsi > 220430999").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi > 220431000").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi > 220431001").test(p1));
+
+        // Test >= operator
+        assertTrue(parseSourceFilter("m.mmsi >= 220430999").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi >= 220431000").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi >= 220431001").test(p1));
+
+        // Test < operator
+        assertFalse(parseSourceFilter("m.mmsi < 220430999").test(p1));
+        assertFalse(parseSourceFilter("m.mmsi < 220431000").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi < 220431001").test(p1));
+
+        // Test <= operator
+        assertFalse(parseSourceFilter("m.mmsi <= 220430999").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi <= 220431000").test(p1));
+        assertTrue(parseSourceFilter("m.mmsi <= 220431001").test(p1));
     }
 
     @Test

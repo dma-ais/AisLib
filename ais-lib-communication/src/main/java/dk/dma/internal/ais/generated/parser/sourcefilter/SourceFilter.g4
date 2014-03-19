@@ -8,13 +8,14 @@ expr:   'id' equalityTest idList      # sourceId
     |   'type' equalityTest ID        # sourceType
     |   'region' equalityTest idList  # sourceRegion
     
-    |   'mmsi' equalityTest idList  # mmsi
+    |   'm.mmsi' comparison ID        # m_mmsi
     |   'messagetype' equalityTest idList  # AisMessagetype
     |   expr op=('&'|'|') expr      # OrAnd
     |   '(' expr ')'                # parens
     ;
 
 equalityTest : '!='|'=';
+comparison : '!='|'='|'>'|'>='|'<='|'<' ;
 
 idList : ID (',' ID)* ;
 

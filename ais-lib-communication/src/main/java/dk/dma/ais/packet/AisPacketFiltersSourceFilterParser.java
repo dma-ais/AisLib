@@ -41,6 +41,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dk.dma.ais.packet.AisPacketFilters.filterOnMmsi;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBaseStation;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
@@ -132,13 +133,30 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMmsi(@NotNull SourceFilterParser.MmsiContext ctx) {
-            return new Predicate<AisPacket>() {
-                @Override
-                public boolean test(AisPacket element) {
-                    return true;
-                }
-            };
+        public Predicate<AisPacket> visitM_mmsi(@NotNull SourceFilterParser.M_mmsiContext ctx) {
+            Predicate<AisPacket> filter = null;
+
+            String valueAsString = ctx.ID().getText();
+            Integer mmsi = Integer.valueOf(valueAsString);
+            String operator = ctx.comparison().getText();
+
+            if ("=".equalsIgnoreCase(operator)) {
+                filter = filterOnMmsi(AisPacketFilters.Operator.EQUALS, mmsi);
+            } else if("!=".equalsIgnoreCase(operator)) {
+                filter = filterOnMmsi(AisPacketFilters.Operator.NOT_EQUALS, mmsi);
+            } else if(">".equalsIgnoreCase(operator)) {
+                filter = filterOnMmsi(AisPacketFilters.Operator.GREATER_THAN, mmsi);
+            } else if(">=".equalsIgnoreCase(operator)) {
+                filter = filterOnMmsi(AisPacketFilters.Operator.GREATER_THAN_OR_EQUALS, mmsi);
+            } else if("<".equalsIgnoreCase(operator)) {
+                filter = filterOnMmsi(AisPacketFilters.Operator.LESS_THAN, mmsi);
+            } else if("<=".equalsIgnoreCase(operator)) {
+                filter = filterOnMmsi(AisPacketFilters.Operator.LESS_THAN_OR_EQUALS, mmsi);
+            } else {
+                throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+            }
+
+            return filter;
         }
 
         @Override

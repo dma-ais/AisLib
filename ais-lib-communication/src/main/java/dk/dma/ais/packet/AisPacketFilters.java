@@ -15,10 +15,6 @@
  */
 package dk.dma.ais.packet;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Arrays;
-
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisPosition;
 import dk.dma.ais.message.IPositionMessage;
@@ -30,6 +26,10 @@ import dk.dma.enav.model.geometry.Area;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
 import dk.dma.enav.util.function.Predicate;
+
+import java.util.Arrays;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * 
@@ -185,6 +185,56 @@ public class AisPacketFilters {
         return new AbstractMessagePredicate() {
             public boolean test(AisMessage m) {
                 return messageType.isAssignableFrom(m.getClass());
+            }
+        };
+    }
+
+    public enum Operator {EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_OR_EQUALS, GREATER_THAN, GREATER_THAN_OR_EQUALS};
+
+    public static Predicate<AisPacket> filterOnMmsi(final Operator operator, final int mmsi) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage != null) {
+                    switch (operator) {
+                        case EQUALS:
+                            return aisMessage.getUserId() == mmsi;
+                        case NOT_EQUALS:
+                            return aisMessage.getUserId() != mmsi;
+                        case GREATER_THAN:
+                            return aisMessage.getUserId() > mmsi;
+                        case GREATER_THAN_OR_EQUALS:
+                            return aisMessage.getUserId() >= mmsi;
+                        case LESS_THAN:
+                            return aisMessage.getUserId() < mmsi;
+                        case LESS_THAN_OR_EQUALS:
+                            return aisMessage.getUserId() <= mmsi;
+                        default:
+                            throw new IllegalArgumentException("Operator " + operator + " not yet implemented.");
+                    }
+                }
+                return false;
+            }
+            public String toString() {
+                return "mmsi = " + mmsi;
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnMmsiInSet(final int... mmsis) {
+        final int[] m = mmsis.clone();
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = false;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage != null) {
+                    pass = Arrays.binarySearch(m, aisMessage.getUserId()) >= 0;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "messageType = " + skipBrackets(Arrays.toString(m));
             }
         };
     }
