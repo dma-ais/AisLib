@@ -106,27 +106,27 @@ public class AisPacketFiltersTest {
     @Test
     public void testParseSourceFilter() {
         //
-//        assertTrue(parseSourceFilter("s.id = AISD, SD").test(p3));
+//        assertFilterExpression(true, ("s.id = AISD, SD").test(p3));
 
         p1.getTags().setSourceType(SourceType.TERRESTRIAL);
-        assertTrue(parseSourceFilter("s.type = LIVE").test(p1));
-        assertTrue(parseSourceFilter("s.type = SAT, LIVE").test(p1));
-        assertFalse(parseSourceFilter("s.type = SAT").test(p1));
+        assertFilterExpression(true, p1, ("s.type = LIVE"));
+        assertFilterExpression(true, p1, ("s.type = SAT, LIVE"));
+        assertFilterExpression(false, p1, ("s.type = SAT"));
 
         //
-        assertTrue(parseSourceFilter("s.id = AISD, SD").test(p3));
-        assertFalse(parseSourceFilter("s.id = AFISD, SD").test(p3));
-        assertTrue(parseSourceFilter("(s.id = AISD, SD) | s.country = DNK").test(p3));
-        assertTrue(parseSourceFilter("(s.id = AISD, SD) | s.country = DNK").test(p1));
-        assertFalse(parseSourceFilter("(s.id = AISD, SD) | s.country = DNK").test(p2));
-        assertTrue(parseSourceFilter("(s.id = AISD, SD) | (s.country = DNK, NLD)").test(p2));
-        assertTrue(parseSourceFilter("s.country = NLD & s.region = 0").test(p2));
-        assertTrue(parseSourceFilter("s.country = DNK | s.region = 3,4,ERER,0").test(p2));
+        assertFilterExpression(true, p3, ("s.id = AISD, SD"));
+        assertFilterExpression(false, p3, ("s.id = AFISD, SD"));
+        assertFilterExpression(true, p3, ("(s.id = AISD, SD) | s.country = DNK"));
+        assertFilterExpression(true, p1, ("(s.id = AISD, SD) | s.country = DNK"));
+        assertFilterExpression(false, p2, ("(s.id = AISD, SD) | s.country = DNK"));
+        assertFilterExpression(true, p2, ("(s.id = AISD, SD) | (s.country = DNK, NLD)"));
+        assertFilterExpression(true, p2, ("s.country = NLD & s.region = 0"));
+        assertFilterExpression(true, p2, ("s.country = DNK | s.region = 3,4,ERER,0"));
 
-        assertFalse(parseSourceFilter("s.country = DNK & s.bs =2190047 & s.type = SAT").test(p1));
+        assertFilterExpression(false, p1, ("s.country = DNK & s.bs =2190047 & s.type = SAT"));
         p1.getTags().setSourceType(SourceType.SATELLITE);
-        assertTrue(parseSourceFilter("s.country = DNK & s.bs =2190047 & s.type = SAT").test(p1));
-        assertTrue(parseSourceFilter("s.country = DNK & s.bs =3,4,4,5,5,2190047 & s.type = SAT").test(p1));
+        assertFilterExpression(true, p1, ("s.country = DNK & s.bs =2190047 & s.type = SAT"));
+        assertFilterExpression(true, p1, ("s.country = DNK & s.bs =3,4,4,5,5,2190047 & s.type = SAT"));
 
         testComparison(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testComparison(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
