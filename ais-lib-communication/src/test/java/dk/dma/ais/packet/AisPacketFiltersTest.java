@@ -26,6 +26,7 @@ import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegion;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceType;
 import static dk.dma.ais.packet.AisPacketFilters.parseSourceFilter;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -104,84 +105,125 @@ public class AisPacketFiltersTest {
 
     @Test
     public void testParseSourceFilter() {
-        assertTrue(parseSourceFilter("id = AISD, SD").test(p3));
-        assertFalse(parseSourceFilter("id = AFISD, SD").test(p3));
-        assertTrue(parseSourceFilter("(id = AISD, SD) | country = DNK").test(p3));
-        assertTrue(parseSourceFilter("(id = AISD, SD) | country = DNK").test(p1));
-        assertFalse(parseSourceFilter("(id = AISD, SD) | country = DNK").test(p2));
-        assertTrue(parseSourceFilter("(id = AISD, SD) | (country = DNK, NLD)").test(p2));
-        assertTrue(parseSourceFilter("country = NLD & region = 0").test(p2));
-        assertTrue(parseSourceFilter("country = DNK | region = 3,4,ERER,0").test(p2));
+        //
+//        assertTrue(parseSourceFilter("s.id = AISD, SD").test(p3));
 
-        assertFalse(parseSourceFilter("country = DNK & bs =2190047 & type = SAT").test(p1));
+        p1.getTags().setSourceType(SourceType.TERRESTRIAL);
+        assertTrue(parseSourceFilter("s.type = LIVE").test(p1));
+        assertTrue(parseSourceFilter("s.type = SAT, LIVE").test(p1));
+        assertFalse(parseSourceFilter("s.type = SAT").test(p1));
+
+        //
+        assertTrue(parseSourceFilter("s.id = AISD, SD").test(p3));
+        assertFalse(parseSourceFilter("s.id = AFISD, SD").test(p3));
+        assertTrue(parseSourceFilter("(s.id = AISD, SD) | s.country = DNK").test(p3));
+        assertTrue(parseSourceFilter("(s.id = AISD, SD) | s.country = DNK").test(p1));
+        assertFalse(parseSourceFilter("(s.id = AISD, SD) | s.country = DNK").test(p2));
+        assertTrue(parseSourceFilter("(s.id = AISD, SD) | (s.country = DNK, NLD)").test(p2));
+        assertTrue(parseSourceFilter("s.country = NLD & s.region = 0").test(p2));
+        assertTrue(parseSourceFilter("s.country = DNK | s.region = 3,4,ERER,0").test(p2));
+
+        assertFalse(parseSourceFilter("s.country = DNK & s.bs =2190047 & s.type = SAT").test(p1));
         p1.getTags().setSourceType(SourceType.SATELLITE);
-        assertTrue(parseSourceFilter("country = DNK & bs =2190047 & type = SAT").test(p1));
-        assertTrue(parseSourceFilter("country = DNK & bs =3,4,4,5,5,2190047 & type = SAT").test(p1));
+        assertTrue(parseSourceFilter("s.country = DNK & s.bs =2190047 & s.type = SAT").test(p1));
+        assertTrue(parseSourceFilter("s.country = DNK & s.bs =3,4,4,5,5,2190047 & s.type = SAT").test(p1));
 
-        // Test = operator
-        assertTrue(parseSourceFilter("m.mmsi = 220431000").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi = 220431001").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi = 211235170").test(p2));
-        assertFalse(parseSourceFilter("m.mmsi = 220431000").test(p2));
-
-        // Test != operator
-        assertFalse(parseSourceFilter("m.mmsi != 220431000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi != 220431001").test(p1));
-
-        // Test > operator
-        assertTrue(parseSourceFilter("m.mmsi > 220430999").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi > 220431000").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi > 220431001").test(p1));
-
-        // Test >= operator
-        assertTrue(parseSourceFilter("m.mmsi >= 220430999").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi >= 220431000").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi >= 220431001").test(p1));
-
-        // Test < operator
-        assertFalse(parseSourceFilter("m.mmsi < 220430999").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi < 220431000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi < 220431001").test(p1));
-
-        // Test <= operator
-        assertFalse(parseSourceFilter("m.mmsi <= 220430999").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi <= 220431000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi <= 220431001").test(p1));
+        testComparison(p1, "m.id", p1.tryGetAisMessage().getMsgId());
+        testComparison(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
 
         // Test in-list operator
-        assertTrue(parseSourceFilter("m.mmsi in 220431000,211235170,002191000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi IN (211235170,220431000,002191000)").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi @ 211235170,002191000, 220431000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi@220431000, 211235170, 002191000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi @ (220431000, 211235170, 002191000)").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi@(220431000,211235170,002191000)").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi in 211235170,002191000").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi IN (211235170,002191000)").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi @ 211235170,002191000").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi@211235170,002191000").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi @ (211235170,002191000)").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi@(211235170,002191000)").test(p1));
+        testInList(p1, "m.id", p1.tryGetAisMessage().getMsgId());
+        testInList(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
 
         // Test in-range operator
-        assertTrue(parseSourceFilter("m.mmsi in 220431000..220431010").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi in 220430000..220432000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi in 220430999..220431001").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi in 220431000..220431000").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi in 222430000..222430099").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi in 1..2").test(p1));
-        assertFalse(parseSourceFilter("m.mmsi in 999999990..999999999").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi in (220430000..220432000)").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi @ (220430000..220432000)").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi @ 220430000..220432000").test(p1));
-        assertTrue(parseSourceFilter("m.mmsi@220430000..220432000").test(p1));
+        testInRange(p1, "m.id", p1.tryGetAisMessage().getMsgId());
+        testInRange(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+    }
+
+    private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {
+        System.out.println("Testing \"" + filterExpression + "\" to be " + expectedResult + " for " + aisPacket.tryGetAisMessage().toString());
+        assertEquals(expectedResult, parseSourceFilter(filterExpression).test(aisPacket));
+    }
+
+    private static void testInList(AisPacket testPacket, String field, int fieldValue) {
+        int otherValue1 = fieldValue + 4325;
+        int otherValue2 = fieldValue - 1;
+
+        assertFilterExpression(true, testPacket, field + " in " + fieldValue + "," + otherValue1 + "," + otherValue2 + "");
+        assertFilterExpression(true, testPacket, field + " IN (" + otherValue1 + "," + fieldValue + "," + otherValue2 + ")");
+        assertFilterExpression(true, testPacket, field + " @ " + otherValue1 + "," + otherValue2 + ", " + fieldValue + "");
+        assertFilterExpression(true, testPacket, field + "@" + fieldValue + ", " + otherValue1 + ", " + otherValue2 + "");
+        assertFilterExpression(true, testPacket, field + " @ (" + fieldValue + ", " + otherValue1 + ", " + otherValue2 + ")");
+        assertFilterExpression(true, testPacket, field + "@(" + fieldValue + "," + otherValue1 + "," + otherValue2 + ")");
+
+        assertFilterExpression(false, testPacket, field + " in " + otherValue1 + "," + otherValue2 + "");
+        assertFilterExpression(false, testPacket, field + " IN (" + otherValue1 + "," + otherValue2 + ")");
+        assertFilterExpression(false, testPacket, field + " @ " + otherValue1 + "," + otherValue2 + "");
+        assertFilterExpression(false, testPacket, field + "@" + otherValue1 + "," + otherValue2 + "");
+        assertFilterExpression(false, testPacket, field + " @ (" + otherValue1 + "," + otherValue2 + ")");
+        assertFilterExpression(false, testPacket, field + "@(" + otherValue1 + "," + otherValue2 + ")");
+    }
+
+    private static void testInRange(AisPacket testPacket, String field, int fieldValue) {
+        int below = fieldValue - 10;
+        int above = fieldValue + 10;
+
+        assertFilterExpression(true, testPacket, field + " in " + fieldValue + ".." + above);
+        assertFilterExpression(true, testPacket, field + " in " + below + ".." + fieldValue);
+        assertFilterExpression(true, testPacket, field + " in " + below + ".." + above);
+        assertFilterExpression(true, testPacket, field + " in " + fieldValue + ".." + fieldValue);
+
+        assertFilterExpression(false, testPacket, field + " in " + (below-10) + ".." + below);
+        assertFilterExpression(false, testPacket, field + " in " + above + ".." + (above+10));
+
+        assertFilterExpression(true, testPacket, field + " in (" + fieldValue + ".." + above + ")");
+        assertFilterExpression(true, testPacket, field + " IN (" + fieldValue + ".." + above + ")");
+        assertFilterExpression(true, testPacket, field + " @ (" + fieldValue + ".." + above + ")");
+
+        assertFilterExpression(true, testPacket, field + " in " + fieldValue + ".." + above + "");
+        assertFilterExpression(true, testPacket, field + " IN " + fieldValue + ".." + above + "");
+        assertFilterExpression(true, testPacket, field + " @ " + fieldValue + ".." + above + "");
+
+        assertFilterExpression(true, testPacket, field + "@" + fieldValue + ".." + above + "");
+    }
+
+    private static void testComparison(AisPacket testPacket, String field, int fieldValue) {
+        // Test = operator
+        assertFilterExpression(true, testPacket, field + " = " + fieldValue);
+        assertFilterExpression(false, testPacket, field + " = " + (fieldValue + 1));
+        assertFilterExpression(false, testPacket, field + " = " + (fieldValue - 1));
+
+        // Test != operator
+        assertFilterExpression(false, testPacket, field + " != " + fieldValue);
+        assertFilterExpression(true, testPacket, field + " != " + (fieldValue + 1));
+
+        // Test > operator
+        assertFilterExpression(true, testPacket, field + " > " + (fieldValue - 1));
+        assertFilterExpression(false, testPacket, field + "> " + fieldValue);
+        assertFilterExpression(false, testPacket, field + "  > " + (fieldValue + 1));
+
+        // Test >= operator
+        assertFilterExpression(true, testPacket, field + " >= " + (fieldValue - 1));
+        assertFilterExpression(true, testPacket, field + " >= " + fieldValue);
+        assertFilterExpression(false, testPacket, field + " >= " + (fieldValue + 1));
+
+        // Test < operator
+        assertFilterExpression(false, testPacket, field + " < " + (fieldValue - 1));
+        assertFilterExpression(false, testPacket, field + " < " + fieldValue);
+        assertFilterExpression(true, testPacket, field + " < " + (fieldValue + 1));
+
+        // Test <= operator
+        assertFilterExpression(false, testPacket, field + " <= " + (fieldValue - 1));
+        assertFilterExpression(true, testPacket, field + " <= " + fieldValue);
+        assertFilterExpression(true, testPacket, field + " <= " + (fieldValue + 1));
     }
 
     @Test
     public void testParseSourceFilterNegative() {
-        assertFalse(parseSourceFilter("id != AISD, SD").test(p3));
-        assertTrue(parseSourceFilter("id != AFISD, SD").test(p3));
-        assertTrue(parseSourceFilter("(id != AISD, SD) | country != DNK").test(p2));
-        assertTrue(parseSourceFilter("(id != AISD, SD) | (country != DNK, NLD)").test(p2));
-        assertFalse(parseSourceFilter("country != NLD").test(p2));
+        assertFilterExpression(false, p3, "s.id != AISD, SD");
+        assertFilterExpression(true, p3, "s.id != AFISD, SD");
+        assertFilterExpression(true, p2, "(s.id != AISD, SD) | s.country != DNK");
+        assertFilterExpression(true, p2, "(s.id != AISD, SD) | (s.country != DNK, NLD)");
+        assertFilterExpression(false, p2, "s.country != NLD");
     }
 }

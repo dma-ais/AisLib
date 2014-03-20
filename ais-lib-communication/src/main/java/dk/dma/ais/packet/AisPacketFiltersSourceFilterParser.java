@@ -35,12 +35,13 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBaseStation;
@@ -68,7 +69,7 @@ class AisPacketFiltersSourceFilterParser {
         parser.addErrorListener(new VerboseListener());
 
         ProgContext tree = parser.prog();
-        return tree.expr().accept(new SourceFilterToPredicateVisitor());
+        return tree.filterExpression().accept(new SourceFilterToPredicateVisitor());
     }
 
     static class VerboseListener extends BaseErrorListener {
@@ -88,13 +89,13 @@ class AisPacketFiltersSourceFilterParser {
 
         @Override
         public Predicate<AisPacket> visitOrAnd(OrAndContext ctx) {
-            return ctx.op.getType() == SourceFilterParser.AND ? visit(ctx.expr(0)).and(visit(ctx.expr(1))) : visit(
-                    ctx.expr(0)).or(visit(ctx.expr(1)));
+            return ctx.op.getType() == SourceFilterParser.AND ? visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) : visit(
+                    ctx.filterExpression(0)).or(visit(ctx.filterExpression(1)));
         }
 
         @Override
         public Predicate<AisPacket> visitParens(ParensContext ctx) {
-            final Predicate<AisPacket> p = visit(ctx.expr());
+            final Predicate<AisPacket> p = visit(ctx.filterExpression());
             return new Predicate<AisPacket>() {
                 public boolean test(AisPacket element) {
                     return p.test(element);
@@ -108,82 +109,37 @@ class AisPacketFiltersSourceFilterParser {
 
         @Override
         public Predicate<AisPacket> visitSourceBasestation(SourceBasestationContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStation(readListAsStringArray(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStation(readValueListAsStringArray(ctx.valueList().value())));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceCountry(SourceCountryContext ctx) {
-            List<Country> countries = Country.findAllByCode(readListAsStringArray(ctx.idList().ID()));
+            List<Country> countries = Country.findAllByCode(readValueListAsStringArray(ctx.valueList().value()));
             return checkNegate(ctx.equalityTest(),
                     filterOnSourceCountry(countries.toArray(new Country[countries.size()])));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceId(final SourceIdContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceId(readListAsStringArray(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceId(readValueListAsStringArray(ctx.valueList().value())));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceRegion(SourceRegionContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceRegion(readListAsStringArray(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceRegion(readValueListAsStringArray(ctx.valueList().value())));
         }
 
         @Override
         public Predicate<AisPacket> visitSourceType(SourceTypeContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceType(SourceType.fromString(ctx.ID().getText())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceType(readValueListAsSourceTypeArray(ctx.valueList().value())));
         }
 
-        @Override
-        public Predicate<AisPacket> visitComparesToInt(@NotNull SourceFilterParser.ComparesToIntContext ctx) {
-            Predicate<AisPacket> filter = null;
-
-            String valueToken = ctx.ID().getText();
-            Integer value = Integer.valueOf(valueToken);
-
-            String operator = ctx.comparison().getText();
-
-            String fieldToken = ctx.getStart().getText();
-            String filterFactoryMethodName = mapFieldTokenToFilterFactoryMethodName(fieldToken);
-
-            try {
-                Method filterFactoryMethod = AisPacketFilters.class.getDeclaredMethod(filterFactoryMethodName, AisPacketFilters.Operator.class, int.class);
-
-                if ("=".equals(operator)) {
-                    filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.EQUALS, value);
-                } else if("!=".equals(operator)) {
-                    filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.NOT_EQUALS, value);
-                } else if(">".equals(operator)) {
-                    filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.GREATER_THAN, value);
-                } else if(">=".equals(operator)) {
-                    filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.GREATER_THAN_OR_EQUALS, value);
-                } else if("<".equals(operator)) {
-                    filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.LESS_THAN, value);
-                } else if("<=".equals(operator)) {
-                    filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.LESS_THAN_OR_EQUALS, value);
-                } else {
-                    throw new IllegalArgumentException("Operator " + operator + " not implemented.");
-                }
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException();
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e);
-            } catch (InvocationTargetException e) {
-                throw new IllegalStateException(e);
-            }
-
-            return filter;
+        @Override public Predicate<AisPacket> visitMessageId(@NotNull SourceFilterParser.MessageIdContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.operator(), ctx.valueSpec());
         }
 
-        @Override
-        public Predicate<AisPacket> visitInIntList(@NotNull SourceFilterParser.InIntListContext ctx) {
-            return AisPacketFilters.filterOnMessageMmsiInList(readListAsIntArray(ctx.idList().ID()));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitInIntRange(@NotNull SourceFilterParser.InIntRangeContext ctx) {
-            int min = Integer.valueOf(ctx.idRange().ID().get(0).getText());
-            int max = Integer.valueOf(ctx.idRange().ID().get(1).getText());
-            return AisPacketFilters.filterOnMessageMmsiInRange(min,max);
+        @Override public Predicate<AisPacket> visitMessageMmsi(@NotNull SourceFilterParser.MessageMmsiContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.operator(), ctx.valueSpec());
         }
 
         @Override
@@ -201,6 +157,41 @@ class AisPacketFiltersSourceFilterParser {
             return text.equals("!=") ? p.negate() : p;
         }
 
+        private static String[] readValueListAsStringArray(List<SourceFilterParser.ValueContext> list) {
+            ArrayList<String> r = new ArrayList<>();
+            Iterator<SourceFilterParser.ValueContext> i = list.iterator();
+            while (i.hasNext()) {
+                SourceFilterParser.ValueContext value = i.next();
+                r.add(value.getText());
+            }
+            return r.toArray(new String[r.size()]);
+        }
+
+        private static SourceType[] readValueListAsSourceTypeArray(List<SourceFilterParser.ValueContext> list) {
+            ArrayList<SourceType> r = new ArrayList<>();
+            Iterator<SourceFilterParser.ValueContext> i = list.iterator();
+            while (i.hasNext()) {
+                SourceFilterParser.ValueContext value = i.next();
+                r.add(SourceType.fromString(value.getText()));
+            }
+            return r.toArray(new SourceType[r.size()]);
+        }
+
+        private static int[] readValueListAsIntArray(List<SourceFilterParser.ValueContext> list) {
+            ArrayList<Integer> r = new ArrayList<>();
+            Iterator<SourceFilterParser.ValueContext> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                SourceFilterParser.ValueContext value = iterator.next();
+                r.add(Integer.valueOf(value.getText()));
+            }
+            int n = r.size();
+            int[] primitiveList = new int[n];
+            for (int i=0; i<n; i++) {
+                primitiveList[i] = r.get(i);
+            }
+            return primitiveList;
+        }
+                       /*
         private static String[] readListAsStringArray(Iterable<TerminalNode> iter) {
             ArrayList<String> list = new ArrayList<>();
             for (TerminalNode t : iter) {
@@ -221,13 +212,84 @@ class AisPacketFiltersSourceFilterParser {
             }
             return primitiveList;
         }
-
+                         */
         private static String mapFieldTokenToFilterFactoryMethodName(String fieldToken) {
             switch(fieldToken) {
+                case "m.id":
+                    return "filterOnMessageId";
                 case "m.mmsi":
                     return "filterOnMessageMmsi";
             }
             return null;
+        }
+
+        private static Predicate<AisPacket> createFilterPredicate(Token startToken, SourceFilterParser.OperatorContext operatorCtx, SourceFilterParser.ValueSpecContext valueSpecCtx) {
+            Predicate<AisPacket> filter = null;
+
+            SourceFilterParser.ComparisonContext comparisonCtx = operatorCtx.comparison();
+            SourceFilterParser.InListOrRangeContext inListOrRangeCtx = operatorCtx.inListOrRange();
+
+            try {
+                if (comparisonCtx != null) {
+                    SourceFilterParser.ValueContext value = valueSpecCtx.value();
+                    if (value != null) {
+                        String operator = comparisonCtx.getText();
+
+                        String fieldToken = startToken.getText();
+                        String filterFactoryMethodName = mapFieldTokenToFilterFactoryMethodName(fieldToken);
+                        Method filterFactoryMethod = AisPacketFilters.class.getDeclaredMethod(filterFactoryMethodName, AisPacketFilters.Operator.class, int.class);
+
+                        Integer valueAsInteger = Integer.valueOf(value.INT().getText());
+
+                        if ("=".equals(operator)) {
+                            filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.EQUALS, valueAsInteger);
+                        } else if("!=".equals(operator)) {
+                            filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.NOT_EQUALS, valueAsInteger);
+                        } else if(">".equals(operator)) {
+                            filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.GREATER_THAN, valueAsInteger);
+                        } else if(">=".equals(operator)) {
+                            filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.GREATER_THAN_OR_EQUALS, valueAsInteger);
+                        } else if("<".equals(operator)) {
+                            filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.LESS_THAN, valueAsInteger);
+                        } else if("<=".equals(operator)) {
+                            filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, AisPacketFilters.Operator.LESS_THAN_OR_EQUALS, valueAsInteger);
+                        } else {
+                            throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Can only use comparison of value, not valueList or valueRange.");
+                    }
+
+                } else if (inListOrRangeCtx != null) {
+                    SourceFilterParser.ValueListContext valueListCtx = valueSpecCtx.valueList();
+                    SourceFilterParser.ValueRangeContext valueRangeCtx = valueSpecCtx.valueRange();
+
+                    if (valueListCtx != null) {
+                        int[] list = readValueListAsIntArray(valueListCtx.value());
+                        String fieldToken = startToken.getText();
+                        String filterFactoryMethodName = mapFieldTokenToFilterFactoryMethodName(fieldToken) + "InList";
+                        Method filterFactoryMethod = AisPacketFilters.class.getDeclaredMethod(filterFactoryMethodName, int[].class);
+                        filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, list);
+                    } else if (valueRangeCtx != null) {
+                        int min = Integer.valueOf(valueRangeCtx.value(0).getText());
+                        int max = Integer.valueOf(valueRangeCtx.value(1).getText());
+                        String fieldToken = startToken.getText();
+                        String filterFactoryMethodName = mapFieldTokenToFilterFactoryMethodName(fieldToken) + "InRange";
+                        Method filterFactoryMethod = AisPacketFilters.class.getDeclaredMethod(filterFactoryMethodName, int.class, int.class);
+                        filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, min, max);
+                    } else {
+                        throw new IllegalArgumentException("Neither list or range; program not complete?");
+                    }
+                }
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            return filter;
         }
     }
 }

@@ -50,7 +50,7 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitIdRange(@NotNull SourceFilterParser.IdRangeContext ctx) { return visitChildren(ctx); }
+	@Override public T visitValueRange(@NotNull SourceFilterParser.ValueRangeContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -58,7 +58,7 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitComparesToInt(@NotNull SourceFilterParser.ComparesToIntContext ctx) { return visitChildren(ctx); }
+	@Override public T visitMessageId(@NotNull SourceFilterParser.MessageIdContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -66,7 +66,7 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitIdList(@NotNull SourceFilterParser.IdListContext ctx) { return visitChildren(ctx); }
+	@Override public T visitMessageSpeedOverGround(@NotNull SourceFilterParser.MessageSpeedOverGroundContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -83,6 +83,22 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitProg(@NotNull SourceFilterParser.ProgContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitOperator(@NotNull SourceFilterParser.OperatorContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitMessageMmsi(@NotNull SourceFilterParser.MessageMmsiContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -114,6 +130,22 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitValueList(@NotNull SourceFilterParser.ValueListContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitValueSpec(@NotNull SourceFilterParser.ValueSpecContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -130,15 +162,7 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitInIntList(@NotNull SourceFilterParser.InIntListContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitInIntRange(@NotNull SourceFilterParser.InIntRangeContext ctx) { return visitChildren(ctx); }
+	@Override public T visitValue(@NotNull SourceFilterParser.ValueContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

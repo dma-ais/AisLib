@@ -15,23 +15,6 @@
  */
 package dk.dma.ais.packet;
 
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceBaseStation;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceCountry;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceId;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceRegion;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceType;
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.util.function.Predicate;
@@ -47,6 +30,21 @@ import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.Sour
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceIdContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceRegionContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceTypeContext;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceBaseStation;
+import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceCountry;
+import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceId;
+import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceRegion;
+import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceType;
+import static java.util.Objects.requireNonNull;
 
 /**
  * 
@@ -66,7 +64,7 @@ class AisPacketSourceFiltersParser {
         parser.addErrorListener(new VerboseListener());
 
         ProgContext tree = parser.prog();
-        return tree.expr().accept(new SourceFilterToPredicateVisitor());
+        return tree.filterExpression().accept(new SourceFilterToPredicateVisitor());
     }
 
     static class VerboseListener extends BaseErrorListener {
@@ -86,13 +84,13 @@ class AisPacketSourceFiltersParser {
 
         @Override
         public Predicate<AisPacketSource> visitOrAnd(OrAndContext ctx) {
-            return ctx.op.getType() == SourceFilterParser.AND ? visit(ctx.expr(0)).and(visit(ctx.expr(1))) : visit(
-                    ctx.expr(0)).or(visit(ctx.expr(1)));
+            return ctx.op.getType() == SourceFilterParser.AND ? visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) : visit(
+                    ctx.filterExpression(0)).or(visit(ctx.filterExpression(1)));
         }
 
         @Override
         public Predicate<AisPacketSource> visitParens(ParensContext ctx) {
-            final Predicate<AisPacketSource> p = visit(ctx.expr());
+            final Predicate<AisPacketSource> p = visit(ctx.filterExpression());
             return new Predicate<AisPacketSource>() {
                 public boolean test(AisPacketSource element) {
                     return p.test(element);
@@ -106,40 +104,42 @@ class AisPacketSourceFiltersParser {
 
         @Override
         public Predicate<AisPacketSource> visitSourceBasestation(SourceBasestationContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStation(readArrays(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStation(readArrays(ctx.valueList().value())));
         }
 
         @Override
         public Predicate<AisPacketSource> visitSourceCountry(SourceCountryContext ctx) {
-            List<Country> countries = Country.findAllByCode(readArrays(ctx.idList().ID()));
+            List<Country> countries = Country.findAllByCode(readArrays(ctx.valueList().value()));
             return checkNegate(ctx.equalityTest(),
                     filterOnSourceCountry(countries.toArray(new Country[countries.size()])));
         }
 
         @Override
         public Predicate<AisPacketSource> visitSourceId(final SourceIdContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceId(readArrays(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceId(readArrays(ctx.valueList().value())));
         }
 
         @Override
         public Predicate<AisPacketSource> visitSourceRegion(SourceRegionContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceRegion(readArrays(ctx.idList().ID())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceRegion(readArrays(ctx.valueList().value())));
         }
 
         @Override
         public Predicate<AisPacketSource> visitSourceType(SourceTypeContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceType(SourceType.fromString(ctx.ID().getText())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceType(SourceType.fromString(ctx.valueList().getText())));
         }
+
+
 
         public Predicate<AisPacketSource> checkNegate(EqualityTestContext context, Predicate<AisPacketSource> p) {
             String text = context.getChild(0).getText();
             return text.equals("!=") ? p.negate() : p;
         }
 
-        private static String[] readArrays(Iterable<TerminalNode> iter) {
+        private static String[] readArrays(Iterable<SourceFilterParser.ValueContext> iter) {
             ArrayList<String> list = new ArrayList<>();
-            for (TerminalNode t : iter) {
-                list.add(t.getText());
+            for (SourceFilterParser.ValueContext vc : iter) {
+                list.add(vc.getText());
             }
             return list.toArray(new String[list.size()]);
         }

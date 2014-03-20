@@ -131,11 +131,19 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnSourceType(final SourceType sourceType) {
+    public static Predicate<AisPacket> filterOnSourceType(final SourceType... sourceType) {
+        final SourceType[] sourceTypes = sourceType.clone();
         requireNonNull(sourceType, "sourceType is null");
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                return sourceType == p.getTags().getSourceType();
+                boolean test = false;
+                for (int i = 0; i<sourceTypes.length; i++) {
+                    //return sourceType == p.getTags().getSourceType();
+                    if (sourceTypes[i].equals(p.getTags().getSourceType())) {
+                        test = true;
+                    }
+                }
+                return test;
             }
 
             public String toString() {
@@ -209,6 +217,54 @@ public class AisPacketFilters {
                 throw new IllegalArgumentException("Operator " + operator + " not implemented.");
         }
     }
+
+    public static Predicate<AisPacket> filterOnMessageId(final Operator operator, final int id) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                AisMessage aisMessage = p.tryGetAisMessage();
+                return aisMessage == null ? false : compare(aisMessage.getMsgId(), id, operator);
+            }
+            public String toString() {
+                return "id = " + id;
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnMessageIdInList(int... mmsis) {
+        final int[] m = mmsis.clone();
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = false;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage != null) {
+                    pass = Arrays.binarySearch(m, aisMessage.getMsgId()) >= 0;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "msgid = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnMessageIdInRange(final int min, final int max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = false;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage != null) {
+                    int id = aisMessage.getMsgId();
+                    pass = id >= min && id <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "msgid = " + min + ".." + max;
+            }
+        };
+    }
+
 
     public static Predicate<AisPacket> filterOnMessageMmsi(final Operator operator, final int mmsi) {
         return new Predicate<AisPacket>() {

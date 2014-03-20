@@ -1,32 +1,40 @@
 grammar SourceFilter; 
 
-prog: expr EOF;
+prog: filterExpression EOF;
 
-expr:   'id' equalityTest idList      # sourceId
-    |   'bs' equalityTest idList      # sourceBasestation
-    |   'country' equalityTest idList # sourceCountry
-    |   'type' equalityTest ID        # sourceType
-    |   'region' equalityTest idList  # sourceRegion
+filterExpression:
+        's.id' equalityTest valueList      # sourceId
+    |   's.bs' equalityTest valueList      # sourceBasestation
+    |   's.country' equalityTest valueList # sourceCountry
+    |   's.type' equalityTest valueList    # sourceType
+    |   's.region' equalityTest valueList  # sourceRegion
     
-    |   'm.mmsi' comparison ID        # comparesToInt
-    |   'm.mmsi' inListOrRange idList  # inIntList
-    |   'm.mmsi' inListOrRange idRange # inIntRange
+    |   'm.id' operator valueSpec          # messageId
+    |   'm.mmsi' operator valueSpec        # messageMmsi
+    |   'm.sog' comparison valueSpec       # messageSpeedOverGround
 
-    |   'messagetype' equalityTest idList  # AisMessagetype
-    |   expr op=('&'|'|') expr      # OrAnd
-    |   '(' expr ')'                # parens
+    |   'messagetype' equalityTest valueList  # AisMessagetype
+    |   filterExpression op=('&'|'|') filterExpression      # OrAnd
+    |   '(' filterExpression ')'                # parens
     ;
 
 equalityTest : '!='|'=';
+
 comparison : '!='|'='|'>'|'>='|'<='|'<' ;
 inListOrRange : '@' | 'in' | 'IN' ;
+operator : (comparison | inListOrRange) ;
 
-idList : '('? ID (',' ID)* ')'? ;
-idRange : '('? ID '..' ID ')'? ;
+valueList : '('? value (',' value)* ')'? ;
+valueRange :'('? value '..' value ')'? ;
+value : (INT | FLOAT | SIXBITSTRING );
+valueSpec : (value | valueList | valueRange );
 
-EQUALS :   '=' ;
-NEQUALS :   '!=' ;
-WS     :   [ \t]+ -> skip ; // toss out whitespace
-AND    :   '&' ;
-OR     :   '|' ;
-ID     :   [a-zA-Z0-9]+ ;      // match identifiers
+EQUALS    :   '=' ;
+NEQUALS   :   '!=' ;
+WS        :   [ \t]+ -> skip ; // toss out whitespace
+AND       :   '&' ;
+OR        :   '|' ;
+INT       :   '-'? [0-9]+ ;
+FLOAT     :   '-'? [0-9]+ '.' [0-9]+ ;
+SIXBITCHAR   :  . ; // @ A-Z [ \ ] ^ _ ! " # $ % & ' ( ) * + , - . / 0-9 : ; < = > ?
+SIXBITSTRING :  [a-zA-Z0-9]+ ; // (SIXBITCHAR)+ ;
