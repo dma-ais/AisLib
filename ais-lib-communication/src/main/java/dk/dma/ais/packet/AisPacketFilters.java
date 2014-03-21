@@ -16,6 +16,7 @@
 package dk.dma.ais.packet;
 
 import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
@@ -282,12 +283,97 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageCourseOverGround(final Operator operator, final Float cog) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IVesselPositionMessage) {
+                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getCog() / 10.0), cog, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "cog = " + cog;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageTrueHeading(final Operator operator, final Integer hdg) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IVesselPositionMessage) {
+                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getTrueHeading()), hdg, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "hdg = " + hdg;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageLongitude(final Operator operator, final Float lon) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IPositionMessage) {
+                    pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLongitudeDouble()), lon, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "lon = " + lon;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageLatitude(final Operator operator, final Float lat) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IPositionMessage) {
+                    pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLatitudeDouble()), lat, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "lat = " + lat;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageDraught(final Operator operator, final Float draught) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    pass = compare((float) (((AisMessage5) aisMessage).getDraught() / 10.0), draught, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "draught = " + draught;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageIdInList(int... mmsis) {
         final int[] m = mmsis.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                boolean pass = false;
+                boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage != null) {
                     pass = Arrays.binarySearch(m, aisMessage.getMsgId()) >= 0;
@@ -306,7 +392,7 @@ public class AisPacketFilters {
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                boolean pass = false;
+                boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage != null) {
                     pass = Arrays.binarySearch(m, aisMessage.getUserId()) >= 0;
@@ -320,10 +406,29 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageTrueHeadingInList(int... hdgs) {
+        final int[] m = hdgs.clone();
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IVesselPositionMessage) {
+                    int hdg = ((IVesselPositionMessage) aisMessage).getTrueHeading();
+                    pass = Arrays.binarySearch(m, hdg) >= 0;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "hdg = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageIdInRange(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                boolean pass = false;
+                boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage != null) {
                     int id = aisMessage.getMsgId();
@@ -341,7 +446,7 @@ public class AisPacketFilters {
     public static Predicate<AisPacket> filterOnMessageMmsiInRange(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                boolean pass = false;
+                boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage != null) {
                     int mmsi = aisMessage.getUserId();
@@ -351,6 +456,24 @@ public class AisPacketFilters {
             }
             public String toString() {
                 return "mmsi = " + min + ".." + max;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageTrueHeadingInRange(final int min, final int max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IVesselPositionMessage) {
+                    int hdg = ((IVesselPositionMessage) aisMessage).getTrueHeading();
+                    pass = hdg >= min && hdg <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "hdg = " + min + ".." + max;
             }
         };
     }

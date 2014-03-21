@@ -3,17 +3,22 @@ grammar SourceFilter;
 prog: filterExpression EOF;
 
 filterExpression:
-        's.id' equalityTest valueList      # sourceId
-    |   's.bs' equalityTest valueList      # sourceBasestation
-    |   's.country' equalityTest valueList # sourceCountry
-    |   's.type' equalityTest valueList    # sourceType
-    |   's.region' equalityTest valueList  # sourceRegion
+        's.id' equalityTest valueList           # sourceId
+    |   's.bs' equalityTest valueList           # sourceBasestation
+    |   's.country' equalityTest valueList      # sourceCountry
+    |   's.type' equalityTest valueList         # sourceType
+    |   's.region' equalityTest valueList       # sourceRegion
     
-    |   'm.id' operator valueSpec          # messageId
-    |   'm.mmsi' operator valueSpec        # messageMmsi
-    |   'm.sog' comparison (INT | FLOAT)   # messageSpeedOverGround
+    |   'm.id' operator valueSpec               # messageId
+    |   'm.mmsi' operator valueSpec             # messageMmsi
+    |   'm.sog' comparison (INT | FLOAT)        # messageSpeedOverGround
+    |   'm.cog' comparison (INT | FLOAT)        # messageCourseOverGround
+    |   'm.hdg' operator valueSpec              # messageHeading
+    |   'm.lon' comparison (INT | FLOAT)        # messageLongitude
+    |   'm.lat' comparison (INT | FLOAT)        # messageLatitude
+    |   'm.draught' comparison (INT | FLOAT)    # messageDraught
 
-    |   'messagetype' equalityTest valueList  # AisMessagetype
+    |   'messagetype' equalityTest valueList    # AisMessagetype
     |   filterExpression op=('&'|'|') filterExpression      # OrAnd
     |   '(' filterExpression ')'                # parens
     ;

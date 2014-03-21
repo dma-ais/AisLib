@@ -147,6 +147,26 @@ class AisPacketFiltersSourceFilterParser {
             return createFilterPredicate(ctx.getStart(), ctx.comparison(), ctx.FLOAT() != null ? ctx.FLOAT() : ctx.INT());
         }
 
+        @Override public Predicate<AisPacket> visitMessageCourseOverGround(@NotNull SourceFilterParser.MessageCourseOverGroundContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.comparison(), ctx.FLOAT() != null ? ctx.FLOAT() : ctx.INT());
+        }
+
+        @Override public Predicate<AisPacket> visitMessageDraught(@NotNull SourceFilterParser.MessageDraughtContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.comparison(), ctx.FLOAT() != null ? ctx.FLOAT() : ctx.INT());
+        }
+
+        @Override public Predicate<AisPacket> visitMessageHeading(@NotNull SourceFilterParser.MessageHeadingContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.operator(), ctx.valueSpec());
+        }
+
+        @Override public Predicate<AisPacket> visitMessageLongitude(@NotNull SourceFilterParser.MessageLongitudeContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.comparison(), ctx.FLOAT() != null ? ctx.FLOAT() : ctx.INT());
+        }
+
+        @Override public Predicate<AisPacket> visitMessageLatitude(@NotNull SourceFilterParser.MessageLatitudeContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.comparison(), ctx.FLOAT() != null ? ctx.FLOAT() : ctx.INT());
+        }
+
         @Override
         public Predicate<AisPacket> visitAisMessagetype(@NotNull SourceFilterParser.AisMessagetypeContext ctx) {
             return new Predicate<AisPacket>() {
@@ -222,6 +242,16 @@ class AisPacketFiltersSourceFilterParser {
                     return "filterOnMessageMmsi";
                 case "m.sog":
                     return "filterOnMessageSpeedOverGround";
+                case "m.cog":
+                    return "filterOnMessageCourseOverGround";
+                case "m.hdg":
+                    return "filterOnMessageTrueHeading";
+                case "m.lon":
+                    return "filterOnMessageLongitude";
+                case "m.lat":
+                    return "filterOnMessageLatitude";
+                case "m.draught":
+                    return "filterOnMessageDraught";
             }
             return null;
         }

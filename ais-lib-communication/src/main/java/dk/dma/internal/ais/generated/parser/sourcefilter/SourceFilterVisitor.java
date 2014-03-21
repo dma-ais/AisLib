@@ -33,11 +33,18 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitParens(@NotNull SourceFilterParser.ParensContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#comparison}.
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageLatitude}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparison(@NotNull SourceFilterParser.ComparisonContext ctx);
+	T visitMessageLatitude(@NotNull SourceFilterParser.MessageLatitudeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageHeading}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageHeading(@NotNull SourceFilterParser.MessageHeadingContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#valueRange}.
@@ -47,20 +54,6 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitValueRange(@NotNull SourceFilterParser.ValueRangeContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#messageId}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageId(@NotNull SourceFilterParser.MessageIdContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#messageSpeedOverGround}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageSpeedOverGround(@NotNull SourceFilterParser.MessageSpeedOverGroundContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#sourceBasestation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -68,11 +61,11 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitSourceBasestation(@NotNull SourceFilterParser.SourceBasestationContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#prog}.
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageCourseOverGround}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProg(@NotNull SourceFilterParser.ProgContext ctx);
+	T visitMessageCourseOverGround(@NotNull SourceFilterParser.MessageCourseOverGroundContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#operator}.
@@ -80,13 +73,6 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitOperator(@NotNull SourceFilterParser.OperatorContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#messageMmsi}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageMmsi(@NotNull SourceFilterParser.MessageMmsiContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#equalityTest}.
@@ -103,32 +89,11 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitInListOrRange(@NotNull SourceFilterParser.InListOrRangeContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#sourceType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSourceType(@NotNull SourceFilterParser.SourceTypeContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#valueList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitValueList(@NotNull SourceFilterParser.ValueListContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#valueSpec}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitValueSpec(@NotNull SourceFilterParser.ValueSpecContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link SourceFilterParser#sourceRegion}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#OrAnd}.
@@ -150,4 +115,74 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAisMessagetype(@NotNull SourceFilterParser.AisMessagetypeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#comparison}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComparison(@NotNull SourceFilterParser.ComparisonContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageId(@NotNull SourceFilterParser.MessageIdContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageSpeedOverGround}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageSpeedOverGround(@NotNull SourceFilterParser.MessageSpeedOverGroundContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#prog}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProg(@NotNull SourceFilterParser.ProgContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageMmsi}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageMmsi(@NotNull SourceFilterParser.MessageMmsiContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageLongitude}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageLongitude(@NotNull SourceFilterParser.MessageLongitudeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageDraught}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageDraught(@NotNull SourceFilterParser.MessageDraughtContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#sourceType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceType(@NotNull SourceFilterParser.SourceTypeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#valueList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValueList(@NotNull SourceFilterParser.ValueListContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#sourceRegion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx);
 }

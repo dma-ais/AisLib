@@ -15,6 +15,8 @@
  */
 package dk.dma.ais.packet;
 
+import dk.dma.ais.message.AisMessage5;
+import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
@@ -134,14 +136,21 @@ public class AisPacketFiltersTest {
         testComparison(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testComparison(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
         testComparison(p5, "m.sog", ((IVesselPositionMessage) p5.tryGetAisMessage()).getSog() / 10.0f);
+        testComparison(p5, "m.cog", ((IVesselPositionMessage) p5.tryGetAisMessage()).getCog() / 10.0f);
+        testComparison(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
+        testComparison(p5, "m.lon", ((IPositionMessage) p5.tryGetAisMessage()).getPos().getLongitudeDouble());
+        testComparison(p5, "m.lat", ((IPositionMessage) p5.tryGetAisMessage()).getPos().getLatitudeDouble());
+        testComparison(p1, "m.draught", ((AisMessage5) (p1.tryGetAisMessage())).getDraught() / 10.0f);
 
         // Test in-list operator
         testInList(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testInList(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+        testInList(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
 
         // Test in-range operator
         testInRange(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testInRange(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+        testInRange(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
     }
 
     private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {
