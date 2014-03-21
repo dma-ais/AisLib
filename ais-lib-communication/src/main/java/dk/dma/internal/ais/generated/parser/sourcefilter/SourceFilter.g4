@@ -11,6 +11,8 @@ filterExpression:
     
     |   'm.id' operator valueSpec               # messageId
     |   'm.mmsi' operator valueSpec             # messageMmsi
+    |   'm.imo' operator valueSpec              # messageImo
+    |   'm.name' operator valueSpec             # messageName
     |   'm.sog' comparison (INT | FLOAT)        # messageSpeedOverGround
     |   'm.cog' comparison (INT | FLOAT)        # messageCourseOverGround
     |   'm.hdg' operator valueSpec              # messageHeading

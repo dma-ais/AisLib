@@ -201,6 +201,28 @@ public class AisPacketFilters {
 
     public enum Operator {EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_OR_EQUALS, GREATER_THAN, GREATER_THAN_OR_EQUALS};
 
+    private static boolean compare(String lhs, String rhs, Operator operator) {
+        lhs = lhs.replace('@',' ').trim();
+        rhs = rhs.replace('@',' ').trim();
+
+        switch (operator) {
+            case EQUALS:
+                return lhs.equalsIgnoreCase(rhs);
+            case NOT_EQUALS:
+                return ! lhs.equalsIgnoreCase(rhs);
+            case GREATER_THAN:
+                return lhs.compareToIgnoreCase(rhs) > 0;
+            case GREATER_THAN_OR_EQUALS:
+                return lhs.compareToIgnoreCase(rhs) >= 0;
+            case LESS_THAN:
+                return lhs.compareToIgnoreCase(rhs) < 0;
+            case LESS_THAN_OR_EQUALS:
+                return lhs.compareToIgnoreCase(rhs) <= 0;
+            default:
+                throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+        }
+    }
+
     private static boolean compare(int lhs, int rhs, Operator operator) {
         switch (operator) {
             case EQUALS:
@@ -261,6 +283,50 @@ public class AisPacketFilters {
             }
             public String toString() {
                 return "mmsi = " + mmsi;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageImo(final Operator operator, final Integer imo) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    pass = compare((int) ((AisMessage5) aisMessage).getImo(), imo, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "imo = " + imo;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final Float name) {
+        return filterOnMessageName(operator, name.toString());
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final Integer name) {
+        return filterOnMessageName(operator, name.toString());
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final String name) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    pass = compare(((AisMessage5) aisMessage).getName(), name, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "name = " + name;
             }
         };
     }
@@ -406,6 +472,26 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageImoInList(int... imos) {
+        final int[] m = imos.clone();
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    int imo = (int) ((AisMessage5) aisMessage).getImo();
+                    pass = Arrays.binarySearch(m, imo) >= 0;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "imo = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageTrueHeadingInList(int... hdgs) {
         final int[] m = hdgs.clone();
         Arrays.sort(m);
@@ -456,6 +542,24 @@ public class AisPacketFilters {
             }
             public String toString() {
                 return "mmsi = " + min + ".." + max;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageImoInRange(final int min, final int max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    int imo = (int) ((AisMessage5) aisMessage).getImo();
+                    pass = imo >= min && imo <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "imo = " + min + ".." + max;
             }
         };
     }

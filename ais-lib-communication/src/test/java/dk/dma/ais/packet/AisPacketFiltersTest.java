@@ -109,48 +109,87 @@ public class AisPacketFiltersTest {
     }
 
     @Test
+    public void testMessagePassesSourceFilterIfNotCarryingTheFilteredTypeOfInformation() {
+        assertFilterExpression(true, p1, "m.sog > 20.0");
+        assertFilterExpression(true, p1, "m.cog > 90");
+        assertFilterExpression(true, p1, "m.hdg > 90");
+        assertFilterExpression(true, p1, "m.lat > 55.5");
+        assertFilterExpression(true, p1, "m.lon > 55.5");
+        assertFilterExpression(true, p5, "m.draught > 0.1");
+    }
+
+    @Test
+    public void testCompositeSourceFilterExpressions() {
+        assertFilterExpression(true, p5, "m.sog > 6.0 & m.sog < 7.0");
+        assertFilterExpression(true, p5, "m.sog >= 6.6 & m.sog < 6.7");
+        assertFilterExpression(false, p5, "m.sog > 6.6 & m.sog < 7.0");
+        assertFilterExpression(false, p5, "m.sog > 6.0 & m.sog < 6.6");
+
+        assertFilterExpression(true, p5, "m.sog > 6.0 | m.sog < 7.0");
+        assertFilterExpression(false, p5, "m.sog > 6.6 | m.sog < 6.4");
+
+        // TODO
+        // assertFilterExpression(true, p5, "m.sog > 6.0 & m.hgd > 350 & m.id = 1");
+        // assertFilterExpression(false, p5, "m.sog > 6.0 & m.hgd > 350 & m.id = 2");
+    }
+
+    @Test
     public void testParseSourceFilter() {
         //
-//        assertFilterExpression(true, ("s.id = AISD, SD").test(p3));
+        assertFilterExpression(true, p3, "s.id = AISD, SD");
 
         p1.getTags().setSourceType(SourceType.TERRESTRIAL);
-        assertFilterExpression(true, p1, ("s.type = LIVE"));
-        assertFilterExpression(true, p1, ("s.type = SAT, LIVE"));
-        assertFilterExpression(false, p1, ("s.type = SAT"));
+        assertFilterExpression(true, p1, "s.type = LIVE");
+        assertFilterExpression(true, p1, "s.type = SAT, LIVE");
+        assertFilterExpression(false, p1, "s.type = SAT");
 
         //
-        assertFilterExpression(true, p3, ("s.id = AISD, SD"));
-        assertFilterExpression(false, p3, ("s.id = AFISD, SD"));
-        assertFilterExpression(true, p3, ("(s.id = AISD, SD) | s.country = DNK"));
-        assertFilterExpression(true, p1, ("(s.id = AISD, SD) | s.country = DNK"));
-        assertFilterExpression(false, p2, ("(s.id = AISD, SD) | s.country = DNK"));
-        assertFilterExpression(true, p2, ("(s.id = AISD, SD) | (s.country = DNK, NLD)"));
-        assertFilterExpression(true, p2, ("s.country = NLD & s.region = 0"));
-        assertFilterExpression(true, p2, ("s.country = DNK | s.region = 3,4,ERER,0"));
+        assertFilterExpression(true, p3, "s.id = AISD, SD");
+        assertFilterExpression(false, p3, "s.id = AFISD, SD");
+        assertFilterExpression(true, p3, "(s.id = AISD, SD) | s.country = DNK");
+        assertFilterExpression(true, p1, "(s.id = AISD, SD) | s.country = DNK");
+        assertFilterExpression(false, p2, "(s.id = AISD, SD) | s.country = DNK");
+        assertFilterExpression(true, p2, "(s.id = AISD, SD) | (s.country = DNK, NLD)");
+        assertFilterExpression(true, p2, "s.country = NLD & s.region = 0");
+        assertFilterExpression(true, p2, "s.country = DNK | s.region = 3,4,ERER,0");
 
-        assertFilterExpression(false, p1, ("s.country = DNK & s.bs =2190047 & s.type = SAT"));
+        assertFilterExpression(false, p1, "s.country = DNK & s.bs =2190047 & s.type = SAT");
         p1.getTags().setSourceType(SourceType.SATELLITE);
-        assertFilterExpression(true, p1, ("s.country = DNK & s.bs =2190047 & s.type = SAT"));
-        assertFilterExpression(true, p1, ("s.country = DNK & s.bs =3,4,4,5,5,2190047 & s.type = SAT"));
+        assertFilterExpression(true, p1, "s.country = DNK & s.bs =2190047 & s.type = SAT");
+        assertFilterExpression(true, p1, "s.country = DNK & s.bs =3,4,4,5,5,2190047 & s.type = SAT");
 
         testComparison(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testComparison(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+        testComparison(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
         testComparison(p5, "m.sog", ((IVesselPositionMessage) p5.tryGetAisMessage()).getSog() / 10.0f);
         testComparison(p5, "m.cog", ((IVesselPositionMessage) p5.tryGetAisMessage()).getCog() / 10.0f);
         testComparison(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
         testComparison(p5, "m.lon", ((IPositionMessage) p5.tryGetAisMessage()).getPos().getLongitudeDouble());
         testComparison(p5, "m.lat", ((IPositionMessage) p5.tryGetAisMessage()).getPos().getLatitudeDouble());
-        testComparison(p1, "m.draught", ((AisMessage5) (p1.tryGetAisMessage())).getDraught() / 10.0f);
+        testComparison(p1, "m.draught", ((AisMessage5) p1.tryGetAisMessage()).getDraught() / 10.0f);
+        testComparison(p1, "m.name", ((AisMessage5) p1.tryGetAisMessage()).getName());
 
         // Test in-list operator
         testInList(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testInList(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+        testInList(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
         testInList(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
+        //testInList(p2, "m.name", ((AisMessage5) p2.tryGetAisMessage()).getName());
 
         // Test in-range operator
         testInRange(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testInRange(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+        testInRange(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
         testInRange(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
+
+        // UNCATEGORIZED
+       /* 
+        'navstat'
+        'time'
+        
+        'cs'
+        'name'
+        'type'*/
     }
 
     private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {
@@ -158,9 +197,20 @@ public class AisPacketFiltersTest {
         assertEquals(expectedResult, parseSourceFilter(filterExpression).test(aisPacket));
     }
 
-    private static void testInList(AisPacket testPacket, String field, int fieldValue) {
-        int otherValue1 = fieldValue + 4325;
-        int otherValue2 = fieldValue - 1;
+    private static void testInList(AisPacket testPacket, String field, Object fieldValue) {
+        Object otherValue1, otherValue2;
+        if (fieldValue instanceof Integer) {
+            otherValue1 = new Integer(((Integer) fieldValue) + 4325);
+            otherValue2 = new Integer(((Integer) fieldValue) - 1);
+        } else if (fieldValue instanceof Long) {
+            otherValue1 = new Long(((Long) fieldValue) + 4325L);
+            otherValue2 = new Long(((Long) fieldValue) - 1L);
+        } else if (fieldValue instanceof String) {
+            otherValue1 = "VALUE1";
+            otherValue2 = "VALUE2";
+        } else {
+            throw new IllegalArgumentException("Unsupported type: " + fieldValue.getClass());
+        }
 
         assertFilterExpression(true, testPacket, field + " in " + fieldValue + "," + otherValue1 + "," + otherValue2 + "");
         assertFilterExpression(true, testPacket, field + " IN (" + otherValue1 + "," + fieldValue + "," + otherValue2 + ")");
@@ -177,17 +227,28 @@ public class AisPacketFiltersTest {
         assertFilterExpression(false, testPacket, field + "@(" + otherValue1 + "," + otherValue2 + ")");
     }
 
-    private static void testInRange(AisPacket testPacket, String field, int fieldValue) {
-        int below = fieldValue - 10;
-        int above = fieldValue + 10;
+    private static void testInRange(AisPacket testPacket, String field, Number fieldValue) {
+        Number below, above;
+        if (fieldValue instanceof Integer) {
+            below = new Integer(((Integer) fieldValue) - 10);
+            above = new Integer(((Integer) fieldValue) + 10);
+        } else if (fieldValue instanceof Long) {
+            below = new Long(((Long) fieldValue) - 10L);
+            above = new Long(((Long) fieldValue) + 10L);
+        } else if (fieldValue instanceof Float) {
+            below = new Float(((Float) fieldValue) - 10.0f);
+            above = new Float(((Float) fieldValue) + 10.0f);
+        } else {
+            throw new IllegalArgumentException("Unsupported type: " + fieldValue.getClass());
+        }
 
         assertFilterExpression(true, testPacket, field + " in " + fieldValue + ".." + above);
         assertFilterExpression(true, testPacket, field + " in " + below + ".." + fieldValue);
         assertFilterExpression(true, testPacket, field + " in " + below + ".." + above);
         assertFilterExpression(true, testPacket, field + " in " + fieldValue + ".." + fieldValue);
 
-        assertFilterExpression(false, testPacket, field + " in " + (below-10) + ".." + below);
-        assertFilterExpression(false, testPacket, field + " in " + above + ".." + (above+10));
+        assertFilterExpression(false, testPacket, field + " in " + (below.longValue()-10) + ".." + below);
+        assertFilterExpression(false, testPacket, field + " in " + above + ".." + (above.longValue()+10));
 
         assertFilterExpression(true, testPacket, field + " in (" + fieldValue + ".." + above + ")");
         assertFilterExpression(true, testPacket, field + " IN (" + fieldValue + ".." + above + ")");
@@ -200,35 +261,63 @@ public class AisPacketFiltersTest {
         assertFilterExpression(true, testPacket, field + "@" + fieldValue + ".." + above + "");
     }
 
-    private static void testComparison(AisPacket testPacket, String field, Number fieldValue) {
+    private static void testComparison(AisPacket testPacket, String field, Object fieldValue) {
+        Object largerValue, lesserValue;
+        if (fieldValue instanceof Integer) {
+            lesserValue = new Integer(((Integer) fieldValue) - 1);
+            largerValue = new Integer(((Integer) fieldValue) + 1);
+        } else if (fieldValue instanceof Long) {
+            lesserValue = new Long(((Long) fieldValue) - 1L);
+            largerValue = new Long(((Long) fieldValue) + 1L);
+        } else if (fieldValue instanceof Float) {
+            lesserValue = new Float(((Float) fieldValue) - 1.0f);
+            largerValue = new Float(((Float) fieldValue) + 1.0f);
+        } else if (fieldValue instanceof Double) {
+            lesserValue = new Double(((Double) fieldValue) - 1.0);
+            largerValue = new Double(((Double) fieldValue) + 1.0);
+        } else if (fieldValue instanceof String) {
+            fieldValue = ((String) fieldValue).replace('@',' ').trim();
+            lesserValue = "0";
+            largerValue = "Z" + fieldValue.toString();
+        } else {
+            throw new IllegalArgumentException("Unsupported type: " + fieldValue.getClass());
+        }
+        
         // Test = operator
         assertFilterExpression(true, testPacket, field + " = " + fieldValue);
-        assertFilterExpression(false, testPacket, field + " = " + (fieldValue.intValue() + 1));
-        assertFilterExpression(false, testPacket, field + " = " + (fieldValue.intValue() - 1));
+        assertFilterExpression(false, testPacket, field + " = " + largerValue);
+        assertFilterExpression(false, testPacket, field + " = " + lesserValue);
 
         // Test != operator
         assertFilterExpression(false, testPacket, field + " != " + fieldValue);
-        assertFilterExpression(true, testPacket, field + " != " + (fieldValue.intValue() + 1));
+        assertFilterExpression(true, testPacket, field + " != " + largerValue);
 
         // Test > operator
-        assertFilterExpression(true, testPacket, field + " > " + (fieldValue.intValue() - 1));
+        assertFilterExpression(true, testPacket, field + " > " + lesserValue);
         assertFilterExpression(false, testPacket, field + "> " + fieldValue);
-        assertFilterExpression(false, testPacket, field + "  > " + (fieldValue.intValue() + 1));
+        assertFilterExpression(false, testPacket, field + "  > " + largerValue);
 
         // Test >= operator
-        assertFilterExpression(true, testPacket, field + " >= " + (fieldValue.intValue() - 1));
+        assertFilterExpression(true, testPacket, field + " >= " + lesserValue);
         assertFilterExpression(true, testPacket, field + " >= " + fieldValue);
-        assertFilterExpression(false, testPacket, field + " >= " + (fieldValue.intValue() + 1));
+        assertFilterExpression(false, testPacket, field + " >= " + largerValue);
 
         // Test < operator
-        assertFilterExpression(false, testPacket, field + " < " + (fieldValue.intValue() - 1));
+        assertFilterExpression(false, testPacket, field + " < " + lesserValue);
         assertFilterExpression(false, testPacket, field + " < " + fieldValue);
-        assertFilterExpression(true, testPacket, field + " < " + (fieldValue.intValue() + 1));
+        assertFilterExpression(true, testPacket, field + " < " + largerValue);
 
         // Test <= operator
-        assertFilterExpression(false, testPacket, field + " <= " + (fieldValue.intValue() - 1));
+        assertFilterExpression(false, testPacket, field + " <= " + lesserValue);
         assertFilterExpression(true, testPacket, field + " <= " + fieldValue);
-        assertFilterExpression(true, testPacket, field + " <= " + (fieldValue.intValue() + 1));
+        assertFilterExpression(true, testPacket, field + " <= " + largerValue);
+    }
+
+    @Test
+    public void testCastNumericFilterExpressionToStringForStringFields() {
+        // Test casting from float,int to string
+        assertFilterExpression(false, p2, "m.name = 0");
+        assertFilterExpression(false, p2, "m.name = 0.0");
     }
 
     @Test

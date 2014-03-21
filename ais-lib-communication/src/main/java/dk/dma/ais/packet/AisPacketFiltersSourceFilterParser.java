@@ -143,6 +143,14 @@ class AisPacketFiltersSourceFilterParser {
             return createFilterPredicate(ctx.getStart(), ctx.operator(), ctx.valueSpec());
         }
 
+        @Override public Predicate<AisPacket> visitMessageImo(@NotNull SourceFilterParser.MessageImoContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.operator(), ctx.valueSpec());
+        }
+
+        @Override public Predicate<AisPacket> visitMessageName(@NotNull SourceFilterParser.MessageNameContext ctx) {
+            return createFilterPredicate(ctx.getStart(), ctx.operator(), ctx.valueSpec());
+        }
+
         @Override public Predicate<AisPacket> visitMessageSpeedOverGround(@NotNull SourceFilterParser.MessageSpeedOverGroundContext ctx) {
             return createFilterPredicate(ctx.getStart(), ctx.comparison(), ctx.FLOAT() != null ? ctx.FLOAT() : ctx.INT());
         }
@@ -240,6 +248,10 @@ class AisPacketFiltersSourceFilterParser {
                     return "filterOnMessageId";
                 case "m.mmsi":
                     return "filterOnMessageMmsi";
+                case "m.imo":
+                    return "filterOnMessageImo";
+                case "m.name":
+                    return "filterOnMessageName";
                 case "m.sog":
                     return "filterOnMessageSpeedOverGround";
                 case "m.cog":
@@ -253,7 +265,7 @@ class AisPacketFiltersSourceFilterParser {
                 case "m.draught":
                     return "filterOnMessageDraught";
             }
-            return null;
+            throw new IllegalArgumentException("No mapping to predicate name for field " + fieldToken);
         }
 
         /**

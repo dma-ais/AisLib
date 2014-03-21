@@ -19,6 +19,13 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitSourceId(@NotNull SourceFilterParser.SourceIdContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageName(@NotNull SourceFilterParser.MessageNameContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#sourceCountry}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -185,4 +192,11 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSourceRegion(@NotNull SourceFilterParser.SourceRegionContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageImo}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageImo(@NotNull SourceFilterParser.MessageImoContext ctx);
 }
