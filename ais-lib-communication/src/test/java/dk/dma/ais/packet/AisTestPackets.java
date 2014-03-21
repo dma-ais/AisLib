@@ -56,6 +56,12 @@ public class AisTestPackets {
                 "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A");
     }
 
+    public static AisPacket p5() {
+        return read(
+                "$PGHP,1,2013,3,13,10,39,18,375,219,,2190047,1,4A*57\r\n",
+                "\\g:1-2-0136,c:1363174860*24\\!BSVDM,1,1,,A,18UG;P0012G?Uq4EdHa=c;7@051@,0*4A\r\n");
+    }
+
     private static AisPacket read(String... lines) {
         try {
             return AisPacket.readFromString(StringUtils.join(lines));

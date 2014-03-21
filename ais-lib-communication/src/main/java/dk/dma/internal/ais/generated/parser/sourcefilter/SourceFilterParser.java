@@ -1,13 +1,22 @@
 // Generated from SourceFilter.g4 by ANTLR 4.2
 package dk.dma.internal.ais.generated.parser.sourcefilter;
-import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.FailedPredicateException;
+import org.antlr.v4.runtime.NoViableAltException;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class SourceFilterParser extends Parser {
@@ -201,9 +210,8 @@ public class SourceFilterParser extends Parser {
 		public ComparisonContext comparison() {
 			return getRuleContext(ComparisonContext.class,0);
 		}
-		public ValueSpecContext valueSpec() {
-			return getRuleContext(ValueSpecContext.class,0);
-		}
+		public TerminalNode INT() { return getToken(SourceFilterParser.INT, 0); }
+		public TerminalNode FLOAT() { return getToken(SourceFilterParser.FLOAT, 0); }
 		public MessageSpeedOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
@@ -350,7 +358,12 @@ public class SourceFilterParser extends Parser {
 				_prevctx = _localctx;
 				setState(52); match(3);
 				setState(53); comparison();
-				setState(54); valueSpec();
+				setState(54);
+				_la = _input.LA(1);
+				if ( !(_la==INT || _la==FLOAT) ) {
+				_errHandler.recoverInline(this);
+				}
+				consume();
 				}
 				break;
 			case 2:
@@ -843,28 +856,28 @@ public class SourceFilterParser extends Parser {
 		"\3K\13\3\3\4\3\4\3\5\3\5\3\6\3\6\3\7\3\7\5\7U\n\7\3\b\5\bX\n\b\3\b\3\b"+
 		"\3\b\7\b]\n\b\f\b\16\b`\13\b\3\b\5\bc\n\b\3\t\5\tf\n\t\3\t\3\t\3\t\3\t"+
 		"\5\tl\n\t\3\n\3\n\3\13\3\13\3\13\5\13s\n\13\3\13\2\3\4\f\2\4\6\b\n\f\16"+
-		"\20\22\24\2\7\3\2\32\33\3\2\27\30\7\2\6\6\b\b\13\13\16\16\27\30\4\2\f"+
-		"\f\17\20\4\2\34\35\37\37|\2\26\3\2\2\2\4B\3\2\2\2\6L\3\2\2\2\bN\3\2\2"+
-		"\2\nP\3\2\2\2\fT\3\2\2\2\16W\3\2\2\2\20e\3\2\2\2\22m\3\2\2\2\24r\3\2\2"+
-		"\2\26\27\5\4\3\2\27\30\7\2\2\3\30\3\3\2\2\2\31\32\b\3\1\2\32\33\7\t\2"+
-		"\2\33\34\5\6\4\2\34\35\5\16\b\2\35C\3\2\2\2\36\37\7\25\2\2\37 \5\6\4\2"+
-		" !\5\16\b\2!C\3\2\2\2\"#\7\22\2\2#$\5\6\4\2$%\5\16\b\2%C\3\2\2\2&\'\7"+
-		"\3\2\2\'(\5\6\4\2()\5\16\b\2)C\3\2\2\2*+\7\n\2\2+,\5\6\4\2,-\5\16\b\2"+
-		"-C\3\2\2\2./\7\21\2\2/\60\5\f\7\2\60\61\5\24\13\2\61C\3\2\2\2\62\63\7"+
-		"\r\2\2\63\64\5\f\7\2\64\65\5\24\13\2\65C\3\2\2\2\66\67\7\5\2\2\678\5\b"+
-		"\5\289\5\24\13\29C\3\2\2\2:;\7\4\2\2;<\5\6\4\2<=\5\16\b\2=C\3\2\2\2>?"+
-		"\7\23\2\2?@\5\4\3\2@A\7\24\2\2AC\3\2\2\2B\31\3\2\2\2B\36\3\2\2\2B\"\3"+
-		"\2\2\2B&\3\2\2\2B*\3\2\2\2B.\3\2\2\2B\62\3\2\2\2B\66\3\2\2\2B:\3\2\2\2"+
-		"B>\3\2\2\2CI\3\2\2\2DE\f\4\2\2EF\t\2\2\2FH\5\4\3\5GD\3\2\2\2HK\3\2\2\2"+
-		"IG\3\2\2\2IJ\3\2\2\2J\5\3\2\2\2KI\3\2\2\2LM\t\3\2\2M\7\3\2\2\2NO\t\4\2"+
-		"\2O\t\3\2\2\2PQ\t\5\2\2Q\13\3\2\2\2RU\5\b\5\2SU\5\n\6\2TR\3\2\2\2TS\3"+
-		"\2\2\2U\r\3\2\2\2VX\7\23\2\2WV\3\2\2\2WX\3\2\2\2XY\3\2\2\2Y^\5\22\n\2"+
-		"Z[\7\26\2\2[]\5\22\n\2\\Z\3\2\2\2]`\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_b\3\2"+
-		"\2\2`^\3\2\2\2ac\7\24\2\2ba\3\2\2\2bc\3\2\2\2c\17\3\2\2\2df\7\23\2\2e"+
-		"d\3\2\2\2ef\3\2\2\2fg\3\2\2\2gh\5\22\n\2hi\7\7\2\2ik\5\22\n\2jl\7\24\2"+
-		"\2kj\3\2\2\2kl\3\2\2\2l\21\3\2\2\2mn\t\6\2\2n\23\3\2\2\2os\5\22\n\2ps"+
-		"\5\16\b\2qs\5\20\t\2ro\3\2\2\2rp\3\2\2\2rq\3\2\2\2s\25\3\2\2\2\13BITW"+
-		"^bekr";
+		"\20\22\24\2\b\3\2\34\35\3\2\32\33\3\2\27\30\7\2\6\6\b\b\13\13\16\16\27"+
+		"\30\4\2\f\f\17\20\4\2\34\35\37\37|\2\26\3\2\2\2\4B\3\2\2\2\6L\3\2\2\2"+
+		"\bN\3\2\2\2\nP\3\2\2\2\fT\3\2\2\2\16W\3\2\2\2\20e\3\2\2\2\22m\3\2\2\2"+
+		"\24r\3\2\2\2\26\27\5\4\3\2\27\30\7\2\2\3\30\3\3\2\2\2\31\32\b\3\1\2\32"+
+		"\33\7\t\2\2\33\34\5\6\4\2\34\35\5\16\b\2\35C\3\2\2\2\36\37\7\25\2\2\37"+
+		" \5\6\4\2 !\5\16\b\2!C\3\2\2\2\"#\7\22\2\2#$\5\6\4\2$%\5\16\b\2%C\3\2"+
+		"\2\2&\'\7\3\2\2\'(\5\6\4\2()\5\16\b\2)C\3\2\2\2*+\7\n\2\2+,\5\6\4\2,-"+
+		"\5\16\b\2-C\3\2\2\2./\7\21\2\2/\60\5\f\7\2\60\61\5\24\13\2\61C\3\2\2\2"+
+		"\62\63\7\r\2\2\63\64\5\f\7\2\64\65\5\24\13\2\65C\3\2\2\2\66\67\7\5\2\2"+
+		"\678\5\b\5\289\t\2\2\29C\3\2\2\2:;\7\4\2\2;<\5\6\4\2<=\5\16\b\2=C\3\2"+
+		"\2\2>?\7\23\2\2?@\5\4\3\2@A\7\24\2\2AC\3\2\2\2B\31\3\2\2\2B\36\3\2\2\2"+
+		"B\"\3\2\2\2B&\3\2\2\2B*\3\2\2\2B.\3\2\2\2B\62\3\2\2\2B\66\3\2\2\2B:\3"+
+		"\2\2\2B>\3\2\2\2CI\3\2\2\2DE\f\4\2\2EF\t\3\2\2FH\5\4\3\5GD\3\2\2\2HK\3"+
+		"\2\2\2IG\3\2\2\2IJ\3\2\2\2J\5\3\2\2\2KI\3\2\2\2LM\t\4\2\2M\7\3\2\2\2N"+
+		"O\t\5\2\2O\t\3\2\2\2PQ\t\6\2\2Q\13\3\2\2\2RU\5\b\5\2SU\5\n\6\2TR\3\2\2"+
+		"\2TS\3\2\2\2U\r\3\2\2\2VX\7\23\2\2WV\3\2\2\2WX\3\2\2\2XY\3\2\2\2Y^\5\22"+
+		"\n\2Z[\7\26\2\2[]\5\22\n\2\\Z\3\2\2\2]`\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_"+
+		"b\3\2\2\2`^\3\2\2\2ac\7\24\2\2ba\3\2\2\2bc\3\2\2\2c\17\3\2\2\2df\7\23"+
+		"\2\2ed\3\2\2\2ef\3\2\2\2fg\3\2\2\2gh\5\22\n\2hi\7\7\2\2ik\5\22\n\2jl\7"+
+		"\24\2\2kj\3\2\2\2kl\3\2\2\2l\21\3\2\2\2mn\t\7\2\2n\23\3\2\2\2os\5\22\n"+
+		"\2ps\5\16\b\2qs\5\20\t\2ro\3\2\2\2rp\3\2\2\2rq\3\2\2\2s\25\3\2\2\2\13"+
+		"BITW^bekr";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

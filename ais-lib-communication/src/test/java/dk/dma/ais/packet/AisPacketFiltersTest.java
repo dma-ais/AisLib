@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.packet;
 
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 import org.junit.Before;
@@ -39,12 +40,14 @@ public class AisPacketFiltersTest {
     AisPacket p1;
     AisPacket p2;
     AisPacket p3;
+    AisPacket p5;
 
     @Before
     public void setup() {
         p1 = AisTestPackets.p1();
         p2 = AisTestPackets.p2();
         p3 = AisTestPackets.p3();
+        p5 = AisTestPackets.p5();
     }
 
     @Test
@@ -130,6 +133,7 @@ public class AisPacketFiltersTest {
 
         testComparison(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testComparison(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+        testComparison(p5, "m.sog", ((IVesselPositionMessage) p5.tryGetAisMessage()).getSog() / 10.0f);
 
         // Test in-list operator
         testInList(p1, "m.id", p1.tryGetAisMessage().getMsgId());
@@ -187,35 +191,35 @@ public class AisPacketFiltersTest {
         assertFilterExpression(true, testPacket, field + "@" + fieldValue + ".." + above + "");
     }
 
-    private static void testComparison(AisPacket testPacket, String field, int fieldValue) {
+    private static void testComparison(AisPacket testPacket, String field, Number fieldValue) {
         // Test = operator
         assertFilterExpression(true, testPacket, field + " = " + fieldValue);
-        assertFilterExpression(false, testPacket, field + " = " + (fieldValue + 1));
-        assertFilterExpression(false, testPacket, field + " = " + (fieldValue - 1));
+        assertFilterExpression(false, testPacket, field + " = " + (fieldValue.intValue() + 1));
+        assertFilterExpression(false, testPacket, field + " = " + (fieldValue.intValue() - 1));
 
         // Test != operator
         assertFilterExpression(false, testPacket, field + " != " + fieldValue);
-        assertFilterExpression(true, testPacket, field + " != " + (fieldValue + 1));
+        assertFilterExpression(true, testPacket, field + " != " + (fieldValue.intValue() + 1));
 
         // Test > operator
-        assertFilterExpression(true, testPacket, field + " > " + (fieldValue - 1));
+        assertFilterExpression(true, testPacket, field + " > " + (fieldValue.intValue() - 1));
         assertFilterExpression(false, testPacket, field + "> " + fieldValue);
-        assertFilterExpression(false, testPacket, field + "  > " + (fieldValue + 1));
+        assertFilterExpression(false, testPacket, field + "  > " + (fieldValue.intValue() + 1));
 
         // Test >= operator
-        assertFilterExpression(true, testPacket, field + " >= " + (fieldValue - 1));
+        assertFilterExpression(true, testPacket, field + " >= " + (fieldValue.intValue() - 1));
         assertFilterExpression(true, testPacket, field + " >= " + fieldValue);
-        assertFilterExpression(false, testPacket, field + " >= " + (fieldValue + 1));
+        assertFilterExpression(false, testPacket, field + " >= " + (fieldValue.intValue() + 1));
 
         // Test < operator
-        assertFilterExpression(false, testPacket, field + " < " + (fieldValue - 1));
+        assertFilterExpression(false, testPacket, field + " < " + (fieldValue.intValue() - 1));
         assertFilterExpression(false, testPacket, field + " < " + fieldValue);
-        assertFilterExpression(true, testPacket, field + " < " + (fieldValue + 1));
+        assertFilterExpression(true, testPacket, field + " < " + (fieldValue.intValue() + 1));
 
         // Test <= operator
-        assertFilterExpression(false, testPacket, field + " <= " + (fieldValue - 1));
+        assertFilterExpression(false, testPacket, field + " <= " + (fieldValue.intValue() - 1));
         assertFilterExpression(true, testPacket, field + " <= " + fieldValue);
-        assertFilterExpression(true, testPacket, field + " <= " + (fieldValue + 1));
+        assertFilterExpression(true, testPacket, field + " <= " + (fieldValue.intValue() + 1));
     }
 
     @Test

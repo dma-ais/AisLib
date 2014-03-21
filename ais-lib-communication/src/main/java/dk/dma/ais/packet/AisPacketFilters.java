@@ -18,6 +18,7 @@ package dk.dma.ais.packet;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisPosition;
 import dk.dma.ais.message.IPositionMessage;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.sentence.Vdm;
@@ -218,7 +219,27 @@ public class AisPacketFilters {
         }
     }
 
-    public static Predicate<AisPacket> filterOnMessageId(final Operator operator, final int id) {
+    private static boolean compare(float lhs, float rhs, Operator operator) {
+        switch (operator) {
+            case EQUALS:
+                return lhs == rhs;
+            case NOT_EQUALS:
+                return lhs != rhs;
+            case GREATER_THAN:
+                return lhs > rhs;
+            case GREATER_THAN_OR_EQUALS:
+                return lhs >= rhs;
+            case LESS_THAN:
+                return lhs < rhs;
+            case LESS_THAN_OR_EQUALS:
+                return lhs <= rhs;
+            default:
+                throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageId(final Operator operator, final Integer id) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 AisMessage aisMessage = p.tryGetAisMessage();
@@ -230,6 +251,37 @@ public class AisPacketFilters {
         };
     }
 
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageMmsi(final Operator operator, final Integer mmsi) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                AisMessage aisMessage = p.tryGetAisMessage();
+                return aisMessage == null ? false : compare(aisMessage.getUserId(), mmsi, operator);
+            }
+            public String toString() {
+                return "mmsi = " + mmsi;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageSpeedOverGround(final Operator operator, final Float sog) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IVesselPositionMessage) {
+                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getSog() / 10.0), sog, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "sog = " + sog;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageIdInList(int... mmsis) {
         final int[] m = mmsis.clone();
         Arrays.sort(m);
@@ -248,36 +300,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnMessageIdInRange(final int min, final int max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = false;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage != null) {
-                    int id = aisMessage.getMsgId();
-                    pass = id >= min && id <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "msgid = " + min + ".." + max;
-            }
-        };
-    }
-
-
-    public static Predicate<AisPacket> filterOnMessageMmsi(final Operator operator, final int mmsi) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                AisMessage aisMessage = p.tryGetAisMessage();
-                return aisMessage == null ? false : compare(aisMessage.getUserId(), mmsi, operator);
-            }
-            public String toString() {
-                return "mmsi = " + mmsi;
-            }
-        };
-    }
-
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageMmsiInList(int... mmsis) {
         final int[] m = mmsis.clone();
         Arrays.sort(m);
@@ -296,6 +319,25 @@ public class AisPacketFilters {
         };
     }
 
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageIdInRange(final int min, final int max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = false;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage != null) {
+                    int id = aisMessage.getMsgId();
+                    pass = id >= min && id <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "msgid = " + min + ".." + max;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageMmsiInRange(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {

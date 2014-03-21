@@ -11,7 +11,7 @@ filterExpression:
     
     |   'm.id' operator valueSpec          # messageId
     |   'm.mmsi' operator valueSpec        # messageMmsi
-    |   'm.sog' comparison valueSpec       # messageSpeedOverGround
+    |   'm.sog' comparison (INT | FLOAT)   # messageSpeedOverGround
 
     |   'messagetype' equalityTest valueList  # AisMessagetype
     |   filterExpression op=('&'|'|') filterExpression      # OrAnd
