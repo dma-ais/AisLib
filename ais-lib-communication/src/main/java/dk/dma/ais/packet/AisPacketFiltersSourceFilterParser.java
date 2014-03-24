@@ -401,9 +401,9 @@ class AisPacketFiltersSourceFilterParser {
             for (int i = 0; i<n; i++) {
                 Object o = strs.get(i);
                 if (o instanceof TerminalNode) {
-                    strings[i] = ((TerminalNode) o).getText();
+                    strings[i] = removeSurroundingApostrophes(((TerminalNode) o).getText());
                 } else if (o instanceof SourceFilterParser.StringContext) {
-                    strings[i] = ((SourceFilterParser.StringContext) o).getText();
+                    strings[i] = removeSurroundingApostrophes(((SourceFilterParser.StringContext) o).getText());
                 } else {
                     throw new IllegalArgumentException(o.getClass().toString());
                 }
@@ -419,13 +419,7 @@ class AisPacketFiltersSourceFilterParser {
         private String extractString(SourceFilterParser.StringContext string) {
             String result = null;
             if (string.STRING() != null) {
-                result = string.STRING().getText();
-                if (result.startsWith("'")) {
-                    result = result.substring(1);
-                }
-                if (result.endsWith("'")) {
-                    result = result.substring(0, result.length()-1);
-                }
+                result = removeSurroundingApostrophes(string.STRING().getText());
             } else if (string.WORD() != null) {
                 result = string.WORD().getText();
             } else if (string.number() != null) {
@@ -596,6 +590,17 @@ class AisPacketFiltersSourceFilterParser {
             throw new IllegalArgumentException("No mapping to predicate name for field " + fieldToken);
         }
 
+    }
+
+    private static String removeSurroundingApostrophes(String string) {
+        String result = string;
+        if (result.startsWith("'")) {
+            result = result.substring(1);
+        }
+        if (result.endsWith("'")) {
+            result = result.substring(0, result.length()-1);
+        }
+        return result;
     }
 
     /**

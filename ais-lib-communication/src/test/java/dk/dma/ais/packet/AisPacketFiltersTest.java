@@ -208,6 +208,8 @@ public class AisPacketFiltersTest {
         assertFilterExpression(true, p1, "m.type in TANKER, MILITARY, HSC, FISHING");
         assertFilterExpression(true, p1, "m.type in tanker, MILITARY, HSC, FISHING");
         assertFilterExpression(true, p1, "m.type in tanker, military, HSC, FISHING");
+        assertFilterExpression(true, p1, "m.type in 'tanker', 'military', HSC");
+        assertFilterExpression(false, p1, "m.type in 'tanker', 'militar', HSC");
         assertFilterExpression(false, p1, "m.type in PASSENGER, TANKER, HSC, FISHING");
     }
 
