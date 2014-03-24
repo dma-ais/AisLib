@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.packet;
 
+import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.util.function.Predicate;
@@ -41,8 +42,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBaseStation;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
@@ -188,6 +191,14 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageShiptype(@NotNull SourceFilterParser.MessageShiptypeContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String operator = ctx.compareTo().getText();
+            Integer id = Integer.valueOf(ctx.INT().getText());
+            return createFilterPredicateForComparison(fieldName, operator, id);
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageName(@NotNull SourceFilterParser.MessageNameContext ctx) {
             String fieldName = ctx.getStart().getText();
             String operator = ctx.compareTo().getText();
@@ -252,6 +263,14 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageShiptypeLabel(@NotNull SourceFilterParser.MessageShiptypeLabelContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String label = extractString(ctx.string());
+            Set<Integer> shipTypes = getShipTypes(label);
+            return createFilterPredicateForList(fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageIdInList(@NotNull SourceFilterParser.MessageIdInListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
@@ -267,6 +286,13 @@ class AisPacketFiltersSourceFilterParser {
 
         @Override
         public Predicate<AisPacket> visitMessageImoInList(@NotNull SourceFilterParser.MessageImoInListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            Integer[] ints = extractIntegers(ctx.intList().INT());
+            return createFilterPredicateForList(fieldName, ints);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageShiptypeInList(@NotNull SourceFilterParser.MessageShiptypeInListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
             return createFilterPredicateForList(fieldName, ints);
@@ -311,6 +337,14 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageShiptypeInRange(@NotNull SourceFilterParser.MessageShiptypeInRangeContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
+            int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
+            return createFilterPredicateForRange(fieldName, min, max);
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageTrueHeadingInRange(@NotNull SourceFilterParser.MessageTrueHeadingInRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.numberRange().number().get(0).getText());
@@ -332,6 +366,14 @@ class AisPacketFiltersSourceFilterParser {
             float min = Float.valueOf(ctx.numberRange().number().get(0).getText());
             float max = Float.valueOf(ctx.numberRange().number().get(1).getText());
             return createFilterPredicateForRange(fieldName, min, max);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageShiptypeInLabelList(@NotNull SourceFilterParser.MessageShiptypeInLabelListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] labels = extractStrings(ctx.stringList().string());
+            Set<Integer> shipTypes = getShipTypes(labels);
+            return createFilterPredicateForList(fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
         }
 
         /**
@@ -532,6 +574,8 @@ class AisPacketFiltersSourceFilterParser {
                     return "filterOnMessageMmsi";
                 case "m.imo":
                     return "filterOnMessageImo";
+                case "m.type":
+                    return "filterOnMessageShiptype";
                 case "m.name":
                     return "filterOnMessageName";
                 case "m.cs":
@@ -552,5 +596,36 @@ class AisPacketFiltersSourceFilterParser {
             throw new IllegalArgumentException("No mapping to predicate name for field " + fieldToken);
         }
 
+    }
+
+    /**
+     * Get the list of AIS ship types matching the label text.
+     * Based on Rec. ITU-R M.1371-4 - table 50.
+     * @param labels the ship type label; e.g. 'fishing'.
+     * @return a list of matching ship types.
+     */
+    private static Set<Integer> getShipTypes(String[] labels) {
+        HashSet<Integer> shipTypes = new HashSet<>();
+        for (String label : labels) {
+            shipTypes.addAll(getShipTypes(label));
+        }
+        return shipTypes;
+    }
+
+    /**
+     * Get the list of AIS ship types matching the label text.
+     * Based on Rec. ITU-R M.1371-4 - table 50.
+     * @param label the ship type label; e.g. 'fishing'.
+     * @return a list of matching ship types.
+     */
+    private static Set<Integer> getShipTypes(String label) {
+        HashSet<Integer> shipTypes = new HashSet<>();
+        for (int i=0; i<100; i++) {
+            ShipTypeCargo shipTypeCargo = new ShipTypeCargo(i);
+            if (shipTypeCargo.getShipType().toString().equalsIgnoreCase(label)) {
+                shipTypes.add(i);
+            }
+        }
+        return shipTypes;
     }
 }

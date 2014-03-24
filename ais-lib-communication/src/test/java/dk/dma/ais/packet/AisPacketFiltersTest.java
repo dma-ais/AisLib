@@ -198,6 +198,20 @@ public class AisPacketFiltersTest {
     }
 
     @Test
+    public void testParseSourceFilterLabels /* enums? */ () {
+        assertFilterExpression(false, p1, "m.type = NONEXISTENTLABEL");
+        assertFilterExpression(false, p1, "m.type = TANKER");
+        assertFilterExpression(true, p1, "m.type = MILITARY");
+        assertFilterExpression(true, p1, "m.type = military");
+        assertFilterExpression(true, p1, "m.type = 'MILITARY'");
+        assertFilterExpression(true, p1, "m.type in MILITARY, TANKER, HSC, FISHING");
+        assertFilterExpression(true, p1, "m.type in TANKER, MILITARY, HSC, FISHING");
+        assertFilterExpression(true, p1, "m.type in tanker, MILITARY, HSC, FISHING");
+        assertFilterExpression(true, p1, "m.type in tanker, military, HSC, FISHING");
+        assertFilterExpression(false, p1, "m.type in PASSENGER, TANKER, HSC, FISHING");
+    }
+
+    @Test
     public void testParseSourceFilter() {
         //
         assertFilterExpression(true, p3, "s.id = AISD, SD");
@@ -236,11 +250,11 @@ public class AisPacketFiltersTest {
         testComparison(p1, "m.draught", ((AisMessage5) p1.tryGetAisMessage()).getDraught() / 10.0f);
         testComparison(p1, "m.name", ((AisMessage5) p1.tryGetAisMessage()).getName());
         testComparison(p1, "m.cs", ((AisMessage5) p1.tryGetAisMessage()).getCallsign());
-
+        testComparison(p1, "m.type", ((AisMessage5) p1.tryGetAisMessage()).getShipType());
        /*
         'navstat'
         'time'
-        'type'*/
+        '*/
     }
 
     @Test
@@ -250,6 +264,7 @@ public class AisPacketFiltersTest {
         testInList(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
         testInList(p2, "m.name", ((AisMessage5) p2.tryGetAisMessage()).getName());
         testInList(p2, "m.cs", ((AisMessage5) p2.tryGetAisMessage()).getCallsign());
+        testInList(p2, "m.type", ((AisMessage5) p2.tryGetAisMessage()).getShipType());
     }
 
     @Test
@@ -260,6 +275,7 @@ public class AisPacketFiltersTest {
         testInRange(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
         testInRange(p5, "m.lat", ((IVesselPositionMessage) p5.tryGetAisMessage()).getPos().getLatitudeDouble());
         testInRange(p5, "m.lon", ((IVesselPositionMessage) p5.tryGetAisMessage()).getPos().getLongitudeDouble());
+        testInRange(p2, "m.type", ((AisMessage5) p2.tryGetAisMessage()).getShipType());
     }
 
     private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {

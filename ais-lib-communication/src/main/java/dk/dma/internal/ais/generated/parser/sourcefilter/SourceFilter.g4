@@ -18,6 +18,11 @@ filterExpression:
     |   'm.imo' compareTo INT                       # messageImo
     |   'm.imo' inListOrRange intRange              # messageImoInRange
     |   'm.imo' inListOrRange intList               # messageImoInList
+    |   'm.type' compareTo INT                      # messageShiptype
+    |   'm.type' compareTo string                   # messageShiptypeLabel
+    |   'm.type' inListOrRange intRange             # messageShiptypeInRange
+    |   'm.type' inListOrRange intList              # messageShiptypeInList
+    |   'm.type' inListOrRange stringList           # messageShiptypeInLabelList
     |   'm.name' compareTo string                   # messageName
     |   'm.name' inListOrRange stringList           # messageNameInList
     |   'm.cs' compareTo string                     # messageCallsign

@@ -306,6 +306,23 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageShiptype(final Operator operator, final Integer shiptype) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    pass = compare((int) ((AisMessage5) aisMessage).getShipType(), shiptype, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "shiptype = " + shiptype;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final Float name) {
         return filterOnMessageName(operator, name.toString());
     }
@@ -512,6 +529,26 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageShiptypeInList(Integer... shiptypes) {
+        final Integer[] m = shiptypes.clone();
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    int shiptype = ((AisMessage5) aisMessage).getShipType();
+                    pass = Arrays.binarySearch(m, shiptype) >= 0;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "shiptypes = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageNameInList(String... names) {
         final String[] m = preprocessExpressionStrings(names);
         Arrays.sort(m);
@@ -622,6 +659,24 @@ public class AisPacketFilters {
             }
             public String toString() {
                 return "imo = " + min + ".." + max;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageShiptypeInRange(final int min, final int max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisMessage5) {
+                    int shiptype = (int) ((AisMessage5) aisMessage).getShipType();
+                    pass = shiptype >= min && shiptype <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "shiptype = " + min + ".." + max;
             }
         };
     }
