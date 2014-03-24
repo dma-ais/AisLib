@@ -35,9 +35,9 @@ filterExpression:
     |   'm.draught' compareTo number                # messageDraught
     |   'm.draught' inListOrRange numberRange       # messageDraughtInRange
 
-    |   'messagetype' equalityTest valueList            # AisMessagetype
-    |   filterExpression op=('&'|'|') filterExpression  # OrAnd
-    |   '(' filterExpression ')'                        # parens
+    |   'messagetype' equalityTest valueList              # AisMessagetype
+    |   filterExpression (op=(AND|OR) filterExpression)+  # OrAnd
+    |   '(' filterExpression ')'                          # parens
     ;
 
 equalityTest : '!='|'=';

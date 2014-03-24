@@ -174,12 +174,27 @@ public class AisPacketFiltersTest {
         assertFilterExpression(false, p5, "m.sog > 6.6 & m.sog < 7.0");
         assertFilterExpression(false, p5, "m.sog > 6.0 & m.sog < 6.6");
 
+        // p5: sog = 66, cog=3500, msgId=1, mmsi=576048000, hdg=355, lat=37.912166666666664, lon=-122.42298333333333
         assertFilterExpression(true, p5, "m.sog > 6.0 | m.sog < 7.0");
         assertFilterExpression(false, p5, "m.sog > 6.6 | m.sog < 6.4");
 
-        // TODO
-        // assertFilterExpression(true, p5, "m.sog > 6.0 & m.hgd > 350 & m.id = 1");
-        // assertFilterExpression(false, p5, "m.sog > 6.0 & m.hgd > 350 & m.id = 2");
+        assertFilterExpression(false, p5, "m.sog > 6.6 & m.sog < 6.7");
+        assertFilterExpression(true, p5, "m.sog >= 6.6 & m.sog < 6.7");
+        assertFilterExpression(true, p5, "m.sog >= 6.1 & m.sog <= 6.9");
+        assertFilterExpression(false, p5, "m.sog >= 6.7 & m.sog <= 6.8");
+
+        assertFilterExpression(true, p5, "m.id = 1 & m.sog >= 6.1 & m.sog <= 6.9");
+        assertFilterExpression(false, p5, "m.id = 2 & m.sog >= 6.1 & m.sog <= 6.9");
+
+        assertFilterExpression(true, p5, "m.id = 2 | m.sog >= 6.1");
+        assertFilterExpression(true, p5, "m.id = 1 | m.sog < 6.1");
+        assertFilterExpression(false, p5, "m.id = 2 & m.sog >= 6.1");
+        assertFilterExpression(false, p5, "m.id = 1 & m.sog < 6.1");
+
+        assertFilterExpression(true, p5, "m.sog > 6.0 & m.hdg > 350 & m.id = 1");
+        assertFilterExpression(false, p5, "m.lat in 55..56 & m.lon in 11..12 & m.sog > 6.0 & m.hdg > 350 & m.id = 2");
+        assertFilterExpression(false, p5, "m.lat in 37..38 & m.lon in -123..-122 & m.sog > 7.0 & m.hdg > 350 & m.id = 1");
+        assertFilterExpression(true, p5, "m.lat in 37..38 & m.lon in -123..-122 & m.sog > 6.0 & m.hdg > 350 & m.id = 1");
     }
 
     @Test
@@ -243,6 +258,8 @@ public class AisPacketFiltersTest {
         testInRange(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
         testInRange(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
         testInRange(p5, "m.hdg", ((IVesselPositionMessage) p5.tryGetAisMessage()).getTrueHeading());
+        testInRange(p5, "m.lat", ((IVesselPositionMessage) p5.tryGetAisMessage()).getPos().getLatitudeDouble());
+        testInRange(p5, "m.lon", ((IVesselPositionMessage) p5.tryGetAisMessage()).getPos().getLongitudeDouble());
     }
 
     private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {
@@ -295,6 +312,9 @@ public class AisPacketFiltersTest {
         } else if (fieldValue instanceof Float) {
             below = new Float(((Float) fieldValue) - 10.0f);
             above = new Float(((Float) fieldValue) + 10.0f);
+        } else if (fieldValue instanceof Double) {
+            below = new Float(((Double) fieldValue) - 10.0f);
+            above = new Float(((Double) fieldValue) + 10.0f);
         } else {
             throw new IllegalArgumentException("Unsupported type: " + fieldValue.getClass());
         }

@@ -318,6 +318,22 @@ class AisPacketFiltersSourceFilterParser {
             return createFilterPredicateForRange(fieldName, min, max);
         }
 
+        @Override
+        public Predicate<AisPacket> visitMessageLatitudeInRange(@NotNull SourceFilterParser.MessageLatitudeInRangeContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            float min = Float.valueOf(ctx.numberRange().number().get(0).getText());
+            float max = Float.valueOf(ctx.numberRange().number().get(1).getText());
+            return createFilterPredicateForRange(fieldName, min, max);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageLongitudeInRange(@NotNull SourceFilterParser.MessageLongitudeInRangeContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            float min = Float.valueOf(ctx.numberRange().number().get(0).getText());
+            float max = Float.valueOf(ctx.numberRange().number().get(1).getText());
+            return createFilterPredicateForRange(fieldName, min, max);
+        }
+
         /**
          * Extract an array of Integers from an ANTLR list of TerminalNodes
          * @param ints
@@ -429,6 +445,32 @@ class AisPacketFiltersSourceFilterParser {
             try {
                 String filterFactoryMethodName = mapFieldTokenToFilterFactoryMethodName(fieldName) + "InRange";
                 Method filterFactoryMethod = AisPacketFilters.class.getDeclaredMethod(filterFactoryMethodName, int.class, int.class);
+                filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, min, max);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace(System.err);
+            } catch (InvocationTargetException e) {
+                e.printStackTrace(System.err);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace(System.err);
+            }
+            return filter;
+        }
+
+        /**
+         * Create new predicate to filter for given field to be in a range of values.
+         * @param fieldName the field to filter
+         * @param min the minimum value that the field must have to pass the filter.
+         * @param max the maximum value that the field must have to pass the filter.
+         * @return true if filter is passed or indeterminate; false if filter blocks.
+         */
+        private Predicate<AisPacket> createFilterPredicateForRange(@NotNull String fieldName, float min, float max) {
+            if (max < min) {
+                throw new IllegalArgumentException("max < min");
+            }
+            Predicate<AisPacket> filter = null;
+            try {
+                String filterFactoryMethodName = mapFieldTokenToFilterFactoryMethodName(fieldName) + "InRange";
+                Method filterFactoryMethod = AisPacketFilters.class.getDeclaredMethod(filterFactoryMethodName, float.class, float.class);
                 filter = (Predicate<AisPacket>) filterFactoryMethod.invoke(null, min, max);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace(System.err);

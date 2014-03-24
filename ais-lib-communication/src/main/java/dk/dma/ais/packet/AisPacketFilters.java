@@ -644,6 +644,42 @@ public class AisPacketFilters {
         };
     }
 
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageLatitudeInRange(final float min, final float max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IVesselPositionMessage) {
+                    float latitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLatitudeDouble();
+                    pass = latitude >= min && latitude <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "lat = " + min + ".." + max;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageLongitudeInRange(final float min, final float max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof IVesselPositionMessage) {
+                    float longitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLongitudeDouble();
+                    pass = longitude >= min && longitude <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "lon = " + min + ".." + max;
+            }
+        };
+    }
+
     public static Predicate<AisPacket> filterOnMessageType(final int... types) {
         final int[] t = types.clone();
         Arrays.sort(t);
