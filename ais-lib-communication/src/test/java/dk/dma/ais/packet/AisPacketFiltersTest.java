@@ -220,11 +220,11 @@ public class AisPacketFiltersTest {
         testComparison(p5, "m.lat", ((IPositionMessage) p5.tryGetAisMessage()).getPos().getLatitudeDouble());
         testComparison(p1, "m.draught", ((AisMessage5) p1.tryGetAisMessage()).getDraught() / 10.0f);
         testComparison(p1, "m.name", ((AisMessage5) p1.tryGetAisMessage()).getName());
+        testComparison(p1, "m.cs", ((AisMessage5) p1.tryGetAisMessage()).getCallsign());
 
        /*
         'navstat'
         'time'
-        'cs'
         'type'*/
     }
 
@@ -234,6 +234,7 @@ public class AisPacketFiltersTest {
         testInList(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
         testInList(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
         testInList(p2, "m.name", ((AisMessage5) p2.tryGetAisMessage()).getName());
+        testInList(p2, "m.cs", ((AisMessage5) p2.tryGetAisMessage()).getCallsign());
     }
 
     @Test

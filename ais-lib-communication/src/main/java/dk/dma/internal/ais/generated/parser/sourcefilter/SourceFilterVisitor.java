@@ -187,6 +187,13 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageLongitudeInRange(@NotNull SourceFilterParser.MessageLongitudeInRangeContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageCallsignInList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageCallsignInList(@NotNull SourceFilterParser.MessageCallsignInListContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#messageCourseOverGroundInRange}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -199,6 +206,13 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageId(@NotNull SourceFilterParser.MessageIdContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#messageCallsign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageCallsign(@NotNull SourceFilterParser.MessageCallsignContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#messageSpeedOverGround}.

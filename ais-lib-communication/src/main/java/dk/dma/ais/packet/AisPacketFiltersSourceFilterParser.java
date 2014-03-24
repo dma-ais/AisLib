@@ -196,6 +196,14 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageCallsign(@NotNull SourceFilterParser.MessageCallsignContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String operator = ctx.compareTo().getText();
+            String name = extractString(ctx.string());
+            return createFilterPredicateForComparison(fieldName, operator, name);
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageSpeedOverGround(@NotNull SourceFilterParser.MessageSpeedOverGroundContext ctx) {
             String fieldName = ctx.getStart().getText();
             String operator = ctx.compareTo().getText();
@@ -266,6 +274,13 @@ class AisPacketFiltersSourceFilterParser {
 
         @Override
         public Predicate<AisPacket> visitMessageNameInList(@NotNull SourceFilterParser.MessageNameInListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] strings = extractStrings(ctx.stringList().string());
+            return createFilterPredicateForList(fieldName, strings);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageCallsignInList(@NotNull SourceFilterParser.MessageCallsignInListContext ctx) {
             String fieldName = ctx.getStart().getText();
             String[] strings = extractStrings(ctx.stringList().string());
             return createFilterPredicateForList(fieldName, strings);
@@ -477,6 +492,8 @@ class AisPacketFiltersSourceFilterParser {
                     return "filterOnMessageImo";
                 case "m.name":
                     return "filterOnMessageName";
+                case "m.cs":
+                    return "filterOnMessageCallsign";
                 case "m.sog":
                     return "filterOnMessageSpeedOverGround";
                 case "m.cog":

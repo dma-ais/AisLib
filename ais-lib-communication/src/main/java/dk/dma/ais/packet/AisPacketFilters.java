@@ -322,13 +322,31 @@ public class AisPacketFilters {
             public boolean test(AisPacket p) {
                 boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    pass = compare(((AisMessage5) aisMessage).getName(), n, operator);
+                if (aisMessage instanceof AisStaticCommon) {
+                    pass = compare(((AisStaticCommon) aisMessage).getName(), n, operator);
                 }
                 return pass;
             }
             public String toString() {
                 return "name = " + n;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageCallsign(final Operator operator, String callsign) {
+        final String n = preprocessExpressionString(callsign);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisStaticCommon) {
+                    pass = compare(((AisStaticCommon) aisMessage).getCallsign(), n, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "callsign = " + n;
             }
         };
     }
@@ -503,6 +521,27 @@ public class AisPacketFilters {
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof AisStaticCommon) {
                     String name = preprocessAisString(((AisStaticCommon) aisMessage).getName());
+                    pass = Arrays.binarySearch(m, name) >= 0;
+                }
+                return pass;
+            }
+
+            public String toString() {
+                return "name = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageCallsignInList(String... callsigns) {
+        final String[] m = preprocessExpressionStrings(callsigns);
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisStaticCommon) {
+                    String name = preprocessAisString(((AisStaticCommon) aisMessage).getCallsign());
                     pass = Arrays.binarySearch(m, name) >= 0;
                 }
                 return pass;

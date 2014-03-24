@@ -20,6 +20,8 @@ filterExpression:
     |   'm.imo' inListOrRange intList               # messageImoInList
     |   'm.name' compareTo string                   # messageName
     |   'm.name' inListOrRange stringList           # messageNameInList
+    |   'm.cs' compareTo string                     # messageCallsign
+    |   'm.cs' inListOrRange stringList             # messageCallsignInList
     |   'm.sog' compareTo number                    # messageSpeedOverGround
     |   'm.sog' inListOrRange numberRange           # messageSpeedOverGroundInRange
     |   'm.cog' compareTo number                    # messageCourseOverGround

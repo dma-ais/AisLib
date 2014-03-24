@@ -218,6 +218,14 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitMessageCallsignInList(@NotNull SourceFilterParser.MessageCallsignInListContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitMessageCourseOverGroundInRange(@NotNull SourceFilterParser.MessageCourseOverGroundInRangeContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -227,6 +235,14 @@ public class SourceFilterBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitMessageId(@NotNull SourceFilterParser.MessageIdContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitMessageCallsign(@NotNull SourceFilterParser.MessageCallsignContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
