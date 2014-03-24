@@ -18,6 +18,7 @@ package dk.dma.ais.packet;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
+import dk.dma.ais.message.AisStaticCommon;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
@@ -315,18 +316,19 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final String name) {
+    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, String name) {
+        final String n = preprocessExpressionString(name);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof AisMessage5) {
-                    pass = compare(((AisMessage5) aisMessage).getName(), name, operator);
+                    pass = compare(((AisMessage5) aisMessage).getName(), n, operator);
                 }
                 return pass;
             }
             public String toString() {
-                return "name = " + name;
+                return "name = " + n;
             }
         };
     }
@@ -434,8 +436,8 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageIdInList(int... mmsis) {
-        final int[] m = mmsis.clone();
+    public static Predicate<AisPacket> filterOnMessageIdInList(Integer... ids) {
+        final Integer[] m = ids.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -453,8 +455,8 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageMmsiInList(int... mmsis) {
-        final int[] m = mmsis.clone();
+    public static Predicate<AisPacket> filterOnMessageMmsiInList(Integer... mmsis) {
+        final Integer[] m = mmsis.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -472,8 +474,8 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageImoInList(int... imos) {
-        final int[] m = imos.clone();
+    public static Predicate<AisPacket> filterOnMessageImoInList(Integer... imos) {
+        final Integer[] m = imos.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -492,8 +494,29 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageTrueHeadingInList(int... hdgs) {
-        final int[] m = hdgs.clone();
+    public static Predicate<AisPacket> filterOnMessageNameInList(String... names) {
+        final String[] m = preprocessExpressionStrings(names);
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisStaticCommon) {
+                    String name = preprocessAisString(((AisStaticCommon) aisMessage).getName());
+                    pass = Arrays.binarySearch(m, name) >= 0;
+                }
+                return pass;
+            }
+
+            public String toString() {
+                return "name = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageTrueHeadingInList(Integer... hdgs) {
+        final Integer[] m = hdgs.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -626,6 +649,26 @@ public class AisPacketFilters {
 
     static String skipBrackets(String s) {
         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
+    }
+
+    private final static String preprocessAisString(String name) {
+        return name != null ? name.replace('@',' ').trim() : null;
+    }
+
+    private final static String[] preprocessExpressionStrings(String[] exprStrings) {
+        String[] preprocessedStrings = new String[exprStrings.length];
+        for (int i=0; i<preprocessedStrings.length; i++) {
+            preprocessedStrings[i] = preprocessExpressionString(exprStrings[i]);
+        }
+        return preprocessedStrings;
+    }
+
+    private final static String preprocessExpressionString(String exprString) {
+        String preprocessedString = exprString;
+        if (preprocessedString.startsWith("'") && preprocessedString.endsWith("'") && preprocessedString.length()>2) {
+            preprocessedString = preprocessedString.substring(1, preprocessedString.length()-1);
+        }
+        return preprocessedString;
     }
 
     abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {
