@@ -426,12 +426,17 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    @Ignore
+    //@Ignore
     public void testParseSourceFilterNegative() {
+        assertFilterExpression(true, p3, "s.id != SD");
+        assertFilterExpression(false, p3, "s.id != AISD");
         assertFilterExpression(false, p3, "s.id != AISD, SD");
         assertFilterExpression(true, p3, "s.id != AFISD, SD");
         assertFilterExpression(true, p2, "(s.id != AISD, SD) | s.country != DNK");
         assertFilterExpression(true, p2, "(s.id != AISD, SD) | (s.country != DNK, NLD)");
-        assertFilterExpression(false, p2, "s.country != NLD");
+        assertFilterExpression(false, p3, "s.country != NLD");
+        p1.getTags().setSourceType(SourceType.TERRESTRIAL);
+        assertFilterExpression(false, p1, "s.type != LIVE");
+        assertFilterExpression(false, p2, "s.region != 0");
     }
 }

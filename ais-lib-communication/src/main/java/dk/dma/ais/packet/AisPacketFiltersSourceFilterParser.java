@@ -134,7 +134,11 @@ class AisPacketFiltersSourceFilterParser {
         public Predicate<AisPacket> visitSourceIdInStringList(@NotNull SourceFilterParser.SourceIdInStringListContext ctx) {
             String fieldName = ctx.getStart().getText();
             String[] labels = extractStrings(ctx.stringList().string());
-            return createFilterPredicateForList(fieldName, labels);
+            Predicate<AisPacket> filter = createFilterPredicateForList(fieldName, labels);
+            if (ctx.notin() != null) {
+                filter = filter.negate();
+            }
+            return filter;
         }
 
         @Override
@@ -142,7 +146,11 @@ class AisPacketFiltersSourceFilterParser {
             String fieldName = ctx.getStart().getText();
             String[] labels = extractStrings(ctx.stringList().string());
             SourceType[] sourceTypes = getSourceTypes(labels);
-            return createFilterPredicateForList(fieldName, sourceTypes);
+            Predicate<AisPacket> filter = createFilterPredicateForList(fieldName, sourceTypes);
+            if (ctx.notin() != null) {
+                filter = filter.negate();
+            }
+            return filter;
         }
 
         @Override
@@ -150,14 +158,22 @@ class AisPacketFiltersSourceFilterParser {
             String fieldName = ctx.getStart().getText();
             String[] labels = extractStrings(ctx.stringList().string());
             Country[] countries = getCountries(labels);
-            return createFilterPredicateForList(fieldName, countries);
+            Predicate<AisPacket> filter = createFilterPredicateForList(fieldName, countries);
+            if (ctx.notin() != null) {
+                filter = filter.negate();
+            }
+            return filter;
         }
 
         @Override
         public Predicate<AisPacket> visitSourceRegionInStringList(SourceFilterParser.SourceRegionInStringListContext ctx) {
             String fieldName = ctx.getStart().getText();
             String[] regions = extractStrings(ctx.stringList().string());
-            return createFilterPredicateForList(fieldName, regions);
+            Predicate<AisPacket> filter = createFilterPredicateForList(fieldName, regions);
+            if (ctx.notin() != null) {
+                filter = filter.negate();
+            }
+            return filter;
         }
 
         //

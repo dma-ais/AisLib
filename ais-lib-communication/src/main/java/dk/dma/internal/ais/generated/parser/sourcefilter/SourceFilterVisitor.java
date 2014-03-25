@@ -355,6 +355,13 @@ public interface SourceFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageImoInIntRange(@NotNull SourceFilterParser.MessageImoInIntRangeContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SourceFilterParser#notin}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNotin(@NotNull SourceFilterParser.NotinContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SourceFilterParser#sourceBasestationInIntRange}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
