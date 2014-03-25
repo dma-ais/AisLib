@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.packet;
 
+import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
@@ -199,6 +200,14 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageNavigationalStatus(@NotNull SourceFilterParser.MessageNavigationalStatusContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String operator = ctx.compareTo().getText();
+            Integer id = Integer.valueOf(ctx.INT().getText());
+            return createFilterPredicateForComparison(fieldName, operator, id);
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageName(@NotNull SourceFilterParser.MessageNameContext ctx) {
             String fieldName = ctx.getStart().getText();
             String operator = ctx.compareTo().getText();
@@ -271,6 +280,14 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageNavigationalStatusLabel(@NotNull SourceFilterParser.MessageNavigationalStatusLabelContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String label = extractString(ctx.string());
+            Set<Integer> shipTypes = getShipTypes(label);
+            return createFilterPredicateForList(fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageIdInList(@NotNull SourceFilterParser.MessageIdInListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
@@ -293,6 +310,13 @@ class AisPacketFiltersSourceFilterParser {
 
         @Override
         public Predicate<AisPacket> visitMessageShiptypeInList(@NotNull SourceFilterParser.MessageShiptypeInListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            Integer[] ints = extractIntegers(ctx.intList().INT());
+            return createFilterPredicateForList(fieldName, ints);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageNavigationalStatusInList(@NotNull SourceFilterParser.MessageNavigationalStatusInListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
             return createFilterPredicateForList(fieldName, ints);
@@ -345,6 +369,14 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageNavigationalStatusInRange(@NotNull SourceFilterParser.MessageNavigationalStatusInRangeContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
+            int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
+            return createFilterPredicateForRange(fieldName, min, max);
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageTrueHeadingInRange(@NotNull SourceFilterParser.MessageTrueHeadingInRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.numberRange().number().get(0).getText());
@@ -374,6 +406,14 @@ class AisPacketFiltersSourceFilterParser {
             String[] labels = extractStrings(ctx.stringList().string());
             Set<Integer> shipTypes = getShipTypes(labels);
             return createFilterPredicateForList(fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageNavigationalStatusInLabelList(@NotNull SourceFilterParser.MessageNavigationalStatusInLabelListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] labels = extractStrings(ctx.stringList().string());
+            Set<Integer> navstats = getNavigationalStatuses(labels);
+            return createFilterPredicateForList(fieldName, navstats.toArray(new Integer[navstats.size()]));
         }
 
         /**
@@ -570,6 +610,8 @@ class AisPacketFiltersSourceFilterParser {
                     return "filterOnMessageImo";
                 case "m.type":
                     return "filterOnMessageShiptype";
+                case "m.navstat":
+                    return "filterOnMessageNavigationalStatus";
                 case "m.name":
                     return "filterOnMessageName";
                 case "m.cs":
@@ -632,5 +674,23 @@ class AisPacketFiltersSourceFilterParser {
             }
         }
         return shipTypes;
+    }
+
+    /**
+     * Get the list of AIS navigational statuses matching the label text.
+     * Based on Rec. ITU-R M.1371-4 - table 45.
+     * @param labels
+     * @return
+     */
+    private static Set<Integer> getNavigationalStatuses(String[] labels) {
+        HashSet<Integer> navstats = new HashSet<>();
+        for (String label : labels) {
+            try {
+                navstats.add(NavigationalStatus.valueOf(label).getCode());
+            } catch (IllegalArgumentException e) {
+                System.out.println("WARN: " + e.getMessage());
+            }
+        }
+        return navstats;
     }
 }

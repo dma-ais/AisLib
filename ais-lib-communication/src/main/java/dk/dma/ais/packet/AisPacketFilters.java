@@ -18,6 +18,7 @@ package dk.dma.ais.packet;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
+import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.AisStaticCommon;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
@@ -323,6 +324,23 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final Operator operator, final Integer navstatus) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisPositionMessage) {
+                    pass = compare(((AisPositionMessage) aisMessage).getNavStatus(), navstatus, operator);
+                }
+                return pass;
+            }
+            public String toString() {
+                return "navstatus = " + navstatus;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final Float name) {
         return filterOnMessageName(operator, name.toString());
     }
@@ -549,6 +567,26 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageNavigationalStatusInList(Integer... navstats) {
+        final Integer[] m = navstats.clone();
+        Arrays.sort(m);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisPositionMessage) {
+                    int navstat = ((AisPositionMessage) aisMessage).getNavStatus();
+                    pass = Arrays.binarySearch(m, navstat) >= 0;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "navstat = " + skipBrackets(Arrays.toString(m));
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageNameInList(String... names) {
         final String[] m = preprocessExpressionStrings(names);
         Arrays.sort(m);
@@ -677,6 +715,24 @@ public class AisPacketFilters {
             }
             public String toString() {
                 return "shiptype = " + min + ".." + max;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageNavigationalStatusInRange(final int min, final int max) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                boolean pass = true;
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage instanceof AisPositionMessage) {
+                    int navstat = ((AisPositionMessage) aisMessage).getNavStatus();
+                    pass = navstat >= min && navstat <= max;
+                }
+                return pass;
+            }
+            public String toString() {
+                return "navstat = " + min + ".." + max;
             }
         };
     }

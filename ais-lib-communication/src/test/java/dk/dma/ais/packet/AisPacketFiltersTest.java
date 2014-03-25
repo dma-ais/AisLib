@@ -15,10 +15,12 @@
  */
 package dk.dma.ais.packet;
 
-import dk.dma.ais.message.AisMessage1;
 import dk.dma.ais.message.AisMessage5;
+import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
+import dk.dma.ais.message.NavigationalStatus;
+import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 import org.junit.Before;
@@ -111,13 +113,13 @@ public class AisPacketFiltersTest {
 
     @Test
     public void testMessagePassesSourceFilterIfNotCarryingTheFilteredTypeOfInformation() {
-        assertTrue(p1.tryGetAisMessage() instanceof AisMessage5);
+        assertFalse(p1.tryGetAisMessage() instanceof AisPositionMessage);
         assertFilterExpression(true, p1, "m.sog > 20.0");
         assertFilterExpression(true, p1, "m.cog > 90");
         assertFilterExpression(true, p1, "m.hdg > 90");
         assertFilterExpression(true, p1, "m.lat > 55.5");
         assertFilterExpression(true, p1, "m.lon > 55.5");
-        assertTrue(p5.tryGetAisMessage() instanceof AisMessage1);
+        assertTrue(p5.tryGetAisMessage() instanceof AisPositionMessage);
         assertFilterExpression(true, p5, "m.draught > 0.1");
     }
 
@@ -148,7 +150,7 @@ public class AisPacketFiltersTest {
     @Ignore
     public void testParseSourceFilterNumberRanges() {
         // TODO
-        assertTrue(p5.tryGetAisMessage() instanceof AisMessage1);
+        assertTrue(p5.tryGetAisMessage() instanceof AisPositionMessage);
         assertFilterExpression(true, p5, "m.id in 0.0 .. 4.1");
         assertFilterExpression(true, p5, "m.id in (0.0 .. 4.1)");
         assertFilterExpression(true, p5, "m.id in 0.0..4.1");
@@ -253,8 +255,8 @@ public class AisPacketFiltersTest {
         testComparison(p1, "m.name", ((AisMessage5) p1.tryGetAisMessage()).getName());
         testComparison(p1, "m.cs", ((AisMessage5) p1.tryGetAisMessage()).getCallsign());
         testComparison(p1, "m.type", ((AisMessage5) p1.tryGetAisMessage()).getShipType());
+        testComparison(p5, "m.navstat", ((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus());
        /*
-        'navstat'
         'time'
         '*/
     }
@@ -267,6 +269,9 @@ public class AisPacketFiltersTest {
         testInList(p2, "m.name", ((AisMessage5) p2.tryGetAisMessage()).getName());
         testInList(p2, "m.cs", ((AisMessage5) p2.tryGetAisMessage()).getCallsign());
         testInList(p2, "m.type", ((AisMessage5) p2.tryGetAisMessage()).getShipType());
+        testInList(p2, "m.type", new ShipTypeCargo(((AisMessage5) p2.tryGetAisMessage()).getShipType()).getShipType().toString());
+        testInList(p5, "m.navstat", ((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus());
+        testInList(p5, "m.navstat", NavigationalStatus.get(((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus()));
     }
 
     @Test
@@ -278,6 +283,7 @@ public class AisPacketFiltersTest {
         testInRange(p5, "m.lat", ((IVesselPositionMessage) p5.tryGetAisMessage()).getPos().getLatitudeDouble());
         testInRange(p5, "m.lon", ((IVesselPositionMessage) p5.tryGetAisMessage()).getPos().getLongitudeDouble());
         testInRange(p2, "m.type", ((AisMessage5) p2.tryGetAisMessage()).getShipType());
+        testInRange(p5, "m.navstat", ((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus());
     }
 
     private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {
@@ -300,6 +306,10 @@ public class AisPacketFiltersTest {
             if (((String) fieldValue).contains(" ")) {
                 fieldValue  = "'" + fieldValue + "'";
             }
+        } else if (fieldValue instanceof Enum) {
+            otherValue1 = "VALUE1";
+            otherValue2 = "VALUE2";
+            fieldValue = ((Enum) fieldValue).name();
         } else {
             throw new IllegalArgumentException("Unsupported type: " + fieldValue.getClass());
         }
