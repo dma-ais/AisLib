@@ -61,7 +61,7 @@
     <dependency>
       <groupId>dk.dma.commons</groupId>
       <artifactId>dma-commons-util</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.1</version>
     </dependency>
     <dependency>
       <groupId>dk.dma.3rdparty</groupId>
