@@ -27,7 +27,7 @@ import dk.dma.enav.util.function.Predicate;
  * 
  * @author Kasper Nielsen
  */
-class AisPacketSourceFilters {
+public class AisPacketSourceFilters {
 
     @SafeVarargs
     static <T> T[] check(T... elements) {
