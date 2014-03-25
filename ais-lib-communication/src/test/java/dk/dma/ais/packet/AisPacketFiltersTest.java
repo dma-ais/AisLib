@@ -426,7 +426,6 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    //@Ignore
     public void testParseSourceFilterNegative() {
         assertFilterExpression(true, p3, "s.id != SD");
         assertFilterExpression(false, p3, "s.id != AISD");

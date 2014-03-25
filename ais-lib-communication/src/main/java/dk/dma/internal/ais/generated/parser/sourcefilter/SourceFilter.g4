@@ -8,67 +8,59 @@ filterExpression:
     // Tokens related to source
     //
 
-        's.id' (in|notin) stringList        # sourceIdInStringList
+        's.id' (in|notin) stringList                            # sourceIdIn
 
-    |   's.bs' compareTo INT                # sourceBasestation
-    |   's.bs' in intRange                  # sourceBasestationInIntRange
-    |   's.bs' in intList                   # sourceBasestationInIntList
+    |   's.bs' compareTo INT                                    # sourceBasestation
+    |   's.bs' (in|notin) (intRange|intList)                    # sourceBasestationIn
 
-    |   's.country' (in|notin) stringList   # sourceCountryInStringList
+    |   's.country' (in|notin) stringList                       # sourceCountryIn
 
-    |   's.type' (in|notin) stringList      # sourceTypeInStringList
+    |   's.type' (in|notin) stringList                          # sourceTypeIn
 
-    |   's.region' (in|notin) stringList    # sourceRegionInStringList
+    |   's.region' (in|notin) stringList                        # sourceRegionIn
 
     //
     // Tokens related to message contents
     //
 
-    |   'm.id' compareTo INT                # messageId
-    |   'm.id' in intRange                  # messageIdInIntRange
-    |   'm.id' in intList                   # messageIdInIntList
+    |   'm.id' compareTo INT                                    # messageId
+    |   'm.id' (in|notin) (intRange|intList)                    # messageIdIn
 
-    |   'm.mmsi' compareTo INT              # messageMmsi
-    |   'm.mmsi' in intRange                # messageMmsiInIntRange
-    |   'm.mmsi' in intList                 # messageMmsiInIntList
+    |   'm.mmsi' compareTo INT                                  # messageMmsi
+    |   'm.mmsi' (in|notin) (intRange|intList)                  # messageMmsiIn
 
-    |   'm.imo' compareTo INT               # messageImo
-    |   'm.imo' in intRange                 # messageImoInIntRange
-    |   'm.imo' in intList                  # messageImoInIntList
+    |   'm.imo' compareTo INT                                   # messageImo
+    |   'm.imo' (in|notin) (intRange|intList)                   # messageImoIn
 
-    |   'm.type' compareTo string           # messageShiptype
-    |   'm.type' in intRange                # messageShiptypeInIntRange
-    |   'm.type' in intList                 # messageShiptypeInIntList
-    |   'm.type' in stringList              # messageShiptypeInStringList
+    |   'm.type' compareTo string                               # messageShiptype
+    |   'm.type' (in|notin) (intRange|intList|stringList)       # messageShiptypeIn
 
-    |   'm.navstat' compareTo string        # messageNavigationalStatus
-    |   'm.navstat' in intRange             # messageNavigationalStatusInIntRange
-    |   'm.navstat' in intList              # messageNavigationalStatusInIntList
-    |   'm.navstat' in stringList           # messageNavigationalStatusInStringList
+    |   'm.navstat' compareTo string                            # messageNavigationalStatus
+    |   'm.navstat' (in|notin) (intRange|intList|stringList)    # messageNavigationalStatusIn
 
-    |   'm.name' compareTo string           # messageName
-    |   'm.name' in stringList              # messageNameInStringList
+    |   'm.name' compareTo string                               # messageName
+    |   'm.name' (in|notin) stringList                          # messageNameIn
 
-    |   'm.cs' compareTo string             # messageCallsign
-    |   'm.cs' in stringList                # messageCallsignInStringList
+    |   'm.cs' compareTo string                                 # messageCallsign
+    |   'm.cs' (in|notin) stringList                            # messageCallsignIn
 
-    |   'm.sog' compareTo number            # messageSpeedOverGround
-    |   'm.sog' in numberRange              # messageSpeedOverGroundInNumberRange
+    |   'm.sog' compareTo number                                # messageSpeedOverGround
+    |   'm.sog' (in|notin) numberRange                          # messageSpeedOverGroundIn
 
-    |   'm.cog' compareTo number            # messageCourseOverGround
-    |   'm.cog' in numberRange              # messageCourseOverGroundInNumberRange
+    |   'm.cog' compareTo number                                # messageCourseOverGround
+    |   'm.cog' (in|notin) numberRange                          # messageCourseOverGroundIn
 
-    |   'm.lat' compareTo number            # messageLatitude
-    |   'm.lat' in numberRange              # messageLatitudeInNumberRange
+    |   'm.lat' compareTo number                                # messageLatitude
+    |   'm.lat' (in|notin) numberRange                          # messageLatitudeIn
 
-    |   'm.lon' compareTo number            # messageLongitude
-    |   'm.lon' in numberRange              # messageLongitudeInNumberRange
+    |   'm.lon' compareTo number                                # messageLongitude
+    |   'm.lon' (in|notin) numberRange                          # messageLongitudeIn
 
-    |   'm.hdg' compareTo number            # messageTrueHeading
-    |   'm.hdg' in numberRange              # messageTrueHeadingInNumberRange
+    |   'm.hdg' compareTo INT                                   # messageTrueHeading
+    |   'm.hdg' (in|notin) intRange                             # messageTrueHeadingIn
 
-    |   'm.draught' compareTo number        # messageDraught
-    |   'm.draught' in numberRange          # messageDraughtInNumberRange
+    |   'm.draught' compareTo number                            # messageDraught
+    |   'm.draught' (in|notin) numberRange                      # messageDraughtIn
 
     //
     // Tokens related to message contents
@@ -80,8 +72,8 @@ filterExpression:
 
     |   'messagetype' in stringList     # AisMessagetype
 
-    |   filterExpression (op=(AND|OR) filterExpression)+  # OrAnd
-    |   '(' filterExpression ')'                          # parens
+    |   filterExpression (op=(AND|OR) filterExpression)+        # OrAnd
+    |   '(' filterExpression ')'                                # parens
     ;
 
 compareTo : '!='|'='|'>'|'>='|'<='|'<' ;
