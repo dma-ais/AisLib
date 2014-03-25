@@ -3,73 +3,89 @@ grammar SourceFilter;
 prog: filterExpression EOF;
 
 filterExpression:
-        's.id' equalityTest valueList               # sourceId
-    |   's.bs' equalityTest valueList               # sourceBasestation
-    |   's.country' equalityTest valueList          # sourceCountry
-    |   's.type' equalityTest valueList             # sourceType
-    |   's.region' equalityTest valueList           # sourceRegion
-    
-    |   'm.id' compareTo INT                        # messageId
-    |   'm.id' inListOrRange intRange               # messageIdInRange
-    |   'm.id' inListOrRange intList                # messageIdInList
 
-    |   'm.mmsi' compareTo INT                      # messageMmsi
-    |   'm.mmsi' inListOrRange intRange             # messageMmsiInRange
-    |   'm.mmsi' inListOrRange intList              # messageMmsiInList
+    //
+    // Tokens related to source
+    //
 
-    |   'm.imo' compareTo INT                       # messageImo
-    |   'm.imo' inListOrRange intRange              # messageImoInRange
-    |   'm.imo' inListOrRange intList               # messageImoInList
+        's.id' in stringList             # sourceIdInStringList
 
-    |   'm.type' compareTo INT                      # messageShiptype
-    |   'm.type' compareTo string                   # messageShiptypeLabel
-    |   'm.type' inListOrRange intRange             # messageShiptypeInRange
-    |   'm.type' inListOrRange intList              # messageShiptypeInList
-    |   'm.type' inListOrRange stringList           # messageShiptypeInLabelList
+    |   's.bs' compareTo INT             # sourceBasestation
+    |   's.bs' in intRange               # sourceBasestationInIntRange
+    |   's.bs' in intList                # sourceBasestationInIntList
 
-    |   'm.navstat' compareTo INT                   # messageNavigationalStatus
-    |   'm.navstat' compareTo string                # messageNavigationalStatusLabel
-    |   'm.navstat' inListOrRange intRange          # messageNavigationalStatusInRange
-    |   'm.navstat' inListOrRange intList           # messageNavigationalStatusInList
-    |   'm.navstat' inListOrRange stringList        # messageNavigationalStatusInLabelList
+    |   's.country' in stringList        # sourceCountryInStringList
 
-    |   'm.name' compareTo string                   # messageName
-    |   'm.name' inListOrRange stringList           # messageNameInList
+    |   's.type' in stringList           # sourceTypeInStringList
 
-    |   'm.cs' compareTo string                     # messageCallsign
-    |   'm.cs' inListOrRange stringList             # messageCallsignInList
+    |   's.region' in stringList         # sourceRegionInStringList
 
-    |   'm.sog' compareTo number                    # messageSpeedOverGround
-    |   'm.sog' inListOrRange numberRange           # messageSpeedOverGroundInRange
+    //
+    // Tokens related to message contents
+    //
 
-    |   'm.cog' compareTo number                    # messageCourseOverGround
-    |   'm.cog' inListOrRange numberRange           # messageCourseOverGroundInRange
+    |   'm.id' compareTo INT             # messageId
+    |   'm.id' in intRange               # messageIdInIntRange
+    |   'm.id' in intList                # messageIdInIntList
 
-    |   'm.lat' compareTo number                    # messageLatitude
-    |   'm.lat' inListOrRange numberRange           # messageLatitudeInRange
+    |   'm.mmsi' compareTo INT           # messageMmsi
+    |   'm.mmsi' in intRange             # messageMmsiInIntRange
+    |   'm.mmsi' in intList              # messageMmsiInIntList
 
-    |   'm.lon' compareTo number                    # messageLongitude
-    |   'm.lon' inListOrRange numberRange           # messageLongitudeInRange
+    |   'm.imo' compareTo INT            # messageImo
+    |   'm.imo' in intRange              # messageImoInIntRange
+    |   'm.imo' in intList               # messageImoInIntList
 
-    |   'm.hdg' compareTo number                    # messageTrueHeading
-    |   'm.hdg' inListOrRange numberRange           # messageTrueHeadingInRange
+    |   'm.type' compareTo string        # messageShiptype
+    |   'm.type' in intRange             # messageShiptypeInIntRange
+    |   'm.type' in intList              # messageShiptypeInIntList
+    |   'm.type' in stringList           # messageShiptypeInStringList
 
-    |   'm.draught' compareTo number                # messageDraught
-    |   'm.draught' inListOrRange numberRange       # messageDraughtInRange
+    |   'm.navstat' compareTo string     # messageNavigationalStatus
+    |   'm.navstat' in intRange          # messageNavigationalStatusInIntRange
+    |   'm.navstat' in intList           # messageNavigationalStatusInIntList
+    |   'm.navstat' in stringList        # messageNavigationalStatusInStringList
 
-    |   'messagetype' equalityTest valueList              # AisMessagetype
+    |   'm.name' compareTo string        # messageName
+    |   'm.name' in stringList           # messageNameInStringList
+
+    |   'm.cs' compareTo string          # messageCallsign
+    |   'm.cs' in stringList             # messageCallsignInStringList
+
+    |   'm.sog' compareTo number         # messageSpeedOverGround
+    |   'm.sog' in numberRange           # messageSpeedOverGroundInNumberRange
+
+    |   'm.cog' compareTo number         # messageCourseOverGround
+    |   'm.cog' in numberRange           # messageCourseOverGroundInNumberRange
+
+    |   'm.lat' compareTo number         # messageLatitude
+    |   'm.lat' in numberRange           # messageLatitudeInNumberRange
+
+    |   'm.lon' compareTo number         # messageLongitude
+    |   'm.lon' in numberRange           # messageLongitudeInNumberRange
+
+    |   'm.hdg' compareTo number         # messageTrueHeading
+    |   'm.hdg' in numberRange           # messageTrueHeadingInNumberRange
+
+    |   'm.draught' compareTo number     # messageDraught
+    |   'm.draught' in numberRange       # messageDraughtInNumberRange
+
+    //
+    // Tokens related to message contents
+    //
+
+    //
+    // Other tokens
+    //
+
+    |   'messagetype' in stringList     # AisMessagetype
 
     |   filterExpression (op=(AND|OR) filterExpression)+  # OrAnd
     |   '(' filterExpression ')'                          # parens
     ;
 
-equalityTest : '!='|'=';
-value  : (INT | FLOAT | WORD /* | STRING */);
-valueList : '('? value (',' value)* ')'? ;
-
 compareTo : '!='|'='|'>'|'>='|'<='|'<' ;
-inListOrRange : '@' | 'in' | 'IN' ;
-complies : (compareTo | inListOrRange) ;
+in : '@' | 'in' | 'IN' | '=' ;
 
 intList  : '('? INT (',' INT)* ')'? ;
 stringList : '('? string (',' string)* ')'? ;

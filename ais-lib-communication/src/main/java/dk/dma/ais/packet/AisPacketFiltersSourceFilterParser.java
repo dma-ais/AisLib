@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.packet;
 
+import com.google.common.collect.ImmutableSet;
 import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
@@ -23,15 +24,10 @@ import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterLexer;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.EqualityTestContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.OrAndContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ParensContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ProgContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceBasestationContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceCountryContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceIdContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceRegionContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceTypeContext;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -44,15 +40,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBaseStation;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegion;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceType;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -93,8 +83,10 @@ class AisPacketFiltersSourceFilterParser {
 
         @Override
         public Predicate<AisPacket> visitOrAnd(OrAndContext ctx) {
-            return ctx.op.getType() == SourceFilterParser.AND ? visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) : visit(
-                    ctx.filterExpression(0)).or(visit(ctx.filterExpression(1)));
+            return ctx.op.getType() ==
+                    SourceFilterParser.AND ?
+                        visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) :
+                        visit(ctx.filterExpression(0)).or(visit(ctx.filterExpression(1)));
         }
 
         @Override
@@ -111,62 +103,67 @@ class AisPacketFiltersSourceFilterParser {
             };
         }
 
-        @Override
-        public Predicate<AisPacket> visitSourceBasestation(SourceBasestationContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStation(readValueListAsStringArray(ctx.valueList().value())));
-        }
+        //
+        // Tokens related to source
+        //
 
         @Override
-        public Predicate<AisPacket> visitSourceCountry(SourceCountryContext ctx) {
-            List<Country> countries = Country.findAllByCode(readValueListAsStringArray(ctx.valueList().value()));
-            return checkNegate(ctx.equalityTest(),
-                    filterOnSourceCountry(countries.toArray(new Country[countries.size()])));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitSourceId(final SourceIdContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceId(readValueListAsStringArray(ctx.valueList().value())));
+        public Predicate<AisPacket> visitSourceBasestation(@NotNull SourceBasestationContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String operator = ctx.compareTo().getText();
+            Integer id = Integer.valueOf(ctx.INT().getText());
+            return createFilterPredicateForComparison(fieldName, operator, id);
         }
 
         @Override
-        public Predicate<AisPacket> visitSourceRegion(SourceRegionContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceRegion(readValueListAsStringArray(ctx.valueList().value())));
+        public Predicate<AisPacket> visitSourceBasestationInIntList(@NotNull SourceFilterParser.SourceBasestationInIntListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            Integer[] ints = extractIntegers(ctx.intList().INT());
+            return createFilterPredicateForList(fieldName, ints);
         }
 
         @Override
-        public Predicate<AisPacket> visitSourceType(SourceTypeContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceType(readValueListAsSourceTypeArray(ctx.valueList().value())));
+        public Predicate<AisPacket> visitSourceBasestationInIntRange(@NotNull SourceFilterParser.SourceBasestationInIntRangeContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
+            int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
+            return createFilterPredicateForRange(fieldName, min, max);
         }
 
-        public Predicate<AisPacket> checkNegate(EqualityTestContext context, Predicate<AisPacket> p) {
-            String text = context.getChild(0).getText();
-            return text.equals("!=") ? p.negate() : p;
+        @Override
+        public Predicate<AisPacket> visitSourceIdInStringList(@NotNull SourceFilterParser.SourceIdInStringListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] labels = extractStrings(ctx.stringList().string());
+            return createFilterPredicateForList(fieldName, labels);
         }
 
-        // -------------------------------
-
-        private static String[] readValueListAsStringArray(List<SourceFilterParser.ValueContext> list) {
-            ArrayList<String> r = new ArrayList<>();
-            Iterator<SourceFilterParser.ValueContext> i = list.iterator();
-            while (i.hasNext()) {
-                SourceFilterParser.ValueContext value = i.next();
-                r.add(value.getText());
-            }
-            return r.toArray(new String[r.size()]);
+        @Override
+        public Predicate<AisPacket> visitSourceTypeInStringList(@NotNull SourceFilterParser.SourceTypeInStringListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] labels = extractStrings(ctx.stringList().string());
+            SourceType[] sourceTypes = getSourceTypes(labels);
+            return createFilterPredicateForList(fieldName, sourceTypes);
         }
 
-        private static SourceType[] readValueListAsSourceTypeArray(List<SourceFilterParser.ValueContext> list) {
-            ArrayList<SourceType> r = new ArrayList<>();
-            Iterator<SourceFilterParser.ValueContext> i = list.iterator();
-            while (i.hasNext()) {
-                SourceFilterParser.ValueContext value = i.next();
-                r.add(SourceType.fromString(value.getText()));
-            }
-            return r.toArray(new SourceType[r.size()]);
+        @Override
+        public Predicate<AisPacket> visitSourceCountryInStringList(SourceFilterParser.SourceCountryInStringListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] labels = extractStrings(ctx.stringList().string());
+            Country[] countries = getCountries(labels);
+            return createFilterPredicateForList(fieldName, countries);
         }
 
-        // -----------------------------
+        @Override
+        public Predicate<AisPacket> visitSourceRegionInStringList(SourceFilterParser.SourceRegionInStringListContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] regions = extractStrings(ctx.stringList().string());
+            return createFilterPredicateForList(fieldName, regions);
+        }
 
+        //
+        // Tokens related to message contents
+        //
+        
         @Override
         public Predicate<AisPacket> visitMessageId(@NotNull SourceFilterParser.MessageIdContext ctx) {
             String fieldName = ctx.getStart().getText();
@@ -195,16 +192,32 @@ class AisPacketFiltersSourceFilterParser {
         public Predicate<AisPacket> visitMessageShiptype(@NotNull SourceFilterParser.MessageShiptypeContext ctx) {
             String fieldName = ctx.getStart().getText();
             String operator = ctx.compareTo().getText();
-            Integer id = Integer.valueOf(ctx.INT().getText());
-            return createFilterPredicateForComparison(fieldName, operator, id);
+            String value = extractString(ctx.string());
+            try {
+                return createFilterPredicateForComparison(fieldName, operator, Integer.valueOf(value));
+            } catch (NumberFormatException e) {
+                Set<Integer> shipTypes = getShipTypes(value);
+                if (!operator.equals("=")) {
+                    throw new IllegalArgumentException("Sorry, only = operator currently supported.");
+                }
+                return createFilterPredicateForList(fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
+            }
         }
 
         @Override
         public Predicate<AisPacket> visitMessageNavigationalStatus(@NotNull SourceFilterParser.MessageNavigationalStatusContext ctx) {
             String fieldName = ctx.getStart().getText();
             String operator = ctx.compareTo().getText();
-            Integer id = Integer.valueOf(ctx.INT().getText());
-            return createFilterPredicateForComparison(fieldName, operator, id);
+            String value = extractString(ctx.string());
+            try {
+                return createFilterPredicateForComparison(fieldName, operator, Integer.valueOf(value));
+            } catch (NumberFormatException e) {
+                Set<Integer> navstats = getNavigationalStatuses(new String[] { value });
+                if (!operator.equals("=")) {
+                    throw new IllegalArgumentException("Sorry, only = operator currently supported.");
+                }
+                return createFilterPredicateForList(fieldName, navstats.toArray(new Integer[navstats.size()]));
+            }
         }
 
         @Override
@@ -272,72 +285,56 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageShiptypeLabel(@NotNull SourceFilterParser.MessageShiptypeLabelContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String label = extractString(ctx.string());
-            Set<Integer> shipTypes = getShipTypes(label);
-            return createFilterPredicateForList(fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitMessageNavigationalStatusLabel(@NotNull SourceFilterParser.MessageNavigationalStatusLabelContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String label = extractString(ctx.string());
-            Set<Integer> shipTypes = getShipTypes(label);
-            return createFilterPredicateForList(fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
-        }
-
-        @Override
-        public Predicate<AisPacket> visitMessageIdInList(@NotNull SourceFilterParser.MessageIdInListContext ctx) {
+        public Predicate<AisPacket> visitMessageIdInIntList(@NotNull SourceFilterParser.MessageIdInIntListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
             return createFilterPredicateForList(fieldName, ints);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageMmsiInList(@NotNull SourceFilterParser.MessageMmsiInListContext ctx) {
+        public Predicate<AisPacket> visitMessageMmsiInIntList(@NotNull SourceFilterParser.MessageMmsiInIntListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
             return createFilterPredicateForList(fieldName, ints);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageImoInList(@NotNull SourceFilterParser.MessageImoInListContext ctx) {
+        public Predicate<AisPacket> visitMessageImoInIntList(@NotNull SourceFilterParser.MessageImoInIntListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
             return createFilterPredicateForList(fieldName, ints);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageShiptypeInList(@NotNull SourceFilterParser.MessageShiptypeInListContext ctx) {
+        public Predicate<AisPacket> visitMessageShiptypeInIntList(@NotNull SourceFilterParser.MessageShiptypeInIntListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
             return createFilterPredicateForList(fieldName, ints);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageNavigationalStatusInList(@NotNull SourceFilterParser.MessageNavigationalStatusInListContext ctx) {
+        public Predicate<AisPacket> visitMessageNavigationalStatusInIntList(@NotNull SourceFilterParser.MessageNavigationalStatusInIntListContext ctx) {
             String fieldName = ctx.getStart().getText();
             Integer[] ints = extractIntegers(ctx.intList().INT());
             return createFilterPredicateForList(fieldName, ints);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageNameInList(@NotNull SourceFilterParser.MessageNameInListContext ctx) {
+        public Predicate<AisPacket> visitMessageNameInStringList(@NotNull SourceFilterParser.MessageNameInStringListContext ctx) {
             String fieldName = ctx.getStart().getText();
             String[] strings = extractStrings(ctx.stringList().string());
             return createFilterPredicateForList(fieldName, strings);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageCallsignInList(@NotNull SourceFilterParser.MessageCallsignInListContext ctx) {
+        public Predicate<AisPacket> visitMessageCallsignInStringList(@NotNull SourceFilterParser.MessageCallsignInStringListContext ctx) {
             String fieldName = ctx.getStart().getText();
             String[] strings = extractStrings(ctx.stringList().string());
             return createFilterPredicateForList(fieldName, strings);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageIdInRange(@NotNull SourceFilterParser.MessageIdInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageIdInIntRange(@NotNull SourceFilterParser.MessageIdInIntRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
             int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
@@ -345,7 +342,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageMmsiInRange(@NotNull SourceFilterParser.MessageMmsiInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageMmsiInIntRange(@NotNull SourceFilterParser.MessageMmsiInIntRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
             int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
@@ -353,7 +350,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageImoInRange(@NotNull SourceFilterParser.MessageImoInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageImoInIntRange(@NotNull SourceFilterParser.MessageImoInIntRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
             int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
@@ -361,7 +358,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageShiptypeInRange(@NotNull SourceFilterParser.MessageShiptypeInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageShiptypeInIntRange(@NotNull SourceFilterParser.MessageShiptypeInIntRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
             int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
@@ -369,7 +366,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageNavigationalStatusInRange(@NotNull SourceFilterParser.MessageNavigationalStatusInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageNavigationalStatusInIntRange(@NotNull SourceFilterParser.MessageNavigationalStatusInIntRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.intRange().INT().get(0).getText());
             int max = Integer.valueOf(ctx.intRange().INT().get(1).getText());
@@ -377,7 +374,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageTrueHeadingInRange(@NotNull SourceFilterParser.MessageTrueHeadingInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageTrueHeadingInNumberRange(@NotNull SourceFilterParser.MessageTrueHeadingInNumberRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             int min = Integer.valueOf(ctx.numberRange().number().get(0).getText());
             int max = Integer.valueOf(ctx.numberRange().number().get(1).getText());
@@ -385,7 +382,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageLatitudeInRange(@NotNull SourceFilterParser.MessageLatitudeInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageLatitudeInNumberRange(@NotNull SourceFilterParser.MessageLatitudeInNumberRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             float min = Float.valueOf(ctx.numberRange().number().get(0).getText());
             float max = Float.valueOf(ctx.numberRange().number().get(1).getText());
@@ -393,7 +390,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageLongitudeInRange(@NotNull SourceFilterParser.MessageLongitudeInRangeContext ctx) {
+        public Predicate<AisPacket> visitMessageLongitudeInNumberRange(@NotNull SourceFilterParser.MessageLongitudeInNumberRangeContext ctx) {
             String fieldName = ctx.getStart().getText();
             float min = Float.valueOf(ctx.numberRange().number().get(0).getText());
             float max = Float.valueOf(ctx.numberRange().number().get(1).getText());
@@ -401,7 +398,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageShiptypeInLabelList(@NotNull SourceFilterParser.MessageShiptypeInLabelListContext ctx) {
+        public Predicate<AisPacket> visitMessageShiptypeInStringList(@NotNull SourceFilterParser.MessageShiptypeInStringListContext ctx) {
             String fieldName = ctx.getStart().getText();
             String[] labels = extractStrings(ctx.stringList().string());
             Set<Integer> shipTypes = getShipTypes(labels);
@@ -409,7 +406,7 @@ class AisPacketFiltersSourceFilterParser {
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageNavigationalStatusInLabelList(@NotNull SourceFilterParser.MessageNavigationalStatusInLabelListContext ctx) {
+        public Predicate<AisPacket> visitMessageNavigationalStatusInStringList(@NotNull SourceFilterParser.MessageNavigationalStatusInStringListContext ctx) {
             String fieldName = ctx.getStart().getText();
             String[] labels = extractStrings(ctx.stringList().string());
             Set<Integer> navstats = getNavigationalStatuses(labels);
@@ -602,6 +599,16 @@ class AisPacketFiltersSourceFilterParser {
          */
         private static String mapFieldTokenToFilterFactoryMethodName(String fieldToken) {
             switch(fieldToken) {
+                case "s.id":
+                    return "filterOnSourceId";
+                case "s.bs":
+                    return "filterOnSourceBasestation";
+                case "s.country":
+                    return "filterOnSourceCountry";
+                case "s.type":
+                    return "filterOnSourceType";
+                case "s.region":
+                    return "filterOnSourceRegion";
                 case "m.id":
                     return "filterOnMessageId";
                 case "m.mmsi":
@@ -665,7 +672,7 @@ class AisPacketFiltersSourceFilterParser {
      * @param label the ship type label; e.g. 'fishing'.
      * @return a list of matching ship types.
      */
-    private static Set<Integer> getShipTypes(String label) {
+    private static ImmutableSet<Integer> getShipTypes(String label) {
         HashSet<Integer> shipTypes = new HashSet<>();
         for (int i=0; i<100; i++) {
             ShipTypeCargo shipTypeCargo = new ShipTypeCargo(i);
@@ -673,7 +680,7 @@ class AisPacketFiltersSourceFilterParser {
                 shipTypes.add(i);
             }
         }
-        return shipTypes;
+        return ImmutableSet.copyOf(shipTypes);
     }
 
     /**
@@ -682,7 +689,7 @@ class AisPacketFiltersSourceFilterParser {
      * @param labels
      * @return
      */
-    private static Set<Integer> getNavigationalStatuses(String[] labels) {
+    private static ImmutableSet<Integer> getNavigationalStatuses(String[] labels) {
         HashSet<Integer> navstats = new HashSet<>();
         for (String label : labels) {
             try {
@@ -691,6 +698,20 @@ class AisPacketFiltersSourceFilterParser {
                 System.out.println("WARN: " + e.getMessage());
             }
         }
-        return navstats;
+        return ImmutableSet.copyOf(navstats);
     }
+
+    private static SourceType[] getSourceTypes(String[] labels) {
+        ArrayList<SourceType> r = new ArrayList<>();
+        for (String label : labels) {
+            r.add(SourceType.fromString(label));
+        }
+        return r.toArray(new SourceType[r.size()]);
+    }
+
+    private static Country[] getCountries(String[] countryCodes) {
+        List<Country> countries = Country.findAllByCode(countryCodes);
+        return countries.toArray(new Country[countries.size()]);
+    }
+
 }

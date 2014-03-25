@@ -15,35 +15,19 @@
  */
 package dk.dma.ais.packet;
 
-import dk.dma.ais.packet.AisPacketTags.SourceType;
-import dk.dma.enav.model.Country;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterLexer;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.EqualityTestContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.OrAndContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ParensContext;
 import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ProgContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceBasestationContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceCountryContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceIdContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceRegionContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.SourceTypeContext;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceBaseStation;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceCountry;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceId;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceRegion;
-import static dk.dma.ais.packet.AisPacketSourceFilters.filterOnSourceType;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -101,10 +85,10 @@ class AisPacketSourceFiltersParser {
                 }
             };
         }
-
+            /*
         @Override
         public Predicate<AisPacketSource> visitSourceBasestation(SourceBasestationContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStation(readArrays(ctx.valueList().value())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStationInList(readArrays(ctx.valueList().value())));
         }
 
         @Override
@@ -126,7 +110,7 @@ class AisPacketSourceFiltersParser {
 
         @Override
         public Predicate<AisPacketSource> visitSourceType(SourceTypeContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceType(SourceType.fromString(ctx.valueList().getText())));
+            return checkNegate(ctx.equalityTest(), filterOnSourceTypeInList(SourceType.fromString(ctx.valueList().getText())));
         }
 
 
@@ -142,6 +126,6 @@ class AisPacketSourceFiltersParser {
                 list.add(vc.getText());
             }
             return list.toArray(new String[list.size()]);
-        }
+        }           */
     }
 }

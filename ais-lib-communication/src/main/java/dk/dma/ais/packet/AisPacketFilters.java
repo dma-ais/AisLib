@@ -54,8 +54,22 @@ public class AisPacketFilters {
         return s;
     }
 
-    public static Predicate<AisPacket> filterOnSourceBaseStation(final int... ids) {
-        final int[] copy = ids.clone();
+    public static Predicate<AisPacket> filterOnSourceId(final String... ids) {
+        final String[] s = check(ids);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                String sourceId = p.getTags().getSourceId();
+                return sourceId != null && Arrays.binarySearch(s, sourceId) >= 0;
+            }
+
+            public String toString() {
+                return "sourceId = " + skipBrackets(Arrays.toString(s));
+            }
+        };
+    }
+
+    public static Predicate<AisPacket> filterOnSourceBasestationInList(Integer... ids) {
+        final Integer[] copy = ids.clone();
         Arrays.sort(copy);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -76,12 +90,12 @@ public class AisPacketFilters {
      *            the id of the base stations for which packets should be accepted
      * @return the predicate
      */
-    public static Predicate<AisPacket> filterOnSourceBaseStation(final String... ids) {
-        final int[] bss = new int[ids.length];
+    public static Predicate<AisPacket> filterOnSourceBasestationInList(String... ids) {
+        final Integer[] bss = new Integer[ids.length];
         for (int i = 0; i < bss.length; i++) {
             bss[i] = Integer.valueOf(ids[i]);
         }
-        return filterOnSourceBaseStation(bss);
+        return filterOnSourceBasestationInList(bss);
     }
 
     /**
@@ -91,7 +105,7 @@ public class AisPacketFilters {
      *            the countries for which packets should be accepted
      * @return the predicate
      */
-    public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
+    public static Predicate<AisPacket> filterOnSourceCountryInList(final Country... countries) {
         final Country[] c = check(countries);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -105,7 +119,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnSourceId(final String... ids) {
+    public static Predicate<AisPacket> filterOnSourceIdInList(final String... ids) {
         final String[] s = check(ids);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -119,7 +133,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnSourceRegion(final String... regions) {
+    public static Predicate<AisPacket> filterOnSourceRegionInList(final String... regions) {
         final String[] s = check(regions);
         requireNonNull(regions, "regions is null");
         return new Predicate<AisPacket>() {
@@ -135,7 +149,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnSourceType(final SourceType... sourceType) {
+    public static Predicate<AisPacket> filterOnSourceTypeInList(final SourceType... sourceType) {
         final SourceType[] sourceTypes = sourceType.clone();
         requireNonNull(sourceType, "sourceType is null");
         return new Predicate<AisPacket>() {
@@ -264,6 +278,18 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnSourceBasestation(final Operator operator, final Integer bs) {
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket p) {
+                return compare(p.getTags().getSourceBs(), bs, operator);
+            }
+            public String toString() {
+                return "bs = " + bs;
+            }
+        };
+    }
+
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessageId(final Operator operator, final Integer id) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -313,7 +339,7 @@ public class AisPacketFilters {
                 boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof AisMessage5) {
-                    pass = compare((int) ((AisMessage5) aisMessage).getShipType(), shiptype, operator);
+                    pass = compare(((AisMessage5) aisMessage).getShipType(), shiptype, operator);
                 }
                 return pass;
             }
