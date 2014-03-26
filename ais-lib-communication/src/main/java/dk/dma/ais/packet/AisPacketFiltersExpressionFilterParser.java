@@ -17,6 +17,8 @@ package dk.dma.ais.packet;
 
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
+import dk.dma.enav.model.geometry.Circle;
+import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
@@ -25,6 +27,7 @@ import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterPar
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.SourceBasestationContext;
 import org.antlr.v4.runtime.misc.NotNull;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -281,6 +284,23 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         @Override
         public Predicate<AisPacket> visitMessageDraughtIn(@NotNull ExpressionFilterParser.MessageDraughtInContext ctx) {
             return createFilterPredicateForNumberRange(AisPacketFilters.class, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessagePositionInside(@NotNull ExpressionFilterParser.MessagePositionInsideContext ctx) {
+            Predicate<AisPacket> filter = null;
+
+            if (ctx.bbox() != null) {
+                throw new IllegalArgumentException("Not yet implemented.");
+            } else if (ctx.circle() != null) {
+                List<ExpressionFilterParser.NumberContext> params = ctx.circle().number();
+                float latitude = Float.valueOf(params.get(0).getText());
+                float longitude = Float.valueOf(params.get(1).getText());
+                float radius = Float.valueOf(params.get(2).getText());
+                filter = AisPacketFilters.filterOnMessagePositionWithin(new Circle(latitude, longitude, radius, CoordinateSystem.CARTESIAN));
+            }
+
+            return filter;
         }
     }
 }

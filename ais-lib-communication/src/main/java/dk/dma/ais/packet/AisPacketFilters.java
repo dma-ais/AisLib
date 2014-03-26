@@ -156,6 +156,12 @@ public class AisPacketFilters implements FilterFactory {
         };
     }
 
+    /**
+     * Filter on message to have known position inside given area.
+     * @param area
+     *          The area that the position must reside inside.
+     * @return
+     */
     public static Predicate<AisPacket> filterOnMessagePositionWithin(final Area area) {
         requireNonNull(area);
         return filterOnMessageType(IPositionMessage.class, new Predicate<IPositionMessage>() {
@@ -167,7 +173,6 @@ public class AisPacketFilters implements FilterFactory {
                 }
                 return false;
             }
-
             public String toString() {
                 return "position within = " + area;
             }
@@ -199,66 +204,6 @@ public class AisPacketFilters implements FilterFactory {
                 return messageType.isAssignableFrom(m.getClass());
             }
         };
-    }
-
-    private static boolean compare(String lhs, String rhs, CompareToOperator operator) {
-        lhs = lhs.replace('@',' ').trim();
-        rhs = rhs.replace('@',' ').trim();
-
-        switch (operator) {
-            case EQUALS:
-                return lhs.equalsIgnoreCase(rhs);
-            case NOT_EQUALS:
-                return ! lhs.equalsIgnoreCase(rhs);
-            case GREATER_THAN:
-                return lhs.compareToIgnoreCase(rhs) > 0;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs.compareToIgnoreCase(rhs) >= 0;
-            case LESS_THAN:
-                return lhs.compareToIgnoreCase(rhs) < 0;
-            case LESS_THAN_OR_EQUALS:
-                return lhs.compareToIgnoreCase(rhs) <= 0;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
-
-    private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
-        switch (operator) {
-            case EQUALS:
-                return lhs == rhs;
-            case NOT_EQUALS:
-                return lhs != rhs;
-            case GREATER_THAN:
-                return lhs > rhs;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs >= rhs;
-            case LESS_THAN:
-                return lhs < rhs;
-            case LESS_THAN_OR_EQUALS:
-                return lhs <= rhs;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
-
-    private static boolean compare(float lhs, float rhs, CompareToOperator operator) {
-        switch (operator) {
-            case EQUALS:
-                return lhs == rhs;
-            case NOT_EQUALS:
-                return lhs != rhs;
-            case GREATER_THAN:
-                return lhs > rhs;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs >= rhs;
-            case LESS_THAN:
-                return lhs < rhs;
-            case LESS_THAN_OR_EQUALS:
-                return lhs <= rhs;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
     }
 
     @SuppressWarnings("unused")
@@ -843,6 +788,8 @@ public class AisPacketFilters implements FilterFactory {
         return AisPacketFiltersExpressionFilterParser.parseExpressionFilter(filter);
     }
 
+    // ---
+
     static String skipBrackets(String s) {
         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
     }
@@ -865,6 +812,66 @@ public class AisPacketFilters implements FilterFactory {
             preprocessedString = preprocessedString.substring(1, preprocessedString.length()-1);
         }
         return preprocessedString;
+    }
+
+    private static boolean compare(String lhs, String rhs, CompareToOperator operator) {
+        lhs = lhs.replace('@',' ').trim();
+        rhs = rhs.replace('@',' ').trim();
+
+        switch (operator) {
+            case EQUALS:
+                return lhs.equalsIgnoreCase(rhs);
+            case NOT_EQUALS:
+                return ! lhs.equalsIgnoreCase(rhs);
+            case GREATER_THAN:
+                return lhs.compareToIgnoreCase(rhs) > 0;
+            case GREATER_THAN_OR_EQUALS:
+                return lhs.compareToIgnoreCase(rhs) >= 0;
+            case LESS_THAN:
+                return lhs.compareToIgnoreCase(rhs) < 0;
+            case LESS_THAN_OR_EQUALS:
+                return lhs.compareToIgnoreCase(rhs) <= 0;
+            default:
+                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
+        }
+    }
+
+    private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
+        switch (operator) {
+            case EQUALS:
+                return lhs == rhs;
+            case NOT_EQUALS:
+                return lhs != rhs;
+            case GREATER_THAN:
+                return lhs > rhs;
+            case GREATER_THAN_OR_EQUALS:
+                return lhs >= rhs;
+            case LESS_THAN:
+                return lhs < rhs;
+            case LESS_THAN_OR_EQUALS:
+                return lhs <= rhs;
+            default:
+                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
+        }
+    }
+
+    private static boolean compare(float lhs, float rhs, CompareToOperator operator) {
+        switch (operator) {
+            case EQUALS:
+                return lhs == rhs;
+            case NOT_EQUALS:
+                return lhs != rhs;
+            case GREATER_THAN:
+                return lhs > rhs;
+            case GREATER_THAN_OR_EQUALS:
+                return lhs >= rhs;
+            case LESS_THAN:
+                return lhs < rhs;
+            case LESS_THAN_OR_EQUALS:
+                return lhs <= rhs;
+            default:
+                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
+        }
     }
 
     abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {

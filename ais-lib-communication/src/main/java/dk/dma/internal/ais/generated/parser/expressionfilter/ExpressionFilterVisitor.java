@@ -68,6 +68,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitIntList(@NotNull ExpressionFilterParser.IntListContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#bbox}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBbox(@NotNull ExpressionFilterParser.BboxContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageNavigationalStatus}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -94,6 +101,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageCourseOverGround(@NotNull ExpressionFilterParser.MessageCourseOverGroundContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messagePositionInside}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessagePositionInside(@NotNull ExpressionFilterParser.MessagePositionInsideContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageShiptypeIn}.
@@ -318,6 +332,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageShiptype(@NotNull ExpressionFilterParser.MessageShiptypeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#circle}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCircle(@NotNull ExpressionFilterParser.CircleContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageImo}.

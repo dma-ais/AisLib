@@ -23,6 +23,8 @@ import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
+import dk.dma.enav.model.geometry.CoordinateSystem;
+import dk.dma.enav.model.geometry.Position;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -437,5 +439,23 @@ public class AisPacketFiltersTest {
         p1.getTags().setSourceType(SourceType.TERRESTRIAL);
         assertFilterExpression(false, p1, "s.type != LIVE");
         assertFilterExpression(false, p2, "s.region != 0");
+    }
+
+    @Test
+    public void testMessagePositionWithinCircle() {
+        AisPacket packet = p5;
+        IPositionMessage msg = (IPositionMessage) packet.tryGetAisMessage();
+        Position center = msg.getPos().getGeoLocation();
+        double centerLatitude = center.getLatitude();
+        double centerLongitude = center.getLongitude();
+
+        Position pos2100MetersNE = CoordinateSystem.CARTESIAN.pointOnBearing(center, 2100, 45);
+        Position pos2000MetersNE = CoordinateSystem.CARTESIAN.pointOnBearing(center, 2000, 45);
+        Position pos1900MetersNE = CoordinateSystem.CARTESIAN.pointOnBearing(center, 1900, 45);
+
+        assertFilterExpression(true, packet, "m.pos within circle(" + centerLatitude + ", " + centerLongitude + ", " + "2000)");
+        assertFilterExpression(false, packet, "m.pos within circle(" + pos2100MetersNE.getLatitude() + ", " + pos2100MetersNE.getLongitude() + ", " + "2000)");
+        assertFilterExpression(false, packet, "m.pos within circle(" + pos2000MetersNE.getLatitude() + ", " + pos2000MetersNE.getLongitude() + ", " + "2000)");
+        assertFilterExpression(true, packet, "m.pos within circle(" + pos1900MetersNE.getLatitude() + ", " + pos1900MetersNE.getLongitude() + ", " + "2000)");
     }
 }

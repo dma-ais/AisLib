@@ -56,6 +56,8 @@ filterExpression:
     |   'm.lon' compareTo number                                # messageLongitude
     |   'm.lon' (in|notin) numberRange                          # messageLongitudeIn
 
+    |   'm.pos' WITHIN (circle|bbox)                          # messagePositionInside
+
     |   'm.hdg' compareTo INT                                   # messageTrueHeading
     |   'm.hdg' (in|notin) intRange                             # messageTrueHeadingIn
 
@@ -90,9 +92,15 @@ numberRange : '('? number RANGE number ')'? ;
 number : (INT | FLOAT);
 string : (number | WORD | STRING);
 
+bbox : BBOX '('? number ',' number ',' number ',' number ')'? ;
+circle : CIRCLE '('? number ',' number ',' number ')'? ;
+
 AND     : '&' ;
 OR      : '|' ;
 RANGE   : '..';
+BBOX    : [Bb][Bb][Oo][Xx] ;
+CIRCLE  : [Cc][Ii][Rr][Cc][Ll][Ee] ;
+WITHIN  : [Ww][Ii][Tt][Hh][Ii][Nn] ;
 INT     : '-'? [0-9]+;
 FLOAT   : '-'? [0-9]+ '.' [0-9]+ ;
 WORD    : [a-zA-Z0-9_?]+ ;
