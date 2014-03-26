@@ -16,12 +16,12 @@
 package dk.dma.ais.packet;
 
 import dk.dma.enav.util.function.Predicate;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterBaseVisitor;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterLexer;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.OrAndContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ParensContext;
-import dk.dma.internal.ais.generated.parser.sourcefilter.SourceFilterParser.ProgContext;
+import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterBaseVisitor;
+import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterLexer;
+import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
+import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.OrAndContext;
+import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.ParensContext;
+import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.ProgContext;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -37,9 +37,9 @@ import static java.util.Objects.requireNonNull;
 class AisPacketSourceFiltersParser {
     static Predicate<AisPacketSource> parseSourceFilter(String filter) {
         ANTLRInputStream input = new ANTLRInputStream(requireNonNull(filter));
-        SourceFilterLexer lexer = new SourceFilterLexer(input);
+        ExpressionFilterLexer lexer = new ExpressionFilterLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        SourceFilterParser parser = new SourceFilterParser(tokens);
+        ExpressionFilterParser parser = new ExpressionFilterParser(tokens);
 
         // Better errors
         lexer.removeErrorListeners();
@@ -64,11 +64,11 @@ class AisPacketSourceFiltersParser {
         }
     }
 
-    static class SourceFilterToPredicateVisitor extends SourceFilterBaseVisitor<Predicate<AisPacketSource>> {
+    static class SourceFilterToPredicateVisitor extends ExpressionFilterBaseVisitor<Predicate<AisPacketSource>> {
 
         @Override
         public Predicate<AisPacketSource> visitOrAnd(OrAndContext ctx) {
-            return ctx.op.getType() == SourceFilterParser.AND ? visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) : visit(
+            return ctx.op.getType() == ExpressionFilterParser.AND ? visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) : visit(
                     ctx.filterExpression(0)).or(visit(ctx.filterExpression(1)));
         }
 
@@ -120,9 +120,9 @@ class AisPacketSourceFiltersParser {
             return text.equals("!=") ? p.negate() : p;
         }
 
-        private static String[] readArrays(Iterable<SourceFilterParser.ValueContext> iter) {
+        private static String[] readArrays(Iterable<ExpressionFilterParser.ValueContext> iter) {
             ArrayList<String> list = new ArrayList<>();
-            for (SourceFilterParser.ValueContext vc : iter) {
+            for (ExpressionFilterParser.ValueContext vc : iter) {
                 list.add(vc.getText());
             }
             return list.toArray(new String[list.size()]);

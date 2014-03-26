@@ -15,26 +15,8 @@
  */
 package dk.dma.ais.utils.filter;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.zip.GZIPOutputStream;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.filter.ExpressionFilter;
 import dk.dma.ais.filter.IPacketFilter;
@@ -59,6 +41,22 @@ import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Consumer;
+import org.apache.commons.lang.StringUtils;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Command line tool to do various AIS reading, filtering and writing
@@ -454,7 +452,7 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
         System.out.println("\t-end      End time in format yyyy-MM-dd-HH:mm (Local time)");
         System.out.println("\t-ds       Down sample rate in seconds (default none)");
         System.out.println("\t-df       Do doublet filtering (default off)");
-        System.out.println("\t-exp      Filter by expression. See SourceFilter.g4");
+        System.out.println("\t-exp      Filter by expression. See ExpressionFilter.g4");
         System.out
                 .println("\t-geo      Filter by geometry. Circle: 'circle,lat,lon,radius' Bounding box: 'bb,lat1,lon1,lat2,lon2' ");
         System.out.println("\t-help     Show this help");

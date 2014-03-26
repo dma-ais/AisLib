@@ -1,4 +1,4 @@
-grammar SourceFilter; 
+grammar ExpressionFilter;
 
 prog: filterExpression EOF;
 

@@ -32,7 +32,7 @@ import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountryInList;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceIdInList;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegionInList;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceTypeInList;
-import static dk.dma.ais.packet.AisPacketFilters.parseSourceFilter;
+import static dk.dma.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -112,7 +112,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testMessagePassesSourceFilterIfNotCarryingTheFilteredTypeOfInformation() {
+    public void testMessagePassesExpressionFilterIfNotCarryingTheFilteredTypeOfInformation() {
         assertFalse(p1.tryGetAisMessage() instanceof AisPositionMessage);
         assertFilterExpression(true, p1, "m.sog > 20.0");
         assertFilterExpression(true, p1, "m.cog > 90");
@@ -124,7 +124,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testParseSourceFilterStrings() {
+    public void testParseExpressionFilterStrings() {
         assertFilterExpression(true, p5, "m.name = a");
         assertFilterExpression(true, p5, "m.name = '0'");
         assertFilterExpression(true, p5, "m.name = 0");
@@ -138,7 +138,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testParseSourceFilterIntRanges() {
+    public void testParseExpressionFilterIntRanges() {
         assertFilterExpression(true, p5, "m.id in 0 .. 4");
         assertFilterExpression(true, p5, "m.id in (0 .. 4)");
         assertFilterExpression(true, p5, "m.id in 0..4");
@@ -148,7 +148,7 @@ public class AisPacketFiltersTest {
 
     @Test
     @Ignore
-    public void testParseSourceFilterNumberRanges() {
+    public void testParseExpressionFilterNumberRanges() {
         // TODO
         assertTrue(p5.tryGetAisMessage() instanceof AisPositionMessage);
         assertFilterExpression(true, p5, "m.id in 0.0 .. 4.1");
@@ -161,7 +161,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testParseSourceFilterLists() {
+    public void testParseExpressionFilterLists() {
         assertFilterExpression(true, p5, "m.id in 0,1,4");
         assertFilterExpression(true, p5, "m.id in (0,1,4)");
         assertFilterExpression(true, p5, "m.name in ('A','BCD','Z')");
@@ -170,7 +170,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testCompositeSourceFilterExpressions() {
+    public void testCompositeExpressionFilterExpressions() {
         assertFilterExpression(true, p5, "m.sog > 6.0 & m.sog < 7.0");
         assertFilterExpression(true, p5, "m.sog >= 6.6 & m.sog < 6.7");
         assertFilterExpression(false, p5, "m.sog > 6.6 & m.sog < 7.0");
@@ -200,7 +200,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testParseSourceFilterLabels /* enums? */ () {
+    public void testParseExpressionFilterLabels /* enums? */ () {
         assertFilterExpression(false, p1, "m.type = NONEXISTENTLABEL");
         assertFilterExpression(false, p1, "m.type = TANKER");
         assertFilterExpression(true, p1, "m.type = MILITARY");
@@ -216,7 +216,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testParseSourceFilter() {
+    public void testParseExpressionFilter() {
         //
         assertFilterExpression(true, p3, "s.id = AISD, SD");
 
@@ -242,7 +242,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testSourceFilterComparisons() {
+    public void testExpressionFilterComparisons() {
         testComparison(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testComparison(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
         testComparison(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
@@ -262,7 +262,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testSourceFilterInList() {
+    public void testExpressionFilterInList() {
         testInList(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testInList(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
         testInList(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
@@ -275,7 +275,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testSourceFilterInRange() {
+    public void testExpressionFilterInRange() {
         testInRange(p1, "m.id", p1.tryGetAisMessage().getMsgId());
         testInRange(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
         testInRange(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
@@ -288,7 +288,7 @@ public class AisPacketFiltersTest {
 
     private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {
         System.out.println("Testing \"" + filterExpression + "\" to be " + expectedResult + " for " + aisPacket.tryGetAisMessage().toString());
-        assertEquals(expectedResult, parseSourceFilter(filterExpression).test(aisPacket));
+        assertEquals(expectedResult, parseExpressionFilter(filterExpression).test(aisPacket));
     }
 
     private static void testInList(AisPacket testPacket, String field, Object fieldValue) {
@@ -426,7 +426,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testParseSourceFilterNegative() {
+    public void testParseExpressionFilterNegative() {
         assertFilterExpression(true, p3, "s.id != SD");
         assertFilterExpression(false, p3, "s.id != AISD");
         assertFilterExpression(false, p3, "s.id != AISD, SD");
