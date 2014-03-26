@@ -132,6 +132,10 @@ public class TargetTracker {
         return getNewest(mmsi, Predicate.TRUE);
     }
     
+    public Entry<AisPacketSource, TargetInfo> getNewestEntry(int mmsi) {
+        return getNewestEntry(mmsi, Predicate.TRUE);
+    }
+    
     public Enumeration<AisPacketSource> getAisPacketSources(int mmsi) {
         return targets.get(mmsi).keys();
     }
@@ -139,6 +143,11 @@ public class TargetTracker {
     public TargetInfo getNewest(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
         MmsiTarget target = targets.get(mmsi);
         return target == null ? null : target.getNewest(sourcePredicate);
+    }
+    
+    public Entry<AisPacketSource, TargetInfo> getNewestEntry(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
+        MmsiTarget target = targets.get(mmsi);
+        return target == null ? null : target.getNewestEntry(sourcePredicate);
     }
 
     /**
@@ -276,6 +285,23 @@ public class TargetTracker {
                 }
             }
             return best;
+        }
+        
+        Entry<AisPacketSource, TargetInfo> getNewestEntry(Predicate<? super AisPacketSource> predicate) {
+            TargetInfo best = null;
+            Entry<AisPacketSource, TargetInfo> bestEntry = null;
+            for (Entry<AisPacketSource, TargetInfo> i: entrySet()) {
+                if (predicate.test(i.getKey())) {
+                    best = best == null ? i.getValue() : best.merge(i.getValue());
+                }
+                
+                if (i.getValue().equals(best)) {
+                    bestEntry = i;
+                }
+
+            }
+            
+            return bestEntry;
         }
     }
 }
