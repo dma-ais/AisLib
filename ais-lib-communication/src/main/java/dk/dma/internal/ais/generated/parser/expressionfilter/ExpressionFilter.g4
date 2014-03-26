@@ -1,6 +1,6 @@
 grammar ExpressionFilter;
 
-prog: filterExpression EOF;
+filter: filterExpression EOF;
 
 filterExpression:
 

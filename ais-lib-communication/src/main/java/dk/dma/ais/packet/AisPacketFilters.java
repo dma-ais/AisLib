@@ -39,7 +39,7 @@ import static java.util.Objects.requireNonNull;
  * 
  * @author Kasper Nielsen
  */
-public class AisPacketFilters {
+public class AisPacketFilters implements FilterFactory {
 
     @SafeVarargs
     static <T> T[] check(T... elements) {
@@ -54,21 +54,7 @@ public class AisPacketFilters {
         return s;
     }
 
-    public static Predicate<AisPacket> filterOnSourceId(final String... ids) {
-        final String[] s = check(ids);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                String sourceId = p.getTags().getSourceId();
-                return sourceId != null && Arrays.binarySearch(s, sourceId) >= 0;
-            }
-
-            public String toString() {
-                return "sourceId = " + skipBrackets(Arrays.toString(s));
-            }
-        };
-    }
-
-    public static Predicate<AisPacket> filterOnSourceBasestationInList(Integer... ids) {
+    public static Predicate<AisPacket> filterOnSourceBasestation(Integer... ids) {
         final Integer[] copy = ids.clone();
         Arrays.sort(copy);
         return new Predicate<AisPacket>() {
@@ -90,22 +76,22 @@ public class AisPacketFilters {
      *            the id of the base stations for which packets should be accepted
      * @return the predicate
      */
-    public static Predicate<AisPacket> filterOnSourceBasestationInList(String... ids) {
+    public static Predicate<AisPacket> filterOnSourceBasestation(String... ids) {
         final Integer[] bss = new Integer[ids.length];
         for (int i = 0; i < bss.length; i++) {
             bss[i] = Integer.valueOf(ids[i]);
         }
-        return filterOnSourceBasestationInList(bss);
+        return filterOnSourceBasestation(bss);
     }
 
     /**
      * Returns a predicate that will filter packets based on the country of the source tag.
      * 
-     * @param ids
+     * @param countries
      *            the countries for which packets should be accepted
      * @return the predicate
      */
-    public static Predicate<AisPacket> filterOnSourceCountryInList(final Country... countries) {
+    public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
         final Country[] c = check(countries);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -119,7 +105,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnSourceIdInList(final String... ids) {
+    public static Predicate<AisPacket> filterOnSourceId(final String... ids) {
         final String[] s = check(ids);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -133,7 +119,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnSourceRegionInList(final String... regions) {
+    public static Predicate<AisPacket> filterOnSourceRegion(final String... regions) {
         final String[] s = check(regions);
         requireNonNull(regions, "regions is null");
         return new Predicate<AisPacket>() {
@@ -149,7 +135,7 @@ public class AisPacketFilters {
         };
     }
 
-    public static Predicate<AisPacket> filterOnSourceTypeInList(final SourceType... sourceType) {
+    public static Predicate<AisPacket> filterOnSourceType(final SourceType... sourceType) {
         final SourceType[] sourceTypes = sourceType.clone();
         requireNonNull(sourceType, "sourceType is null");
         return new Predicate<AisPacket>() {
@@ -215,9 +201,7 @@ public class AisPacketFilters {
         };
     }
 
-    public enum Operator {EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_OR_EQUALS, GREATER_THAN, GREATER_THAN_OR_EQUALS};
-
-    private static boolean compare(String lhs, String rhs, Operator operator) {
+    private static boolean compare(String lhs, String rhs, CompareToOperator operator) {
         lhs = lhs.replace('@',' ').trim();
         rhs = rhs.replace('@',' ').trim();
 
@@ -235,11 +219,11 @@ public class AisPacketFilters {
             case LESS_THAN_OR_EQUALS:
                 return lhs.compareToIgnoreCase(rhs) <= 0;
             default:
-                throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
         }
     }
 
-    private static boolean compare(int lhs, int rhs, Operator operator) {
+    private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
         switch (operator) {
             case EQUALS:
                 return lhs == rhs;
@@ -254,11 +238,11 @@ public class AisPacketFilters {
             case LESS_THAN_OR_EQUALS:
                 return lhs <= rhs;
             default:
-                throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
         }
     }
 
-    private static boolean compare(float lhs, float rhs, Operator operator) {
+    private static boolean compare(float lhs, float rhs, CompareToOperator operator) {
         switch (operator) {
             case EQUALS:
                 return lhs == rhs;
@@ -273,12 +257,12 @@ public class AisPacketFilters {
             case LESS_THAN_OR_EQUALS:
                 return lhs <= rhs;
             default:
-                throw new IllegalArgumentException("Operator " + operator + " not implemented.");
+                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
         }
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnSourceBasestation(final Operator operator, final Integer bs) {
+    public static Predicate<AisPacket> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 return compare(p.getTags().getSourceBs(), bs, operator);
@@ -290,7 +274,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageId(final Operator operator, final Integer id) {
+    public static Predicate<AisPacket> filterOnMessageId(final CompareToOperator operator, final Integer id) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 AisMessage aisMessage = p.tryGetAisMessage();
@@ -303,7 +287,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageMmsi(final Operator operator, final Integer mmsi) {
+    public static Predicate<AisPacket> filterOnMessageMmsi(final CompareToOperator operator, final Integer mmsi) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 AisMessage aisMessage = p.tryGetAisMessage();
@@ -316,7 +300,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageImo(final Operator operator, final Integer imo) {
+    public static Predicate<AisPacket> filterOnMessageImo(final CompareToOperator operator, final Integer imo) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -333,7 +317,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageShiptype(final Operator operator, final Integer shiptype) {
+    public static Predicate<AisPacket> filterOnMessageShiptype(final CompareToOperator operator, final Integer shiptype) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -350,7 +334,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final Operator operator, final Integer navstatus) {
+    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final CompareToOperator operator, final Integer navstatus) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -367,17 +351,17 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final Float name) {
+    public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Float name) {
         return filterOnMessageName(operator, name.toString());
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, final Integer name) {
+    public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Integer name) {
         return filterOnMessageName(operator, name.toString());
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(final Operator operator, String name) {
+    public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, String name) {
         final String n = preprocessExpressionString(name);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -395,7 +379,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageCallsign(final Operator operator, String callsign) {
+    public static Predicate<AisPacket> filterOnMessageCallsign(final CompareToOperator operator, String callsign) {
         final String n = preprocessExpressionString(callsign);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -413,7 +397,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageSpeedOverGround(final Operator operator, final Float sog) {
+    public static Predicate<AisPacket> filterOnMessageSpeedOverGround(final CompareToOperator operator, final Float sog) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -430,7 +414,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageCourseOverGround(final Operator operator, final Float cog) {
+    public static Predicate<AisPacket> filterOnMessageCourseOverGround(final CompareToOperator operator, final Float cog) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -447,7 +431,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageTrueHeading(final Operator operator, final Integer hdg) {
+    public static Predicate<AisPacket> filterOnMessageTrueHeading(final CompareToOperator operator, final Integer hdg) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -464,7 +448,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLongitude(final Operator operator, final Float lon) {
+    public static Predicate<AisPacket> filterOnMessageLongitude(final CompareToOperator operator, final Float lon) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -481,7 +465,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLatitude(final Operator operator, final Float lat) {
+    public static Predicate<AisPacket> filterOnMessageLatitude(final CompareToOperator operator, final Float lat) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -498,7 +482,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageDraught(final Operator operator, final Float draught) {
+    public static Predicate<AisPacket> filterOnMessageDraught(final CompareToOperator operator, final Float draught) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -515,7 +499,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageIdInList(Integer... ids) {
+    public static Predicate<AisPacket> filterOnMessageId(Integer... ids) {
         final Integer[] m = ids.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -534,7 +518,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageMmsiInList(Integer... mmsis) {
+    public static Predicate<AisPacket> filterOnMessageMmsi(Integer... mmsis) {
         final Integer[] m = mmsis.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -553,7 +537,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageImoInList(Integer... imos) {
+    public static Predicate<AisPacket> filterOnMessageImo(Integer... imos) {
         final Integer[] m = imos.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -573,7 +557,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageShiptypeInList(Integer... shiptypes) {
+    public static Predicate<AisPacket> filterOnMessageShiptype(Integer... shiptypes) {
         final Integer[] m = shiptypes.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -593,7 +577,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNavigationalStatusInList(Integer... navstats) {
+    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(Integer... navstats) {
         final Integer[] m = navstats.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -613,7 +597,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNameInList(String... names) {
+    public static Predicate<AisPacket> filterOnMessageName(String... names) {
         final String[] m = preprocessExpressionStrings(names);
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -634,7 +618,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageCallsignInList(String... callsigns) {
+    public static Predicate<AisPacket> filterOnMessageCallsign(String... callsigns) {
         final String[] m = preprocessExpressionStrings(callsigns);
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -655,7 +639,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageTrueHeadingInList(Integer... hdgs) {
+    public static Predicate<AisPacket> filterOnMessageTrueHeading(Integer... hdgs) {
         final Integer[] m = hdgs.clone();
         Arrays.sort(m);
         return new Predicate<AisPacket>() {
@@ -674,7 +658,7 @@ public class AisPacketFilters {
         };
     }
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageIdInRange(final int min, final int max) {
+    public static Predicate<AisPacket> filterOnMessageId(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -692,7 +676,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageMmsiInRange(final int min, final int max) {
+    public static Predicate<AisPacket> filterOnMessageMmsi(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -710,7 +694,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageImoInRange(final int min, final int max) {
+    public static Predicate<AisPacket> filterOnMessageImo(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -728,7 +712,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageShiptypeInRange(final int min, final int max) {
+    public static Predicate<AisPacket> filterOnMessageShiptype(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -746,7 +730,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNavigationalStatusInRange(final int min, final int max) {
+    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -764,7 +748,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageTrueHeadingInRange(final int min, final int max) {
+    public static Predicate<AisPacket> filterOnMessageTrueHeading(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -782,7 +766,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLatitudeInRange(final float min, final float max) {
+    public static Predicate<AisPacket> filterOnMessageLatitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -800,7 +784,7 @@ public class AisPacketFilters {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLongitudeInRange(final float min, final float max) {
+    public static Predicate<AisPacket> filterOnMessageLongitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;

@@ -27,11 +27,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBasestationInList;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountryInList;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceIdInList;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegionInList;
-import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceTypeInList;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBasestation;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegion;
+import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceType;
 import static dk.dma.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,58 +57,58 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testfilterOnSourceIdInList() {
-        assertTrue(filterOnSourceIdInList("AISD").test(p3));
-        assertTrue(filterOnSourceIdInList("AD", "AISD", "DFF").test(p3));
-        assertFalse(filterOnSourceIdInList("AD", "ASD", "DFF").test(p3));
+    public void testfilterOnSourceId() {
+        assertTrue(filterOnSourceId("AISD").test(p3));
+        assertTrue(filterOnSourceId("AD", "AISD", "DFF").test(p3));
+        assertFalse(filterOnSourceId("AD", "ASD", "DFF").test(p3));
 
-        assertFalse(filterOnSourceIdInList("AD", "AISD", "DFF").test(p1)); // no source id
+        assertFalse(filterOnSourceId("AD", "AISD", "DFF").test(p1)); // no source id
         p1.getTags().setSourceId("DFF");
-        assertTrue(filterOnSourceIdInList("AD", "AISD", "DFF").test(p1));
+        assertTrue(filterOnSourceId("AD", "AISD", "DFF").test(p1));
     }
 
     @Test
     public void testFilterOnSourceType() {
-        assertFalse(filterOnSourceTypeInList(SourceType.SATELLITE).test(p1));
-        assertFalse(filterOnSourceTypeInList(SourceType.TERRESTRIAL).test(p1));
+        assertFalse(filterOnSourceType(SourceType.SATELLITE).test(p1));
+        assertFalse(filterOnSourceType(SourceType.TERRESTRIAL).test(p1));
         p1.getTags().setSourceType(SourceType.SATELLITE);
-        assertTrue(filterOnSourceTypeInList(SourceType.SATELLITE).test(p1));
-        assertFalse(filterOnSourceTypeInList(SourceType.TERRESTRIAL).test(p1));
+        assertTrue(filterOnSourceType(SourceType.SATELLITE).test(p1));
+        assertFalse(filterOnSourceType(SourceType.TERRESTRIAL).test(p1));
         p1.getTags().setSourceType(SourceType.TERRESTRIAL);
-        assertFalse(filterOnSourceTypeInList(SourceType.SATELLITE).test(p1));
-        assertTrue(filterOnSourceTypeInList(SourceType.TERRESTRIAL).test(p1));
+        assertFalse(filterOnSourceType(SourceType.SATELLITE).test(p1));
+        assertTrue(filterOnSourceType(SourceType.TERRESTRIAL).test(p1));
     }
 
     @Test
     public void testFilterOnSourceBaseStation() {
-        assertTrue(AisPacketFilters.filterOnSourceBasestationInList("2190047").test(p1));
-        assertTrue(filterOnSourceBasestationInList(2190047).test(p1));
-        assertFalse(AisPacketFilters.filterOnSourceBasestationInList("2190046").test(p1));
-        assertFalse(filterOnSourceBasestationInList(2190046).test(p1));
-        assertTrue(AisPacketFilters.filterOnSourceBasestationInList("123322", "2190047", "1233223").test(p1));
-        assertTrue(filterOnSourceBasestationInList(12323, 2190047, 1230393).test(p1));
+        assertTrue(AisPacketFilters.filterOnSourceBasestation("2190047").test(p1));
+        assertTrue(filterOnSourceBasestation(2190047).test(p1));
+        assertFalse(AisPacketFilters.filterOnSourceBasestation("2190046").test(p1));
+        assertFalse(filterOnSourceBasestation(2190046).test(p1));
+        assertTrue(AisPacketFilters.filterOnSourceBasestation("123322", "2190047", "1233223").test(p1));
+        assertTrue(filterOnSourceBasestation(12323, 2190047, 1230393).test(p1));
 
-        assertFalse(filterOnSourceBasestationInList(2190046).test(p2));
-        assertFalse(filterOnSourceBasestationInList(2190046).test(p2));
+        assertFalse(filterOnSourceBasestation(2190046).test(p2));
+        assertFalse(filterOnSourceBasestation(2190046).test(p2));
     }
 
     @Test
     public void testFilterOnCountry() {
-        assertTrue(filterOnSourceCountryInList(Country.getByCode("DNK")).test(p1));
-        assertFalse(filterOnSourceCountryInList(Country.getByCode("NLD")).test(p1));
+        assertTrue(filterOnSourceCountry(Country.getByCode("DNK")).test(p1));
+        assertFalse(filterOnSourceCountry(Country.getByCode("NLD")).test(p1));
 
-        assertFalse(filterOnSourceCountryInList(Country.getByCode("DNK")).test(p2));
-        assertTrue(filterOnSourceCountryInList(Country.getByCode("NLD")).test(p2));
+        assertFalse(filterOnSourceCountry(Country.getByCode("DNK")).test(p2));
+        assertTrue(filterOnSourceCountry(Country.getByCode("NLD")).test(p2));
         p3.getTags().setSourceCountry(null);
-        assertFalse(filterOnSourceCountryInList(Country.getByCode("DNK")).test(p3));
-        assertFalse(filterOnSourceCountryInList(Country.getByCode("DNK")).test(p3));
+        assertFalse(filterOnSourceCountry(Country.getByCode("DNK")).test(p3));
+        assertFalse(filterOnSourceCountry(Country.getByCode("DNK")).test(p3));
     }
 
     @Test
     public void testFilterOnSourceRegion() {
-        assertFalse(filterOnSourceRegionInList("0").test(p1));
-        assertTrue(filterOnSourceRegionInList("0").test(p2));
-        assertFalse(filterOnSourceRegionInList("1").test(p2));
+        assertFalse(filterOnSourceRegion("0").test(p1));
+        assertTrue(filterOnSourceRegion("0").test(p2));
+        assertFalse(filterOnSourceRegion("1").test(p2));
     }
 
     @Test
@@ -262,16 +262,16 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testExpressionFilterInList() {
-        testInList(p1, "m.id", p1.tryGetAisMessage().getMsgId());
-        testInList(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
-        testInList(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
-        testInList(p2, "m.name", ((AisMessage5) p2.tryGetAisMessage()).getName());
-        testInList(p2, "m.cs", ((AisMessage5) p2.tryGetAisMessage()).getCallsign());
-        testInList(p2, "m.type", ((AisMessage5) p2.tryGetAisMessage()).getShipType());
-        testInList(p2, "m.type", new ShipTypeCargo(((AisMessage5) p2.tryGetAisMessage()).getShipType()).getShipType().toString());
-        testInList(p5, "m.navstat", ((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus());
-        testInList(p5, "m.navstat", NavigationalStatus.get(((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus()));
+    public void testExpressionFilter() {
+        test(p1, "m.id", p1.tryGetAisMessage().getMsgId());
+        test(p1, "m.mmsi", p1.tryGetAisMessage().getUserId());
+        test(p2, "m.imo", ((AisMessage5) p2.tryGetAisMessage()).getImo());
+        test(p2, "m.name", ((AisMessage5) p2.tryGetAisMessage()).getName());
+        test(p2, "m.cs", ((AisMessage5) p2.tryGetAisMessage()).getCallsign());
+        test(p2, "m.type", ((AisMessage5) p2.tryGetAisMessage()).getShipType());
+        test(p2, "m.type", new ShipTypeCargo(((AisMessage5) p2.tryGetAisMessage()).getShipType()).getShipType().toString());
+        test(p5, "m.navstat", ((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus());
+        test(p5, "m.navstat", NavigationalStatus.get(((AisPositionMessage) p5.tryGetAisMessage()).getNavStatus()));
     }
 
     @Test
@@ -291,7 +291,7 @@ public class AisPacketFiltersTest {
         assertEquals(expectedResult, parseExpressionFilter(filterExpression).test(aisPacket));
     }
 
-    private static void testInList(AisPacket testPacket, String field, Object fieldValue) {
+    private static void test(AisPacket testPacket, String field, Object fieldValue) {
         Object otherValue1, otherValue2;
         if (fieldValue instanceof Integer) {
             otherValue1 = new Integer(((Integer) fieldValue) + 4325);

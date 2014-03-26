@@ -243,18 +243,18 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageSpeedOverGroundIn(@NotNull ExpressionFilterParser.MessageSpeedOverGroundInContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#prog}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitProg(@NotNull ExpressionFilterParser.ProgContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageMmsi}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitMessageMmsi(@NotNull ExpressionFilterParser.MessageMmsiContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#filter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFilter(@NotNull ExpressionFilterParser.FilterContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCourseOverGroundIn}.

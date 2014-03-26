@@ -15,53 +15,20 @@
  */
 package dk.dma.ais.packet;
 
+import dk.dma.enav.model.Country;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterBaseVisitor;
-import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterLexer;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.OrAndContext;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.ParensContext;
-import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.ProgContext;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
-import static java.util.Objects.requireNonNull;
+import org.antlr.v4.runtime.misc.NotNull;
 
 /**
- * 
  * @author Kasper Nielsen
  */
-class AisPacketSourceFiltersParser {
+class AisPacketSourceFiltersParser extends ExpressionFilterParserBase {
     static Predicate<AisPacketSource> parseSourceFilter(String filter) {
-        ANTLRInputStream input = new ANTLRInputStream(requireNonNull(filter));
-        ExpressionFilterLexer lexer = new ExpressionFilterLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        ExpressionFilterParser parser = new ExpressionFilterParser(tokens);
-
-        // Better errors
-        lexer.removeErrorListeners();
-        parser.removeErrorListeners();
-        lexer.addErrorListener(new VerboseListener());
-        parser.addErrorListener(new VerboseListener());
-
-        ProgContext tree = parser.prog();
-        return tree.filterExpression().accept(new SourceFilterToPredicateVisitor());
-    }
-
-    static class VerboseListener extends BaseErrorListener {
-        @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-                String msg, RecognitionException e) {
-            throw new IllegalArgumentException(msg + " @ character " + charPositionInLine);
-            // if (recognizer instanceof Parser)
-            // List<String> stack = ((Parser) recognizer).getRuleInvocationStack();
-            // Collections.reverse(stack);
-            // System.err.println("rule stack: " + stack);
-            // System.err.println("line " + line + ":" + charPositionInLine + " at " + offendingSymbol + ": " + sentenceStr);
-        }
+        return createFilterContext(filter).filterExpression().accept(new SourceFilterToPredicateVisitor());
     }
 
     static class SourceFilterToPredicateVisitor extends ExpressionFilterBaseVisitor<Predicate<AisPacketSource>> {
@@ -85,47 +52,55 @@ class AisPacketSourceFiltersParser {
                 }
             };
         }
-            /*
+
+        // 's.id' (in|notin) stringList
         @Override
-        public Predicate<AisPacketSource> visitSourceBasestation(SourceBasestationContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceBaseStationInList(readArrays(ctx.valueList().value())));
+        public Predicate<AisPacketSource> visitSourceIdIn(final ExpressionFilterParser.SourceIdInContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] strings = extractStrings(ctx.stringList().string());
+            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, strings);
+            return checkNegate(ctx, filter);
         }
 
+        // 's.bs' compareTo INT
         @Override
-        public Predicate<AisPacketSource> visitSourceCountry(SourceCountryContext ctx) {
-            List<Country> countries = Country.findAllByCode(readArrays(ctx.valueList().value()));
-            return checkNegate(ctx.equalityTest(),
-                    filterOnSourceCountry(countries.toArray(new Country[countries.size()])));
+        public Predicate<AisPacketSource> visitSourceBasestation(@NotNull ExpressionFilterParser.SourceBasestationContext ctx) {
+            return createFilterPredicateForIntComparison(AisPacketSourceFilters.class, ctx);
         }
 
+        // 's.bs' (in|notin) (intRange|intList)
         @Override
-        public Predicate<AisPacketSource> visitSourceId(final SourceIdContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceId(readArrays(ctx.valueList().value())));
+        public Predicate<AisPacketSource> visitSourceBasestationIn(@NotNull ExpressionFilterParser.SourceBasestationInContext ctx) {
+            return createFilterPredicateForIntRangeOrIntList(AisPacketSourceFilters.class, ctx);
         }
 
+        // 's.country' (in|notin) stringList
         @Override
-        public Predicate<AisPacketSource> visitSourceRegion(SourceRegionContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceRegion(readArrays(ctx.valueList().value())));
+        public Predicate<AisPacketSource> visitSourceCountryIn(@NotNull ExpressionFilterParser.SourceCountryInContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] strings = extractStrings(ctx.stringList().string());
+            Country[] countries = getCountries(strings);
+            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, countries);
+            return checkNegate(ctx, filter);
         }
 
+        // 's.type' (in|notin) stringList
         @Override
-        public Predicate<AisPacketSource> visitSourceType(SourceTypeContext ctx) {
-            return checkNegate(ctx.equalityTest(), filterOnSourceTypeInList(SourceType.fromString(ctx.valueList().getText())));
+        public Predicate<AisPacketSource> visitSourceTypeIn(@NotNull ExpressionFilterParser.SourceTypeInContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] strings = extractStrings(ctx.stringList().string());
+            AisPacketTags.SourceType[] sourceTypes = getSourceTypes(strings);
+            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, sourceTypes);
+            return checkNegate(ctx, filter);
         }
 
-
-
-        public Predicate<AisPacketSource> checkNegate(EqualityTestContext context, Predicate<AisPacketSource> p) {
-            String text = context.getChild(0).getText();
-            return text.equals("!=") ? p.negate() : p;
+        // 's.region' (in|notin) stringList
+        @Override
+        public Predicate<AisPacketSource> visitSourceRegionIn(@NotNull ExpressionFilterParser.SourceRegionInContext ctx) {
+            String fieldName = ctx.getStart().getText();
+            String[] strings = extractStrings(ctx.stringList().string());
+            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, strings);
+            return checkNegate(ctx, filter);
         }
-
-        private static String[] readArrays(Iterable<ExpressionFilterParser.ValueContext> iter) {
-            ArrayList<String> list = new ArrayList<>();
-            for (ExpressionFilterParser.ValueContext vc : iter) {
-                list.add(vc.getText());
-            }
-            return list.toArray(new String[list.size()]);
-        }           */
     }
 }

@@ -1,13 +1,22 @@
 // Generated from ExpressionFilter.g4 by ANTLR 4.2
 package dk.dma.internal.ais.generated.parser.expressionfilter;
-import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.FailedPredicateException;
+import org.antlr.v4.runtime.NoViableAltException;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class ExpressionFilterParser extends Parser {
@@ -30,11 +39,11 @@ public class ExpressionFilterParser extends Parser {
 		"'&'", "'|'", "'..'", "INT", "FLOAT", "WORD", "STRING", "WS"
 	};
 	public static final int
-		RULE_prog = 0, RULE_filterExpression = 1, RULE_compareTo = 2, RULE_in = 3, 
+		RULE_filter = 0, RULE_filterExpression = 1, RULE_compareTo = 2, RULE_in = 3, 
 		RULE_notin = 4, RULE_intList = 5, RULE_stringList = 6, RULE_intRange = 7, 
 		RULE_numberRange = 8, RULE_number = 9, RULE_string = 10;
 	public static final String[] ruleNames = {
-		"prog", "filterExpression", "compareTo", "in", "notin", "intList", "stringList", 
+		"filter", "filterExpression", "compareTo", "in", "notin", "intList", "stringList", 
 		"intRange", "numberRange", "number", "string"
 	};
 
@@ -57,25 +66,25 @@ public class ExpressionFilterParser extends Parser {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
-	public static class ProgContext extends ParserRuleContext {
+	public static class FilterContext extends ParserRuleContext {
 		public FilterExpressionContext filterExpression() {
 			return getRuleContext(FilterExpressionContext.class,0);
 		}
 		public TerminalNode EOF() { return getToken(ExpressionFilterParser.EOF, 0); }
-		public ProgContext(ParserRuleContext parent, int invokingState) {
+		public FilterContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_prog; }
+		@Override public int getRuleIndex() { return RULE_filter; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitProg(this);
+			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitFilter(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final ProgContext prog() throws RecognitionException {
-		ProgContext _localctx = new ProgContext(_ctx, getState());
-		enterRule(_localctx, 0, RULE_prog);
+	public final FilterContext filter() throws RecognitionException {
+		FilterContext _localctx = new FilterContext(_ctx, getState());
+		enterRule(_localctx, 0, RULE_filter);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
