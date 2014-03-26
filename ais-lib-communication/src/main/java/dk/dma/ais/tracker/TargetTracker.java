@@ -17,9 +17,12 @@ package dk.dma.ais.tracker;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import jsr166e.ConcurrentHashMapV8;
 import jsr166e.ConcurrentHashMapV8.Action;
@@ -127,6 +130,10 @@ public class TargetTracker {
 
     public TargetInfo getNewest(int mmsi) {
         return getNewest(mmsi, Predicate.TRUE);
+    }
+    
+    public Enumeration<AisPacketSource> getAisPacketSources(int mmsi) {
+        return targets.get(mmsi).keys();
     }
 
     public TargetInfo getNewest(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
