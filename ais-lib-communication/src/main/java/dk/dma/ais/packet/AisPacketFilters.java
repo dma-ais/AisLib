@@ -16,29 +16,28 @@
 package dk.dma.ais.packet;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.message.AisMessage5;
-import dk.dma.ais.message.AisPosition;
-import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.ais.message.AisStaticCommon;
-import dk.dma.ais.message.IPositionMessage;
-import dk.dma.ais.message.IVesselPositionMessage;
-import dk.dma.ais.packet.AisPacketTags.SourceType;
-import dk.dma.ais.proprietary.IProprietarySourceTag;
-import dk.dma.ais.sentence.Vdm;
-import dk.dma.enav.model.Country;
-import dk.dma.enav.model.geometry.Area;
-import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.model.geometry.PositionTime;
-import dk.dma.enav.util.function.Predicate;
+ import dk.dma.ais.message.AisMessage5;
+ import dk.dma.ais.message.AisPosition;
+ import dk.dma.ais.message.AisPositionMessage;
+ import dk.dma.ais.message.AisStaticCommon;
+ import dk.dma.ais.message.IPositionMessage;
+ import dk.dma.ais.message.IVesselPositionMessage;
+ import dk.dma.ais.packet.AisPacketTags.SourceType;
+ import dk.dma.ais.proprietary.IProprietarySourceTag;
+ import dk.dma.ais.sentence.Vdm;
+ import dk.dma.enav.model.Country;
+ import dk.dma.enav.model.geometry.Area;
+ import dk.dma.enav.model.geometry.Position;
+ import dk.dma.enav.model.geometry.PositionTime;
+ import dk.dma.enav.util.function.Predicate;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
+ import java.util.Arrays;
+ import java.util.Calendar;
+ import java.util.Date;
 
-import static java.util.Objects.requireNonNull;
+ import static java.util.Objects.requireNonNull;
 
 /**
-  *
   * @author Kasper Nielsen
   */
  public class AisPacketFilters implements FilterFactory {
@@ -74,8 +73,7 @@ import static java.util.Objects.requireNonNull;
      /**
       * Returns a predicate that will filter packets based on the base station source tag.
       *
-      * @param ids
-      *            the id of the base stations for which packets should be accepted
+      * @param ids the id of the base stations for which packets should be accepted
       * @return the predicate
       */
      public static Predicate<AisPacket> filterOnSourceBasestation(String... ids) {
@@ -89,8 +87,7 @@ import static java.util.Objects.requireNonNull;
      /**
       * Returns a predicate that will filter packets based on the country of the source tag.
       *
-      * @param countries
-      *            the countries for which packets should be accepted
+      * @param countries the countries for which packets should be accepted
       * @return the predicate
       */
      public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
@@ -143,7 +140,7 @@ import static java.util.Objects.requireNonNull;
          return new Predicate<AisPacket>() {
              public boolean test(AisPacket p) {
                  boolean test = false;
-                 for (int i = 0; i<sourceTypes.length; i++) {
+                 for (int i = 0; i < sourceTypes.length; i++) {
                      //return sourceType == p.getTags().getSourceType();
                      if (sourceTypes[i].equals(p.getTags().getSourceType())) {
                          test = true;
@@ -160,8 +157,8 @@ import static java.util.Objects.requireNonNull;
 
      /**
       * Filter on message to have known position inside given area.
-      * @param area
-      *          The area that the position must reside inside.
+      *
+      * @param area The area that the position must reside inside.
       * @return
       */
      public static Predicate<AisPacket> filterOnMessagePositionWithin(final Area area) {
@@ -175,6 +172,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return false;
              }
+
              public String toString() {
                  return "position within = " + area;
              }
@@ -219,6 +217,7 @@ import static java.util.Objects.requireNonNull;
              public boolean test(AisPacket p) {
                  return compare(p.getTags().getSourceBs(), bs, operator);
              }
+
              public String toString() {
                  return "bs = " + bs;
              }
@@ -227,13 +226,15 @@ import static java.util.Objects.requireNonNull;
 
      // ---
 
-    /**
-     * Filter on a comparison to a value of the indicated calendarField (see java.util.Calendar).
-     * @param operator
-     * @param calendarField
-     * @param value
-     * @return
-     */
+     /**
+      * Filter on a comparison to a value of the indicated calendarField (see java.util.Calendar).
+      *
+      * @param operator
+      * @param calendarField
+      * @param value
+      * @return
+      */
+     @SuppressWarnings("unused")
      public static Predicate<AisPacket> filterOnMessageReceiveTime(final CompareToOperator operator, final int calendarField, final int value) {
          return new Predicate<AisPacket>() {
              public boolean test(AisPacket p) {
@@ -242,17 +243,224 @@ import static java.util.Objects.requireNonNull;
                  if (msgTimestamp != null) {
                      Calendar calendar = Calendar.getInstance();
                      calendar.setTime(msgTimestamp);
-                     pass = compare(calendar.get(calendarField), value, operator);
+                     pass = compare(getCalendarValue(calendar, calendarField), value, operator);
                  }
                  return pass;
              }
+
              public String toString() {
                  return "cal#" + calendarField + " = " + value;
              }
          };
      }
 
-     // ---
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeYear(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInRange(min, max, p.getTimestamp(), Calendar.YEAR);
+             }
+
+             public String toString() {
+                 return "year = " + min + ".." + max;
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeYear(Integer... years) {
+         final Integer[] copy = years.clone();
+         Arrays.sort(copy);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInSortedArray(p.getTimestamp(), Calendar.YEAR, copy);
+             }
+
+             public String toString() {
+                 return "year = " + skipBrackets(Arrays.toString(copy));
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeMonth(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInRange(min, max, p.getTimestamp(), Calendar.MONTH);
+             }
+
+             public String toString() {
+                 return "month = " + min + ".." + max;
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeMonth(Integer... months) {
+         final Integer[] copy = months.clone();
+         Arrays.sort(copy);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInSortedArray(p.getTimestamp(), Calendar.MONTH, copy);
+             }
+
+             public String toString() {
+                 return "months = " + skipBrackets(Arrays.toString(copy));
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfMonth(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInRange(min, max, p.getTimestamp(), Calendar.DAY_OF_MONTH);
+             }
+
+             public String toString() {
+                 return "dom = " + min + ".." + max;
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfMonth(Integer... days) {
+         final Integer[] copy = days.clone();
+         Arrays.sort(copy);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInSortedArray(p.getTimestamp(), Calendar.DAY_OF_MONTH, copy);
+             }
+
+             public String toString() {
+                 return "dom = " + skipBrackets(Arrays.toString(copy));
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfWeek(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInRange(min, max, p.getTimestamp(), Calendar.DAY_OF_WEEK);
+             }
+
+             public String toString() {
+                 return "dom = " + min + ".." + max;
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfWeek(Integer... days) {
+         final Integer[] copy = days.clone();
+         Arrays.sort(copy);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInSortedArray(p.getTimestamp(), Calendar.DAY_OF_WEEK, copy);
+             }
+
+             public String toString() {
+                 return "dow = " + skipBrackets(Arrays.toString(copy));
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeHour(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInRange(min, max, p.getTimestamp(), Calendar.HOUR_OF_DAY);
+             }
+
+             public String toString() {
+                 return "hour = " + min + ".." + max;
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeHour(Integer... hours) {
+         final Integer[] copy = hours.clone();
+         Arrays.sort(copy);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInSortedArray(p.getTimestamp(), Calendar.HOUR_OF_DAY, copy);
+             }
+
+             public String toString() {
+                 return "hour = " + skipBrackets(Arrays.toString(copy));
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeMinute(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInRange(min, max, p.getTimestamp(), Calendar.MINUTE);
+             }
+
+             public String toString() {
+                 return "minute = " + min + ".." + max;
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageReceiveTimeMinute(Integer... minutes) {
+         final Integer[] copy = minutes.clone();
+         Arrays.sort(copy);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return timestampInSortedArray(p.getTimestamp(), Calendar.MINUTE, copy);
+             }
+
+             public String toString() {
+                 return "minute = " + skipBrackets(Arrays.toString(copy));
+             }
+         };
+     }
+
+     private static boolean timestampInSortedArray(Date timestamp, int calendarField, Integer[] sortedArray) {
+               boolean pass = true;
+               if (timestamp != null) {
+                   Calendar calendar = Calendar.getInstance();
+                   calendar.setTime(timestamp);
+                   int value = getCalendarValue(calendar, calendarField);
+                   pass = Arrays.binarySearch(sortedArray, value) >= 0;
+               }
+               return pass;
+           }
+
+    private static boolean timestampInRange(int min, int max, Date timestamp, int calendarField) {
+         boolean pass = true;
+         if (timestamp != null) {
+             Calendar calendar = Calendar.getInstance();
+             calendar.setTime(timestamp);
+             int value = getCalendarValue(calendar, calendarField);
+             pass = inRange(min, max, value);
+         }
+         return pass;
+     }
+
+    /**
+     * Extract values from Calendar, by adjusting month numbers to January = 1 and weekdays having Monday = 1
+     * @param calendarField
+     * @param calendar
+     * @return
+     */
+    private static int getCalendarValue(Calendar calendar, int calendarField) {
+        int value = calendar.get(calendarField);
+        if (calendarField == Calendar.MONTH) {
+            value = value + 1;
+        } else if (calendarField == Calendar.DAY_OF_WEEK) {
+            value = (value - 1 + 8) % 8;  // 1 = man, 7 = sun
+        }
+        return value;
+    }
+
+    // ---
 
      @SuppressWarnings("unused")
      public static Predicate<AisPacket> filterOnMessageId(final CompareToOperator operator, final Integer id) {
@@ -261,6 +469,7 @@ import static java.util.Objects.requireNonNull;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  return aisMessage == null ? false : compare(aisMessage.getMsgId(), id, operator);
              }
+
              public String toString() {
                  return "id = " + id;
              }
@@ -274,6 +483,7 @@ import static java.util.Objects.requireNonNull;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  return aisMessage == null ? false : compare(aisMessage.getUserId(), mmsi, operator);
              }
+
              public String toString() {
                  return "mmsi = " + mmsi;
              }
@@ -291,6 +501,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "imo = " + imo;
              }
@@ -308,6 +519,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "shiptype = " + shiptype;
              }
@@ -325,6 +537,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "navstatus = " + navstatus;
              }
@@ -353,6 +566,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "name = " + n;
              }
@@ -371,6 +585,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "callsign = " + n;
              }
@@ -388,6 +603,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "sog = " + sog;
              }
@@ -405,6 +621,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "cog = " + cog;
              }
@@ -422,6 +639,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "hdg = " + hdg;
              }
@@ -439,6 +657,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "lon = " + lon;
              }
@@ -456,6 +675,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "lat = " + lat;
              }
@@ -473,6 +693,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "draught = " + draught;
              }
@@ -492,6 +713,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "msgid = " + skipBrackets(Arrays.toString(m));
              }
@@ -511,6 +733,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "mmsi = " + skipBrackets(Arrays.toString(m));
              }
@@ -531,6 +754,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "imo = " + skipBrackets(Arrays.toString(m));
              }
@@ -551,6 +775,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "shiptypes = " + skipBrackets(Arrays.toString(m));
              }
@@ -571,6 +796,7 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "navstat = " + skipBrackets(Arrays.toString(m));
              }
@@ -633,11 +859,13 @@ import static java.util.Objects.requireNonNull;
                  }
                  return pass;
              }
+
              public String toString() {
                  return "hdg = " + skipBrackets(Arrays.toString(m));
              }
          };
      }
+
      @SuppressWarnings("unused")
      public static Predicate<AisPacket> filterOnMessageId(final int min, final int max) {
          return new Predicate<AisPacket>() {
@@ -645,11 +873,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage != null) {
-                     int id = aisMessage.getMsgId();
-                     pass = id >= min && id <= max;
+                     pass = inRange(min, max, aisMessage.getMsgId());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "msgid = " + min + ".." + max;
              }
@@ -663,11 +891,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage != null) {
-                     int mmsi = aisMessage.getUserId();
-                     pass = mmsi >= min && mmsi <= max;
+                     pass = inRange(min, max, aisMessage.getUserId());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "mmsi = " + min + ".." + max;
              }
@@ -681,11 +909,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage instanceof AisMessage5) {
-                     int imo = (int) ((AisMessage5) aisMessage).getImo();
-                     pass = imo >= min && imo <= max;
+                     pass = inRange(min, max, (int) ((AisMessage5) aisMessage).getImo());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "imo = " + min + ".." + max;
              }
@@ -699,11 +927,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage instanceof AisMessage5) {
-                     int shiptype = (int) ((AisMessage5) aisMessage).getShipType();
-                     pass = shiptype >= min && shiptype <= max;
+                     pass = inRange(min, max, ((AisMessage5) aisMessage).getShipType());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "shiptype = " + min + ".." + max;
              }
@@ -717,11 +945,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage instanceof AisPositionMessage) {
-                     int navstat = ((AisPositionMessage) aisMessage).getNavStatus();
-                     pass = navstat >= min && navstat <= max;
+                     pass = inRange(min, max, ((AisPositionMessage) aisMessage).getNavStatus());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "navstat = " + min + ".." + max;
              }
@@ -735,11 +963,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage instanceof IVesselPositionMessage) {
-                     int hdg = ((IVesselPositionMessage) aisMessage).getTrueHeading();
-                     pass = hdg >= min && hdg <= max;
+                     pass = inRange(min, max, ((IVesselPositionMessage) aisMessage).getTrueHeading());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "hdg = " + min + ".." + max;
              }
@@ -753,11 +981,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage instanceof IVesselPositionMessage) {
-                     float latitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLatitudeDouble();
-                     pass = latitude >= min && latitude <= max;
+                     pass = inRange(min, max, (float) ((IVesselPositionMessage) aisMessage).getPos().getLatitudeDouble());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "lat = " + min + ".." + max;
              }
@@ -771,11 +999,11 @@ import static java.util.Objects.requireNonNull;
                  boolean pass = true;
                  AisMessage aisMessage = p.tryGetAisMessage();
                  if (aisMessage instanceof IVesselPositionMessage) {
-                     float longitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLongitudeDouble();
-                     pass = longitude >= min && longitude <= max;
+                     pass = inRange(min, max, (float) ((IVesselPositionMessage) aisMessage).getPos().getLongitudeDouble());
                  }
                  return pass;
              }
+
              public String toString() {
                  return "lon = " + min + ".." + max;
              }
@@ -830,35 +1058,35 @@ import static java.util.Objects.requireNonNull;
          return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
      }
 
-     private final static String preprocessAisString(String name) {
-         return name != null ? name.replace('@',' ').trim() : null;
+     private static String preprocessAisString(String name) {
+         return name != null ? name.replace('@', ' ').trim() : null;
      }
 
-     private final static String[] preprocessExpressionStrings(String[] exprStrings) {
+     private static String[] preprocessExpressionStrings(String[] exprStrings) {
          String[] preprocessedStrings = new String[exprStrings.length];
-         for (int i=0; i<preprocessedStrings.length; i++) {
+         for (int i = 0; i < preprocessedStrings.length; i++) {
              preprocessedStrings[i] = preprocessExpressionString(exprStrings[i]);
          }
          return preprocessedStrings;
      }
 
-     private final static String preprocessExpressionString(String exprString) {
+     private static String preprocessExpressionString(String exprString) {
          String preprocessedString = exprString;
-         if (preprocessedString.startsWith("'") && preprocessedString.endsWith("'") && preprocessedString.length()>2) {
-             preprocessedString = preprocessedString.substring(1, preprocessedString.length()-1);
+         if (preprocessedString.startsWith("'") && preprocessedString.endsWith("'") && preprocessedString.length() > 2) {
+             preprocessedString = preprocessedString.substring(1, preprocessedString.length() - 1);
          }
          return preprocessedString;
      }
 
      private static boolean compare(String lhs, String rhs, CompareToOperator operator) {
-         lhs = lhs.replace('@',' ').trim();
-         rhs = rhs.replace('@',' ').trim();
+         lhs = lhs.replace('@', ' ').trim();
+         rhs = rhs.replace('@', ' ').trim();
 
          switch (operator) {
              case EQUALS:
                  return lhs.equalsIgnoreCase(rhs);
              case NOT_EQUALS:
-                 return ! lhs.equalsIgnoreCase(rhs);
+                 return !lhs.equalsIgnoreCase(rhs);
              case GREATER_THAN:
                  return lhs.compareToIgnoreCase(rhs) > 0;
              case GREATER_THAN_OR_EQUALS:
@@ -910,11 +1138,21 @@ import static java.util.Objects.requireNonNull;
          }
      }
 
+     private static boolean inRange(int min, int max, int value) {
+         return value >= min && value <= max;
+     }
+
+     private static boolean inRange(float min, float max, float value) {
+         return value >= min && value <= max;
+     }
+
      abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {
 
          abstract boolean test(AisMessage message);
 
-         /** {@inheritDoc} */
+         /**
+          * {@inheritDoc}
+          */
          @Override
          public boolean test(AisPacket element) {
              AisMessage m = element.tryGetAisMessage();
@@ -927,16 +1165,24 @@ import static java.util.Objects.requireNonNull;
       */
      static class SamplerFilter extends Predicate<AisPacket> {
 
-         /** The latest received position that was accepted, or null if no position has been received. */
+         /**
+          * The latest received position that was accepted, or null if no position has been received.
+          */
          Position latestPosition;
 
-         /** The latest time stamp that was accepted, or null if no packets has been received. */
+         /**
+          * The latest time stamp that was accepted, or null if no packets has been received.
+          */
          Long latestTimestamp;
 
-         /** If non-null the minimum distance traveled in meters between updates. */
+         /**
+          * If non-null the minimum distance traveled in meters between updates.
+          */
          final Integer minDistanceInMeters;
 
-         /** If non-null the minimum duration in milliseconds between updates. */
+         /**
+          * If non-null the minimum duration in milliseconds between updates.
+          */
          final Long minDurationInMS;
 
          SamplerFilter(Integer minDistanceInMeters, Long minDurationInMS) {
@@ -947,7 +1193,9 @@ import static java.util.Objects.requireNonNull;
              this.minDurationInMS = minDurationInMS;
          }
 
-         /** {@inheritDoc} */
+         /**
+          * {@inheritDoc}
+          */
          @Override
          public boolean test(AisPacket p) {
              PositionTime pos = p.tryGetPositionTime();

@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 
  * @author Kasper Nielsen
  */
 class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase {
@@ -49,8 +48,8 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         public Predicate<AisPacket> visitOrAnd(OrAndContext ctx) {
             return ctx.op.getType() ==
                     ExpressionFilterParser.AND ?
-                        visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) :
-                        visit(ctx.filterExpression(0)).or(visit(ctx.filterExpression(1)));
+                    visit(ctx.filterExpression(0)).and(visit(ctx.filterExpression(1))) :
+                    visit(ctx.filterExpression(0)).or(visit(ctx.filterExpression(1)));
         }
 
         @Override
@@ -125,6 +124,23 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         }
 
         @Override
+        public Predicate<AisPacket> visitMessageTimeIn(@NotNull ExpressionFilterParser.MessageTimeInContext ctx) {
+            Predicate<AisPacket> filter = createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
+            if (filter == null && ctx.stringList() != null) {
+                String fieldName = ctx.getStart().getText();
+                String[] strings = extractStrings(ctx.stringList().string());
+                Set<Integer> intList = null;
+                if ("m.month".equalsIgnoreCase(fieldName)) {
+                    intList = getMonths(strings);
+                } else if ("m.dow".equalsIgnoreCase(fieldName)) {
+                    intList = getWeekdays(strings);
+                }
+                filter = checkNegate(ctx, createFilterPredicateForList(AisPacketFilters.class, fieldName, intList.toArray(new Integer[intList.size()])));
+            }
+            return filter;
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageId(@NotNull ExpressionFilterParser.MessageIdContext ctx) {
             return createFilterPredicateForIntComparison(AisPacketFilters.class, ctx);
         }
@@ -190,7 +206,7 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
             try {
                 return createFilterPredicateForComparison(AisPacketFilters.class, fieldName, operator, Integer.valueOf(value));
             } catch (NumberFormatException e) {
-                Set<Integer> navstats = getNavigationalStatuses(new String[] { value });
+                Set<Integer> navstats = getNavigationalStatuses(new String[]{value});
                 if (!operator.equals("=")) {
                     throw new IllegalArgumentException("Sorry, only = operator currently supported.");
                 }

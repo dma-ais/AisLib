@@ -2,7 +2,7 @@ grammar ExpressionFilter;
 
 filter: filterExpression EOF;
 
- filterExpression:
+filterExpression:
 
      //
      // Tokens related to source

@@ -491,20 +491,55 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testMessageTimestamp() {
+    public void testMessageTimeCompareTo() {
         // p1: 2013-03-13T12:41:00.000+0100
-        assertFilterExpression(true, p1, "m.year = 2013");
-        assertFilterExpression(true, p1, "m.month = 3");       assertFilterExpression(false, p1, "m.month != 3");
+        testComparison(p1, "m.year", 2013);
+        testComparison(p1, "m.month", 3);
+        testComparison(p1, "m.dom", 13);
+        testComparison(p1, "m.dow", 3);
+        testComparison(p1, "m.hour", 12);
+        testComparison(p1, "m.minute", 41);
+
         assertFilterExpression(true, p1, "m.month = 03");      assertFilterExpression(false, p1, "m.month != 03");
         assertFilterExpression(true, p1, "m.month = mar");     assertFilterExpression(false, p1, "m.month != mar");
         assertFilterExpression(true, p1, "m.month = MAR");     assertFilterExpression(false, p1, "m.month != MAR");
         assertFilterExpression(true, p1, "m.month = MARCH");   assertFilterExpression(false, p1, "m.month != MARCH");
-        assertFilterExpression(true, p1, "m.dom = 13");
-        assertFilterExpression(true, p1, "m.dow = 3");         assertFilterExpression(false, p1, "m.dow != 3");
         assertFilterExpression(true, p1, "m.dow = wed");       assertFilterExpression(false, p1, "m.dow != wed");
         assertFilterExpression(true, p1, "m.dow = WED");       assertFilterExpression(false, p1, "m.dow != WED");
         assertFilterExpression(true, p1, "m.dow = WEDNESDAY"); assertFilterExpression(false, p1, "m.dow != WEDNESDAY");
-        assertFilterExpression(true, p1, "m.hour = 12");
-        assertFilterExpression(true, p1, "m.minute = 41");
+    }
+
+    @Test
+    public void testMessageTimeInRange() {
+        // p1: 2013-03-13T12:41:00.000+0100
+        assertFilterExpression(true, p1, "m.year in 2011..2014");
+        assertFilterExpression(true, p1, "m.month in 2..4");       assertFilterExpression(false, p1, "m.month not in 2..4");
+        // TODO ? assertFilterExpression(true, p1, "m.month in feb..may");   assertFilterExpression(false, p1, "m.month not in feb..may");
+        assertFilterExpression(true, p1, "m.dom in 10..15");
+        assertFilterExpression(true, p1, "m.dow in 2..4");         assertFilterExpression(false, p1, "m.dow not in 2..4");
+        // TODO ? assertFilterExpression(true, p1, "m.dow in mon..fri");     assertFilterExpression(false, p1, "m.dow not in mon..fri");
+        assertFilterExpression(true, p1, "m.hour = 12..13");
+        assertFilterExpression(true, p1, "m.minute = 40..49");
+    }
+
+    @Test
+    public void testMessageTimeInIntList() {
+        // p1: 2013-03-13T12:41:00.000+0100
+        assertFilterExpression(true, p1, "m.year in 2011..2014");     assertFilterExpression(false, p1, "m.year not in 2013, 2014");
+        assertFilterExpression(true, p1, "m.month in 2,3,4");         assertFilterExpression(false, p1, "m.month not in 2,3,4");
+        assertFilterExpression(true, p1, "m.dom in 12,13,14");
+        assertFilterExpression(true, p1, "m.dow in 2, 3, 4");         assertFilterExpression(false, p1, "m.dow not in 2,3,4");
+        assertFilterExpression(true, p1, "m.hour = 12, 13");
+        assertFilterExpression(true, p1, "m.minute = 40,41,42,43,44,45,49");
+    }
+
+    @Test
+    public void testMessageTimeInStringList() {
+        // p1: 2013-03-13T12:41:00.000+0100
+        assertFilterExpression(true, p1, "m.month in jan,feb,mar");            assertFilterExpression(false, p1, "m.month not in jan,feb,mar");
+        assertFilterExpression(true, p1, "m.month in JAN,feb,MAR");            assertFilterExpression(false, p1, "m.month not in JAN,feb,MAR");
+        assertFilterExpression(true, p1, "m.month in JAN,febRuary,MARCH");     assertFilterExpression(false, p1, "m.month not in JAN,febRuary,MARCH");
+        assertFilterExpression(true, p1, "m.dow in mon,tue,wed");              assertFilterExpression(false, p1, "m.dow not in mon,tue,wed");
+        assertFilterExpression(true, p1, "m.dow in monday,tuesday,Wednesday"); assertFilterExpression(false, p1, "m.dow not in monday,tuesday,Wednesday");
     }
 }
