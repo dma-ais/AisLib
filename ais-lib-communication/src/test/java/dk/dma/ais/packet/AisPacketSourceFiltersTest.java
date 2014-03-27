@@ -90,6 +90,11 @@ public class AisPacketSourceFiltersTest {
         assertFilterExpression(false, src1, "s.region = 0 & s.country = CZE & s.type = LIVE");
     }
 
+    @Test(expected = NullPointerException.class)
+    public void rejectsMessageRelatedExpressions() {
+        assertFilterExpression(true, src1, "m.sog > 6.6");
+    }
+
     private static void assertFilterExpression(boolean expectedResult, AisPacketSource aisPacketSource, String filterExpression) {
         System.out.println("Testing \"" + filterExpression + "\" to be " + expectedResult + " for " + aisPacketSource.toString());
         assertEquals(expectedResult, parseSourceFilter(filterExpression).test(aisPacketSource));

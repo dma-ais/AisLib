@@ -12,18 +12,18 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageName}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageName(@NotNull ExpressionFilterParser.MessageNameContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTrueHeading}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitMessageTrueHeading(@NotNull ExpressionFilterParser.MessageTrueHeadingContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTime}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTime(@NotNull ExpressionFilterParser.MessageTimeContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTrueHeadingIn}.
@@ -38,27 +38,6 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParens(@NotNull ExpressionFilterParser.ParensContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageLatitude}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageLatitude(@NotNull ExpressionFilterParser.MessageLatitudeContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#string}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitString(@NotNull ExpressionFilterParser.StringContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageDraughtIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageDraughtIn(@NotNull ExpressionFilterParser.MessageDraughtInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#intList}.
@@ -96,6 +75,132 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitSourceBasestation(@NotNull ExpressionFilterParser.SourceBasestationContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#number}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNumber(@NotNull ExpressionFilterParser.NumberContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#sourceBasestationIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceBasestationIn(@NotNull ExpressionFilterParser.SourceBasestationInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageImoIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageImoIn(@NotNull ExpressionFilterParser.MessageImoInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#in}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIn(@NotNull ExpressionFilterParser.InContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageLatitudeIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageLatitudeIn(@NotNull ExpressionFilterParser.MessageLatitudeInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageId(@NotNull ExpressionFilterParser.MessageIdContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCallsign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageCallsign(@NotNull ExpressionFilterParser.MessageCallsignContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageSpeedOverGround}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageSpeedOverGround(@NotNull ExpressionFilterParser.MessageSpeedOverGroundContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCourseOverGroundIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageCourseOverGroundIn(@NotNull ExpressionFilterParser.MessageCourseOverGroundInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageDraught}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageDraught(@NotNull ExpressionFilterParser.MessageDraughtContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageMmsiIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageMmsiIn(@NotNull ExpressionFilterParser.MessageMmsiInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#sourceCountryIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSourceCountryIn(@NotNull ExpressionFilterParser.SourceCountryInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageIdIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageIdIn(@NotNull ExpressionFilterParser.MessageIdInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#circle}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCircle(@NotNull ExpressionFilterParser.CircleContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageName(@NotNull ExpressionFilterParser.MessageNameContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageLatitude}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageLatitude(@NotNull ExpressionFilterParser.MessageLatitudeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#string}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitString(@NotNull ExpressionFilterParser.StringContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageDraughtIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageDraughtIn(@NotNull ExpressionFilterParser.MessageDraughtInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCourseOverGround}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -122,27 +227,6 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNumberRange(@NotNull ExpressionFilterParser.NumberRangeContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#number}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNumber(@NotNull ExpressionFilterParser.NumberContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#sourceBasestationIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSourceBasestationIn(@NotNull ExpressionFilterParser.SourceBasestationInContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageImoIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageImoIn(@NotNull ExpressionFilterParser.MessageImoInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageNavigationalStatusIn}.
@@ -208,41 +292,6 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitSourceTypeIn(@NotNull ExpressionFilterParser.SourceTypeInContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#in}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIn(@NotNull ExpressionFilterParser.InContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageLatitudeIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageLatitudeIn(@NotNull ExpressionFilterParser.MessageLatitudeInContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageId}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageId(@NotNull ExpressionFilterParser.MessageIdContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCallsign}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageCallsign(@NotNull ExpressionFilterParser.MessageCallsignContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageSpeedOverGround}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageSpeedOverGround(@NotNull ExpressionFilterParser.MessageSpeedOverGroundContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageNameIn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -271,13 +320,6 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitFilter(@NotNull ExpressionFilterParser.FilterContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCourseOverGroundIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageCourseOverGroundIn(@NotNull ExpressionFilterParser.MessageCourseOverGroundInContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageLongitude}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -285,25 +327,11 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageLongitude(@NotNull ExpressionFilterParser.MessageLongitudeContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageDraught}.
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeIn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMessageDraught(@NotNull ExpressionFilterParser.MessageDraughtContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageMmsiIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageMmsiIn(@NotNull ExpressionFilterParser.MessageMmsiInContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#sourceCountryIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSourceCountryIn(@NotNull ExpressionFilterParser.SourceCountryInContext ctx);
+	T visitMessageTimeIn(@NotNull ExpressionFilterParser.MessageTimeInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#stringList}.
@@ -311,13 +339,6 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitStringList(@NotNull ExpressionFilterParser.StringListContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageIdIn}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageIdIn(@NotNull ExpressionFilterParser.MessageIdInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#notin}.
@@ -332,13 +353,6 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageShiptype(@NotNull ExpressionFilterParser.MessageShiptypeContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#circle}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCircle(@NotNull ExpressionFilterParser.CircleContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageImo}.

@@ -200,10 +200,12 @@ public class AisPacketFiltersTest {
         assertFilterExpression(false, p5, "m.lat in 55..56 & m.lon in 11..12 & m.sog > 6.0 & m.hdg > 350 & m.id = 2");
         assertFilterExpression(false, p5, "m.lat in 37..38 & m.lon in -123..-122 & m.sog > 7.0 & m.hdg > 350 & m.id = 1");
         assertFilterExpression(true, p5, "m.lat in 37..38 & m.lon in -123..-122 & m.sog > 6.0 & m.hdg > 350 & m.id = 1");
+
+        assertFilterExpression(false, p5, "s.type=SAT|s.id=AISD|s.id=MSSIS");
     }
 
     @Test
-    public void testParseExpressionFilterLabels /* enums? */ () {
+    public void testParseExpressionFilterLabels /* enums? */() {
         assertFilterExpression(false, p1, "m.type = NONEXISTENTLABEL");
         assertFilterExpression(false, p1, "m.type = TANKER");
         assertFilterExpression(true, p1, "m.type = MILITARY");
@@ -305,9 +307,9 @@ public class AisPacketFiltersTest {
         } else if (fieldValue instanceof String) {
             otherValue1 = "VALUE1";
             otherValue2 = "VALUE2";
-            fieldValue = ((String) fieldValue).replace('@',' ').trim();
+            fieldValue = ((String) fieldValue).replace('@', ' ').trim();
             if (((String) fieldValue).contains(" ")) {
-                fieldValue  = "'" + fieldValue + "'";
+                fieldValue = "'" + fieldValue + "'";
             }
         } else if (fieldValue instanceof Enum) {
             otherValue1 = "VALUE1";
@@ -355,8 +357,8 @@ public class AisPacketFiltersTest {
         assertFilterExpression(true, testPacket, field + " in " + below + ".." + above);
         assertFilterExpression(true, testPacket, field + " in " + fieldValue + ".." + fieldValue);
 
-        assertFilterExpression(false, testPacket, field + " in " + (below.longValue()-10) + ".." + below);
-        assertFilterExpression(false, testPacket, field + " in " + above + ".." + (above.longValue()+10));
+        assertFilterExpression(false, testPacket, field + " in " + (below.longValue() - 10) + ".." + below);
+        assertFilterExpression(false, testPacket, field + " in " + above + ".." + (above.longValue() + 10));
 
         assertFilterExpression(true, testPacket, field + " in (" + fieldValue + ".." + above + ")");
         assertFilterExpression(true, testPacket, field + " IN (" + fieldValue + ".." + above + ")");
@@ -384,13 +386,13 @@ public class AisPacketFiltersTest {
             lesserValue = new Double(((Double) fieldValue) - 1.0);
             largerValue = new Double(((Double) fieldValue) + 1.0);
         } else if (fieldValue instanceof String) {
-            fieldValue = ((String) fieldValue).replace('@',' ').trim();
+            fieldValue = ((String) fieldValue).replace('@', ' ').trim();
             lesserValue = "0";
             largerValue = "Z" + fieldValue.toString();
         } else {
             throw new IllegalArgumentException("Unsupported type: " + fieldValue.getClass());
         }
-        
+
         // Test = operator
         assertFilterExpression(true, testPacket, field + " = " + fieldValue);
         assertFilterExpression(false, testPacket, field + " = " + largerValue);
@@ -472,19 +474,37 @@ public class AisPacketFiltersTest {
 
         int width = 2000;
 
-        Position ne = CoordinateSystem.CARTESIAN.pointOnBearing(position, width/2, 45);
-        Position sw = CoordinateSystem.CARTESIAN.pointOnBearing(position, width/2, 45 + 180);
+        Position ne = CoordinateSystem.CARTESIAN.pointOnBearing(position, width / 2, 45);
+        Position sw = CoordinateSystem.CARTESIAN.pointOnBearing(position, width / 2, 45 + 180);
         BoundingBox bboxWithPositionInside = BoundingBox.create(ne, sw, CoordinateSystem.CARTESIAN);
 
         Position nw = CoordinateSystem.CARTESIAN.pointOnBearing(position, width, 45);
         Position se = CoordinateSystem.CARTESIAN.pointOnBearing(nw, width, 135);
         BoundingBox bboxWithPositionOutside = BoundingBox.create(nw, se, CoordinateSystem.CARTESIAN);
 
-        assertFilterExpression(true, packet, "m.pos within bbox(" + bboxWithPositionInside.getMinLat() + ", " + bboxWithPositionInside.getMinLon() + ", " + + bboxWithPositionInside.getMaxLat() + ", " + bboxWithPositionInside.getMaxLon() + ")");
-        assertFilterExpression(false, packet, "m.pos within bbox(" + bboxWithPositionOutside.getMinLat() + ", " + bboxWithPositionOutside.getMinLon() + ", " + + bboxWithPositionOutside.getMaxLat() + ", " + bboxWithPositionOutside.getMaxLon() + ")");
+        assertFilterExpression(true, packet, "m.pos within bbox(" + bboxWithPositionInside.getMinLat() + ", " + bboxWithPositionInside.getMinLon() + ", " + +bboxWithPositionInside.getMaxLat() + ", " + bboxWithPositionInside.getMaxLon() + ")");
+        assertFilterExpression(false, packet, "m.pos within bbox(" + bboxWithPositionOutside.getMinLat() + ", " + bboxWithPositionOutside.getMinLon() + ", " + +bboxWithPositionOutside.getMaxLat() + ", " + bboxWithPositionOutside.getMaxLon() + ")");
 
         // Message with no position information passes
         assertTrue(p1.tryGetAisMessage() instanceof AisMessage5);
         assertFilterExpression(true, p1, "m.pos within bbox(" + bboxWithPositionInside.getMinLat() + ", " + bboxWithPositionInside.getMinLon() + ", " + +bboxWithPositionInside.getMaxLat() + ", " + bboxWithPositionInside.getMaxLon() + ")");
+    }
+
+    @Test
+    public void testMessageTimestamp() {
+        // p1: 2013-03-13T12:41:00.000+0100
+        assertFilterExpression(true, p1, "m.year = 2013");
+        assertFilterExpression(true, p1, "m.month = 3");       assertFilterExpression(false, p1, "m.month != 3");
+        assertFilterExpression(true, p1, "m.month = 03");      assertFilterExpression(false, p1, "m.month != 03");
+        assertFilterExpression(true, p1, "m.month = mar");     assertFilterExpression(false, p1, "m.month != mar");
+        assertFilterExpression(true, p1, "m.month = MAR");     assertFilterExpression(false, p1, "m.month != MAR");
+        assertFilterExpression(true, p1, "m.month = MARCH");   assertFilterExpression(false, p1, "m.month != MARCH");
+        assertFilterExpression(true, p1, "m.dom = 13");
+        assertFilterExpression(true, p1, "m.dow = 3");         assertFilterExpression(false, p1, "m.dow != 3");
+        assertFilterExpression(true, p1, "m.dow = wed");       assertFilterExpression(false, p1, "m.dow != wed");
+        assertFilterExpression(true, p1, "m.dow = WED");       assertFilterExpression(false, p1, "m.dow != WED");
+        assertFilterExpression(true, p1, "m.dow = WEDNESDAY"); assertFilterExpression(false, p1, "m.dow != WEDNESDAY");
+        assertFilterExpression(true, p1, "m.hour = 12");
+        assertFilterExpression(true, p1, "m.minute = 41");
     }
 }

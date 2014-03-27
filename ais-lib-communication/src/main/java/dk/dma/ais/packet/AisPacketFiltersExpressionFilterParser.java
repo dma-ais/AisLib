@@ -120,6 +120,11 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         //
 
         @Override
+        public Predicate<AisPacket> visitMessageTime(@NotNull ExpressionFilterParser.MessageTimeContext ctx) {
+            return createFilterPredicateForTimeComparison(AisPacketFilters.class, ctx);
+        }
+
+        @Override
         public Predicate<AisPacket> visitMessageId(@NotNull ExpressionFilterParser.MessageIdContext ctx) {
             return createFilterPredicateForIntComparison(AisPacketFilters.class, ctx);
         }

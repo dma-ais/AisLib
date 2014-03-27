@@ -32,908 +32,939 @@ import dk.dma.enav.model.geometry.PositionTime;
 import dk.dma.enav.util.function.Predicate;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * 
- * @author Kasper Nielsen
- */
-public class AisPacketFilters implements FilterFactory {
+  *
+  * @author Kasper Nielsen
+  */
+ public class AisPacketFilters implements FilterFactory {
 
-    @SafeVarargs
-    static <T> T[] check(T... elements) {
-        T[] s = elements.clone();
-        Arrays.sort(s);
-        for (int i = 0; i < s.length; i++) {
-            if (s[i] == null) {
-                throw new NullPointerException("Array is null at position " + i);
-            }
-        }
-        // Check for nulls
-        return s;
-    }
+     @SafeVarargs
+     static <T> T[] check(T... elements) {
+         T[] s = elements.clone();
+         Arrays.sort(s);
+         for (int i = 0; i < s.length; i++) {
+             if (s[i] == null) {
+                 throw new NullPointerException("Array is null at position " + i);
+             }
+         }
+         // Check for nulls
+         return s;
+     }
 
-    public static Predicate<AisPacket> filterOnSourceBasestation(Integer... ids) {
-        final Integer[] copy = ids.clone();
-        Arrays.sort(copy);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                Integer sourceBs = p.getTags().getSourceBs();
-                return sourceBs != null && Arrays.binarySearch(copy, sourceBs) >= 0;
-            }
+     public static Predicate<AisPacket> filterOnSourceBasestation(Integer... ids) {
+         final Integer[] copy = ids.clone();
+         Arrays.sort(copy);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 Integer sourceBs = p.getTags().getSourceBs();
+                 return sourceBs != null && Arrays.binarySearch(copy, sourceBs) >= 0;
+             }
 
-            public String toString() {
-                return "sourceBaseStation = " + skipBrackets(Arrays.toString(copy));
-            }
-        };
-    }
+             public String toString() {
+                 return "sourceBaseStation = " + skipBrackets(Arrays.toString(copy));
+             }
+         };
+     }
+
+     /**
+      * Returns a predicate that will filter packets based on the base station source tag.
+      *
+      * @param ids
+      *            the id of the base stations for which packets should be accepted
+      * @return the predicate
+      */
+     public static Predicate<AisPacket> filterOnSourceBasestation(String... ids) {
+         final Integer[] bss = new Integer[ids.length];
+         for (int i = 0; i < bss.length; i++) {
+             bss[i] = Integer.valueOf(ids[i]);
+         }
+         return filterOnSourceBasestation(bss);
+     }
+
+     /**
+      * Returns a predicate that will filter packets based on the country of the source tag.
+      *
+      * @param countries
+      *            the countries for which packets should be accepted
+      * @return the predicate
+      */
+     public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
+         final Country[] c = check(countries);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 Country country = p.getTags().getSourceCountry();
+                 return country != null && Arrays.binarySearch(c, country) >= 0;
+             }
+
+             public String toString() {
+                 return "sourceCountry = " + skipBrackets(Arrays.toString(c));
+             }
+         };
+     }
+
+     public static Predicate<AisPacket> filterOnSourceId(final String... ids) {
+         final String[] s = check(ids);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 String sourceId = p.getTags().getSourceId();
+                 return sourceId != null && Arrays.binarySearch(s, sourceId) >= 0;
+             }
+
+             public String toString() {
+                 return "sourceId = " + skipBrackets(Arrays.toString(s));
+             }
+         };
+     }
+
+     public static Predicate<AisPacket> filterOnSourceRegion(final String... regions) {
+         final String[] s = check(regions);
+         requireNonNull(regions, "regions is null");
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 IProprietarySourceTag sourceTag = p.getVdm().getSourceTag();
+                 String region = sourceTag == null ? null : sourceTag.getRegion();
+                 return region != null && Arrays.binarySearch(s, region) >= 0;
+             }
+
+             public String toString() {
+                 return "sourceRegion = " + skipBrackets(Arrays.toString(s));
+             }
+         };
+     }
+
+     public static Predicate<AisPacket> filterOnSourceType(final SourceType... sourceType) {
+         final SourceType[] sourceTypes = sourceType.clone();
+         requireNonNull(sourceType, "sourceType is null");
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean test = false;
+                 for (int i = 0; i<sourceTypes.length; i++) {
+                     //return sourceType == p.getTags().getSourceType();
+                     if (sourceTypes[i].equals(p.getTags().getSourceType())) {
+                         test = true;
+                     }
+                 }
+                 return test;
+             }
+
+             public String toString() {
+                 return "sourceType = " + sourceType;
+             }
+         };
+     }
+
+     /**
+      * Filter on message to have known position inside given area.
+      * @param area
+      *          The area that the position must reside inside.
+      * @return
+      */
+     public static Predicate<AisPacket> filterOnMessagePositionWithin(final Area area) {
+         requireNonNull(area);
+         return filterOnMessageType(IPositionMessage.class, new Predicate<IPositionMessage>() {
+             public boolean test(IPositionMessage element) {
+                 AisPosition pos = element.getPos();
+                 if (pos != null) {
+                     Position p = pos.getGeoLocation();
+                     return p != null && area.contains(p);
+                 }
+                 return false;
+             }
+             public String toString() {
+                 return "position within = " + area;
+             }
+         });
+     }
+
+     public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
+         requireNonNull(messageType);
+         requireNonNull(predicate);
+         return new AbstractMessagePredicate() {
+             /**
+              * If AisMessage m is of the given messageType, then evaluate its predicate. Otherwise ignore it and return true.
+              * @param m
+              * @return
+              */
+             @SuppressWarnings("unchecked")
+             public boolean test(AisMessage m) {
+                 if (messageType.isAssignableFrom(m.getClass())) {
+                     return predicate.test((T) m);
+                 }
+                 return true;
+             }
+
+             public String toString() {
+                 return predicate.toString();
+             }
+         };
+     }
+
+     public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
+         requireNonNull(messageType);
+         return new AbstractMessagePredicate() {
+             public boolean test(AisMessage m) {
+                 return messageType.isAssignableFrom(m.getClass());
+             }
+         };
+     }
+
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 return compare(p.getTags().getSourceBs(), bs, operator);
+             }
+             public String toString() {
+                 return "bs = " + bs;
+             }
+         };
+     }
+
+     // ---
 
     /**
-     * Returns a predicate that will filter packets based on the base station source tag.
-     * 
-     * @param ids
-     *            the id of the base stations for which packets should be accepted
-     * @return the predicate
-     */
-    public static Predicate<AisPacket> filterOnSourceBasestation(String... ids) {
-        final Integer[] bss = new Integer[ids.length];
-        for (int i = 0; i < bss.length; i++) {
-            bss[i] = Integer.valueOf(ids[i]);
-        }
-        return filterOnSourceBasestation(bss);
-    }
-
-    /**
-     * Returns a predicate that will filter packets based on the country of the source tag.
-     * 
-     * @param countries
-     *            the countries for which packets should be accepted
-     * @return the predicate
-     */
-    public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
-        final Country[] c = check(countries);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                Country country = p.getTags().getSourceCountry();
-                return country != null && Arrays.binarySearch(c, country) >= 0;
-            }
-
-            public String toString() {
-                return "sourceCountry = " + skipBrackets(Arrays.toString(c));
-            }
-        };
-    }
-
-    public static Predicate<AisPacket> filterOnSourceId(final String... ids) {
-        final String[] s = check(ids);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                String sourceId = p.getTags().getSourceId();
-                return sourceId != null && Arrays.binarySearch(s, sourceId) >= 0;
-            }
-
-            public String toString() {
-                return "sourceId = " + skipBrackets(Arrays.toString(s));
-            }
-        };
-    }
-
-    public static Predicate<AisPacket> filterOnSourceRegion(final String... regions) {
-        final String[] s = check(regions);
-        requireNonNull(regions, "regions is null");
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                IProprietarySourceTag sourceTag = p.getVdm().getSourceTag();
-                String region = sourceTag == null ? null : sourceTag.getRegion();
-                return region != null && Arrays.binarySearch(s, region) >= 0;
-            }
-
-            public String toString() {
-                return "sourceRegion = " + skipBrackets(Arrays.toString(s));
-            }
-        };
-    }
-
-    public static Predicate<AisPacket> filterOnSourceType(final SourceType... sourceType) {
-        final SourceType[] sourceTypes = sourceType.clone();
-        requireNonNull(sourceType, "sourceType is null");
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean test = false;
-                for (int i = 0; i<sourceTypes.length; i++) {
-                    //return sourceType == p.getTags().getSourceType();
-                    if (sourceTypes[i].equals(p.getTags().getSourceType())) {
-                        test = true;
-                    }
-                }
-                return test;
-            }
-
-            public String toString() {
-                return "sourceType = " + sourceType;
-            }
-        };
-    }
-
-    /**
-     * Filter on message to have known position inside given area.
-     * @param area
-     *          The area that the position must reside inside.
+     * Filter on a comparison to a value of the indicated calendarField (see java.util.Calendar).
+     * @param operator
+     * @param calendarField
+     * @param value
      * @return
      */
-    public static Predicate<AisPacket> filterOnMessagePositionWithin(final Area area) {
-        requireNonNull(area);
-        return filterOnMessageType(IPositionMessage.class, new Predicate<IPositionMessage>() {
-            public boolean test(IPositionMessage element) {
-                AisPosition pos = element.getPos();
-                if (pos != null) {
-                    Position p = pos.getGeoLocation();
-                    return p != null && area.contains(p);
-                }
-                return false;
-            }
-            public String toString() {
-                return "position within = " + area;
-            }
-        });
-    }
+     public static Predicate<AisPacket> filterOnMessageReceiveTime(final CompareToOperator operator, final int calendarField, final int value) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 Date msgTimestamp = p.getTimestamp();
+                 if (msgTimestamp != null) {
+                     Calendar calendar = Calendar.getInstance();
+                     calendar.setTime(msgTimestamp);
+                     pass = compare(calendar.get(calendarField), value, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "cal#" + calendarField + " = " + value;
+             }
+         };
+     }
 
-    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
-        requireNonNull(messageType);
-        requireNonNull(predicate);
-        return new AbstractMessagePredicate() {
-            /**
-             * If AisMessage m is of the given messageType, then evaluate its predicate. Otherwise ignore it and return true.
-             * @param m
-             * @return
-             */
-            @SuppressWarnings("unchecked")
-            public boolean test(AisMessage m) {
-                if (messageType.isAssignableFrom(m.getClass())) {
-                    return predicate.test((T) m);
-                }
-                return true;
-            }
+     // ---
 
-            public String toString() {
-                return predicate.toString();
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageId(final CompareToOperator operator, final Integer id) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 return aisMessage == null ? false : compare(aisMessage.getMsgId(), id, operator);
+             }
+             public String toString() {
+                 return "id = " + id;
+             }
+         };
+     }
 
-    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
-        requireNonNull(messageType);
-        return new AbstractMessagePredicate() {
-            public boolean test(AisMessage m) {
-                return messageType.isAssignableFrom(m.getClass());
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageMmsi(final CompareToOperator operator, final Integer mmsi) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 return aisMessage == null ? false : compare(aisMessage.getUserId(), mmsi, operator);
+             }
+             public String toString() {
+                 return "mmsi = " + mmsi;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                return compare(p.getTags().getSourceBs(), bs, operator);
-            }
-            public String toString() {
-                return "bs = " + bs;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageImo(final CompareToOperator operator, final Integer imo) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisMessage5) {
+                     pass = compare((int) ((AisMessage5) aisMessage).getImo(), imo, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "imo = " + imo;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageId(final CompareToOperator operator, final Integer id) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                AisMessage aisMessage = p.tryGetAisMessage();
-                return aisMessage == null ? false : compare(aisMessage.getMsgId(), id, operator);
-            }
-            public String toString() {
-                return "id = " + id;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageShiptype(final CompareToOperator operator, final Integer shiptype) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisMessage5) {
+                     pass = compare(((AisMessage5) aisMessage).getShipType(), shiptype, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "shiptype = " + shiptype;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageMmsi(final CompareToOperator operator, final Integer mmsi) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                AisMessage aisMessage = p.tryGetAisMessage();
-                return aisMessage == null ? false : compare(aisMessage.getUserId(), mmsi, operator);
-            }
-            public String toString() {
-                return "mmsi = " + mmsi;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final CompareToOperator operator, final Integer navstatus) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisPositionMessage) {
+                     pass = compare(((AisPositionMessage) aisMessage).getNavStatus(), navstatus, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "navstatus = " + navstatus;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageImo(final CompareToOperator operator, final Integer imo) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    pass = compare((int) ((AisMessage5) aisMessage).getImo(), imo, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "imo = " + imo;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Float name) {
+         return filterOnMessageName(operator, name.toString());
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageShiptype(final CompareToOperator operator, final Integer shiptype) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    pass = compare(((AisMessage5) aisMessage).getShipType(), shiptype, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "shiptype = " + shiptype;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Integer name) {
+         return filterOnMessageName(operator, name.toString());
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final CompareToOperator operator, final Integer navstatus) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisPositionMessage) {
-                    pass = compare(((AisPositionMessage) aisMessage).getNavStatus(), navstatus, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "navstatus = " + navstatus;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, String name) {
+         final String n = preprocessExpressionString(name);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisStaticCommon) {
+                     pass = compare(((AisStaticCommon) aisMessage).getName(), n, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "name = " + n;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Float name) {
-        return filterOnMessageName(operator, name.toString());
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageCallsign(final CompareToOperator operator, String callsign) {
+         final String n = preprocessExpressionString(callsign);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisStaticCommon) {
+                     pass = compare(((AisStaticCommon) aisMessage).getCallsign(), n, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "callsign = " + n;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Integer name) {
-        return filterOnMessageName(operator, name.toString());
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageSpeedOverGround(final CompareToOperator operator, final Float sog) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IVesselPositionMessage) {
+                     pass = compare((float) (((IVesselPositionMessage) aisMessage).getSog() / 10.0), sog, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "sog = " + sog;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, String name) {
-        final String n = preprocessExpressionString(name);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisStaticCommon) {
-                    pass = compare(((AisStaticCommon) aisMessage).getName(), n, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "name = " + n;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageCourseOverGround(final CompareToOperator operator, final Float cog) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IVesselPositionMessage) {
+                     pass = compare((float) (((IVesselPositionMessage) aisMessage).getCog() / 10.0), cog, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "cog = " + cog;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageCallsign(final CompareToOperator operator, String callsign) {
-        final String n = preprocessExpressionString(callsign);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisStaticCommon) {
-                    pass = compare(((AisStaticCommon) aisMessage).getCallsign(), n, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "callsign = " + n;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageTrueHeading(final CompareToOperator operator, final Integer hdg) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IVesselPositionMessage) {
+                     pass = compare((float) (((IVesselPositionMessage) aisMessage).getTrueHeading()), hdg, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "hdg = " + hdg;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageSpeedOverGround(final CompareToOperator operator, final Float sog) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IVesselPositionMessage) {
-                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getSog() / 10.0), sog, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "sog = " + sog;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageLongitude(final CompareToOperator operator, final Float lon) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IPositionMessage) {
+                     pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLongitudeDouble()), lon, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "lon = " + lon;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageCourseOverGround(final CompareToOperator operator, final Float cog) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IVesselPositionMessage) {
-                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getCog() / 10.0), cog, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "cog = " + cog;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageLatitude(final CompareToOperator operator, final Float lat) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IPositionMessage) {
+                     pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLatitudeDouble()), lat, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "lat = " + lat;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageTrueHeading(final CompareToOperator operator, final Integer hdg) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IVesselPositionMessage) {
-                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getTrueHeading()), hdg, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "hdg = " + hdg;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageDraught(final CompareToOperator operator, final Float draught) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisMessage5) {
+                     pass = compare((float) (((AisMessage5) aisMessage).getDraught() / 10.0), draught, operator);
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "draught = " + draught;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLongitude(final CompareToOperator operator, final Float lon) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IPositionMessage) {
-                    pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLongitudeDouble()), lon, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "lon = " + lon;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageId(Integer... ids) {
+         final Integer[] m = ids.clone();
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage != null) {
+                     pass = Arrays.binarySearch(m, aisMessage.getMsgId()) >= 0;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "msgid = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLatitude(final CompareToOperator operator, final Float lat) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IPositionMessage) {
-                    pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLatitudeDouble()), lat, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "lat = " + lat;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageMmsi(Integer... mmsis) {
+         final Integer[] m = mmsis.clone();
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage != null) {
+                     pass = Arrays.binarySearch(m, aisMessage.getUserId()) >= 0;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "mmsi = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageDraught(final CompareToOperator operator, final Float draught) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    pass = compare((float) (((AisMessage5) aisMessage).getDraught() / 10.0), draught, operator);
-                }
-                return pass;
-            }
-            public String toString() {
-                return "draught = " + draught;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageImo(Integer... imos) {
+         final Integer[] m = imos.clone();
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisMessage5) {
+                     int imo = (int) ((AisMessage5) aisMessage).getImo();
+                     pass = Arrays.binarySearch(m, imo) >= 0;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "imo = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageId(Integer... ids) {
-        final Integer[] m = ids.clone();
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage != null) {
-                    pass = Arrays.binarySearch(m, aisMessage.getMsgId()) >= 0;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "msgid = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageShiptype(Integer... shiptypes) {
+         final Integer[] m = shiptypes.clone();
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisMessage5) {
+                     int shiptype = ((AisMessage5) aisMessage).getShipType();
+                     pass = Arrays.binarySearch(m, shiptype) >= 0;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "shiptypes = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageMmsi(Integer... mmsis) {
-        final Integer[] m = mmsis.clone();
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage != null) {
-                    pass = Arrays.binarySearch(m, aisMessage.getUserId()) >= 0;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "mmsi = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageNavigationalStatus(Integer... navstats) {
+         final Integer[] m = navstats.clone();
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisPositionMessage) {
+                     int navstat = ((AisPositionMessage) aisMessage).getNavStatus();
+                     pass = Arrays.binarySearch(m, navstat) >= 0;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "navstat = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageImo(Integer... imos) {
-        final Integer[] m = imos.clone();
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    int imo = (int) ((AisMessage5) aisMessage).getImo();
-                    pass = Arrays.binarySearch(m, imo) >= 0;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "imo = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageName(String... names) {
+         final String[] m = preprocessExpressionStrings(names);
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisStaticCommon) {
+                     String name = preprocessAisString(((AisStaticCommon) aisMessage).getName());
+                     pass = Arrays.binarySearch(m, name) >= 0;
+                 }
+                 return pass;
+             }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageShiptype(Integer... shiptypes) {
-        final Integer[] m = shiptypes.clone();
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    int shiptype = ((AisMessage5) aisMessage).getShipType();
-                    pass = Arrays.binarySearch(m, shiptype) >= 0;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "shiptypes = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
+             public String toString() {
+                 return "name = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(Integer... navstats) {
-        final Integer[] m = navstats.clone();
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisPositionMessage) {
-                    int navstat = ((AisPositionMessage) aisMessage).getNavStatus();
-                    pass = Arrays.binarySearch(m, navstat) >= 0;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "navstat = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageCallsign(String... callsigns) {
+         final String[] m = preprocessExpressionStrings(callsigns);
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisStaticCommon) {
+                     String name = preprocessAisString(((AisStaticCommon) aisMessage).getCallsign());
+                     pass = Arrays.binarySearch(m, name) >= 0;
+                 }
+                 return pass;
+             }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageName(String... names) {
-        final String[] m = preprocessExpressionStrings(names);
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisStaticCommon) {
-                    String name = preprocessAisString(((AisStaticCommon) aisMessage).getName());
-                    pass = Arrays.binarySearch(m, name) >= 0;
-                }
-                return pass;
-            }
+             public String toString() {
+                 return "name = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
 
-            public String toString() {
-                return "name = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageTrueHeading(Integer... hdgs) {
+         final Integer[] m = hdgs.clone();
+         Arrays.sort(m);
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IVesselPositionMessage) {
+                     int hdg = ((IVesselPositionMessage) aisMessage).getTrueHeading();
+                     pass = Arrays.binarySearch(m, hdg) >= 0;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "hdg = " + skipBrackets(Arrays.toString(m));
+             }
+         };
+     }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageId(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage != null) {
+                     int id = aisMessage.getMsgId();
+                     pass = id >= min && id <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "msgid = " + min + ".." + max;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageCallsign(String... callsigns) {
-        final String[] m = preprocessExpressionStrings(callsigns);
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisStaticCommon) {
-                    String name = preprocessAisString(((AisStaticCommon) aisMessage).getCallsign());
-                    pass = Arrays.binarySearch(m, name) >= 0;
-                }
-                return pass;
-            }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageMmsi(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage != null) {
+                     int mmsi = aisMessage.getUserId();
+                     pass = mmsi >= min && mmsi <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "mmsi = " + min + ".." + max;
+             }
+         };
+     }
 
-            public String toString() {
-                return "name = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageImo(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisMessage5) {
+                     int imo = (int) ((AisMessage5) aisMessage).getImo();
+                     pass = imo >= min && imo <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "imo = " + min + ".." + max;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageTrueHeading(Integer... hdgs) {
-        final Integer[] m = hdgs.clone();
-        Arrays.sort(m);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IVesselPositionMessage) {
-                    int hdg = ((IVesselPositionMessage) aisMessage).getTrueHeading();
-                    pass = Arrays.binarySearch(m, hdg) >= 0;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "hdg = " + skipBrackets(Arrays.toString(m));
-            }
-        };
-    }
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageId(final int min, final int max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage != null) {
-                    int id = aisMessage.getMsgId();
-                    pass = id >= min && id <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "msgid = " + min + ".." + max;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageShiptype(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisMessage5) {
+                     int shiptype = (int) ((AisMessage5) aisMessage).getShipType();
+                     pass = shiptype >= min && shiptype <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "shiptype = " + min + ".." + max;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageMmsi(final int min, final int max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage != null) {
-                    int mmsi = aisMessage.getUserId();
-                    pass = mmsi >= min && mmsi <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "mmsi = " + min + ".." + max;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof AisPositionMessage) {
+                     int navstat = ((AisPositionMessage) aisMessage).getNavStatus();
+                     pass = navstat >= min && navstat <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "navstat = " + min + ".." + max;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageImo(final int min, final int max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    int imo = (int) ((AisMessage5) aisMessage).getImo();
-                    pass = imo >= min && imo <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "imo = " + min + ".." + max;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageTrueHeading(final int min, final int max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IVesselPositionMessage) {
+                     int hdg = ((IVesselPositionMessage) aisMessage).getTrueHeading();
+                     pass = hdg >= min && hdg <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "hdg = " + min + ".." + max;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageShiptype(final int min, final int max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisMessage5) {
-                    int shiptype = (int) ((AisMessage5) aisMessage).getShipType();
-                    pass = shiptype >= min && shiptype <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "shiptype = " + min + ".." + max;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageLatitude(final float min, final float max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IVesselPositionMessage) {
+                     float latitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLatitudeDouble();
+                     pass = latitude >= min && latitude <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "lat = " + min + ".." + max;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final int min, final int max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof AisPositionMessage) {
-                    int navstat = ((AisPositionMessage) aisMessage).getNavStatus();
-                    pass = navstat >= min && navstat <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "navstat = " + min + ".." + max;
-            }
-        };
-    }
+     @SuppressWarnings("unused")
+     public static Predicate<AisPacket> filterOnMessageLongitude(final float min, final float max) {
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 boolean pass = true;
+                 AisMessage aisMessage = p.tryGetAisMessage();
+                 if (aisMessage instanceof IVesselPositionMessage) {
+                     float longitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLongitudeDouble();
+                     pass = longitude >= min && longitude <= max;
+                 }
+                 return pass;
+             }
+             public String toString() {
+                 return "lon = " + min + ".." + max;
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageTrueHeading(final int min, final int max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IVesselPositionMessage) {
-                    int hdg = ((IVesselPositionMessage) aisMessage).getTrueHeading();
-                    pass = hdg >= min && hdg <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "hdg = " + min + ".." + max;
-            }
-        };
-    }
+     public static Predicate<AisPacket> filterOnMessageType(final int... types) {
+         final int[] t = types.clone();
+         Arrays.sort(t);
+         for (int i : t) {
+             if (!AisMessage.VALID_MESSAGE_TYPES.contains(i)) {
+                 throw new IllegalArgumentException(i + " is not a valid message type");
+             }
+         }
+         return new Predicate<AisPacket>() {
+             public boolean test(AisPacket p) {
+                 Vdm vdm = p.getVdm();
+                 return vdm != null && Arrays.binarySearch(t, vdm.getMsgId()) >= 0;
+             }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLatitude(final float min, final float max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IVesselPositionMessage) {
-                    float latitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLatitudeDouble();
-                    pass = latitude >= min && latitude <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "lat = " + min + ".." + max;
-            }
-        };
-    }
+             public String toString() {
+                 return "messageType = " + skipBrackets(Arrays.toString(t));
+             }
+         };
+     }
 
-    @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageLongitude(final float min, final float max) {
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                boolean pass = true;
-                AisMessage aisMessage = p.tryGetAisMessage();
-                if (aisMessage instanceof IVesselPositionMessage) {
-                    float longitude = (float) ((IVesselPositionMessage) aisMessage).getPos().getLongitudeDouble();
-                    pass = longitude >= min && longitude <= max;
-                }
-                return pass;
-            }
-            public String toString() {
-                return "lon = " + min + ".." + max;
-            }
-        };
-    }
+     public static Predicate<AisPacket> filterOnTargetCountry(final Country... countries) {
+         final Country[] c = AisPacketFilters.check(countries);
+         return new AbstractMessagePredicate() {
+             public boolean test(AisMessage m) {
+                 Country country = Country.getCountryForMmsi(m.getUserId());
+                 return country != null && Arrays.binarySearch(c, country) >= 0;
+             }
 
-    public static Predicate<AisPacket> filterOnMessageType(final int... types) {
-        final int[] t = types.clone();
-        Arrays.sort(t);
-        for (int i : t) {
-            if (!AisMessage.VALID_MESSAGE_TYPES.contains(i)) {
-                throw new IllegalArgumentException(i + " is not a valid message type");
-            }
-        }
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                Vdm vdm = p.getVdm();
-                return vdm != null && Arrays.binarySearch(t, vdm.getMsgId()) >= 0;
-            }
+             public String toString() {
+                 return "targetCountry = " + skipBrackets(Arrays.toString(c));
+             }
+         };
+     }
 
-            public String toString() {
-                return "messageType = " + skipBrackets(Arrays.toString(t));
-            }
-        };
-    }
+     public static Predicate<AisPacket> samplingFilter(Integer minDistanceInMeters, Long minDurationInMS) {
+         return new SamplerFilter(minDistanceInMeters, minDurationInMS);
+     }
 
-    public static Predicate<AisPacket> filterOnTargetCountry(final Country... countries) {
-        final Country[] c = AisPacketFilters.check(countries);
-        return new AbstractMessagePredicate() {
-            public boolean test(AisMessage m) {
-                Country country = Country.getCountryForMmsi(m.getUserId());
-                return country != null && Arrays.binarySearch(c, country) >= 0;
-            }
+     public static Predicate<AisPacket> parseSourceFilter(String filter) {
+         return AisPacketFiltersExpressionFilterParser.parseExpressionFilter(filter);
+     }
 
-            public String toString() {
-                return "targetCountry = " + skipBrackets(Arrays.toString(c));
-            }
-        };
-    }
+     // ---
 
-    public static Predicate<AisPacket> samplingFilter(Integer minDistanceInMeters, Long minDurationInMS) {
-        return new SamplerFilter(minDistanceInMeters, minDurationInMS);
-    }
+     static String skipBrackets(String s) {
+         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
+     }
 
-    public static Predicate<AisPacket> parseSourceFilter(String filter) {
-        return AisPacketFiltersExpressionFilterParser.parseExpressionFilter(filter);
-    }
+     private final static String preprocessAisString(String name) {
+         return name != null ? name.replace('@',' ').trim() : null;
+     }
 
-    // ---
+     private final static String[] preprocessExpressionStrings(String[] exprStrings) {
+         String[] preprocessedStrings = new String[exprStrings.length];
+         for (int i=0; i<preprocessedStrings.length; i++) {
+             preprocessedStrings[i] = preprocessExpressionString(exprStrings[i]);
+         }
+         return preprocessedStrings;
+     }
 
-    static String skipBrackets(String s) {
-        return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
-    }
+     private final static String preprocessExpressionString(String exprString) {
+         String preprocessedString = exprString;
+         if (preprocessedString.startsWith("'") && preprocessedString.endsWith("'") && preprocessedString.length()>2) {
+             preprocessedString = preprocessedString.substring(1, preprocessedString.length()-1);
+         }
+         return preprocessedString;
+     }
 
-    private final static String preprocessAisString(String name) {
-        return name != null ? name.replace('@',' ').trim() : null;
-    }
+     private static boolean compare(String lhs, String rhs, CompareToOperator operator) {
+         lhs = lhs.replace('@',' ').trim();
+         rhs = rhs.replace('@',' ').trim();
 
-    private final static String[] preprocessExpressionStrings(String[] exprStrings) {
-        String[] preprocessedStrings = new String[exprStrings.length];
-        for (int i=0; i<preprocessedStrings.length; i++) {
-            preprocessedStrings[i] = preprocessExpressionString(exprStrings[i]);
-        }
-        return preprocessedStrings;
-    }
+         switch (operator) {
+             case EQUALS:
+                 return lhs.equalsIgnoreCase(rhs);
+             case NOT_EQUALS:
+                 return ! lhs.equalsIgnoreCase(rhs);
+             case GREATER_THAN:
+                 return lhs.compareToIgnoreCase(rhs) > 0;
+             case GREATER_THAN_OR_EQUALS:
+                 return lhs.compareToIgnoreCase(rhs) >= 0;
+             case LESS_THAN:
+                 return lhs.compareToIgnoreCase(rhs) < 0;
+             case LESS_THAN_OR_EQUALS:
+                 return lhs.compareToIgnoreCase(rhs) <= 0;
+             default:
+                 throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
+         }
+     }
 
-    private final static String preprocessExpressionString(String exprString) {
-        String preprocessedString = exprString;
-        if (preprocessedString.startsWith("'") && preprocessedString.endsWith("'") && preprocessedString.length()>2) {
-            preprocessedString = preprocessedString.substring(1, preprocessedString.length()-1);
-        }
-        return preprocessedString;
-    }
+     private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
+         switch (operator) {
+             case EQUALS:
+                 return lhs == rhs;
+             case NOT_EQUALS:
+                 return lhs != rhs;
+             case GREATER_THAN:
+                 return lhs > rhs;
+             case GREATER_THAN_OR_EQUALS:
+                 return lhs >= rhs;
+             case LESS_THAN:
+                 return lhs < rhs;
+             case LESS_THAN_OR_EQUALS:
+                 return lhs <= rhs;
+             default:
+                 throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
+         }
+     }
 
-    private static boolean compare(String lhs, String rhs, CompareToOperator operator) {
-        lhs = lhs.replace('@',' ').trim();
-        rhs = rhs.replace('@',' ').trim();
+     private static boolean compare(float lhs, float rhs, CompareToOperator operator) {
+         switch (operator) {
+             case EQUALS:
+                 return lhs == rhs;
+             case NOT_EQUALS:
+                 return lhs != rhs;
+             case GREATER_THAN:
+                 return lhs > rhs;
+             case GREATER_THAN_OR_EQUALS:
+                 return lhs >= rhs;
+             case LESS_THAN:
+                 return lhs < rhs;
+             case LESS_THAN_OR_EQUALS:
+                 return lhs <= rhs;
+             default:
+                 throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
+         }
+     }
 
-        switch (operator) {
-            case EQUALS:
-                return lhs.equalsIgnoreCase(rhs);
-            case NOT_EQUALS:
-                return ! lhs.equalsIgnoreCase(rhs);
-            case GREATER_THAN:
-                return lhs.compareToIgnoreCase(rhs) > 0;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs.compareToIgnoreCase(rhs) >= 0;
-            case LESS_THAN:
-                return lhs.compareToIgnoreCase(rhs) < 0;
-            case LESS_THAN_OR_EQUALS:
-                return lhs.compareToIgnoreCase(rhs) <= 0;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
+     abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {
 
-    private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
-        switch (operator) {
-            case EQUALS:
-                return lhs == rhs;
-            case NOT_EQUALS:
-                return lhs != rhs;
-            case GREATER_THAN:
-                return lhs > rhs;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs >= rhs;
-            case LESS_THAN:
-                return lhs < rhs;
-            case LESS_THAN_OR_EQUALS:
-                return lhs <= rhs;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
+         abstract boolean test(AisMessage message);
 
-    private static boolean compare(float lhs, float rhs, CompareToOperator operator) {
-        switch (operator) {
-            case EQUALS:
-                return lhs == rhs;
-            case NOT_EQUALS:
-                return lhs != rhs;
-            case GREATER_THAN:
-                return lhs > rhs;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs >= rhs;
-            case LESS_THAN:
-                return lhs < rhs;
-            case LESS_THAN_OR_EQUALS:
-                return lhs <= rhs;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
+         /** {@inheritDoc} */
+         @Override
+         public boolean test(AisPacket element) {
+             AisMessage m = element.tryGetAisMessage();
+             return m != null && test(m);
+         }
+     }
 
-    abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {
+     /**
+      * A non thread-safe predicate (statefull) that can be used sample duration/distance.
+      */
+     static class SamplerFilter extends Predicate<AisPacket> {
 
-        abstract boolean test(AisMessage message);
+         /** The latest received position that was accepted, or null if no position has been received. */
+         Position latestPosition;
 
-        /** {@inheritDoc} */
-        @Override
-        public boolean test(AisPacket element) {
-            AisMessage m = element.tryGetAisMessage();
-            return m != null && test(m);
-        }
-    }
+         /** The latest time stamp that was accepted, or null if no packets has been received. */
+         Long latestTimestamp;
 
-    /**
-     * A non thread-safe predicate (statefull) that can be used sample duration/distance.
-     */
-    static class SamplerFilter extends Predicate<AisPacket> {
+         /** If non-null the minimum distance traveled in meters between updates. */
+         final Integer minDistanceInMeters;
 
-        /** The latest received position that was accepted, or null if no position has been received. */
-        Position latestPosition;
+         /** If non-null the minimum duration in milliseconds between updates. */
+         final Long minDurationInMS;
 
-        /** The latest time stamp that was accepted, or null if no packets has been received. */
-        Long latestTimestamp;
+         SamplerFilter(Integer minDistanceInMeters, Long minDurationInMS) {
+             if (minDistanceInMeters == null && minDurationInMS == null) {
+                 throw new IllegalArgumentException("minDistanceInMeters and minDurationInMS cannot both be null");
+             }
+             this.minDistanceInMeters = minDistanceInMeters;
+             this.minDurationInMS = minDurationInMS;
+         }
 
-        /** If non-null the minimum distance traveled in meters between updates. */
-        final Integer minDistanceInMeters;
-
-        /** If non-null the minimum duration in milliseconds between updates. */
-        final Long minDurationInMS;
-
-        SamplerFilter(Integer minDistanceInMeters, Long minDurationInMS) {
-            if (minDistanceInMeters == null && minDurationInMS == null) {
-                throw new IllegalArgumentException("minDistanceInMeters and minDurationInMS cannot both be null");
-            }
-            this.minDistanceInMeters = minDistanceInMeters;
-            this.minDurationInMS = minDurationInMS;
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public boolean test(AisPacket p) {
-            PositionTime pos = p.tryGetPositionTime();
-            if (pos == null) {
-                return false;
-            }
-            boolean updateDistance = minDistanceInMeters != null
-                    && (latestPosition == null || latestPosition.rhumbLineDistanceTo(pos) >= minDistanceInMeters);
-            boolean updateDuration = minDurationInMS != null
-                    && (latestTimestamp == null || pos.getTime() - latestTimestamp >= minDurationInMS);
-            if (!updateDistance && !updateDuration) {
-                return false;
-            }
-            // update latest positions
-            latestPosition = pos;
-            latestTimestamp = pos.getTime();
-            return true;
-        }
-    }
-}
+         /** {@inheritDoc} */
+         @Override
+         public boolean test(AisPacket p) {
+             PositionTime pos = p.tryGetPositionTime();
+             if (pos == null) {
+                 return false;
+             }
+             boolean updateDistance = minDistanceInMeters != null
+                     && (latestPosition == null || latestPosition.rhumbLineDistanceTo(pos) >= minDistanceInMeters);
+             boolean updateDuration = minDurationInMS != null
+                     && (latestTimestamp == null || pos.getTime() - latestTimestamp >= minDurationInMS);
+             if (!updateDistance && !updateDuration) {
+                 return false;
+             }
+             // update latest positions
+             latestPosition = pos;
+             latestTimestamp = pos.getTime();
+             return true;
+         }
+     }
+ }
