@@ -23,6 +23,7 @@ import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
+import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
 import org.junit.Before;
@@ -457,5 +458,33 @@ public class AisPacketFiltersTest {
         assertFilterExpression(false, packet, "m.pos within circle(" + pos2100MetersNE.getLatitude() + ", " + pos2100MetersNE.getLongitude() + ", " + "2000)");
         assertFilterExpression(false, packet, "m.pos within circle(" + pos2000MetersNE.getLatitude() + ", " + pos2000MetersNE.getLongitude() + ", " + "2000)");
         assertFilterExpression(true, packet, "m.pos within circle(" + pos1900MetersNE.getLatitude() + ", " + pos1900MetersNE.getLongitude() + ", " + "2000)");
+
+        // Message with no position information passes
+        assertTrue(p1.tryGetAisMessage() instanceof AisMessage5);
+        assertFilterExpression(true, p1, "m.pos within circle(" + centerLatitude + ", " + centerLongitude + ", " + "2000)");
+    }
+
+    @Test
+    public void testMessagePositionWithinBbox() {
+        AisPacket packet = p5;
+        IPositionMessage msg = (IPositionMessage) packet.tryGetAisMessage();
+        Position position = msg.getPos().getGeoLocation();
+
+        int width = 2000;
+
+        Position ne = CoordinateSystem.CARTESIAN.pointOnBearing(position, width/2, 45);
+        Position sw = CoordinateSystem.CARTESIAN.pointOnBearing(position, width/2, 45 + 180);
+        BoundingBox bboxWithPositionInside = BoundingBox.create(ne, sw, CoordinateSystem.CARTESIAN);
+
+        Position nw = CoordinateSystem.CARTESIAN.pointOnBearing(position, width, 45);
+        Position se = CoordinateSystem.CARTESIAN.pointOnBearing(nw, width, 135);
+        BoundingBox bboxWithPositionOutside = BoundingBox.create(nw, se, CoordinateSystem.CARTESIAN);
+
+        assertFilterExpression(true, packet, "m.pos within bbox(" + bboxWithPositionInside.getMinLat() + ", " + bboxWithPositionInside.getMinLon() + ", " + + bboxWithPositionInside.getMaxLat() + ", " + bboxWithPositionInside.getMaxLon() + ")");
+        assertFilterExpression(false, packet, "m.pos within bbox(" + bboxWithPositionOutside.getMinLat() + ", " + bboxWithPositionOutside.getMinLon() + ", " + + bboxWithPositionOutside.getMaxLat() + ", " + bboxWithPositionOutside.getMaxLon() + ")");
+
+        // Message with no position information passes
+        assertTrue(p1.tryGetAisMessage() instanceof AisMessage5);
+        assertFilterExpression(true, p1, "m.pos within bbox(" + bboxWithPositionInside.getMinLat() + ", " + bboxWithPositionInside.getMinLon() + ", " + +bboxWithPositionInside.getMaxLat() + ", " + bboxWithPositionInside.getMaxLon() + ")");
     }
 }

@@ -17,8 +17,11 @@ package dk.dma.ais.packet;
 
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
+import dk.dma.enav.model.geometry.Area;
+import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
+import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
@@ -289,15 +292,27 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         @Override
         public Predicate<AisPacket> visitMessagePositionInside(@NotNull ExpressionFilterParser.MessagePositionInsideContext ctx) {
             Predicate<AisPacket> filter = null;
+            Area area = null;
 
             if (ctx.bbox() != null) {
-                throw new IllegalArgumentException("Not yet implemented.");
+                List<ExpressionFilterParser.NumberContext> params = ctx.bbox().number();
+                float latitude1 = Float.valueOf(params.get(0).getText());
+                float longitude1 = Float.valueOf(params.get(1).getText());
+                float latitude2 = Float.valueOf(params.get(2).getText());
+                float longitude2 = Float.valueOf(params.get(3).getText());
+                Position corner1 = Position.create(latitude1, longitude1);
+                Position corner2 = Position.create(latitude2, longitude2);
+                area = BoundingBox.create(corner1, corner2, CoordinateSystem.CARTESIAN);
             } else if (ctx.circle() != null) {
                 List<ExpressionFilterParser.NumberContext> params = ctx.circle().number();
                 float latitude = Float.valueOf(params.get(0).getText());
                 float longitude = Float.valueOf(params.get(1).getText());
                 float radius = Float.valueOf(params.get(2).getText());
-                filter = AisPacketFilters.filterOnMessagePositionWithin(new Circle(latitude, longitude, radius, CoordinateSystem.CARTESIAN));
+                area = new Circle(latitude, longitude, radius, CoordinateSystem.CARTESIAN);
+            }
+
+            if (area != null) {
+                filter = AisPacketFilters.filterOnMessagePositionWithin(area);
             }
 
             return filter;

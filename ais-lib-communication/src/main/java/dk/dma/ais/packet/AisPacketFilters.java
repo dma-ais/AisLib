@@ -183,12 +183,17 @@ public class AisPacketFilters implements FilterFactory {
         requireNonNull(messageType);
         requireNonNull(predicate);
         return new AbstractMessagePredicate() {
+            /**
+             * If AisMessage m is of the given messageType, then evaluate its predicate. Otherwise ignore it and return true.
+             * @param m
+             * @return
+             */
             @SuppressWarnings("unchecked")
             public boolean test(AisMessage m) {
                 if (messageType.isAssignableFrom(m.getClass())) {
                     return predicate.test((T) m);
                 }
-                return false;
+                return true;
             }
 
             public String toString() {
