@@ -162,6 +162,16 @@ abstract class ExpressionFilterParserBase {
      }
 
      /**
+      * Check if context has LIKE() method and it returns a value different from null.
+      *
+      * @param ctx
+      * @return
+      */
+     protected static boolean hasLIKE(ParserRuleContext ctx) {
+         return hasMethod(ctx, "LIKE") && invokeMethod(ctx, "LIKE") != null;
+     }
+
+     /**
       * Check if context has INT() method and it returns a value different from null.
       *
       * @param ctx
@@ -359,11 +369,11 @@ abstract class ExpressionFilterParserBase {
              } catch (IllegalAccessException e) {
                  e.printStackTrace(System.err);
              }
-               /*
-               if (ctx.notin() != null) {
-                   filter = filter.negate();
-               }
-               */
+                  /*
+                  if (ctx.notin() != null) {
+                      filter = filter.negate();
+                  }
+                  */
          }
          return filter;
      }
@@ -466,14 +476,14 @@ abstract class ExpressionFilterParserBase {
          return ImmutableSet.copyOf(set);
      }
 
-    // ---
+     // ---
 
      /**
       * Create a new predicate which will perform a comparison of the given field in an AisMessage to the given value.
       *
       * @param fieldToken the field to compare
-      * @param operator   the type of comparison to make (=, !=, >, >=, <=, <)
-      * @param value      the fixed value to compare against
+      * @param operator the type of comparison to make (=, !=, >, >=, <=, <)
+      * @param value the fixed value to compare against
       * @return true if filter is passed or indeterminate; false if filter blocks.
       */
      protected static <T, R> Predicate<T> createFilterPredicateForComparison(Class<? extends FilterFactory> filterFactoryClass, @NotNull String fieldToken, @NotNull String operator, @NotNull R value) {
@@ -493,11 +503,37 @@ abstract class ExpressionFilterParserBase {
      }
 
      /**
+      * Create a new predicate which will perform a glob match of the given field in an AisMessage to the given value.
+      *
+      * @param filterFactoryClass
+      * @param fieldToken
+      * @param value
+      * @param <T>
+      * @param <R>
+      * @return
+      */
+     protected static <T, R> Predicate<T> createFilterPredicateForMatch(Class<? extends FilterFactory> filterFactoryClass, @NotNull String fieldToken, @NotNull R value) {
+         Predicate<T> filter = null;
+         String filterFactoryMethodName = mapFieldTokenToFilterFactoryMethodName(fieldToken);
+         try {
+             Method filterFactoryMethod = filterFactoryClass.getDeclaredMethod(filterFactoryMethodName + "Match", String.class);
+             filter = (Predicate<T>) filterFactoryMethod.invoke(null, value);
+         } catch (InvocationTargetException e) {
+             e.printStackTrace(System.err);
+         } catch (NoSuchMethodException e) {
+             e.printStackTrace(System.err);
+         } catch (IllegalAccessException e) {
+             e.printStackTrace(System.err);
+         }
+         return filter;
+     }
+
+     /**
       * Create new predicate to filter for given field to be in a range of values.
       *
       * @param fieldName the field to filter
-      * @param min       the minimum value that the field must have to pass the filter.
-      * @param max       the maximum value that the field must have to pass the filter.
+      * @param min the minimum value that the field must have to pass the filter.
+      * @param max the maximum value that the field must have to pass the filter.
       * @return true if filter is passed or indeterminate; false if filter blocks.
       */
      protected static <T> Predicate<T> createFilterPredicateForRange(Class<? extends FilterFactory> filterFactoryClass, @NotNull String fieldName, Number min, Number max) {
@@ -528,7 +564,7 @@ abstract class ExpressionFilterParserBase {
       * Create new predicate to filter for given field to be in list of allowed values.
       *
       * @param fieldName the field to filter
-      * @param list      an array of allowed values for the field to pass the filter
+      * @param list an array of allowed values for the field to pass the filter
       * @param <T>
       * @return true if filter is passed or indeterminate; false if filter blocks.
       */
@@ -564,11 +600,16 @@ abstract class ExpressionFilterParserBase {
 
      protected static <T> Predicate<T> createFilterPredicateForStringComparison(Class<? extends FilterFactory> filterFactoryClass, ParserRuleContext ctx) {
          Predicate<T> filter = null;
-         if (hasCompareTo(ctx) && hasString(ctx)) {
+         if (hasString(ctx)) {
              String fieldName = ctx.getStart().getText();
-             String operator = invokeCompareTo(ctx).getText();
              String string = invokeString(ctx).getText();
-             filter = createFilterPredicateForComparison(filterFactoryClass, fieldName, operator, string);
+             if (hasCompareTo(ctx)) {
+                 ExpressionFilterParser.CompareToContext compareToContext = invokeCompareTo(ctx);
+                 String operator = compareToContext.getText();
+                 filter = createFilterPredicateForComparison(filterFactoryClass, fieldName, operator, string);
+             } else if (hasLIKE(ctx)) {
+                 filter = createFilterPredicateForMatch(filterFactoryClass, fieldName, string);
+             }
          }
          return filter;
      }
@@ -620,43 +661,41 @@ abstract class ExpressionFilterParserBase {
          return checkNegate(ctx, filter);
      }
 
-     // ---
-
      protected static <T> Predicate<T> createFilterPredicateForTimeComparison(Class<? extends AisPacketFilters> filterFactoryClass, ExpressionFilterParser.MessageTimeContext ctx) {
-               Predicate<T> filter = null;
+         Predicate<T> filter = null;
 
-               try {
-                   String field = ctx.getStart().getText();
-                   CompareToOperator operator = CompareToOperator.fromString(invokeCompareTo(ctx).getText());
-                   Method filterFactoryMethod = filterFactoryClass.getDeclaredMethod("filterOnMessageReceiveTime", CompareToOperator.class, int.class, int.class);
+         try {
+             String field = ctx.getStart().getText();
+             CompareToOperator operator = CompareToOperator.fromString(invokeCompareTo(ctx).getText());
+             Method filterFactoryMethod = filterFactoryClass.getDeclaredMethod("filterOnMessageReceiveTime", CompareToOperator.class, int.class, int.class);
 
-                   if ("m.year".equalsIgnoreCase(field)) {
-                       filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.YEAR, Integer.valueOf(ctx.INT().getText()));
-                   } else if ("m.month".equalsIgnoreCase(field)) {
-                       int month = ctx.INT() != null ? Integer.parseInt(ctx.INT().getText()) : mapStringToCalendarMonth(ctx.string().getText());
-                       filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.MONTH, month);
-                   } else if ("m.dom".equalsIgnoreCase(field)) {
-                       filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.DAY_OF_MONTH, Integer.valueOf(ctx.INT().getText()));
-                   } else if ("m.dow".equalsIgnoreCase(field)) {
-                       int dow = ctx.INT() != null ? Integer.parseInt(ctx.INT().getText()) : mapStringToCalendarDayOfWeek(ctx.string().getText());
-                       filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.DAY_OF_WEEK, dow);
-                   } else if ("m.hour".equalsIgnoreCase(field)) {
-                       filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.HOUR_OF_DAY, Integer.valueOf(ctx.INT().getText()));
-                   } else if ("m.minute".equalsIgnoreCase(field)) {
-                       filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.MINUTE, Integer.valueOf(ctx.INT().getText()));
-                   } else {
-                       throw new IllegalArgumentException(field);
-                   }
-               } catch (NoSuchMethodException e) {
-                   e.printStackTrace(System.err);
-               } catch (InvocationTargetException e) {
-                   e.printStackTrace(System.err);
-               } catch (IllegalAccessException e) {
-                   e.printStackTrace(System.err);
-               }
+             if ("m.year".equalsIgnoreCase(field)) {
+                 filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.YEAR, Integer.valueOf(ctx.INT().getText()));
+             } else if ("m.month".equalsIgnoreCase(field)) {
+                 int month = ctx.INT() != null ? Integer.parseInt(ctx.INT().getText()) : mapStringToCalendarMonth(ctx.string().getText());
+                 filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.MONTH, month);
+             } else if ("m.dom".equalsIgnoreCase(field)) {
+                 filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.DAY_OF_MONTH, Integer.valueOf(ctx.INT().getText()));
+             } else if ("m.dow".equalsIgnoreCase(field)) {
+                 int dow = ctx.INT() != null ? Integer.parseInt(ctx.INT().getText()) : mapStringToCalendarDayOfWeek(ctx.string().getText());
+                 filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.DAY_OF_WEEK, dow);
+             } else if ("m.hour".equalsIgnoreCase(field)) {
+                 filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.HOUR_OF_DAY, Integer.valueOf(ctx.INT().getText()));
+             } else if ("m.minute".equalsIgnoreCase(field)) {
+                 filter = (Predicate<T>) filterFactoryMethod.invoke(null, operator, Calendar.MINUTE, Integer.valueOf(ctx.INT().getText()));
+             } else {
+                 throw new IllegalArgumentException(field);
+             }
+         } catch (NoSuchMethodException e) {
+             e.printStackTrace(System.err);
+         } catch (InvocationTargetException e) {
+             e.printStackTrace(System.err);
+         } catch (IllegalAccessException e) {
+             e.printStackTrace(System.err);
+         }
 
-               return filter;
-           }
+         return filter;
+     }
 
      private static int mapStringToCalendarDayOfWeek(String text) {
          int dow = -1;
@@ -684,32 +723,32 @@ abstract class ExpressionFilterParserBase {
          return month + 1; // 1 = jan
      }
 
-    static ExpressionFilterParser.FilterContext createFilterContext(String filter) {
-        ANTLRInputStream input = new ANTLRInputStream(requireNonNull(filter));
-        ExpressionFilterLexer lexer = new ExpressionFilterLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        ExpressionFilterParser parser = new ExpressionFilterParser(tokens);
+     static ExpressionFilterParser.FilterContext createFilterContext(String filter) {
+         ANTLRInputStream input = new ANTLRInputStream(requireNonNull(filter));
+         ExpressionFilterLexer lexer = new ExpressionFilterLexer(input);
+         CommonTokenStream tokens = new CommonTokenStream(lexer);
+         ExpressionFilterParser parser = new ExpressionFilterParser(tokens);
 
-        // Better errors
-        lexer.removeErrorListeners();
-        parser.removeErrorListeners();
-        lexer.addErrorListener(new VerboseListener());
-        parser.addErrorListener(new VerboseListener());
+         // Better errors
+         lexer.removeErrorListeners();
+         parser.removeErrorListeners();
+         lexer.addErrorListener(new VerboseListener());
+         parser.addErrorListener(new VerboseListener());
 
-        return parser.filter();
-    }
+         return parser.filter();
+     }
 
-    static class VerboseListener extends BaseErrorListener {
-             @Override
-             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-                                     String msg, RecognitionException e) {
-                 throw new IllegalArgumentException(msg + " @ character " + charPositionInLine + " " + offendingSymbol);
-                 // if (recognizer instanceof Parser)
-                 // List<String> stack = ((Parser) recognizer).getRuleInvocationStack();
-                 // Collections.reverse(stack);
-                 // System.err.println("rule stack: " + stack);
-                 // System.err.println("line " + line + ":" + charPositionInLine + " at " + offendingSymbol + ": " + sentenceStr);
-             }
+     static class VerboseListener extends BaseErrorListener {
+         @Override
+         public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
+                                 String msg, RecognitionException e) {
+             throw new IllegalArgumentException(msg + " @ character " + charPositionInLine + (offendingSymbol != null ? " " + offendingSymbol : ""));
+             // if (recognizer instanceof Parser)
+             // List<String> stack = ((Parser) recognizer).getRuleInvocationStack();
+             // Collections.reverse(stack);
+             // System.err.println("rule stack: " + stack);
+             // System.err.println("line " + line + ":" + charPositionInLine + " at " + offendingSymbol + ": " + sentenceStr);
          }
+     }
 
-}
+ }

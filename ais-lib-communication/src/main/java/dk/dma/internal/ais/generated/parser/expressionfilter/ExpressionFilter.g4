@@ -38,10 +38,10 @@ filterExpression:
     |   'm.navstat' compareTo string                            # messageNavigationalStatus
     |   'm.navstat' (in|notin) (intRange|intList|stringList)    # messageNavigationalStatusIn
 
-    |   'm.name' compareTo string                               # messageName
+    |   'm.name' (compareTo|LIKE) string                        # messageName
     |   'm.name' (in|notin) stringList                          # messageNameIn
 
-    |   'm.cs' compareTo string                                 # messageCallsign
+    |   'm.cs' (compareTo|LIKE) string                          # messageCallsign
     |   'm.cs' (in|notin) stringList                            # messageCallsignIn
 
     |   'm.sog' compareTo number                                # messageSpeedOverGround
@@ -104,10 +104,11 @@ circle : CIRCLE '('? number ',' number ',' number ')'? ;
 AND     : '&' ;
 OR      : '|' ;
 RANGE   : '..';
+LIKE    : [Ll][Ii][Kk][Ee]|'~' ;
 BBOX    : [Bb][Bb][Oo][Xx] ;
 CIRCLE  : [Cc][Ii][Rr][Cc][Ll][Ee] ;
 WITHIN  : [Ww][Ii][Tt][Hh][Ii][Nn] ;
 INT     : '-'? [0-9]+;
 FLOAT   : '-'? [0-9]* '.' [0-9]+ ;
-STRING  : [a-zA-Z0-9_?]+ | '\'' .*? '\'' ;
+STRING  : [a-zA-Z0-9_?\*]+ | '\'' .*? '\'' ;
 WS      : [ \n\r\t]+ -> skip ; // toss out whitespace
