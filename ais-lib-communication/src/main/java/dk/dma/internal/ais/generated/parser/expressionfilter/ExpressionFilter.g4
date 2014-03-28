@@ -95,8 +95,8 @@ stringList : '('? string (',' string)* ')'? ;
 intRange : '('? INT RANGE INT ')'? ;
 numberRange : '('? number RANGE number ')'? ;
 
-number : (INT | FLOAT);
-string : (number | WORD | STRING);
+number : INT|FLOAT;
+string : number|STRING;
 
 bbox : BBOX '('? number ',' number ',' number ',' number ')'? ;
 circle : CIRCLE '('? number ',' number ',' number ')'? ;
@@ -109,6 +109,5 @@ CIRCLE  : [Cc][Ii][Rr][Cc][Ll][Ee] ;
 WITHIN  : [Ww][Ii][Tt][Hh][Ii][Nn] ;
 INT     : '-'? [0-9]+;
 FLOAT   : '-'? [0-9]+ '.' [0-9]+ ;
-WORD    : [a-zA-Z0-9_?]+ ;
-STRING : '\'' .*? '\'' ; // '\'' ( ~('\n'|'\r') )*? '\'';
+STRING  : [a-zA-Z0-9_?]+ | '\'' .*? '\'' ;
 WS      : [ \n\r\t]+ -> skip ; // toss out whitespace

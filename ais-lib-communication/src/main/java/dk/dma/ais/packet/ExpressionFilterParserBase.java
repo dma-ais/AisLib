@@ -155,8 +155,6 @@ abstract class ExpressionFilterParserBase {
          String result = null;
          if (string.STRING() != null) {
              result = removeSurroundingApostrophes(string.STRING().getText());
-         } else if (string.WORD() != null) {
-             result = string.WORD().getText();
          } else if (string.number() != null) {
              result = string.number().getText();
          }
@@ -702,16 +700,16 @@ abstract class ExpressionFilterParserBase {
     }
 
     static class VerboseListener extends BaseErrorListener {
-        @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-                                String msg, RecognitionException e) {
-            throw new IllegalArgumentException(msg + " @ character " + charPositionInLine);
-            // if (recognizer instanceof Parser)
-            // List<String> stack = ((Parser) recognizer).getRuleInvocationStack();
-            // Collections.reverse(stack);
-            // System.err.println("rule stack: " + stack);
-            // System.err.println("line " + line + ":" + charPositionInLine + " at " + offendingSymbol + ": " + sentenceStr);
-        }
-    }
+             @Override
+             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
+                                     String msg, RecognitionException e) {
+                 throw new IllegalArgumentException(msg + " @ character " + charPositionInLine + " " + offendingSymbol);
+                 // if (recognizer instanceof Parser)
+                 // List<String> stack = ((Parser) recognizer).getRuleInvocationStack();
+                 // Collections.reverse(stack);
+                 // System.err.println("rule stack: " + stack);
+                 // System.err.println("line " + line + ":" + charPositionInLine + " at " + offendingSymbol + ": " + sentenceStr);
+             }
+         }
 
 }
