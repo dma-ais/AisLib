@@ -108,6 +108,6 @@ BBOX    : [Bb][Bb][Oo][Xx] ;
 CIRCLE  : [Cc][Ii][Rr][Cc][Ll][Ee] ;
 WITHIN  : [Ww][Ii][Tt][Hh][Ii][Nn] ;
 INT     : '-'? [0-9]+;
-FLOAT   : '-'? [0-9]+ '.' [0-9]+ ;
+FLOAT   : '-'? [0-9]* '.' [0-9]+ ;
 STRING  : [a-zA-Z0-9_?]+ | '\'' .*? '\'' ;
 WS      : [ \n\r\t]+ -> skip ; // toss out whitespace
