@@ -295,6 +295,178 @@ reader.registerHandler(doubletFilter);
 reader.start();
 ```
 
+### Expression based packet filtering ##
+It is also possible to perform packet filtering based on packet sources and contents using free-text expressions.
+These expressions must comply with a specified grammar.
+
+#### Using the filter ####
+The expression filter can be used programmatically like this:
+
+##### Filtering on packets source #####
+```java
+import static dk.da.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
+...
+parseExpressionFilter("scountry = DNK & s.type = LIVE").test(aisPacket);
+```
+
+In this example the test method wll return `true` for all packets received from a source in Denmark ('DNK') and
+coming from a terrestrial source (typically a VHF base station as opposed to e.g. data received via satellite).
+For packets coming sources not fulfilling this expression the `test` method will return false.
+
+Filtering on source attributes is indicated by the 's' in front of the field ('country').
+
+##### Filtering on message contents #####
+```java
+import static dk.dm.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
+...
+parseExpressionFilter("m.pos witin circle(37.9121, -122.4229, 2000)").test(aisPacket);
+```
+
+In this example the test method will return `false` for packets containing a position outside a cartesian circle
+centered in 37.912 degrees north (37°N54'44"), 122.4229 degrees west (22°W25'22"), and with a radius of 2000 meters.
+For other packets (including packets without any position information) the method will return `true`.
+
+Filtering on message (~packet) attributes is indicated by the 'm.' in front of the field ('pos').
+
+##### Filtering on targets #####
+In some cases it is insufficient to filter on packet sources and content alone. For instance it may be desirable to
+block AIS packets with static and voyage related data (see class `AisStaticCommon`) for vessels which are outside a
+given area. Since the `AisStaticCommon` messages do not contain any position information, it is not possible to filter
+on these packets alone.
+
+Instead, it is possible to use an expression filter which will "remember" all AIS packets it has previously been
+served. It uses these messages to track all AIS targets and keep a cache of the latest known positions, speeds, and
+other characteristis. This why, it is possible to filter on the target's characteristics rather than the latest packet
+received.
+
+As an example:
+
+```java
+import static dk.dma.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
+...
+parseExpresionFiter("t.sog > 10").test(aisPacket);
+```
+
+Of all packets send to the `test`-method only those which are related to a vesel with a speed over ground larger
+than 10 knots will result in `true` being returned from `test`. This is true even for e.g. AIS messages of type 5
+which contain no speed information.
+
+Filtering on target attributes is indicated by the 't.' in front of the field ('sog').
+
+##### Example application ####
+An example of an existing application which uses the expression filter is AisFilter which is based on main class
+`dk.dma.ais.utils.filter.AisFilter`:
+
+```
+java dk.dma.ais.utils.filter.Aisilter -t localhost:4001 -exp ".sog in 2..8"
+```
+
+This will make the application connect via TCP to localhost:4001 to receive AIS packets, filter them using the
+supplied expression (so that packets with speed over ground outside the range 2 to 8 knots are rejected), and
+output the remaining packets on the standard output.
+
+#### Grammar ####
+The full grammar is specified usit ANTLR notation in file `expresionFilter.g4`.
+
+The following are examples of filter expressions:
+
+##### Simple comparisons #####
+- `m.sog  0`
+- `m.sog != 0`
+- `m.sog > 6.0`
+- `m.sog < 7.0`
+- `m.sog >= 6.6`
+- `m.sog <= 6.6`
+
+###### In lists ######
+- `m.month = jan,feb,mar`
+- `m.month = (jan,feb,mar)`
+- `m.month in jan,feb,mar`
+- `m.month in (jan,feb,mar)`
+- `m.month @ jan,feb,mar`
+- `m.month @ (jan,feb,mar)`
+- `m.mmsi in 220431000,220435325,220430999`
+- `m.mmsi in (220431000,220435325,220430999)`
+
+- `m.month != jan,feb,mar`
+- `m.month != (jan,feb,mar)`
+- `m.month not in jan,feb,mar`
+- `m.month not in (jan,feb,mar)`
+- `m.month !@ jan,feb,mar`
+- `m.month !@ (jan,feb,mar)`
+- `m.mmsi not in 220431000,220435325,220430999`
+- `m.mmsi not in (220431000,220435325,220430999)`
+
+##### In ranges ######
+- `m.id = 5..15`
+- `m.id in 5..15`
+- `m.id in (5..15)`
+- `m.id @ (5..15)`
+
+- `m.id != 5..15`
+- `m.id not in 5..15`
+- `m.id !@ (5..15)`
+
+##### Within geographical areas #####
+- `m.pos within circle(37.9058, -122.4310, 1000)`
+- `m.pos within bbox(37.9058, -122.4310, 37.9185, -122.4149)`
+
+##### With string resembling glob #####
+- `m.name like D*`
+- `m.name LIKE DI*`
+- `m.name LIKE DI?NA`
+- `m.name ~ D*A`
+- `m.name ~ 'DIA*'`
+
+##### Named values #####
+- `m.type = TANKER`
+- `m.type = military`
+- `m.type in MILITARY, TANKER, HSC, FISHING`
+- `m.type in 'tanker', 'military', HSC`
+
+##### Composite expressions with boolean and/or #####
+- `m.id = 1 & m.sog >= 6.1 & m.sog <= 6.9`
+- `m.sog > 6.6 | m.sog < 6.4`
+- `m.sog > 6.6 & m.sog < 6.7`
+- `s.type=SAT|s.id=AISD|s.id=MSSIS`
+
+##### Fields #####
+The following fields can be used in filter expressions
+
+| Group | Field   | Meaning                    | Example values
+|-------| --------| ---------------------------| ---
+| s     | id      | Source id                  | |                   
+|       | bs      | Source base station        | |                   
+|       | country | Source country             | DNK                
+|       | type    | Source type                | LIVE, SAT          
+|       | region  | Source region              | 0                  
+|---    | ---     | ---                        | ---                
+| m     | id      | Message type               | 1, 2, 3, 5         
+|       | mmsi    | MMSI number                | 219010123          
+|       | imo     | IMO number                 | 6159463            
+|       | type    | Ship type                  | tanker, 32         
+|       | navstat | Navigational status        | AT_ANCHOR, 1       
+|       | name    | Ship name                  | Maersk Alabama     
+|       | cs      | Radio call sign            | XP1234              
+|       | sog     | Speed over ground          | 10.0               
+|       | cog     | Course over ground         | 234                
+|       | hdg     | True heading               | 180               
+|       | lat     | Latitude                   | 56.1234           
+|       | lon     | Longitude                  | 12.4321           
+|       | pos(*)  | Position                   | (56.1234, 12.4321) 
+|       | draught | Current draught            | 4.6                
+|       | year    | Msg recv'd in year         | 2014               
+|       | month   | Msg recv'd in month        | jan, january, 1    
+|       | dom     | Msg recv'd on day-of-month | 1, 31              
+|       | dow     | Msg recv'd on day-of-week  | mon, monday, 1     
+|       | hour    | Msg recv'd on hour         | 14                 
+|       | minute  | Msg recv'd on minute       | 34                 
+|---    | ---     | ---                        | ---                
+| t     | <TBD>   |                            | ||                  
+
+(*) pos is represents same values as (lat, lon) but is used in contexts where complete position (not just latitude or longitude)
+is used.
+
 ### Packet transformers ###
 
 TBD. See `dk.dma.ais.transform.*`, `dk.dma.ais.transform.TransformTest` and

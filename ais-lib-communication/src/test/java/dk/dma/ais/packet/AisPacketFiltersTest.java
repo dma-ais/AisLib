@@ -297,6 +297,7 @@ import static org.junit.Assert.assertTrue;
          assertFilterExpression(true, p1, "m.type in 'tanker', 'military', HSC");
          assertFilterExpression(false, p1, "m.type in 'tanker', 'militar', HSC");
          assertFilterExpression(false, p1, "m.type in PASSENGER, TANKER, HSC, FISHING");
+         assertFilterExpression(false, p1, "m.type = PASSENGER, TANKER, HSC, FISHING");
      }
 
      @Test
@@ -455,10 +456,14 @@ import static org.junit.Assert.assertTrue;
      public void testMessageTimeInStringList() {
         // p1: 2013-03-13T12:41:00.000+0100
         assertFilterExpression(true, p1, "m.month in jan,feb,mar");            assertFilterExpression(false, p1, "m.month not in jan,feb,mar");
+        assertFilterExpression(true, p1, "m.month @ jan,feb,mar");             assertFilterExpression(false, p1, "m.month !@ jan,feb,mar");
+        assertFilterExpression(true, p1, "m.month = jan,feb,mar");             assertFilterExpression(false, p1, "m.month != jan,feb,mar");
+        assertFilterExpression(true, p1, "m.month = (jan,feb,mar)");           assertFilterExpression(false, p1, "m.month != (jan,feb,mar)");
         assertFilterExpression(true, p1, "m.month in JAN,feb,MAR");            assertFilterExpression(false, p1, "m.month not in JAN,feb,MAR");
         assertFilterExpression(true, p1, "m.month in JAN,febRuary,MARCH");     assertFilterExpression(false, p1, "m.month not in JAN,febRuary,MARCH");
         assertFilterExpression(true, p1, "m.dow in mon,tue,wed");              assertFilterExpression(false, p1, "m.dow not in mon,tue,wed");
         assertFilterExpression(true, p1, "m.dow in monday,tuesday,Wednesday"); assertFilterExpression(false, p1, "m.dow not in monday,tuesday,Wednesday");
+        assertFilterExpression(true, p1, "m.dow = monday,tuesday,Wednesday");  assertFilterExpression(false, p1, "m.dow != monday,tuesday,Wednesday");
      }
 
       private static void assertFilterExpression(boolean expectedResult, AisPacket aisPacket, String filterExpression) {
