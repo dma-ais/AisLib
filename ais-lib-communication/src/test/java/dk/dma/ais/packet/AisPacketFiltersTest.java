@@ -411,7 +411,7 @@ import static org.junit.Assert.assertTrue;
 
      @Test
      public void testMessageTimeCompareTo() {
-         // p1: 2013-03-13T12:41:00.000+0100
+         // pkgStatic: 2013-03-13T12:41:00.000+0100
          testComparison(p1, "m.year", 2013);
          testComparison(p1, "m.month", 3);
          testComparison(p1, "m.dom", 13);
@@ -430,20 +430,20 @@ import static org.junit.Assert.assertTrue;
 
      @Test
      public void testMessageTimeInRange() {
-        // p1: 2013-03-13T12:41:00.000+0100
+        // pkgStatic: 2013-03-13T12:41:00.000+0100
         assertFilterExpression(true, p1, "m.year in 2011..2014");
         assertFilterExpression(true, p1, "m.month in 2..4");       assertFilterExpression(false, p1, "m.month not in 2..4");
-        // TODO ? assertFilterExpression(true, p1, "m.month in feb..may");   assertFilterExpression(false, p1, "m.month not in feb..may");
+        // TODO ? assertFilterExpression(true, pkgStatic, "m.month in feb..may");   assertFilterExpression(false, pkgStatic, "m.month not in feb..may");
         assertFilterExpression(true, p1, "m.dom in 10..15");
         assertFilterExpression(true, p1, "m.dow in 2..4");         assertFilterExpression(false, p1, "m.dow not in 2..4");
-        // TODO ? assertFilterExpression(true, p1, "m.dow in mon..fri");     assertFilterExpression(false, p1, "m.dow not in mon..fri");
+        // TODO ? assertFilterExpression(true, pkgStatic, "m.dow in mon..fri");     assertFilterExpression(false, pkgStatic, "m.dow not in mon..fri");
         assertFilterExpression(true, p1, "m.hour = 12..13");
         assertFilterExpression(true, p1, "m.minute = 40..49");
      }
 
      @Test
      public void testMessageTimeInIntList() {
-        // p1: 2013-03-13T12:41:00.000+0100
+        // pkgStatic: 2013-03-13T12:41:00.000+0100
         assertFilterExpression(true, p1, "m.year in 2011..2014");     assertFilterExpression(false, p1, "m.year not in 2013, 2014");
         assertFilterExpression(true, p1, "m.month in 2,3,4");         assertFilterExpression(false, p1, "m.month not in 2,3,4");
         assertFilterExpression(true, p1, "m.dom in 12,13,14");
@@ -454,7 +454,7 @@ import static org.junit.Assert.assertTrue;
 
      @Test
      public void testMessageTimeInStringList() {
-        // p1: 2013-03-13T12:41:00.000+0100
+        // pkgStatic: 2013-03-13T12:41:00.000+0100
         assertFilterExpression(true, p1, "m.month in jan,feb,mar");            assertFilterExpression(false, p1, "m.month not in jan,feb,mar");
         assertFilterExpression(true, p1, "m.month @ jan,feb,mar");             assertFilterExpression(false, p1, "m.month !@ jan,feb,mar");
         assertFilterExpression(true, p1, "m.month = jan,feb,mar");             assertFilterExpression(false, p1, "m.month != jan,feb,mar");

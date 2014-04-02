@@ -25,11 +25,9 @@ import java.util.Arrays;
 import static java.util.Objects.requireNonNull;
 
 /**
- * 
  * @author Kasper Nielsen
  */
-public class AisPacketSourceFilters implements FilterFactory {
-
+public class AisPacketSourceFilters implements FilterPredicateFactory {
 
     @SafeVarargs
     static <T> T[] check(T... elements) {

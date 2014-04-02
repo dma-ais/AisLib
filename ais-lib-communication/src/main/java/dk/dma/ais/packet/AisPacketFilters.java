@@ -41,19 +41,38 @@ import static java.util.Objects.requireNonNull;
 /**
  * @author Kasper Nielsen
  */
-public class AisPacketFilters implements FilterFactory {
+public class AisPacketFilters extends AisPacketFiltersBase {
 
-    @SafeVarargs
-    static <T> T[] check(T... elements) {
-        T[] s = elements.clone();
-        Arrays.sort(s);
-        for (int i = 0; i < s.length; i++) {
-            if (s[i] == null) {
-                throw new NullPointerException("Array is null at position " + i);
+    protected static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
+        requireNonNull(messageType);
+        requireNonNull(predicate);
+        return new AbstractMessagePredicate() {
+            /**
+             * If AisMessage m is of the given messageType, then evaluate its predicate. Otherwise ignore it and return true.
+             * @param m
+             * @return
+             */
+            @SuppressWarnings("unchecked")
+            public boolean test(AisMessage m) {
+                if (messageType.isAssignableFrom(m.getClass())) {
+                    return predicate.test((T) m);
+                }
+                return true;
             }
-        }
-        // Check for nulls
-        return s;
+
+            public String toString() {
+                return predicate.toString();
+            }
+        };
+    }
+
+    protected static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
+        requireNonNull(messageType);
+        return new AbstractMessagePredicate() {
+            public boolean test(AisMessage m) {
+                return messageType.isAssignableFrom(m.getClass());
+            }
+        };
     }
 
     public static Predicate<AisPacket> filterOnSourceBasestation(Integer... ids) {
@@ -162,6 +181,7 @@ public class AisPacketFilters implements FilterFactory {
      * @param area The area that the position must reside inside.
      * @return
      */
+    @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnMessagePositionWithin(final Area area) {
         requireNonNull(area);
         return filterOnMessageType(IPositionMessage.class, new Predicate<IPositionMessage>() {
@@ -178,38 +198,6 @@ public class AisPacketFilters implements FilterFactory {
                 return "position within = " + area;
             }
         });
-    }
-
-    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
-        requireNonNull(messageType);
-        requireNonNull(predicate);
-        return new AbstractMessagePredicate() {
-            /**
-             * If AisMessage m is of the given messageType, then evaluate its predicate. Otherwise ignore it and return true.
-             * @param m
-             * @return
-             */
-            @SuppressWarnings("unchecked")
-            public boolean test(AisMessage m) {
-                if (messageType.isAssignableFrom(m.getClass())) {
-                    return predicate.test((T) m);
-                }
-                return true;
-            }
-
-            public String toString() {
-                return predicate.toString();
-            }
-        };
-    }
-
-    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
-        requireNonNull(messageType);
-        return new AbstractMessagePredicate() {
-            public boolean test(AisMessage m) {
-                return messageType.isAssignableFrom(m.getClass());
-            }
-        };
     }
 
     @SuppressWarnings("unused")
@@ -236,7 +224,7 @@ public class AisPacketFilters implements FilterFactory {
      * @return
      */
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageReceiveTime(final CompareToOperator operator, final int calendarField, final int value) {
+    protected static Predicate<AisPacket> filterOnMessageReceiveTime(final CompareToOperator operator, final int calendarField, final int value) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = true;
@@ -253,6 +241,16 @@ public class AisPacketFilters implements FilterFactory {
                 return "cal#" + calendarField + " = " + value;
             }
         };
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageReceiveTimeMonth(final CompareToOperator operator, Integer rhs) {
+        return filterOnMessageReceiveTime(operator, Calendar.MONTH, rhs);
+    }
+
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfWeek(final CompareToOperator operator, Integer rhs) {
+        return filterOnMessageReceiveTime(operator, Calendar.DAY_OF_WEEK, rhs);
     }
 
     @SuppressWarnings("unused")
@@ -583,7 +581,7 @@ public class AisPacketFilters implements FilterFactory {
                 boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof AisStaticCommon) {
-                    pass = match(preprocessAisString(((AisStaticCommon) aisMessage).getName()), convertGlobToRegex(glob));
+                    pass = matchesGlob(preprocessAisString(((AisStaticCommon) aisMessage).getName()), glob);
                 }
                 return pass;
             }
@@ -621,7 +619,7 @@ public class AisPacketFilters implements FilterFactory {
                 boolean pass = true;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof AisStaticCommon) {
-                    pass = match(preprocessAisString(((AisStaticCommon) aisMessage).getCallsign()), convertGlobToRegex(glob));
+                    pass = matchesGlob(preprocessAisString(((AisStaticCommon) aisMessage).getCallsign()), glob);
                 }
                 return pass;
             }
@@ -1093,211 +1091,6 @@ public class AisPacketFilters implements FilterFactory {
     }
 
     // ---
-
-    static String skipBrackets(String s) {
-        return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
-    }
-
-    private static String preprocessAisString(String name) {
-        return name != null ? name.replace('@', ' ').trim() : null;
-    }
-
-    private static String[] preprocessExpressionStrings(String[] exprStrings) {
-        String[] preprocessedStrings = new String[exprStrings.length];
-        for (int i = 0; i < preprocessedStrings.length; i++) {
-            preprocessedStrings[i] = preprocessExpressionString(exprStrings[i]);
-        }
-        return preprocessedStrings;
-    }
-
-    private static String preprocessExpressionString(String exprString) {
-        String preprocessedString = exprString;
-        if (preprocessedString.startsWith("'") && preprocessedString.endsWith("'") && preprocessedString.length() > 2) {
-            preprocessedString = preprocessedString.substring(1, preprocessedString.length() - 1);
-        }
-        return preprocessedString;
-    }
-
-    private static boolean compare(String lhs, String rhs, CompareToOperator operator) {
-        lhs = lhs.replace('@', ' ').trim();
-        rhs = rhs.replace('@', ' ').trim();
-
-        switch (operator) {
-            case EQUALS:
-                return lhs.equalsIgnoreCase(rhs);
-            case NOT_EQUALS:
-                return !lhs.equalsIgnoreCase(rhs);
-            case GREATER_THAN:
-                return lhs.compareToIgnoreCase(rhs) > 0;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs.compareToIgnoreCase(rhs) >= 0;
-            case LESS_THAN:
-                return lhs.compareToIgnoreCase(rhs) < 0;
-            case LESS_THAN_OR_EQUALS:
-                return lhs.compareToIgnoreCase(rhs) <= 0;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
-
-    private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
-        switch (operator) {
-            case EQUALS:
-                return lhs == rhs;
-            case NOT_EQUALS:
-                return lhs != rhs;
-            case GREATER_THAN:
-                return lhs > rhs;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs >= rhs;
-            case LESS_THAN:
-                return lhs < rhs;
-            case LESS_THAN_OR_EQUALS:
-                return lhs <= rhs;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
-
-    private static boolean compare(float lhs, float rhs, CompareToOperator operator) {
-        switch (operator) {
-            case EQUALS:
-                return lhs == rhs;
-            case NOT_EQUALS:
-                return lhs != rhs;
-            case GREATER_THAN:
-                return lhs > rhs;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs >= rhs;
-            case LESS_THAN:
-                return lhs < rhs;
-            case LESS_THAN_OR_EQUALS:
-                return lhs <= rhs;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
-        }
-    }
-
-    private static <T> boolean match(T value, String regexp) {
-        return value.toString().matches(regexp);
-    }
-
-    private static boolean inRange(int min, int max, int value) {
-        return value >= min && value <= max;
-    }
-
-    private static boolean inRange(float min, float max, float value) {
-        return value >= min && value <= max;
-    }
-
-    /**
-     * Converts a standard POSIX Shell globbing pattern into a regular expression
-     * pattern. The result can be used with the standard {@link java.util.regex} API to
-     * recognize strings which match the glob pattern.
-     * <p/>
-     * See also, the POSIX Shell language:
-     * http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_13_01
-     *
-     * Thanks go to
-     * http://stackoverflow.com/questions/1247772/is-there-an-equivalent-of-java-util-regex-for-glob-type-patterns
-     *
-     * @param pattern A glob pattern.
-     * @return A regex pattern to recognize the given glob pattern.
-     */
-    private static String convertGlobToRegex(String pattern) {
-        StringBuilder sb = new StringBuilder(pattern.length());
-        int inGroup = 0;
-        int inClass = 0;
-        int firstIndexInClass = -1;
-        char[] arr = pattern.toCharArray();
-        for (int i = 0; i < arr.length; i++) {
-            char ch = arr[i];
-            switch (ch) {
-                case '\\':
-                    if (++i >= arr.length) {
-                        sb.append('\\');
-                    } else {
-                        char next = arr[i];
-                        switch (next) {
-                            case ',':
-                                // escape not needed
-                                break;
-                            case 'Q':
-                            case 'E':
-                                // extra escape needed
-                                sb.append('\\');
-                            default:
-                                sb.append('\\');
-                        }
-                        sb.append(next);
-                    }
-                    break;
-                case '*':
-                    if (inClass == 0) {
-                        sb.append(".*");
-                    } else {
-                        sb.append('*');
-                    }
-                    break;
-
-                case '?':
-                    if (inClass == 0) {
-                        sb.append('.');
-                    } else {
-                        sb.append('?');
-                    }
-                    break;
-                case '[':
-                    inClass++;
-                    firstIndexInClass = i + 1;
-                    sb.append('[');
-                    break;
-                case ']':
-                    inClass--;
-                    sb.append(']');
-                    break;
-                case '.':
-                case '(':
-                case ')':
-                case '+':
-                case '|':
-                case '^':
-                case '$':
-                case '@':
-                case '%':
-                    if (inClass == 0 || (firstIndexInClass == i && ch == '^')) {
-                        sb.append('\\');
-                    }
-                    sb.append(ch);
-                    break;
-                case '!':
-                    if (firstIndexInClass == i) {
-                        sb.append('^');
-                    } else {
-                        sb.append('!');
-                    }
-                    break;
-                case '{':
-                    inGroup++;
-                    sb.append('(');
-                    break;
-                case '}':
-                    inGroup--;
-                    sb.append(')');
-                    break;
-                case ',':
-                    if (inGroup > 0) {
-                        sb.append('|');
-                    } else {
-                        sb.append(',');
-                    }
-                    break;
-                default:
-                    sb.append(ch);
-            }
-        }
-        return sb.toString();
-    }
 
     abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {
 

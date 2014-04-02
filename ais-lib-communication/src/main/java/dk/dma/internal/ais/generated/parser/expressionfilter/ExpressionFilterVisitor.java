@@ -19,13 +19,6 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageTrueHeading(@NotNull ExpressionFilterParser.MessageTrueHeadingContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTime}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMessageTime(@NotNull ExpressionFilterParser.MessageTimeContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTrueHeadingIn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -38,6 +31,20 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParens(@NotNull ExpressionFilterParser.ParensContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeMinute}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeMinute(@NotNull ExpressionFilterParser.MessageTimeMinuteContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeYear}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeYear(@NotNull ExpressionFilterParser.MessageTimeYearContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#intList}.
@@ -68,6 +75,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitCompareTo(@NotNull ExpressionFilterParser.CompareToContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeMinuteIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeMinuteIn(@NotNull ExpressionFilterParser.MessageTimeMinuteInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#sourceBasestation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -75,11 +89,39 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitSourceBasestation(@NotNull ExpressionFilterParser.SourceBasestationContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetNavigationalStatusIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetNavigationalStatusIn(@NotNull ExpressionFilterParser.TargetNavigationalStatusInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetLatitudeIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetLatitudeIn(@NotNull ExpressionFilterParser.TargetLatitudeInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#number}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNumber(@NotNull ExpressionFilterParser.NumberContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetCallsign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetCallsign(@NotNull ExpressionFilterParser.TargetCallsignContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeMonthIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeMonthIn(@NotNull ExpressionFilterParser.MessageTimeMonthInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#sourceBasestationIn}.
@@ -94,6 +136,41 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageImoIn(@NotNull ExpressionFilterParser.MessageImoInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetImo}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetImo(@NotNull ExpressionFilterParser.TargetImoContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeWeekday}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeWeekday(@NotNull ExpressionFilterParser.MessageTimeWeekdayContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetSpeedOverGround}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetSpeedOverGround(@NotNull ExpressionFilterParser.TargetSpeedOverGroundContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetTrueHeading}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetTrueHeading(@NotNull ExpressionFilterParser.TargetTrueHeadingContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetTrueHeadingIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetTrueHeadingIn(@NotNull ExpressionFilterParser.TargetTrueHeadingInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#in}.
@@ -131,6 +208,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageSpeedOverGround(@NotNull ExpressionFilterParser.MessageSpeedOverGroundContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetNameIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetNameIn(@NotNull ExpressionFilterParser.TargetNameInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCourseOverGroundIn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -152,6 +236,20 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageMmsiIn(@NotNull ExpressionFilterParser.MessageMmsiInContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeHour}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeHour(@NotNull ExpressionFilterParser.MessageTimeHourContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeWeekdayIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeWeekdayIn(@NotNull ExpressionFilterParser.MessageTimeWeekdayInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#sourceCountryIn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -166,6 +264,20 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageIdIn(@NotNull ExpressionFilterParser.MessageIdInContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetDraught}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetDraught(@NotNull ExpressionFilterParser.TargetDraughtContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetImoIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetImoIn(@NotNull ExpressionFilterParser.TargetImoInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#circle}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -173,11 +285,39 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitCircle(@NotNull ExpressionFilterParser.CircleContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeYearIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeYearIn(@NotNull ExpressionFilterParser.MessageTimeYearInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageName}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitMessageName(@NotNull ExpressionFilterParser.MessageNameContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeHourIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeHourIn(@NotNull ExpressionFilterParser.MessageTimeHourInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetNavigationalStatus}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetNavigationalStatus(@NotNull ExpressionFilterParser.TargetNavigationalStatusContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetName(@NotNull ExpressionFilterParser.TargetNameContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageLatitude}.
@@ -199,6 +339,20 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageDraughtIn(@NotNull ExpressionFilterParser.MessageDraughtInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetCourseOverGroundIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetCourseOverGroundIn(@NotNull ExpressionFilterParser.TargetCourseOverGroundInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeDay}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeDay(@NotNull ExpressionFilterParser.MessageTimeDayContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCourseOverGround}.
@@ -229,6 +383,20 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitNumberRange(@NotNull ExpressionFilterParser.NumberRangeContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetCourseOverGround}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetCourseOverGround(@NotNull ExpressionFilterParser.TargetCourseOverGroundContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetPositionInside}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetPositionInside(@NotNull ExpressionFilterParser.TargetPositionInsideContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageNavigationalStatusIn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -236,11 +404,46 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageNavigationalStatusIn(@NotNull ExpressionFilterParser.MessageNavigationalStatusInContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetSpeedOverGroundIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetSpeedOverGroundIn(@NotNull ExpressionFilterParser.TargetSpeedOverGroundInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetDraughtIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetDraughtIn(@NotNull ExpressionFilterParser.TargetDraughtInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#OrAnd}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitOrAnd(@NotNull ExpressionFilterParser.OrAndContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetLatitude}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetLatitude(@NotNull ExpressionFilterParser.TargetLatitudeContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetShiptypeIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetShiptypeIn(@NotNull ExpressionFilterParser.TargetShiptypeInContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeDayIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageTimeDayIn(@NotNull ExpressionFilterParser.MessageTimeDayInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#AisMessagetype}.
@@ -320,6 +523,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitFilter(@NotNull ExpressionFilterParser.FilterContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetShiptype}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetShiptype(@NotNull ExpressionFilterParser.TargetShiptypeContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageLongitude}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -327,11 +537,18 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitMessageLongitude(@NotNull ExpressionFilterParser.MessageLongitudeContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeIn}.
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageTimeMonth}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMessageTimeIn(@NotNull ExpressionFilterParser.MessageTimeInContext ctx);
+	T visitMessageTimeMonth(@NotNull ExpressionFilterParser.MessageTimeMonthContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetLongitude}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetLongitude(@NotNull ExpressionFilterParser.TargetLongitudeContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#stringList}.
@@ -348,6 +565,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitNotin(@NotNull ExpressionFilterParser.NotinContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetCallsignIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetCallsignIn(@NotNull ExpressionFilterParser.TargetCallsignInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageShiptype}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -360,4 +584,11 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageImo(@NotNull ExpressionFilterParser.MessageImoContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetLongitudeIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetLongitudeIn(@NotNull ExpressionFilterParser.TargetLongitudeInContext ctx);
 }

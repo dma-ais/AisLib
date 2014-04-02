@@ -15,7 +15,6 @@
  */
 package dk.dma.ais.packet;
 
-import dk.dma.enav.model.Country;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
@@ -53,54 +52,34 @@ class AisPacketSourceFiltersParser extends ExpressionFilterParserBase {
             };
         }
 
-        // 's.id' (in|notin) stringList
         @Override
         public Predicate<AisPacketSource> visitSourceIdIn(final ExpressionFilterParser.SourceIdInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, strings);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForRangeOrList(AisPacketSourceFilters.class, null, ctx);
         }
 
-        // 's.bs' compareTo INT
         @Override
         public Predicate<AisPacketSource> visitSourceBasestation(@NotNull ExpressionFilterParser.SourceBasestationContext ctx) {
-            return createFilterPredicateForIntComparison(AisPacketSourceFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketSourceFilters.class, null, ctx);
         }
 
-        // 's.bs' (in|notin) (intRange|intList)
         @Override
         public Predicate<AisPacketSource> visitSourceBasestationIn(@NotNull ExpressionFilterParser.SourceBasestationInContext ctx) {
-            return createFilterPredicateForIntRangeOrIntList(AisPacketSourceFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketSourceFilters.class, null, ctx);
         }
 
-        // 's.country' (in|notin) stringList
         @Override
         public Predicate<AisPacketSource> visitSourceCountryIn(@NotNull ExpressionFilterParser.SourceCountryInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            Country[] countries = getCountries(strings);
-            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, countries);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForListOfCountry(AisPacketSourceFilters.class, null, ctx);
         }
 
-        // 's.type' (in|notin) stringList
         @Override
         public Predicate<AisPacketSource> visitSourceTypeIn(@NotNull ExpressionFilterParser.SourceTypeInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            AisPacketTags.SourceType[] sourceTypes = getSourceTypes(strings);
-            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, sourceTypes);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForListOfSourceType(AisPacketSourceFilters.class, null, ctx);
         }
 
-        // 's.region' (in|notin) stringList
         @Override
         public Predicate<AisPacketSource> visitSourceRegionIn(@NotNull ExpressionFilterParser.SourceRegionInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            Predicate<AisPacketSource> filter = createFilterPredicateForList(AisPacketSourceFilters.class, fieldName, strings);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForRangeOrList(AisPacketSourceFilters.class, null, ctx);
         }
     }
 }

@@ -15,13 +15,6 @@
  */
 package dk.dma.ais.packet;
 
-import dk.dma.ais.packet.AisPacketTags.SourceType;
-import dk.dma.enav.model.Country;
-import dk.dma.enav.model.geometry.Area;
-import dk.dma.enav.model.geometry.BoundingBox;
-import dk.dma.enav.model.geometry.Circle;
-import dk.dma.enav.model.geometry.CoordinateSystem;
-import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
@@ -30,8 +23,7 @@ import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterPar
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.SourceBasestationContext;
 import org.antlr.v4.runtime.misc.NotNull;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Calendar;
 
 /**
  * @author Kasper Nielsen
@@ -67,276 +59,388 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         }
 
         //
-        // Tokens related to source
+        // Visitors related to source
         //
 
         @Override
         public Predicate<AisPacket> visitSourceIdIn(@NotNull ExpressionFilterParser.SourceIdInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            Predicate<AisPacket> filter = createFilterPredicateForList(AisPacketFilters.class, fieldName, strings);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitSourceBasestation(@NotNull SourceBasestationContext ctx) {
-            return createFilterPredicateForIntComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitSourceBasestationIn(@NotNull ExpressionFilterParser.SourceBasestationInContext ctx) {
-            return createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitSourceCountryIn(@NotNull ExpressionFilterParser.SourceCountryInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            Country[] countries = getCountries(strings);
-            Predicate<AisPacket> filter = createFilterPredicateForList(AisPacketFilters.class, fieldName, countries);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForListOfCountry(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitSourceTypeIn(@NotNull ExpressionFilterParser.SourceTypeInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            SourceType[] sourceTypes = getSourceTypes(strings);
-            Predicate<AisPacket> filter = createFilterPredicateForList(AisPacketFilters.class, fieldName, sourceTypes);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForListOfSourceType(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitSourceRegionIn(@NotNull ExpressionFilterParser.SourceRegionInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            Predicate<AisPacket> filter = createFilterPredicateForList(AisPacketFilters.class, fieldName, strings);
-            return checkNegate(ctx, filter);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         //
-        // Tokens related to message contents
+        // Visitors related to message contents
         //
 
         @Override
-        public Predicate<AisPacket> visitMessageTime(@NotNull ExpressionFilterParser.MessageTimeContext ctx) {
-            return createFilterPredicateForTimeComparison(AisPacketFilters.class, ctx);
+        public Predicate<AisPacket> visitMessageTimeYear(@NotNull ExpressionFilterParser.MessageTimeYearContext ctx) {
+            return createFilterPredicateForComparisonOfMessageReceiveTime(AisPacketFilters.class, null, ctx, Calendar.YEAR);
         }
 
         @Override
-        public Predicate<AisPacket> visitMessageTimeIn(@NotNull ExpressionFilterParser.MessageTimeInContext ctx) {
-            Predicate<AisPacket> filter = createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
-            if (filter == null && ctx.stringList() != null) {
-                String fieldName = ctx.getStart().getText();
-                String[] strings = extractStrings(ctx.stringList().string());
-                Set<Integer> intList = null;
-                if ("m.month".equalsIgnoreCase(fieldName)) {
-                    intList = getMonths(strings);
-                } else if ("m.dow".equalsIgnoreCase(fieldName)) {
-                    intList = getWeekdays(strings);
-                }
-                filter = checkNegate(ctx, createFilterPredicateForList(AisPacketFilters.class, fieldName, intList.toArray(new Integer[intList.size()])));
-            }
-            return filter;
+        public Predicate<AisPacket> visitMessageTimeYearIn(@NotNull ExpressionFilterParser.MessageTimeYearInContext ctx) {
+            return createFilterPredicateForRangeOrListOfMessageReceiveTime(AisPacketFilters.class, null, ctx);
         }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeMonth(@NotNull ExpressionFilterParser.MessageTimeMonthContext ctx) {
+            return createFilterPredicateForComparisonOfMonth(AisPacketFilters.class, null, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeMonthIn(@NotNull ExpressionFilterParser.MessageTimeMonthInContext ctx) {
+            return createFilterPredicateForRangeOrListOfMonth(AisPacketFilters.class, null, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeDay(@NotNull ExpressionFilterParser.MessageTimeDayContext ctx) {
+            return createFilterPredicateForComparisonOfMessageReceiveTime(AisPacketFilters.class, null, ctx, Calendar.DAY_OF_MONTH);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeDayIn(@NotNull ExpressionFilterParser.MessageTimeDayInContext ctx) {
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeWeekday(@NotNull ExpressionFilterParser.MessageTimeWeekdayContext ctx) {
+            return createFilterPredicateForComparisonOfWeekday(AisPacketFilters.class, null, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeWeekdayIn(@NotNull ExpressionFilterParser.MessageTimeWeekdayInContext ctx) {
+            return createFilterPredicateForRangeOrListOfWeekday(AisPacketFilters.class, null, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeHour(@NotNull ExpressionFilterParser.MessageTimeHourContext ctx) {
+            return createFilterPredicateForComparisonOfMessageReceiveTime(AisPacketFilters.class, null, ctx, Calendar.HOUR_OF_DAY);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeHourIn(@NotNull ExpressionFilterParser.MessageTimeHourInContext ctx) {
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeMinute(@NotNull ExpressionFilterParser.MessageTimeMinuteContext ctx) {
+            return createFilterPredicateForComparisonOfMessageReceiveTime(AisPacketFilters.class, null, ctx, Calendar.MINUTE);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitMessageTimeMinuteIn(@NotNull ExpressionFilterParser.MessageTimeMinuteInContext ctx) {
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
+        }
+
+        // ---
 
         @Override
         public Predicate<AisPacket> visitMessageId(@NotNull ExpressionFilterParser.MessageIdContext ctx) {
-            return createFilterPredicateForIntComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageIdIn(@NotNull ExpressionFilterParser.MessageIdInContext ctx) {
-            return createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageMmsi(@NotNull ExpressionFilterParser.MessageMmsiContext ctx) {
-            return createFilterPredicateForIntComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageMmsiIn(@NotNull ExpressionFilterParser.MessageMmsiInContext ctx) {
-            return createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageImo(@NotNull ExpressionFilterParser.MessageImoContext ctx) {
-            return createFilterPredicateForIntComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageImoIn(@NotNull ExpressionFilterParser.MessageImoInContext ctx) {
-            return createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageShiptype(@NotNull ExpressionFilterParser.MessageShiptypeContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String operator = ctx.compareTo().getText();
-            String value = extractString(ctx.string());
-            try {
-                return createFilterPredicateForComparison(AisPacketFilters.class, fieldName, operator, Integer.valueOf(value));
-            } catch (NumberFormatException e) {
-                Set<Integer> shipTypes = getShipTypes(value);
-                if (!operator.equals("=")) {
-                    throw new IllegalArgumentException("Sorry, only = operator currently supported.");
-                }
-                return createFilterPredicateForList(AisPacketFilters.class, fieldName, shipTypes.toArray(new Integer[shipTypes.size()]));
-            }
+            return createFilterPredicateForComparisonOfShipType(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageShiptypeIn(@NotNull ExpressionFilterParser.MessageShiptypeInContext ctx) {
-            Predicate<AisPacket> filter = createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
-            if (filter == null && ctx.stringList() != null) {
-                String fieldName = ctx.getStart().getText();
-                String[] strings = extractStrings(ctx.stringList().string());
-                Set<Integer> shipTypes = getShipTypes(strings);
-                filter = checkNegate(ctx, createFilterPredicateForList(AisPacketFilters.class, fieldName, shipTypes.toArray(new Integer[shipTypes.size()])));
-            }
-            return filter;
+            return createFilterPredicateForListOfShipType(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageNavigationalStatus(@NotNull ExpressionFilterParser.MessageNavigationalStatusContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String operator = ctx.compareTo().getText();
-            String value = extractString(ctx.string());
-            try {
-                return createFilterPredicateForComparison(AisPacketFilters.class, fieldName, operator, Integer.valueOf(value));
-            } catch (NumberFormatException e) {
-                Set<Integer> navstats = getNavigationalStatuses(new String[]{value});
-                if (!operator.equals("=")) {
-                    throw new IllegalArgumentException("Sorry, only = operator currently supported.");
-                }
-                return createFilterPredicateForList(AisPacketFilters.class, fieldName, navstats.toArray(new Integer[navstats.size()]));
-            }
+            return createFilterPredicateForComparisonOfNavigationalStatus(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageNavigationalStatusIn(@NotNull ExpressionFilterParser.MessageNavigationalStatusInContext ctx) {
-            Predicate<AisPacket> filter = createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
-            if (filter == null && ctx.stringList() != null) {
-                String fieldName = ctx.getStart().getText();
-                String[] strings = extractStrings(ctx.stringList().string());
-                Set<Integer> navstats = getNavigationalStatuses(strings);
-                filter = checkNegate(ctx, createFilterPredicateForList(AisPacketFilters.class, fieldName, navstats.toArray(new Integer[navstats.size()])));
-            }
-            return filter;
+            return createFilterPredicateForListOfNavigationalStatus(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageName(@NotNull ExpressionFilterParser.MessageNameContext ctx) {
-            return createFilterPredicateForStringComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForStringComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageNameIn(@NotNull ExpressionFilterParser.MessageNameInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            return createFilterPredicateForList(AisPacketFilters.class, fieldName, strings);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageCallsign(@NotNull ExpressionFilterParser.MessageCallsignContext ctx) {
-            return createFilterPredicateForStringComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForStringComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageCallsignIn(@NotNull ExpressionFilterParser.MessageCallsignInContext ctx) {
-            String fieldName = ctx.getStart().getText();
-            String[] strings = extractStrings(ctx.stringList().string());
-            return createFilterPredicateForList(AisPacketFilters.class, fieldName, strings);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageSpeedOverGround(@NotNull ExpressionFilterParser.MessageSpeedOverGroundContext ctx) {
-            return createFilterPredicateForNumberComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageSpeedOverGroundIn(@NotNull ExpressionFilterParser.MessageSpeedOverGroundInContext ctx) {
-            return createFilterPredicateForNumberRange(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageCourseOverGround(@NotNull ExpressionFilterParser.MessageCourseOverGroundContext ctx) {
-            return createFilterPredicateForNumberComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageCourseOverGroundIn(@NotNull ExpressionFilterParser.MessageCourseOverGroundInContext ctx) {
-            return createFilterPredicateForNumberRange(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageLatitude(@NotNull ExpressionFilterParser.MessageLatitudeContext ctx) {
-            return createFilterPredicateForNumberComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageLatitudeIn(@NotNull ExpressionFilterParser.MessageLatitudeInContext ctx) {
-            return createFilterPredicateForNumberRange(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageLongitude(@NotNull ExpressionFilterParser.MessageLongitudeContext ctx) {
-            return createFilterPredicateForNumberComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageLongitudeIn(@NotNull ExpressionFilterParser.MessageLongitudeInContext ctx) {
-            return createFilterPredicateForNumberRange(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageTrueHeading(@NotNull ExpressionFilterParser.MessageTrueHeadingContext ctx) {
-            return createFilterPredicateForIntComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageTrueHeadingIn(@NotNull ExpressionFilterParser.MessageTrueHeadingInContext ctx) {
-            return createFilterPredicateForIntRangeOrIntList(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageDraught(@NotNull ExpressionFilterParser.MessageDraughtContext ctx) {
-            return createFilterPredicateForNumberComparison(AisPacketFilters.class, ctx);
+            return createFilterPredicateForComparison(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessageDraughtIn(@NotNull ExpressionFilterParser.MessageDraughtInContext ctx) {
-            return createFilterPredicateForNumberRange(AisPacketFilters.class, ctx);
+            return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
 
         @Override
         public Predicate<AisPacket> visitMessagePositionInside(@NotNull ExpressionFilterParser.MessagePositionInsideContext ctx) {
-            Predicate<AisPacket> filter = null;
-            Area area = null;
+            return createFilterPredicateForPositionWithin(AisPacketFilters.class, null, ctx);
+        }
 
-            if (ctx.bbox() != null) {
-                List<ExpressionFilterParser.NumberContext> params = ctx.bbox().number();
-                float latitude1 = Float.valueOf(params.get(0).getText());
-                float longitude1 = Float.valueOf(params.get(1).getText());
-                float latitude2 = Float.valueOf(params.get(2).getText());
-                float longitude2 = Float.valueOf(params.get(3).getText());
-                Position corner1 = Position.create(latitude1, longitude1);
-                Position corner2 = Position.create(latitude2, longitude2);
-                area = BoundingBox.create(corner1, corner2, CoordinateSystem.CARTESIAN);
-            } else if (ctx.circle() != null) {
-                List<ExpressionFilterParser.NumberContext> params = ctx.circle().number();
-                float latitude = Float.valueOf(params.get(0).getText());
-                float longitude = Float.valueOf(params.get(1).getText());
-                float radius = Float.valueOf(params.get(2).getText());
-                area = new Circle(latitude, longitude, radius, CoordinateSystem.CARTESIAN);
+        //
+        // Visitors related to target
+        //
+
+        @Override
+        public Predicate<AisPacket> visitTargetImo(@NotNull ExpressionFilterParser.TargetImoContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetImoIn(@NotNull ExpressionFilterParser.TargetImoInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetShiptype(@NotNull ExpressionFilterParser.TargetShiptypeContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparisonOfShipType(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetShiptypeIn(@NotNull ExpressionFilterParser.TargetShiptypeInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForListOfShipType(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetNavigationalStatus(@NotNull ExpressionFilterParser.TargetNavigationalStatusContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparisonOfNavigationalStatus(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetNavigationalStatusIn(@NotNull ExpressionFilterParser.TargetNavigationalStatusInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForListOfNavigationalStatus(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetSpeedOverGround(@NotNull ExpressionFilterParser.TargetSpeedOverGroundContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetSpeedOverGroundIn(@NotNull ExpressionFilterParser.TargetSpeedOverGroundInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetCourseOverGround(@NotNull ExpressionFilterParser.TargetCourseOverGroundContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetCourseOverGroundIn(@NotNull ExpressionFilterParser.TargetCourseOverGroundInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetTrueHeading(@NotNull ExpressionFilterParser.TargetTrueHeadingContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetTrueHeadingIn(@NotNull ExpressionFilterParser.TargetTrueHeadingInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetDraught(@NotNull ExpressionFilterParser.TargetDraughtContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetDraughtIn(@NotNull ExpressionFilterParser.TargetDraughtInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetLatitude(@NotNull ExpressionFilterParser.TargetLatitudeContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetLatitudeIn(@NotNull ExpressionFilterParser.TargetLatitudeInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetLongitude(@NotNull ExpressionFilterParser.TargetLongitudeContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetLongitudeIn(@NotNull ExpressionFilterParser.TargetLongitudeInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetName(@NotNull ExpressionFilterParser.TargetNameContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForStringComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetNameIn(@NotNull ExpressionFilterParser.TargetNameInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetCallsign(@NotNull ExpressionFilterParser.TargetCallsignContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForStringComparison(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetCallsignIn(@NotNull ExpressionFilterParser.TargetCallsignInContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForRangeOrList(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        @Override
+        public Predicate<AisPacket> visitTargetPositionInside(@NotNull ExpressionFilterParser.TargetPositionInsideContext ctx) {
+            setupStatefulFilterPredicateFactory();
+            return createFilterPredicateForPositionWithin(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
+        }
+
+        private FilterPredicateFactory statefulFilterPredicateFactory;
+
+        private void setupStatefulFilterPredicateFactory() {
+            if (statefulFilterPredicateFactory == null) {
+                statefulFilterPredicateFactory = new AisPacketFiltersStateful();
             }
-
-            if (area != null) {
-                filter = AisPacketFilters.filterOnMessagePositionWithin(area);
-            }
-
-            return filter;
         }
     }
 }
