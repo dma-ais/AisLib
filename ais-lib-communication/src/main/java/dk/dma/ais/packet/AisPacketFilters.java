@@ -43,7 +43,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class AisPacketFilters extends AisPacketFiltersBase {
 
-    protected static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
+    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
         requireNonNull(messageType);
         requireNonNull(predicate);
         return new AbstractMessagePredicate() {
@@ -66,7 +66,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
-    protected static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
+    public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
         requireNonNull(messageType);
         return new AbstractMessagePredicate() {
             public boolean test(AisMessage m) {
