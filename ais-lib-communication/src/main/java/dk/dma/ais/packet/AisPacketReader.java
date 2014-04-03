@@ -22,10 +22,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,6 +37,8 @@ import java.util.zip.ZipInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.AbstractIterator;
+
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
@@ -42,14 +46,15 @@ import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.transform.AisPacketTaggingTransformer;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 import dk.dma.commons.util.io.CountingInputStream;
+import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Consumer;
 
 /**
  * Class for reading AIS packet streams.
- * 
+ *
  * @author Kasper Nielsen
  */
-public class AisPacketReader implements AutoCloseable {
+public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
 
     /** The logger */
     static final Logger LOG = LoggerFactory.getLogger(AisPacketReader.class);
@@ -83,7 +88,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Create
-     * 
+     *
      * @param stream
      *            the input stream to read data from
      */
@@ -105,7 +110,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Returns the number of bytes read by this reader.
-     * 
+     *
      * @return the number of bytes read by this reader
      */
     public long getNumberOfBytesRead() {
@@ -114,7 +119,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Returns the number of lines read by this reader.
-     * 
+     *
      * @return the number of lines read by this reader
      */
     public long getNumberOfLinesRead() {
@@ -123,7 +128,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Returns the number of packets read by this reader.
-     * 
+     *
      * @return the number of packets read by this reader
      */
     public long getNumberOfPacketsRead() {
@@ -132,7 +137,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Override this method to handle {@link Abk} sentences.
-     * 
+     *
      * @param abk
      *            the sentence to handle
      */
@@ -140,7 +145,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Handle a received line
-     * 
+     *
      * @param line
      * @return
      */
@@ -184,7 +189,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Reads the next AisPacket. Or returns null if the end of the stream has been reached
-     * 
+     *
      * @throws IOException
      *             if an exception occurred while reading the packet
      */
@@ -254,7 +259,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Returns a AIS packet stream running in a new thread.
-     * 
+     *
      * @return a AIS packet stream running in a new thread
      */
     public AisPacketStream stream() {
@@ -263,7 +268,7 @@ public class AisPacketReader implements AutoCloseable {
 
     /**
      * Returns a AIS packet stream using the specified executor.
-     * 
+     *
      * @return a AIS packet stream using the specified executor
      */
     public AisPacketStream stream(Executor e) {
@@ -296,7 +301,7 @@ public class AisPacketReader implements AutoCloseable {
     /**
      * Creates a new AIS packet reader from the specified file. If the specified file has a '.zip' suffix. The file is
      * automatically treated as a zip file.
-     * 
+     *
      * @param p
      *            the path of the file
      * @param throwExceptions
@@ -315,6 +320,7 @@ public class AisPacketReader implements AutoCloseable {
 
         return new AisPacketReader(zis, throwExceptions) {
             ZipEntry e;
+
             boolean isFirst = true;
 
             /** {@inheritDoc} */
@@ -335,5 +341,50 @@ public class AisPacketReader implements AutoCloseable {
                 return p;
             }
         };
+    }
+
+    /**
+     * Writes the reminder of packets to the output stream using the specified sink
+     *
+     * @param os
+     *            the output stream to write to
+     * @param sink
+     *            the sink to write to
+     * @throws IOException
+     *             if the a packet could not be written
+     */
+    public void writeTo(OutputStream os, OutputStreamSink<AisPacket> sink) throws IOException {
+        sink.header(os);
+        long count = 0;
+        AisPacket p = readPacket();
+        while (p != null) {
+            count++;
+            sink.process(os, p, count);
+            p = readPacket();
+        }
+        sink.footer(os, count);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Iterator<AisPacket> iterator() {
+        return new IteratorImpl();
+    }
+
+    class IteratorImpl extends AbstractIterator<AisPacket> {
+
+        /** {@inheritDoc} */
+        @Override
+        protected AisPacket computeNext() {
+            try {
+                AisPacket p = readPacket();
+                if (p == null) {
+                    super.endOfData();
+                }
+                return p;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
