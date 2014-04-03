@@ -615,9 +615,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getImo(int mmsi) {
         int imo = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            imo = (int) ((AisMessage5) staticPackets[0].tryGetAisMessage()).getImo();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                imo = (int) ((AisMessage5) staticPackets[0].tryGetAisMessage()).getImo();
+            }
         }
         return imo;
     }
@@ -630,9 +632,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getSog(int mmsi) {
         float sog = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            sog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getSog() / 10.0);
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                sog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getSog()/10.0);
+            }
         }
         return sog;
     }
@@ -645,9 +649,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getCog(int mmsi) {
         float cog = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            cog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getCog() / 10.0);
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                cog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getCog()/10.0);
+            }
         }
         return cog;
     }
@@ -660,9 +666,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getHdg(int mmsi) {
         int hdg = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            hdg = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getTrueHeading();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                hdg = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getTrueHeading();
+            }
         }
         return hdg;
     }
@@ -675,9 +683,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getDraught(int mmsi) {
         float draught = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            draught = (float) (((AisMessage5) staticPackets[0].tryGetAisMessage()).getDraught() / 10.0);
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                draught = (float) (((AisMessage5) staticPackets[0].tryGetAisMessage()).getDraught()/10.0);
+            }
         }
         return draught;
     }
@@ -690,9 +700,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getLatitude(int mmsi) {
         float lat = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            lat = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLatitudeDouble();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                lat = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLatitudeDouble();
+            }
         }
         return lat;
     }
@@ -705,9 +717,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getLongitude(int mmsi) {
         float lon = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            lon = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLongitudeDouble();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                lon = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLongitudeDouble();
+            }
         }
         return lon;
     }
@@ -720,9 +734,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private AisPosition getPosition(int mmsi) {
         AisPosition pos = null;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            pos = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                pos = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos();
+            }
         }
         return pos;
     }
@@ -735,9 +751,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getShiptype(int mmsi) {
         int shiptype = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            shiptype = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getShipType();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                shiptype = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getShipType();
+            }
         }
         return shiptype;
     }
@@ -750,9 +768,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getNavstat(int mmsi) {
         int navstat = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            navstat = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getNavStatus();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                navstat = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getNavStatus();
+            }
         }
         return navstat;
     }
@@ -765,9 +785,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private String getName(int mmsi) {
         String name = null;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            name = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getName();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                name = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getName();
+            }
         }
         return name;
     }
@@ -780,9 +802,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private String getCallsign(int mmsi) {
         String cs = null;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            cs = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getCallsign();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                cs = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getCallsign();
+            }
         }
         return cs;
     }
