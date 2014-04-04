@@ -84,14 +84,14 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void imoCompare() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.imo = 1234567");
-        assertFilterPredicate(true,  filter1, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(false, filter1, pkgStatic); // Reject, because this packet contains imo = 9596428
+        assertFilterPredicate(false, filter1, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(false, filter1, pkgStatic);    // Reject, because this packet contains imo = 9596428
         assertFilterPredicate(false, filter1, pkgPosition1); // Still reject, because second packet learned us that this mmsi -> imo 9596428
         assertFilterPredicate(false, filter1, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> imo 9596428
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.imo = " + ((AisMessage5) pkgStatic.tryGetAisMessage()).getImo());
-        assertFilterPredicate(true,  filter2, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(true,  filter2, pkgStatic); // Accept, because this packet contains imo = 9596428
+        assertFilterPredicate(false, filter2, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(true,  filter2, pkgStatic);    // Accept, because this packet contains imo = 9596428
         assertFilterPredicate(true,  filter2, pkgPosition1); // Still accept, because second packet learned us that this mmsi -> imo 9596428
         assertFilterPredicate(true,  filter2, pkgPosition2); // Still accept, because second packet learned us that this mmsi -> imo 9596428
     }
@@ -99,41 +99,41 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void imoInRange() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.imo = 1000..1999");
-        assertFilterPredicate(true,  filter1, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(false, filter1, pkgStatic); // Reject, because this packet contains imo = 9596428 out of range
+        assertFilterPredicate(false, filter1, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(false, filter1, pkgStatic);    // Reject, because this packet contains imo = 9596428 out of range
         assertFilterPredicate(false, filter1, pkgPosition1); // Still reject, because second packet learned us that this mmsi -> imo out of range
         assertFilterPredicate(false, filter1, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> imo out of range
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.imo = 9596420..9596430");
-        assertFilterPredicate(true,  filter2, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(true,  filter2, pkgStatic); // Accept, because this packet contains imo = 9596428 in range
-        assertFilterPredicate(true,  filter2, pkgPosition1); // Accept, because second packet learned us that this mmsi -> imo in range
-        assertFilterPredicate(true,  filter2, pkgPosition2); // Accept, because second packet learned us that this mmsi -> imo in range
+        assertFilterPredicate(false, filter2, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(true, filter2, pkgStatic);     // Accept, because this packet contains imo = 9596428 in range
+        assertFilterPredicate(true, filter2, pkgPosition1);  // Accept, because second packet learned us that this mmsi -> imo in range
+        assertFilterPredicate(true, filter2, pkgPosition2);  // Accept, because second packet learned us that this mmsi -> imo in range
     }
 
     @Test
     public void imoInList() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.imo = 1234567, 9596429, 9596430");
-        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because this packet contains imo = 9596428 out of range
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because this packet contains imo = 9596428 out of range
         assertFilterPredicate(false, filter, pkgPosition1); // Still reject, because second packet learned us that this mmsi -> imo out of range
         assertFilterPredicate(false, filter, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> imo out of range
 
         filter = parseExpressionFilter("t.imo != 1234567, 9596429, 9596430");
-        assertFilterPredicate(false,  filter, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(true, filter, pkgStatic); // Reject, because this packet contains imo = 9596428 out of range
+        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(true, filter, pkgStatic);    // Reject, because this packet contains imo = 9596428 out of range
         assertFilterPredicate(true, filter, pkgPosition1); // Still reject, because second packet learned us that this mmsi -> imo out of range
         assertFilterPredicate(true, filter, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> imo out of range
 
         filter = parseExpressionFilter("t.imo = 1234567, 9596428, 9596429, 9596430");
-        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(true,  filter, pkgStatic); // Accept, because this packet contains imo = 9596428 in range
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(true,  filter, pkgStatic);    // Accept, because this packet contains imo = 9596428 in range
         assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because second packet learned us that this mmsi -> imo in range
         assertFilterPredicate(true,  filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> imo in range
 
         filter = parseExpressionFilter("t.imo != 1234567, 9596428, 9596429, 9596430");
-        assertFilterPredicate(false,  filter, pkgPosition1); // Accept, because we know nothing of this target's imo yet
-        assertFilterPredicate(false,  filter, pkgStatic); // Accept, because this packet contains imo = 9596428 in range
+        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(false,  filter, pkgStatic);    // Accept, because this packet contains imo = 9596428 in range
         assertFilterPredicate(false,  filter, pkgPosition1); // Accept, because second packet learned us that this mmsi -> imo in range
         assertFilterPredicate(false,  filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> imo in range
     }
@@ -143,37 +143,37 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void shipTypeCompare() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.type = 59");
-        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because this packet contains shiptype = 60
         assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type = 60");
-        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.type != 60");
-        assertFilterPredicate(true,  filter, pkgPosition1);  // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(false, filter, pkgStatic);  // Reject, because this packet contains shiptype = 60
-        assertFilterPredicate(false, filter, pkgPosition1);  // Reject, because second packet learned us that this mmsi -> shiptype 60
-        assertFilterPredicate(false, filter, pkgPosition2);  // Reject, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type >= 60");
-        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.type < 70");
-        assertFilterPredicate(true, filter, pkgPosition1); // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(true, filter, pkgStatic);  // Accept, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(true, filter, pkgStatic);     // Accept, because this packet contains shiptype = 60
         assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(true, filter, pkgPosition2);  // Accept, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type = passenger");
-        assertFilterPredicate(true, filter, pkgPosition1); // Accept, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgPosition2);
@@ -188,10 +188,10 @@ public class AisPacketFiltersStatefulTest {
         */
 
         filter = parseExpressionFilter("t.type = tanker");
-        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because this packet contains shiptype = 60 ()
-        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
-        assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(false,  filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because this packet contains shiptype = 60 ()
+        assertFilterPredicate(false, filter, pkgPosition1);  // Reject, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(false, filter, pkgPosition2);  // Reject, because second packet learned us that this mmsi -> shiptype 60
 
         /*
         TODO
@@ -206,44 +206,44 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void shipTypeInListOrRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.type = 59..61");
-        assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(true, filter, pkgStatic); // Accept, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(true, filter, pkgStatic);    // Accept, because this packet contains shiptype = 60
         assertFilterPredicate(true, filter, pkgPosition1); // Accept, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(true, filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type != 55..61");
-        assertFilterPredicate(false /* TODO true */, filter, pkgPosition1);  // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because this packet contains shiptype = 60
+        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because this packet contains shiptype = 60
         assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type = 59,60,61");
-        assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(true, filter, pkgStatic); // Accept, because this packet contains shiptype = 60
-        assertFilterPredicate(true, filter, pkgPosition1); // Accept, because second packet learned us that this mmsi -> shiptype 60
-        assertFilterPredicate(true, filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(true, filter, pkgStatic);     // Accept, because this packet contains shiptype = 60
+        assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(true, filter, pkgPosition2);  // Accept, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type != 59,60,61");
-        assertFilterPredicate(false /* TODO true */,  filter, pkgPosition1);  // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because this packet contains shiptype = 60
-        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
-        assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1);  // Reject, because second packet learned us that this mmsi -> shiptype 60
+        assertFilterPredicate(false, filter, pkgPosition2);  // Reject, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type = 59,43,61");
-        assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because this packet contains shiptype = 60
         assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type = tanker, passenger, cargo");
-        assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(true, filter, pkgStatic);  // Accept, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(true, filter, pkgStatic);     // Accept, because this packet contains shiptype = 60
         assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(true, filter, pkgPosition2);  // Accept, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type = tanker, cargo");
-        assertFilterPredicate(true, filter, pkgPosition1); // Accept, because we know nothing of this target's shiptype yet
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because this packet contains shiptype = 60
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because this packet contains shiptype = 60
         assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
     }
@@ -253,46 +253,46 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void navstatCompare() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.navstat = 1");
-        assertFilterPredicate(true,  filter, pkgStatic); // Accept, because we know nothing of this target's navstat yet
+        assertFilterPredicate(false,  filter, pkgStatic);   // Reject, because we know nothing of this target's navstat yet
         assertFilterPredicate(false, filter, pkgPosition1); // Reject, because this packet contains navstat = 0
-        assertFilterPredicate(false, filter, pkgStatic); // Reject, because second packet learned us that this mmsi -> navstat 0
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because second packet learned us that this mmsi -> navstat 0
         assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> navstat 0
 
         filter = parseExpressionFilter("t.navstat = 0");
-        assertFilterPredicate(true,  filter, pkgStatic); // Accept, because we know nothing of this target's navstat yet
+        assertFilterPredicate(false, filter, pkgStatic); // Reject, because we know nothing of this target's navstat yet
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat != 0");
-        assertFilterPredicate(true,  filter, pkgStatic);  // Accept, because we know nothing of this target's navstat yet
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because we know nothing of this target's navstat yet
         assertFilterPredicate(false, filter, pkgPosition1);  // Reject, because this packet contains navstat = 0
-        assertFilterPredicate(false, filter, pkgStatic);  // Reject, because second packet learned us that this mmsi -> navstat 0
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because second packet learned us that this mmsi -> navstat 0
         assertFilterPredicate(false, filter, pkgPosition2);  // Reject, because second packet learned us that this mmsi -> navstat 0
 
         filter = parseExpressionFilter("t.navstat >= 0");
-        assertFilterPredicate(true,  filter, pkgStatic); // Accept, because we know nothing of this target's navstat yet
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because we know nothing of this target's navstat yet
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat < 3");
-        assertFilterPredicate(true, filter, pkgStatic); // Accept, because we know nothing of this target's navstat yet
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because we know nothing of this target's navstat yet
         assertFilterPredicate(true, filter, pkgPosition1);  // Accept, because this packet contains navstat = 0
-        assertFilterPredicate(true, filter, pkgStatic);  // Accept, because second packet learned us that this mmsi -> navstat 0
+        assertFilterPredicate(true, filter, pkgStatic);     // Accept, because second packet learned us that this mmsi -> navstat 0
         assertFilterPredicate(true, filter, pkgPosition2);  // Accept, because second packet learned us that this mmsi -> navstat 0
 
-        filter = parseExpressionFilter("t.navstat = at_anchor");
-        assertFilterPredicate(true, filter, pkgStatic); // Accept, because we know nothing of this target's navstat yet
-        assertFilterPredicate(false, filter, pkgPosition1);
-        assertFilterPredicate(false, filter, pkgStatic);
-        assertFilterPredicate(false, filter, pkgPosition2);
-
         filter = parseExpressionFilter("t.navstat = UNDER_WAY_USING_ENGINE");
-        assertFilterPredicate(true, filter, pkgStatic); // Accept, because we know nothing of this target's navstat yet
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because we know nothing of this target's navstat yet
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition2);
+
+        filter = parseExpressionFilter("t.navstat = at_anchor");
+        assertFilterPredicate(false, filter, pkgStatic);     // Reject, because we know nothing of this target's navstat yet
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgPosition2);
 
         /*
         TODO
@@ -316,43 +316,43 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void navstatInListOrRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.navstat = 0..2");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat != 0..2");
-        assertFilterPredicate(false /* TODO true */ , filter, pkgStatic);
+        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat = 0,1,2");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat != 0,1,2");
-        assertFilterPredicate(false /* TODO true */, filter, pkgStatic);
+        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
         assertFilterPredicate(false,  filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat = 1,2,3");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat = UNDER_WAY_USING_ENGINE, at_anchor, moored");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat = at_anchor, moored");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
@@ -363,37 +363,37 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void sogCompare() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.sog > 12");
-        assertFilterPredicate(true,  filter1, pkgStatic); // Accept, because we know nothing of this target's sog yet
+        assertFilterPredicate(false,  filter1, pkgStatic);   // Reject, because we know nothing of this target's sog yet
         assertFilterPredicate(false, filter1, pkgPosition1); // Reject, because this packet contains sog = 11.6
         assertFilterPredicate(false, filter1, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> sog = 11.6
-        assertFilterPredicate(false, filter1, pkgStatic); // Still reject, because second packet learned us that this mmsi -> sog = 11.6
+        assertFilterPredicate(false, filter1, pkgStatic);    // Still reject, because second packet learned us that this mmsi -> sog = 11.6
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.sog >= 11.5");
-        assertFilterPredicate(true,  filter2, pkgStatic); // Accept, because we know nothing of this target's sog yet
+        assertFilterPredicate(false, filter2, pkgStatic);    // Reject, because we know nothing of this target's sog yet
         assertFilterPredicate(true,  filter2, pkgPosition1); // Accept, because this packet contains sog = 11.6
         assertFilterPredicate(true,  filter2, pkgPosition2); // Still accept, because second packet learned us that this mmsi -> sog = 11.6
-        assertFilterPredicate(true,  filter2, pkgStatic); // Still accept, because second packet learned us that this mmsi -> sog = 11.6
+        assertFilterPredicate(true,  filter2, pkgStatic);    // Still accept, because second packet learned us that this mmsi -> sog = 11.6
     }
 
     @Test
     public void sogInRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.sog = 11.5..11.9");
-        assertFilterPredicate(true,  filter, pkgStatic); // Accept, because we know nothing of this target's sog yet
-        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because this packet contains sog = 9596428 in range
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because we know nothing of this target's sog yet
+        assertFilterPredicate(true,  filter, pkgPosition1); // Accept, because this packet contains sog = 11.6 in range
         assertFilterPredicate(true,  filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> sog in range
-        assertFilterPredicate(true,  filter, pkgStatic); // Accept, because second packet learned us that this mmsi -> sog in range
-
-        filter = parseExpressionFilter("t.sog != 11.5..11.9");
-        assertFilterPredicate(false /* TODO true */,  filter, pkgStatic); // Accept, because we know nothing of this target's sog yet
-        assertFilterPredicate(false,  filter, pkgPosition1); // Accept, because this packet contains sog = 9596428 in range
-        assertFilterPredicate(false,  filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> sog in range
-        assertFilterPredicate(false,  filter, pkgStatic); // Accept, because second packet learned us that this mmsi -> sog in range
+        assertFilterPredicate(true,  filter, pkgStatic);    // Accept, because second packet learned us that this mmsi -> sog in range
 
         filter = parseExpressionFilter("t.sog = 12.5..20.0");
-        assertFilterPredicate(true,  filter, pkgStatic); // Accept, because we know nothing of this target's sog yet
-        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because this packet contains sog = 9596428 out of range
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because we know nothing of this target's sog yet
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because this packet contains sog = 11.6 out of range
         assertFilterPredicate(false, filter, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> sog out of range
-        assertFilterPredicate(false, filter, pkgStatic); // Still reject, because second packet learned us that this mmsi -> sog out of range
+        assertFilterPredicate(false, filter, pkgStatic);    // Still reject, because second packet learned us that this mmsi -> sog out of range
+
+        filter = parseExpressionFilter("t.sog != 11.5..11.9");
+        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);    // Reject, because we know nothing of this target's sog yet
+        assertFilterPredicate(false, filter, pkgPosition1); // Reject, because this packet contains sog = 11.6 in range
+        assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> sog in range
+        assertFilterPredicate(false, filter, pkgStatic);    // Reject, because second packet learned us that this mmsi -> sog in range
     }
 
     // --- COG
@@ -401,13 +401,13 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void cogCompare() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.cog > 120.9");
-        assertFilterPredicate(true,  filter1, pkgStatic);
+        assertFilterPredicate(false, filter1, pkgStatic);
         assertFilterPredicate(false, filter1, pkgPosition1);
         assertFilterPredicate(false, filter1, pkgPosition2);
         assertFilterPredicate(false, filter1, pkgStatic);
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.cog >= 120.0");
-        assertFilterPredicate(true,  filter2, pkgStatic);
+        assertFilterPredicate(false, filter2, pkgStatic);
         assertFilterPredicate(true,  filter2, pkgPosition1);
         assertFilterPredicate(true,  filter2, pkgPosition2);
         assertFilterPredicate(true,  filter2, pkgStatic);
@@ -416,19 +416,19 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void cogInRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.cog = 120.0..120.9");
-        assertFilterPredicate(true,  filter, pkgStatic);
-        assertFilterPredicate(true,  filter, pkgPosition1);
-        assertFilterPredicate(true,  filter, pkgPosition2);
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
+        assertFilterPredicate(true, filter, pkgPosition1);
+        assertFilterPredicate(true, filter, pkgPosition2);
+        assertFilterPredicate(true, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.cog != 120.0..120.9");
-        assertFilterPredicate(false /* TODO true */,  filter, pkgStatic);
-        assertFilterPredicate(false,  filter, pkgPosition1);
-        assertFilterPredicate(false,  filter, pkgPosition2);
-        assertFilterPredicate(false,  filter, pkgStatic);
+        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition2);
+        assertFilterPredicate(false, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.cog = 180..190");
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgPosition2);
         assertFilterPredicate(false, filter, pkgStatic);
@@ -439,13 +439,13 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void hdgCompare() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.hdg > 180");
-        assertFilterPredicate(true,  filter1, pkgStatic);
-        assertFilterPredicate(false, filter1, pkgPosition1);
-        assertFilterPredicate(false, filter1, pkgPosition2);
-        assertFilterPredicate(false, filter1, pkgStatic);
+        assertFilterPredicate(false, filter1, pkgStatic);    // Unknown hgd -> blocked
+        assertFilterPredicate(false, filter1, pkgPosition1); // Known, non-matching hgd -> blocked
+        assertFilterPredicate(false, filter1, pkgPosition2); // Known, non-matching hgd -> blocked
+        assertFilterPredicate(false, filter1, pkgStatic);    // Known, non-matching hgd -> blocked
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.hdg >= 120");
-        assertFilterPredicate(true,  filter2, pkgStatic);
+        assertFilterPredicate(false, filter2, pkgStatic);    // Unknown hgd -> blocked
         assertFilterPredicate(true,  filter2, pkgPosition1);
         assertFilterPredicate(true,  filter2, pkgPosition2);
         assertFilterPredicate(true,  filter2, pkgStatic);
@@ -454,19 +454,19 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void hdgInRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.hdg = 120..130");
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(true,  filter, pkgPosition1);
         assertFilterPredicate(true,  filter, pkgPosition2);
         assertFilterPredicate(true,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.hdg != 120..130");
-        assertFilterPredicate(false /* TODO true */,  filter, pkgStatic);
+        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgStatic);    // hdg unknown
         assertFilterPredicate(false,  filter, pkgPosition1);
         assertFilterPredicate(false,  filter, pkgPosition2);
         assertFilterPredicate(false,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.hdg = 1..99");
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgPosition2);
         assertFilterPredicate(false, filter, pkgStatic);
@@ -477,13 +477,13 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void draughtCompare() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.draught > 3.5");
-        assertFilterPredicate(true, filter1,  pkgPosition1);
+        assertFilterPredicate(false, filter1, pkgPosition1); // Unknown draught
         assertFilterPredicate(false, filter1, pkgStatic);
         assertFilterPredicate(false, filter1, pkgPosition2);
         assertFilterPredicate(false, filter1, pkgStatic);
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.draught < 3.5");
-        assertFilterPredicate(true,  filter2, pkgPosition1);
+        assertFilterPredicate(false, filter2, pkgPosition1); // Unknown draught
         assertFilterPredicate(true,  filter2, pkgStatic);
         assertFilterPredicate(true,  filter2, pkgPosition2);
         assertFilterPredicate(true,  filter2, pkgStatic);
@@ -492,19 +492,19 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void draugtInRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.draught = 2.5..3.5");
-        assertFilterPredicate(true,  filter, pkgPosition1);
-        assertFilterPredicate(true,  filter, pkgStatic);
-        assertFilterPredicate(true,  filter, pkgPosition2);
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(true, filter, pkgPosition2);
+        assertFilterPredicate(true, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.draught != 2.5..3.5");
-        assertFilterPredicate(false /* TODO true */,  filter, pkgStatic);
-        assertFilterPredicate(false,  filter, pkgPosition1);
-        assertFilterPredicate(false,  filter, pkgPosition2);
-        assertFilterPredicate(false,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition2);
+        assertFilterPredicate(false, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.draught = 5.0..9.9");
-        assertFilterPredicate(true,  filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
         assertFilterPredicate(false, filter, pkgStatic);
@@ -515,13 +515,13 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void latCompare() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.lat > 54.90");
-        assertFilterPredicate(true,  filter1, pkgStatic);
+        assertFilterPredicate(false,  filter1, pkgStatic);
         assertFilterPredicate(false, filter1, pkgPosition1);
         assertFilterPredicate(false, filter1, pkgPosition2);
         assertFilterPredicate(false, filter1, pkgStatic);
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.lat >= 54.88");
-        assertFilterPredicate(true,  filter2, pkgStatic);
+        assertFilterPredicate(false,  filter2, pkgStatic);
         assertFilterPredicate(true,  filter2, pkgPosition1);
         assertFilterPredicate(true,  filter2, pkgPosition2);
         assertFilterPredicate(true,  filter2, pkgStatic);
@@ -530,19 +530,19 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void latInRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.lat = 54.88..55.00");
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(true,  filter, pkgPosition1);  // 54.898133333333334
         assertFilterPredicate(true,  filter, pkgPosition2);
         assertFilterPredicate(true,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.lat != 54.88..55.00");
-        assertFilterPredicate(false /* TODO true */,  filter, pkgStatic);
+        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgStatic);
         assertFilterPredicate(false,  filter, pkgPosition1);
         assertFilterPredicate(false,  filter, pkgPosition2);
         assertFilterPredicate(false,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.lat = -10.0..20.0");
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgPosition2);
         assertFilterPredicate(false, filter, pkgStatic);
@@ -553,13 +553,13 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void lonCompare() {
         Predicate<AisPacket> filter1 = parseExpressionFilter("t.lon > 11.0");
-        assertFilterPredicate(true,  filter1, pkgStatic);
-        assertFilterPredicate(false, filter1, pkgPosition1);
+        assertFilterPredicate(false, filter1, pkgStatic);    // Unknown lon
+        assertFilterPredicate(false, filter1, pkgPosition1); // 10.920783042907715
         assertFilterPredicate(false, filter1, pkgPosition2);
         assertFilterPredicate(false, filter1, pkgStatic);
 
         Predicate<AisPacket> filter2 = parseExpressionFilter("t.lon >= 10.8");
-        assertFilterPredicate(true,  filter2, pkgStatic);
+        assertFilterPredicate(false, filter2, pkgStatic);    // Unknown lon
         assertFilterPredicate(true,  filter2, pkgPosition1);
         assertFilterPredicate(true,  filter2, pkgPosition2);
         assertFilterPredicate(true,  filter2, pkgStatic);
@@ -568,19 +568,19 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void lonInRange() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.lon = 10.0..10.95");
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);    // Unknown lon
         assertFilterPredicate(true,  filter, pkgPosition1); // 10.920783042907715
         assertFilterPredicate(true,  filter, pkgPosition2);
         assertFilterPredicate(true,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.lon != 10.0..10.95");
-        assertFilterPredicate(false /* TODO true */,  filter, pkgStatic);
-        assertFilterPredicate(false,  filter, pkgPosition1);
-        assertFilterPredicate(false,  filter, pkgPosition2);
-        assertFilterPredicate(false,  filter, pkgStatic);
+        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition2);
+        assertFilterPredicate(false, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.lon = 0..1");
-        assertFilterPredicate(true,  filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgPosition2);
         assertFilterPredicate(false, filter, pkgStatic);
@@ -591,9 +591,9 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void nameCompare() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.name = LANGELAND");
-        assertFilterPredicate(true,  filter, pkgPosition1);
-        assertFilterPredicate(true,  filter, pkgStatic);
-        assertFilterPredicate(true,  filter, pkgPosition2);
+        assertFilterPredicate(false, filter, pkgPosition1); // Unknown name; therefore blocked
+        assertFilterPredicate(true,  filter, pkgStatic);    // Matching name; therefore passing
+        assertFilterPredicate(true,  filter, pkgPosition2); // Matching name; therefore passing
 
         /* TODO
         filter = parseExpressionFilter("t.name not like L?NGELAND");
@@ -603,22 +603,22 @@ public class AisPacketFiltersStatefulTest {
         */
 
         filter = parseExpressionFilter("t.name ~ L?NGELAND");
-        assertFilterPredicate(true,  filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(true,  filter, pkgStatic);
         assertFilterPredicate(true,  filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.name ~ L?WEIRDO");
-        assertFilterPredicate(true,  filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.name LIKE L*D");
-        assertFilterPredicate(true,  filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(true,  filter, pkgStatic);
         assertFilterPredicate(true,  filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.name LIKE L*X");
-        assertFilterPredicate(true,  filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
 
@@ -629,27 +629,27 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void callsignCompare() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.cs = OZCU");
-        assertFilterPredicate(true,  filter, pkgPosition1);
-        assertFilterPredicate(true,  filter, pkgStatic);
-        assertFilterPredicate(true,  filter, pkgPosition2);
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.cs ~ O*U");
-        assertFilterPredicate(true,  filter, pkgPosition1);
-        assertFilterPredicate(true,  filter, pkgStatic);
-        assertFilterPredicate(true,  filter, pkgPosition2);
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.cs ~ OZ?U");
-        assertFilterPredicate(true,  filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(true, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.cs LIKE O*X");
-        assertFilterPredicate(true,  filter, pkgPosition1);
-        assertFilterPredicate(false,  filter, pkgStatic);
-        assertFilterPredicate(false,  filter, pkgPosition2);
+        assertFilterPredicate(false, filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.cs LIKE Z*");
-        assertFilterPredicate(true,  filter, pkgPosition1);
+        assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
     }
@@ -659,13 +659,13 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void positionWithinBbox() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.pos within bbox(54.5, 10.5, 55.0, 11.0)");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);  // 54.898133333333334
         assertFilterPredicate(true, filter, pkgPosition2);  // 10.920783042907715
         assertFilterPredicate(true, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.pos within bbox(54.0, 10.0, 54.5, 10.5)");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);  // 54.898133333333334
         assertFilterPredicate(false, filter, pkgPosition2);  // 10.920783042907715
         assertFilterPredicate(false, filter, pkgStatic);
@@ -674,23 +674,39 @@ public class AisPacketFiltersStatefulTest {
     @Test
     public void positionWithinCircle() {
         Predicate<AisPacket> filter = parseExpressionFilter("t.pos within circle(54.898, 10.921, 1000)");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(true, filter, pkgPosition1);  // 54.898133333333334
         assertFilterPredicate(true, filter, pkgPosition2);  // 10.920783042907715
         assertFilterPredicate(true, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.pos within circle(54.0, 10.0, 1000)");
-        assertFilterPredicate(true, filter, pkgStatic);
+        assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);  // 54.898133333333334
         assertFilterPredicate(false, filter, pkgPosition2);  // 10.920783042907715
         assertFilterPredicate(false, filter, pkgStatic);
     }
 
-     /*
+    // ---
 
-    |   TGT_POSITION WITHIN (circle|bbox)                       # targetPositionInside
+    @Test
+    public void testMessageExpressionFilterBlocksMessagesNotCarryingTheFilteredTypeOfInformation() {
+        // Position reports
+        assertFilterPredicate(false, parseExpressionFilter("t.sog >= 0"), pkgStatic);
+        assertFilterPredicate(false, parseExpressionFilter("t.cog >= 0"), pkgStatic);
+        assertFilterPredicate(false, parseExpressionFilter("t.hdg >= 0"), pkgStatic);
+        assertFilterPredicate(false, parseExpressionFilter("t.lat >= 0"), pkgStatic);
+        assertFilterPredicate(false, parseExpressionFilter("t.lon >= 0"), pkgStatic);
+        assertFilterPredicate(false, parseExpressionFilter("t.navstat >= 0"), pkgStatic);
+        assertFilterPredicate(false, parseExpressionFilter("t.pos within circle(56,11,250000)"), pkgStatic);
+        assertFilterPredicate(false, parseExpressionFilter("t.pos within bbox(50,09,60,12)"), pkgStatic);
 
-     */
+        // Static messages
+        assertFilterPredicate(false, parseExpressionFilter("t.draught > 0"), pkgPosition1);
+        assertFilterPredicate(false, parseExpressionFilter("t.imo > 0"), pkgPosition1);
+        assertFilterPredicate(false, parseExpressionFilter("t.type > 0"), pkgPosition1);
+        assertFilterPredicate(false, parseExpressionFilter("t.name like *"), pkgPosition1);
+        assertFilterPredicate(false, parseExpressionFilter("t.cs like *"), pkgPosition1);
+    }
 
     // ---
 

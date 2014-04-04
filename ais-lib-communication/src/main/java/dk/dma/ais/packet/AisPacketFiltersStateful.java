@@ -69,7 +69,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final int lhsImo = getImo(mmsi); // Extract IMO no. - if we know it
-                return lhsImo < 0 ? true : compare(lhsImo, imo, operator);
+                return lhsImo < 0 ? false : compare(lhsImo, imo, operator);
             }
             public String toString() {
                 return "imo = " + imo;
@@ -87,7 +87,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final int imo = getImo(mmsi);    // Extract IMO no. - if we know it
-                return imo < 0 ? true : inRange(min, max, imo);
+                return imo < 0 ? false : inRange(min, max, imo);
             }
             public String toString() {
                 return "imo in " + min + ".." + max;
@@ -107,7 +107,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final int imo = getImo(mmsi);    // Extract IMO no. - if we know it
-                return imo < 0 ? true : Arrays.binarySearch(list, imo) >= 0;
+                return imo < 0 ? false : Arrays.binarySearch(list, imo) >= 0;
             }
             public String toString() {
                 return "imo in " + skipBrackets(Arrays.toString(list));
@@ -131,7 +131,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);                    // Update state
                 final int mmsi = getMmsi(p);               // Get MMSI in question
                 final int lhsShiptype = getShiptype(mmsi); // Extract shiptype - if we know it
-                return lhsShiptype < 0 ? true : compare(lhsShiptype, shiptype, operator);
+                return lhsShiptype < 0 ? false : compare(lhsShiptype, shiptype, operator);
             }
             public String toString() {
                 return "shiptype = " + shiptype;
@@ -149,7 +149,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final int shiptype = getShiptype(mmsi); // Extract IMO no. - if we know it
-                return shiptype < 0 ? true : inRange(min, max, shiptype);
+                return shiptype < 0 ? false : inRange(min, max, shiptype);
             }
             public String toString() {
                 return "imo in " + min + ".." + max;
@@ -169,7 +169,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);                 // Update state
                 final int mmsi = getMmsi(p);            // Get MMSI in question
                 final int shiptype = getShiptype(mmsi); // Extract shiptype no. - if we know it
-                return shiptype < 0 ? true : Arrays.binarySearch(list, shiptype) >= 0;
+                return shiptype < 0 ? false : Arrays.binarySearch(list, shiptype) >= 0;
             }
             public String toString() {
                 return "shiptype in " + skipBrackets(Arrays.toString(list));
@@ -193,7 +193,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);                    // Update state
                 final int mmsi = getMmsi(p);               // Get MMSI in question
                 final int lhsNavstat = getNavstat(mmsi); // Extract navstat - if we know it
-                return lhsNavstat < 0 ? true : compare(lhsNavstat, navstat, operator);
+                return lhsNavstat < 0 ? false : compare(lhsNavstat, navstat, operator);
             }
             public String toString() {
                 return "navstat = " + navstat;
@@ -211,7 +211,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final int navstat = getNavstat(mmsi); // Extract IMO no. - if we know it
-                return navstat < 0 ? true : inRange(min, max, navstat);
+                return navstat < 0 ? false : inRange(min, max, navstat);
             }
             public String toString() {
                 return "imo in " + min + ".." + max;
@@ -231,7 +231,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);                 // Update state
                 final int mmsi = getMmsi(p);            // Get MMSI in question
                 final int navstat = getNavstat(mmsi); // Extract navstat no. - if we know it
-                return navstat < 0 ? true : Arrays.binarySearch(list, navstat) >= 0;
+                return navstat < 0 ? false : Arrays.binarySearch(list, navstat) >= 0;
             }
             public String toString() {
                 return "navstat in " + skipBrackets(Arrays.toString(list));
@@ -255,7 +255,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final float lhsSog = getSog(mmsi); // Extract sog - if we know it
-                return lhsSog != lhsSog /* NaN */ ? true : compare(lhsSog, rhsSog, operator);
+                return lhsSog != lhsSog /* NaN */ ? false : compare(lhsSog, rhsSog, operator);
             }
             public String toString() {
                 return "sog " + operator + " " + rhsSog;
@@ -273,7 +273,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final float lhsSog = getSog(mmsi);    // Extract sog - if we know it
-                return lhsSog != lhsSog /* NaN */ ? true : inRange(min, max, lhsSog);
+                return lhsSog != lhsSog /* NaN */ ? false : inRange(min, max, lhsSog);
             }
             public String toString() {
                 return "sog in " + min + ".." + max;
@@ -297,7 +297,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final float lhsCog = getCog(mmsi); // Extract cog - if we know it
-                return lhsCog != lhsCog /* NaN */ ? true : compare(lhsCog, rhsCog, operator);
+                return lhsCog != lhsCog /* NaN */ ? false : compare(lhsCog, rhsCog, operator);
             }
             public String toString() {
                 return "cog " + operator + " " + rhsCog;
@@ -315,7 +315,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final float lhsCog = getCog(mmsi);    // Extract cog - if we know it
-                return lhsCog != lhsCog /* NaN */ ? true : inRange(min, max, lhsCog);
+                return lhsCog != lhsCog /* NaN */ ? false : inRange(min, max, lhsCog);
             }
             public String toString() {
                 return "cog in " + min + ".." + max;
@@ -339,7 +339,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final int lhsHdg = getHdg(mmsi); // Extract hdg - if we know it
-                return lhsHdg < 0 ? true : compare(lhsHdg, rhsHdg, operator);
+                return lhsHdg < 0 ? false : compare(lhsHdg, rhsHdg, operator);
             }
             public String toString() {
                 return "hdg " + operator + " " + rhsHdg;
@@ -357,7 +357,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final int lhsHdg = getHdg(mmsi);    // Extract cog - if we know it
-                return lhsHdg < 0 ? true : inRange(min, max, lhsHdg);
+                return lhsHdg < 0 ? false : inRange(min, max, lhsHdg);
             }
             public String toString() {
                 return "hdg in " + min + ".." + max;
@@ -381,7 +381,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final float lhsDraught = getDraught(mmsi); // Extract draught - if we know it
-                return lhsDraught != lhsDraught /* NaN */ ? true : compare(lhsDraught, rhsDraught, operator);
+                return lhsDraught != lhsDraught /* NaN */ ? false : compare(lhsDraught, rhsDraught, operator);
             }
             public String toString() {
                 return "draught " + operator + " " + rhsDraught;
@@ -399,7 +399,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final float lhsDraught = getDraught(mmsi);    // Extract cog - if we know it
-                return lhsDraught != lhsDraught /* NaN */ ? true : inRange(min, max, lhsDraught);
+                return lhsDraught != lhsDraught /* NaN */ ? false : inRange(min, max, lhsDraught);
             }
             public String toString() {
                 return "draught in " + min + ".." + max;
@@ -423,7 +423,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final float lhsLat = getLatitude(mmsi); // Extract lat - if we know it
-                return lhsLat != lhsLat /* NaN */ ? true : compare(lhsLat, rhsLat, operator);
+                return lhsLat != lhsLat /* NaN */ ? false : compare(lhsLat, rhsLat, operator);
             }
             public String toString() {
                 return "lat " + operator + " " + rhsLat;
@@ -441,7 +441,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final float lhsLat = getLatitude(mmsi);    // Extract  - if we know it
-                return lhsLat != lhsLat /* NaN */ ? true : inRange(min, max, lhsLat);
+                return lhsLat != lhsLat /* NaN */? false : inRange(min, max, lhsLat);
             }
             public String toString() {
                 return "lat in " + min + ".." + max;
@@ -465,7 +465,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);            // Update state
                 final int mmsi = getMmsi(p);       // Get MMSI in question
                 final float lhsLon = getLongitude(mmsi); // Extract lon - if we know it
-                return lhsLon != lhsLon /* NaN */ ? true : compare(lhsLon, rhsLon, operator);
+                return lhsLon != lhsLon /* NaN */? false : compare(lhsLon, rhsLon, operator);
             }
             public String toString() {
                 return "lon " + operator + " " + rhsLon;
@@ -483,7 +483,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final float lhsLon = getLongitude(mmsi);    // Extract cog - if we know it
-                return lhsLon != lhsLon /* NaN */ ? true : inRange(min, max, lhsLon);
+                return lhsLon != lhsLon /* NaN */? false : inRange(min, max, lhsLon);
             }
             public String toString() {
                 return "lon in " + min + ".." + max;
@@ -504,7 +504,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final String lhsName = getName(mmsi); // Extract - if we know it
-                return lhsName == null ? true : compare(lhsName, rhsName, operator);
+                return lhsName == null ? false : compare(lhsName, rhsName, operator);
             }
             public String toString() {
                 return "name " + operator + " " + rhsName;
@@ -524,7 +524,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final String lhsName = getName(mmsi); // Extract - if we know it
-                return lhsName == null ? true :matchesGlob(preprocessAisString(lhsName), glob);
+                return lhsName == null ? false :matchesGlob(preprocessAisString(lhsName), glob);
             }
             public String toSting() {
                 return "name ~ " + glob;
@@ -545,7 +545,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final String lhsCallsign = getCallsign(mmsi); // Extract - if we know it
-                return lhsCallsign == null ? true : compare(lhsCallsign, rhsCallsign, operator);
+                return lhsCallsign == null ? false : compare(lhsCallsign, rhsCallsign, operator);
             }
             public String toString() {
                 return "cs " + operator + " " + rhsCallsign;
@@ -565,7 +565,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final String callsign = getCallsign(mmsi); // Extract - if we know it
-                return callsign == null ? true :matchesGlob(preprocessAisString(callsign), glob);
+                return callsign == null ? false :matchesGlob(preprocessAisString(callsign), glob);
             }
             public String toString() {
                 return "cs ~ " + glob;
@@ -587,7 +587,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final AisPosition pos = getPosition(mmsi); // Extract - if we know it
-                return pos == null ? true : area.contains(pos.getGeoLocation());
+                return pos == null ? false : area.contains(pos.getGeoLocation());
             }
             public String toString() {
                 return "pos within " + area;
@@ -615,9 +615,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getImo(int mmsi) {
         int imo = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            imo = (int) ((AisMessage5) staticPackets[0].tryGetAisMessage()).getImo();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                imo = (int) ((AisMessage5) staticPackets[0].tryGetAisMessage()).getImo();
+            }
         }
         return imo;
     }
@@ -630,9 +632,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getSog(int mmsi) {
         float sog = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            sog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getSog() / 10.0);
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                sog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getSog()/10.0);
+            }
         }
         return sog;
     }
@@ -645,9 +649,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getCog(int mmsi) {
         float cog = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            cog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getCog() / 10.0);
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                cog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getCog()/10.0);
+            }
         }
         return cog;
     }
@@ -660,9 +666,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getHdg(int mmsi) {
         int hdg = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            hdg = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getTrueHeading();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                hdg = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getTrueHeading();
+            }
         }
         return hdg;
     }
@@ -675,9 +683,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getDraught(int mmsi) {
         float draught = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            draught = (float) (((AisMessage5) staticPackets[0].tryGetAisMessage()).getDraught() / 10.0);
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                draught = (float) (((AisMessage5) staticPackets[0].tryGetAisMessage()).getDraught()/10.0);
+            }
         }
         return draught;
     }
@@ -690,9 +700,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getLatitude(int mmsi) {
         float lat = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            lat = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLatitudeDouble();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                lat = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLatitudeDouble();
+            }
         }
         return lat;
     }
@@ -705,9 +717,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private float getLongitude(int mmsi) {
         float lon = Float.NaN;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            lon = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLongitudeDouble();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                lon = (float) ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos().getLongitudeDouble();
+            }
         }
         return lon;
     }
@@ -720,9 +734,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private AisPosition getPosition(int mmsi) {
         AisPosition pos = null;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            pos = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                pos = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getPos();
+            }
         }
         return pos;
     }
@@ -735,9 +751,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getShiptype(int mmsi) {
         int shiptype = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            shiptype = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getShipType();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                shiptype = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getShipType();
+            }
         }
         return shiptype;
     }
@@ -750,9 +768,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private int getNavstat(int mmsi) {
         int navstat = -1;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket positionPacket = target.getPositionPacket();
-        if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-            navstat = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getNavStatus();
+        if (target != null) {
+            AisPacket positionPacket = target.getPositionPacket();
+            if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
+                navstat = ((AisPositionMessage) positionPacket.tryGetAisMessage()).getNavStatus();
+            }
         }
         return navstat;
     }
@@ -765,9 +785,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private String getName(int mmsi) {
         String name = null;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            name = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getName();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                name = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getName();
+            }
         }
         return name;
     }
@@ -780,9 +802,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private String getCallsign(int mmsi) {
         String cs = null;
         TargetInfo target = targetTracker.getNewest(mmsi);
-        AisPacket[] staticPackets = target.getStaticPackets();
-        if (staticPackets.length>0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-            cs = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getCallsign();
+        if (target != null) {
+            AisPacket[] staticPackets = target.getStaticPackets();
+            if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
+                cs = ((AisMessage5) staticPackets[0].tryGetAisMessage()).getCallsign();
+            }
         }
         return cs;
     }

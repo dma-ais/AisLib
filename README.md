@@ -26,16 +26,16 @@ the use.
 ## Building ##
 
 To build
- 
+
 	mvn clean install
- 
+
 To run tests
 
 	mvn test
-	
+
 ## Developing in Eclipse ##
 
-Use M2 plugin or 
+Use M2 plugin or
 
 	mvn eclipse:eclipse
 
@@ -43,7 +43,7 @@ and import as regular project.
 
 ## Contributing ##
 
-You're encouraged to contribute to AisLib. Fork the code from 
+You're encouraged to contribute to AisLib. Fork the code from
 [https://github.com/dma-ais/AisLib](https://github.com/dma-ais/AisLib) and submit pull requests.
 
 ## License ##
@@ -59,10 +59,10 @@ are read from a file.
 
 ```java
 AisReader reader = AisReader.createReaderFromInputStream(new FileInputStream("sentences.txt"));
-reader.registerHandler(new Consumer<AisMessage>() {			
+reader.registerHandler(new Consumer<AisMessage>() {
 	@Override
 	public void accept(AisMessage aisMessage) {
-		System.out.println("message id: " + aisMessage.getMsgId());	
+		System.out.println("message id: " + aisMessage.getMsgId());
 	}
 });
 reader.start();
@@ -73,10 +73,10 @@ Reading using a TCP connection is just as easy
 
 ```java
 AisReader reader = AisReaders.createReader("localhost", 4001);
-reader.registerHandler(new Consumer<AisMessage>() {			
+reader.registerHandler(new Consumer<AisMessage>() {
 	@Override
 	public void accept(AisMessage aisMessage) {
-		System.out.println("message id: " + aisMessage.getMsgId());		
+		System.out.println("message id: " + aisMessage.getMsgId());
 	}
 });
 reader.start();
@@ -90,7 +90,7 @@ reader.setReconnectInterval(1000);
 ```
 
 A read timeout can be defined for the reader. If no data is received within this period
-the connection will be closed and a reconnect will be tried. 
+the connection will be closed and a reconnect will be tried.
 
 ### Reading raw message packets ###
 
@@ -100,7 +100,7 @@ A packet consumer is registred in a reader.
 
 ```java
 AisReader reader = AisReaders.createReader("localhost", 4001);
-reader.registerPacketHandler(new Consumer<AisPacket>() {			
+reader.registerPacketHandler(new Consumer<AisPacket>() {
 	@Override
 	public void accept(AisPacket packet) {
 		try {
@@ -111,7 +111,7 @@ reader.registerPacketHandler(new Consumer<AisPacket>() {
 		}
 		// Alternative returning null if no valid AIS message
 		AisMessage message = packet.tryGetAisMessage();
-		
+
 		Date timestamp = packet.getTimestamp();
 		CommentBlock cb = packet.getVdm().getCommentBlock();
 	}
@@ -142,7 +142,7 @@ An `AisReader` instance is created using factory methods in `AisReaders`. The fo
 methods can be used.
 
    * `createReader(String hostname, int port)` - Creates a reader connection to host:port.
-   * `createReader(String commaHostPort)` - Creates a {@link AisTcpReader} from a list of one or more hosts on the 
+   * `createReader(String commaHostPort)` - Creates a {@link AisTcpReader} from a list of one or more hosts on the
 form: host1:port1,...,hostN:portN. If more than one host/port round robin will be used.
    * `createReaderFromInputStream(InputStream inputStream)` - Creates a reader reading from an input stream.
    * `createReaderFromFile(String filename)` - Creates a reader reading from a file. If the filename suffix is '.zip' or '.gz',
@@ -152,7 +152,7 @@ zip or gzip decompression will be applied respectively.
 ### Reader group ###
 
 A collection of readers can be organized in an `AisReaderGroup` that will deliver packets in a
-single join packet stream. Sources are defined by a commaseparated list of host:port. If more than 
+single join packet stream. Sources are defined by a commaseparated list of host:port. If more than
 one host for each source, round robin reading is used.
 
 ```java
@@ -169,7 +169,7 @@ TBD
 ### Working with messages ###
 
 To determine what messages are received the instanceof operator can be used. The example
-below shows how to test and cast, and take advantage of the object oriented design where 
+below shows how to test and cast, and take advantage of the object oriented design where
 related messages shares parents.
 
 ```java
@@ -181,11 +181,11 @@ public void accept(AisMessage aisMessage) {
 		System.out.println("AtoN name: " + msg21.getName());
 	}
 	// Handle position messages 1,2 and 3 (class A) by using their shared parent
-	if (aisMessage instanceof AisPositionMessage) {					
+	if (aisMessage instanceof AisPositionMessage) {
 		AisPositionMessage posMessage = (AisPositionMessage)aisMessage;
 		System.out.println("speed over ground: " + posMessage.getSog());
 	}
-	// Handle position messages 1,2,3 and 18 (class A and B)  
+	// Handle position messages 1,2,3 and 18 (class A and B)
 	if (aisMessage instanceof IGeneralPositionMessage) {
 		IGeneralPositionMessage posMessage = (IGeneralPositionMessage)aisMessage;
 		System.out.println("course over ground: " + posMessage.getCog());
@@ -194,7 +194,7 @@ public void accept(AisMessage aisMessage) {
 	if (aisMessage instanceof AisStaticCommon) {
 		AisStaticCommon staticMessage = (AisStaticCommon)aisMessage;
 		System.out.println("vessel name: " + staticMessage.getName());
-	}					
+	}
 }
 ```
 
@@ -205,10 +205,10 @@ handler.
 
 ```java
 // Make a handler
-Consumer<AisMessage> handler = new Consumer<AisMessage>() {			
+Consumer<AisMessage> handler = new Consumer<AisMessage>() {
 	@Override
 	public void accept(AisMessage aisMessage) {
-		System.out.println("aisMessage: " + aisMessage);				
+		System.out.println("aisMessage: " + aisMessage);
 	}
 };
 
@@ -233,14 +233,14 @@ one goes down, the re-connect will be to the next on the list.
 
 ```java
 AisReader reader = AisReaders.createReader("host1:port1,host2:port2,host3:port3");
-reader.registerHandler(new Consumer<AisMessage>() {			
+reader.registerHandler(new Consumer<AisMessage>() {
 	@Override
 	public void accept(AisMessage aisMessage) {
-		System.out.println("message id: " + aisMessage.getMsgId());		
+		System.out.println("message id: " + aisMessage.getMsgId());
 	}
 });
 reader.start();
-reader.join();		
+reader.join();
 ```
 
 ### Message filtering ###
@@ -253,7 +253,7 @@ Down sample example:
 
 ```java
 AisReader reader = AisReaders.createReader("ais163.sealan.dk:4712");
-reader.registerHandler(new Consumer<AisMessage>() {			
+reader.registerHandler(new Consumer<AisMessage>() {
 	DownSampleFilter downSampleFilter = new DownSampleFilter(60);
 	@Override
 	public void accept(AisMessage aisMessage) {
@@ -264,7 +264,7 @@ reader.registerHandler(new Consumer<AisMessage>() {
 	}
 });
 reader.start();
-reader.join();		
+reader.join();
 ```
 
 A MessageHandlerFilter can be used to put in between readers
@@ -371,7 +371,7 @@ The full grammar is specified usit ANTLR notation in file `expresionFilter.g4`.
 The following are examples of filter expressions:
 
 ##### Simple comparisons #####
-- `m.sog  0`
+- `m.sog = 0`
 - `m.sog != 0`
 - `m.sog > 6.0`
 - `m.sog < 7.0`
@@ -433,39 +433,51 @@ The following are examples of filter expressions:
 ##### Fields #####
 The following fields can be used in filter expressions
 
-| Group | Field   | Meaning                    | Example values
-|-------| --------| ---------------------------| ---
-| s     | id      | Source id                  | |                   
-|       | bs      | Source base station        | |                   
-|       | country | Source country             | DNK                
-|       | type    | Source type                | LIVE, SAT          
-|       | region  | Source region              | 0                  
-|---    | ---     | ---                        | ---                
-| m     | id      | Message type               | 1, 2, 3, 5         
-|       | mmsi    | MMSI number                | 219010123          
-|       | imo     | IMO number                 | 6159463            
-|       | type    | Ship type                  | tanker, 32         
-|       | navstat | Navigational status        | AT_ANCHOR, 1       
-|       | name    | Ship name                  | Maersk Alabama     
-|       | cs      | Radio call sign            | XP1234              
-|       | sog     | Speed over ground          | 10.0               
-|       | cog     | Course over ground         | 234                
-|       | hdg     | True heading               | 180               
-|       | lat     | Latitude                   | 56.1234           
-|       | lon     | Longitude                  | 12.4321           
-|       | pos(*)  | Position                   | (56.1234, 12.4321) 
-|       | draught | Current draught            | 4.6                
-|       | year    | Msg recv'd in year         | 2014               
-|       | month   | Msg recv'd in month        | jan, january, 1    
-|       | dom     | Msg recv'd on day-of-month | 1, 31              
-|       | dow     | Msg recv'd on day-of-week  | mon, monday, 1     
-|       | hour    | Msg recv'd on hour         | 14                 
-|       | minute  | Msg recv'd on minute       | 34                 
-|---    | ---     | ---                        | ---                
-| t     | <TBD>   |                            | ||                  
+ Group     | Field     | Meaning                    | Example values
+:----------|:----------|:---------------------------|:-------------------
+ sources   | s.id      | Source id                  |
+           | s.bs      | Source base station        |
+           | s.country | Source country             | DNK
+           | s.type    | Source type                | LIVE, SAT 
+           | s.region  | Source region              | 0
+<hr>       | <hr>      | <hr>                       | <hr>
+ messages  | m.id      | Message type               | 1, 2, 3, 5
+           | m.mmsi    | MMSI number                | 219010123
+           | m.year    | Msg recv'd in year         | 2014
+           | m.month   | Msg recv'd in month        | jan, january, 1
+           | m.dom     | Msg recv'd on day-of-month | 1, 31
+           | m.dow     | Msg recv'd on day-of-week  | mon, monday, 1
+           | m.hour    | Msg recv'd on hour         | 14
+           | m.minute  | Msg recv'd on minute       | 34
+<hr>       | <hr>      | <hr>                       | <hr>
+           | m.imo     | IMO number                 | 6159463
+           | m.type    | Ship type                  | tanker, 32
+           | m.navstat | Navigational status        | AT_ANCHOR, 1
+           | m.name    | Ship name                  | Maersk Alabama
+           | m.cs      | Radio call sign            | XP1234
+           | m.sog     | Speed over ground          | 10.0
+           | m.cog     | Course over ground         | 234
+           | m.hdg     | True heading               | 180
+           | m.draught | Current draught            | 4.6
+           | m.lat     | Latitude                   | 56.1234
+           | m.lon     | Longitude                  | 12.4321
+           | m.pos(*)  | Position                   | (56.1234, 12.4321)
+<hr>       | <hr>      | <hr>                       | <hr>
+ targets   | t.imo     | IMO number                 | 6159463
+           | t.type    | Ship type                  | tanker, 32
+           | t.navstat | Navigational status        | AT_ANCHOR, 1
+           | t.name    | Ship name                  | Maersk Alabama
+           | t.cs      | Radio call sign            | XP1234
+           | t.sog     | Speed over ground          | 10.0
+           | t.cog     | Course over ground         | 234
+           | t.hdg     | True heading               | 180
+           | t.draught | Current draught            | 4.6
+           | t.lat     | Latitude                   | 56.1234
+           | t.lon     | Longitude                  | 12.4321
+           | t.pos(*)  | Position                   | (56.1234, 12.4321)
 
-(*) pos is represents same values as (lat, lon) but is used in contexts where complete position (not just latitude or longitude)
-is used.
+(*) pos is represents same values as (lat, lon) but is used in contexts where complete position (not just latitude or
+longitude) is used.
 
 ### Packet transformers ###
 
@@ -506,7 +518,7 @@ The example below shows how to handle comment blocks.
 
 ```java
 AisReader reader = ...
-reader.registerPacketHandler(new Consumer<AisPacket>() {            
+reader.registerPacketHandler(new Consumer<AisPacket>() {
     @Override
     public void accept(AisPacket aisPacket) {
     	Vdm vdm = packet.getVdm();
@@ -524,7 +536,7 @@ reader.start();
 reader.join();
 ```
 
-Common metadata has been standardized in the class `AisPacketTags`. The 
+Common metadata has been standardized in the class `AisPacketTags`. The
 following attributes are used:
 
    * Timestamp
@@ -564,7 +576,7 @@ TBD. See `dk.dma.ais.bus.AisBusTest`.
 ### Sending a message ###
 
 Example of sending an addressed text message in an ABM sentence. See test cases on how
-to send application specific message. See AisReader for different sending options. In the 
+to send application specific message. See AisReader for different sending options. In the
 example below all ABM packaging is handled by AisReader.
 
 ```java
