@@ -26,9 +26,6 @@ import static dk.dma.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpr
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Kasper Nielsen
- */
 public class AisPacketFiltersStatefulTest {
 
     AisPacket pkgStatic, pkgPosition1, pkgPosition2;
@@ -120,7 +117,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(false, filter, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> imo out of range
 
         filter = parseExpressionFilter("t.imo != 1234567, 9596429, 9596430");
-        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */, filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
         assertFilterPredicate(true, filter, pkgStatic);    // Reject, because this packet contains imo = 9596428 out of range
         assertFilterPredicate(true, filter, pkgPosition1); // Still reject, because second packet learned us that this mmsi -> imo out of range
         assertFilterPredicate(true, filter, pkgPosition2); // Still reject, because second packet learned us that this mmsi -> imo out of range
@@ -132,7 +129,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true,  filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> imo in range
 
         filter = parseExpressionFilter("t.imo != 1234567, 9596428, 9596429, 9596430");
-        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */,  filter, pkgPosition1); // Reject, because we know nothing of this target's imo yet
         assertFilterPredicate(false,  filter, pkgStatic);    // Accept, because this packet contains imo = 9596428 in range
         assertFilterPredicate(false,  filter, pkgPosition1); // Accept, because second packet learned us that this mmsi -> imo in range
         assertFilterPredicate(false,  filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> imo in range
@@ -212,7 +209,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true, filter, pkgPosition2); // Accept, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type != 55..61");
-        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */, filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
         assertFilterPredicate(false, filter, pkgStatic);    // Reject, because this packet contains shiptype = 60
         assertFilterPredicate(false, filter, pkgPosition1); // Reject, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> shiptype 60
@@ -224,7 +221,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true, filter, pkgPosition2);  // Accept, because second packet learned us that this mmsi -> shiptype 60
 
         filter = parseExpressionFilter("t.type != 59,60,61");
-        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */,  filter, pkgPosition1); // Reject, because we know nothing of this target's shiptype yet
         assertFilterPredicate(false, filter, pkgStatic);     // Reject, because this packet contains shiptype = 60
         assertFilterPredicate(false, filter, pkgPosition1);  // Reject, because second packet learned us that this mmsi -> shiptype 60
         assertFilterPredicate(false, filter, pkgPosition2);  // Reject, because second packet learned us that this mmsi -> shiptype 60
@@ -322,7 +319,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat != 0..2");
-        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
@@ -334,7 +331,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true, filter, pkgPosition2);
 
         filter = parseExpressionFilter("t.navstat != 0,1,2");
-        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */, filter, pkgStatic);
         assertFilterPredicate(false,  filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition2);
@@ -390,7 +387,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(false, filter, pkgStatic);    // Still reject, because second packet learned us that this mmsi -> sog out of range
 
         filter = parseExpressionFilter("t.sog != 11.5..11.9");
-        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);    // Reject, because we know nothing of this target's sog yet
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */, filter, pkgStatic);    // Reject, because we know nothing of this target's sog yet
         assertFilterPredicate(false, filter, pkgPosition1); // Reject, because this packet contains sog = 11.6 in range
         assertFilterPredicate(false, filter, pkgPosition2); // Reject, because second packet learned us that this mmsi -> sog in range
         assertFilterPredicate(false, filter, pkgStatic);    // Reject, because second packet learned us that this mmsi -> sog in range
@@ -422,7 +419,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true, filter, pkgStatic);
 
         filter = parseExpressionFilter("t.cog != 120.0..120.9");
-        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgPosition2);
         assertFilterPredicate(false, filter, pkgStatic);
@@ -460,7 +457,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.hdg != 120..130");
-        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgStatic);    // hdg unknown
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */,  filter, pkgStatic);    // hdg unknown
         assertFilterPredicate(false,  filter, pkgPosition1);
         assertFilterPredicate(false,  filter, pkgPosition2);
         assertFilterPredicate(false,  filter, pkgStatic);
@@ -536,7 +533,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.lat != 54.88..55.00");
-        assertFilterPredicate(true /* TODO return false for undefined value */,  filter, pkgStatic);
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */,  filter, pkgStatic);
         assertFilterPredicate(false,  filter, pkgPosition1);
         assertFilterPredicate(false,  filter, pkgPosition2);
         assertFilterPredicate(false,  filter, pkgStatic);
@@ -574,7 +571,7 @@ public class AisPacketFiltersStatefulTest {
         assertFilterPredicate(true,  filter, pkgStatic);
 
         filter = parseExpressionFilter("t.lon != 10.0..10.95");
-        assertFilterPredicate(true /* TODO return false for undefined value */, filter, pkgStatic);
+        assertFilterPredicate(true /* TODO AISAB-103: return false for undefined value */, filter, pkgStatic);
         assertFilterPredicate(false, filter, pkgPosition1);
         assertFilterPredicate(false, filter, pkgPosition2);
         assertFilterPredicate(false, filter, pkgStatic);

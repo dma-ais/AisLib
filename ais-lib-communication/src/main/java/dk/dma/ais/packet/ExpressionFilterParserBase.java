@@ -1006,11 +1006,6 @@ abstract class ExpressionFilterParserBase {
             } catch (IllegalAccessException e) {
                 e.printStackTrace(System.err);
             }
-                  /*
-                  if (ctx.notin() != null) {
-                      filter = filter.negate();
-                  }
-                  */
         }
         return filter;
     }
