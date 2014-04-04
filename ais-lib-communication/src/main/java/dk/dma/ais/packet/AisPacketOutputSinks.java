@@ -35,7 +35,7 @@ import dk.dma.enav.model.geometry.Position;
 
 /**
  * Common sink that can be used to convert AIS packets to text.
- * 
+ *
  * @author Kasper Nielsen
  */
 public class AisPacketOutputSinks {
@@ -73,21 +73,23 @@ public class AisPacketOutputSinks {
         public void process(OutputStream stream, AisPacket p, long count) throws IOException {
             DecimalFormat df = POSITION_FORMATTER.get();
             AisMessage m = p.tryGetAisMessage();
-            IVesselPositionMessage im = (IVesselPositionMessage) m;
-            Position pos = m.getValidPosition();
+            if (m instanceof IVesselPositionMessage) {
+                IVesselPositionMessage im = (IVesselPositionMessage) m;
+                Position pos = m.getValidPosition();
 
-            StringBuilder sb = new StringBuilder();
-            if (count > 1) {
-                sb.append("  },");
+                StringBuilder sb = new StringBuilder();
+                if (count > 1) {
+                    sb.append("  },");
+                }
+                sb.append("\n  \"point\": {\n");
+                sb.append("    \"timestamp\": ").append(p.getBestTimestamp()).append(",\n");
+                sb.append("    \"lon\": ").append(df.format(pos.getLongitude())).append(",\n");
+                sb.append("    \"lat\": ").append(df.format(pos.getLatitude())).append(",\n");
+                sb.append("    \"sog\": ").append(im.getSog()).append(",\n");
+                sb.append("    \"cog\": ").append(im.getCog()).append(",\n");
+                sb.append("    \"heading\": ").append(im.getTrueHeading()).append("\n");
+                writeAscii(sb, stream);
             }
-            sb.append("\n  \"point\": {\n");
-            sb.append("    \"timestamp\": ").append(p.getBestTimestamp()).append(",\n");
-            sb.append("    \"lon\": ").append(df.format(pos.getLongitude())).append(",\n");
-            sb.append("    \"lat\": ").append(df.format(pos.getLatitude())).append(",\n");
-            sb.append("    \"sog\": ").append(im.getSog()).append(",\n");
-            sb.append("    \"cog\": ").append(im.getCog()).append(",\n");
-            sb.append("    \"heading\": ").append(im.getTrueHeading()).append("\n");
-            writeAscii(sb, stream);
         }
 
         /** {@inheritDoc} */
@@ -141,7 +143,7 @@ public class AisPacketOutputSinks {
 
     /**
      * Filters a list of packets according to their timestamp.
-     * 
+     *
      * @param packets
      *            a list of packets
      * @param start
