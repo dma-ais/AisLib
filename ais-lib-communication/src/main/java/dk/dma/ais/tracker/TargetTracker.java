@@ -44,7 +44,7 @@ import dk.dma.enav.util.function.Predicate;
  * 
  * @author Kasper Nielsen
  */
-public class TargetTracker {
+public class TargetTracker implements Tracker {
 
     /** All targets that we are currently monitoring. */
     final ConcurrentHashMapV8<Integer, MmsiTarget> targets = new ConcurrentHashMapV8<>();
@@ -120,6 +120,7 @@ public class TargetTracker {
      *            the group
      * @return the subscription
      */
+    @Override
     public Subscription readFromStream(AisPacketStream stream) {
         return stream.subscribe(new Consumer<AisPacket>() {
             public void accept(AisPacket p) {
