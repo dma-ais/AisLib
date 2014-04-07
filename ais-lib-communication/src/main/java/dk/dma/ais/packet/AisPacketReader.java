@@ -276,8 +276,8 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
         e.execute(new Runnable() {
             public void run() {
                 try {
-                    for (AisPacket p = readPacket(); p != null; readPacket()) {
-                        s.add(readPacket());
+                    for (AisPacket p = readPacket(); p != null; p = readPacket()) {
+                        s.add(p);
                     }
                 } catch (IOException e) {
                     LOG.error("Failed to read packet: ", e);
