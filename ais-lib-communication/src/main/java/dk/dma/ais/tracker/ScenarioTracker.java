@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -106,7 +107,7 @@ public class ScenarioTracker implements Tracker {
      * Return all targets involved in this scenario.
      * @return
      */
-    public Set<Target> getTargets() {
+    public ImmutableSet<Target> getTargets() {
         return ImmutableSet.copyOf(targets.values());
     }
 
@@ -121,6 +122,10 @@ public class ScenarioTracker implements Tracker {
             target = targets.get(mmsi);
         }
         target.update(p);
+    }
+
+    public void tagTarget(int mmsi, Object tag) {
+        targets.get(mmsi).setTag(tag);
     }
 
     private final Map<Integer, Target> targets = new TreeMap<>();
@@ -162,6 +167,14 @@ public class ScenarioTracker implements Tracker {
             return toStarboard;
         }
 
+        private void setTag(Object tag) {
+            tags.add(tag);
+        }
+
+        public boolean isTagged(Object tag) {
+            return tags.contains(tag);
+        }
+
         private void update(AisPacket p) {
             AisMessage message = p.tryGetAisMessage();
             checkOrSetMmsi(message);
@@ -196,6 +209,7 @@ public class ScenarioTracker implements Tracker {
         private String name;
         private int mmsi=-1, toBow=-1, toStern=-1, toPort=-1, toStarboard=-1;
 
+        private final Set<Object> tags = new HashSet<>();
         private final TreeMap<Date, PositionReport> positionReports = new TreeMap<>();
 
         public final class PositionReport {

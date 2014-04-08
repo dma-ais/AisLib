@@ -17,14 +17,13 @@ package dk.dma.ais.packet;
 
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
-import de.micromata.opengis.kml.v_2_2_0.Container;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
-import de.micromata.opengis.kml.v_2_2_0.Geometry;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 import de.micromata.opengis.kml.v_2_2_0.LinearRing;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
+import de.micromata.opengis.kml.v_2_2_0.Style;
 import dk.dma.ais.tracker.ScenarioTracker;
 import dk.dma.ais.utils.coordinates.CoordinateConverter;
 import dk.dma.commons.util.io.OutputStreamSink;
@@ -53,27 +52,71 @@ import static java.lang.Math.toRadians;
  */
 class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements AutoCloseable, Closeable {
 
+    /**
+     * The output stream which KML output will be written to.
+     */
     private final OutputStream outputStream;
 
+    /**
+     * The tracker which will be used to build the scenario that will be written as KML.
+     */
     private final ScenarioTracker scenarioTracker = new ScenarioTracker();
 
+    /**
+     * Only AisPackets passing this filter will be passed to the scenarioTracker.
+     */
     private final Predicate<AisPacket> filter;
+
+    /**
+     * Style only
+     */
+    private final Predicate<AisPacket> style1Packets;
+    private final Predicate<AisPacket> style2Packets;
+    private final Predicate<AisPacket> style3Packets;
+
+    private static final String STYLE1_TAG = "Ship1Style";
+    private static final String STYLE2_TAG = "Ship2Style";
+    private static final String STYLE3_TAG = "Ship3Style";
 
     public AisPacketKMLOutputSink(OutputStream outputStream) {
         this.outputStream = outputStream;
-        filter = null;
+        this.filter = AisPacketFilters.ACCEPT;
+        this.style1Packets = AisPacketFilters.REJECT;
+        this.style2Packets = AisPacketFilters.REJECT;
+        this.style3Packets = AisPacketFilters.REJECT;
     }
 
     /**
-     * Create a sink that writes KML contents to outputstream - but take into account only
+     * Create a sink that writes KML contents to outputStream - but build the scenario only from
      * AisPackets which comply with the filter predicate.
      *
-     * @param outputStream
-     * @param filter
+     * @param outputStream the stream to write the KML output to.
+     * @param filter a filter predicate for pre-filtering of AisPackets.
      */
     public AisPacketKMLOutputSink(OutputStream outputStream, Predicate<AisPacket> filter) {
         this.outputStream = outputStream;
         this.filter = filter;
+        this.style1Packets = AisPacketFilters.REJECT;
+        this.style2Packets = AisPacketFilters.REJECT;
+        this.style3Packets = AisPacketFilters.REJECT;
+    }
+
+    /**
+     * Create a sink that writes KML contents to outputStream - but build the scenario only from
+     * AisPackets which comply with the filter predicate.
+     *
+     * @param outputStream the stream to write the KML output to.
+     * @param filter a filter predicate for pre-filtering of AisPackets.
+     * @param style1Packets Apply primary KML styling to packets which pass this predicate.
+     * @param style2Packets Apply secondary KML styling to packets which pass this predicate.
+     * @param style3Packets Apply tertiary KML styling to packets which pass this predicate.
+     */
+    public AisPacketKMLOutputSink(OutputStream outputStream, Predicate<AisPacket> filter, Predicate<AisPacket> style1Packets, Predicate<AisPacket> style2Packets, Predicate<AisPacket> style3Packets) {
+        this.outputStream = outputStream;
+        this.filter = filter;
+        this.style1Packets = style1Packets;
+        this.style2Packets = style2Packets;
+        this.style3Packets = style3Packets;
     }
 
     /**
@@ -81,8 +124,18 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
      */
     @Override
     public void process(OutputStream stream, AisPacket packet, long count) throws IOException {
-        if (filter == null || filter.test(packet)) {
+        if (filter.test(packet)) {
             scenarioTracker.update(packet);
+
+            if (style1Packets.test(packet)) {
+                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE1_TAG);
+            }
+            if (style2Packets.test(packet)) {
+                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE2_TAG);
+            }
+            if (style3Packets.test(packet)) {
+                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE3_TAG);
+            }
         }
     }
 
@@ -96,7 +149,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
             public boolean test(AisPacket aisPacket) {
                 return aisPacket.tryGetAisMessage().getUserId() == 477325700;
             }
-        })) {
+        }, AisPacketFilters.ACCEPT, AisPacketFilters.REJECT, AisPacketFilters.REJECT
+        )) {
             reader.writeTo(fis, kmlOutputSink);
         }
     }
@@ -138,15 +192,32 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
     }
 
     private void createKmlStyles(Document document) {
-        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargets();
-        for (ScenarioTracker.Target target : targets) {
-            document
+        Style ship1Style = document
                 .createAndAddStyle()
-                    .withId(target.getMmsi())
-                    .createAndSetLineStyle()
-                    .withWidth(2)
-                    .withColor("ff00ff00");
-        }
+                .withId(STYLE1_TAG);
+        ship1Style.createAndSetLineStyle()
+            .withWidth(2)
+            .withColor("ff00ff00");
+        ship1Style.createAndSetPolyStyle()
+            .withColor("ff00ff00");
+
+        Style ship2Style = document
+                .createAndAddStyle()
+                .withId(STYLE2_TAG);
+        ship2Style.createAndSetLineStyle()
+            .withWidth(2)
+            .withColor("ff0000ff");
+        ship2Style.createAndSetPolyStyle()
+            .withColor("ff0000ff");
+
+        Style ship3Style = document
+                .createAndAddStyle()
+                .withId(STYLE3_TAG);
+        ship3Style.createAndSetLineStyle()
+            .withWidth(2)
+            .withColor("ff7fffff");
+        ship3Style.createAndSetPolyStyle()
+            .withColor("ff7fffff");
     }
 
     private void createKmlSituationFolder(Folder kmlNode) {
@@ -196,6 +267,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
                     placemark.createAndSetTimeSpan()
                             .withBegin(begin)
                             .withEnd(end);
+
+                    addStyles(placemark, target);
                 }
             }
         }
@@ -217,7 +290,20 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
                 for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
                     lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
                 }
+                addStyles(placemark, target);
             }
+        }
+    }
+
+    private void addStyles(Placemark placemark, ScenarioTracker.Target target) {
+        if (target.isTagged(STYLE1_TAG)) {
+            placemark.withStyleUrl("#" + STYLE1_TAG);
+        }
+        if (target.isTagged(STYLE2_TAG)) {
+            placemark.withStyleUrl("#" + STYLE2_TAG);
+        }
+        if (target.isTagged(STYLE3_TAG)) {
+            placemark.withStyleUrl("#" + STYLE3_TAG);
         }
     }
 
