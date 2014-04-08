@@ -15,17 +15,18 @@
  */
 package dk.dma.ais.packet;
 
-import com.google.common.collect.Lists;
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
-import de.micromata.opengis.kml.v_2_2_0.Coordinate;
+import de.micromata.opengis.kml.v_2_2_0.Boundary;
+import de.micromata.opengis.kml.v_2_2_0.Container;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
 import de.micromata.opengis.kml.v_2_2_0.Geometry;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
+import de.micromata.opengis.kml.v_2_2_0.LinearRing;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
-import de.micromata.opengis.kml.v_2_2_0.Point;
 import dk.dma.ais.tracker.ScenarioTracker;
+import dk.dma.ais.utils.coordinates.CoordinateConverter;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Predicate;
 
@@ -40,10 +41,14 @@ import java.util.Calendar;
 import java.util.Set;
 import java.util.TimeZone;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.toRadians;
+
 /**
  * This class receives AisPacket and use them to build a scenario
  *
- * When the sink is closed it dumps the entire target state in KML format to an output stream.
+ * When the sink is closed it dumps the entire target state to the output stream in KML format.
  *
  */
 class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements AutoCloseable, Closeable {
@@ -59,6 +64,13 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
         filter = null;
     }
 
+    /**
+     * Create a sink that writes KML contents to outputstream - but take into account only
+     * AisPackets which comply with the filter predicate.
+     *
+     * @param outputStream
+     * @param filter
+     */
     public AisPacketKMLOutputSink(OutputStream outputStream, Predicate<AisPacket> filter) {
         this.outputStream = outputStream;
         this.filter = filter;
@@ -68,25 +80,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
      * {@inheritDoc}
      */
     @Override
-    public void header(OutputStream stream) throws IOException {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-
-    @Override
     public void process(OutputStream stream, AisPacket packet, long count) throws IOException {
         if (filter == null || filter.test(packet)) {
             scenarioTracker.update(packet);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void footer(OutputStream stream, long count) throws IOException {
     }
 
     public static void main(String[] args) throws IOException {
@@ -109,81 +106,63 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
      */
     @Override
     public void close() throws IOException {
-        dumpScenarioToKmlFile();
+        Kml kml = createKml();
+        kml.marshal(outputStream);
         outputStream.close();
     }
 
-    /**
-     *
-     * @param parentPlacemark
-     * @param lat
-     * @param lon
-     * @param heading
-     * @param toBow
-     * @param toStern
-     * @param toPort
-     * @param toStarbord
-     * @return
-     */
-    private static Geometry getShipGeometry(Placemark parentPlacemark, double lat, double lon, int heading, int toBow, int toStern, int toPort, int toStarbord) {
-        Point shipShape = parentPlacemark
-                .createAndSetPoint()
-                .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND)
-                .withCoordinates(Lists.newArrayList(new Coordinate(lon, lat)));
-
-        return shipShape;
-    }
-
-    private void dumpScenarioToKmlFile() throws IOException {
+    private Kml createKml() throws IOException {
         Kml kml = new Kml();
 
         Document document = kml.createAndSetDocument()
-                .withDescription("Event starting " + scenarioTracker.scenarioBegin() + " and ending " + scenarioTracker.scenarioEnd())
+                .withDescription("Scenario starting " + scenarioTracker.scenarioBegin()
+                        + " and ending " + scenarioTracker.scenarioEnd())
                 .withName("Abnormal event")
                 .withOpen(true);
 
         // Create all ship styles
+        createKmlStyles(document);
+
+        Folder rootFolder = document.createAndAddFolder().withName(scenarioTracker.scenarioBegin().toString());
+
+        // Generate situation folder
+        createKmlSituationFolder(rootFolder);
+
+        // Generate tracks folder
+        createKmlTracksFolder(rootFolder);
+
+        // Generate movements folder
+        createKmlMovementsFolder(rootFolder);
+
+        return kml;
+    }
+
+    private void createKmlStyles(Document document) {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargets();
         for (ScenarioTracker.Target target : targets) {
             document
-            .createAndAddStyle()
-                .withId(target.getMmsi())
-                .createAndSetLineStyle()
+                .createAndAddStyle()
+                    .withId(target.getMmsi())
+                    .createAndSetLineStyle()
                     .withWidth(2)
                     .withColor("ff00ff00");
-
         }
+    }
 
-        //  Folder rootFolder = document.createAndAddFolder().withName(scenarioTracker.scenarioBegin().toString());
+    private void createKmlSituationFolder(Folder kmlNode) {
+        kmlNode.createAndAddFolder()
+            .withName("Situation")
+            .withOpen(false)
+            .withVisibility(false);
+    }
 
-        // Generate situation folder
-        Folder situationFolder = document.createAndAddFolder()
-                .withName("Situation")
-                .withOpen(false)
-                .withVisibility(false);
+    private void createKmlMovementsFolder(Folder kmlNode) {
+        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargets();
 
-        // Generate tracks folder
-        Folder tracksFolder = document.createAndAddFolder()
-                .withName("Tracks")
-                .withOpen(false)
-                .withVisibility(false);
-
-        for (ScenarioTracker.Target target : targets) {
-            Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
-            if (positionReportReports.size() > 0) {
-                Placemark placemark = tracksFolder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
-                LineString lineString = placemark.createAndSetLineString();
-                for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
-                    lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
-                }
-            }
-        }
-
-        // Generate movements folder
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        Folder movementFolder = document.createAndAddFolder()
+        Folder movementFolder = kmlNode.createAndAddFolder()
                 .withName("Movements")
                 .withOpen(true)
                 .withVisibility(false);
@@ -195,11 +174,13 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
                 for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
                     Placemark placemark = movementFolder
                             .createAndAddPlacemark()
+                            .withVisibility(true)
                             .withId(target.getMmsi() + "-" + c++).withName(target.getName());
 
-                    placemark.setGeometry(
-                            getShipGeometry(
-                                    placemark,
+                    Boundary boundary = placemark.createAndSetPolygon().createAndSetOuterBoundaryIs();
+                    boundary.setLinearRing(
+                            createKmlShipGeometry(
+                                    boundary,
                                     positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getHeading(),
                                     target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard()
                             )
@@ -218,9 +199,92 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
                 }
             }
         }
-
-        // Generate the KML
-        kml.marshal(outputStream);
-        outputStream.close();
     }
+
+    private void createKmlTracksFolder(Folder kmlNode) {
+        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargets();
+
+        Folder tracksFolder = kmlNode.createAndAddFolder()
+                .withName("Tracks")
+                .withOpen(false)
+                .withVisibility(false);
+
+        for (ScenarioTracker.Target target : targets) {
+            Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
+            if (positionReportReports.size() > 0) {
+                Placemark placemark = tracksFolder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
+                LineString lineString = placemark.createAndSetLineString();
+                for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
+                    lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
+                }
+            }
+        }
+    }
+
+    /**
+     * Create a KML geometry to symbolize a ship at the given position, at the given heading and with the
+     * given dimensions.
+     *
+     * @param parentPlacemark
+     * @param lat Ship's positional latitude in degrees.
+     * @param lon Ship's positional longitude in degrees.
+     * @param heading Ship's heading in degrees; 0 being north, 90 being east.
+     * @param toBow Distance in meters from ship's position reference to ship's bow.
+     * @param toStern Distance in meters from ship's position reference to ship's stern.
+     * @param toPort Distance in meters from ship's position reference to port side at maximum beam.
+     * @param toStarbord Distance in meters from ship's position reference to starboard side at maximum beam.
+     * @return
+     */
+    private static LinearRing createKmlShipGeometry(Boundary parentPlacemark, double lat, double lon, int heading, int toBow /* A */, int toStern /* B */, int toPort /* C */, int toStarbord /* D */) {
+        // If the ship dimensions are not found then create a small ship
+        if (toBow < 0 || toStern < 0) {
+            toBow = 20;
+            toStern = 4;
+        }
+        if (toPort < 0 || toStarbord < 0) {
+            toPort = (int) ((toBow + toStern) / 6.5);
+            toStarbord = toPort;
+        }
+
+        int szA = toBow;
+        int szB = toStern;
+        int szC = toPort;
+        int szD = toStarbord;
+
+        // The ship consists of 5 points which are stored in shipPnts()
+        // To begin with the points are in meters
+        Point[] points = new Point[5];
+        
+        points[0] = new Point(); points[0].x = -szB;                         points[0].y = szC;                 // stern port
+        points[1] = new Point(); points[1].x = points[0].x + 0.85*(szA+szB); points[1].y = points[0].y;
+        points[2] = new Point(); points[2].x = szA;                          points[2].y = szC - (szC+szD)/2.0; // bow
+        points[3] = new Point(); points[3].x = points[1].x;                  points[3].y = -szD;
+        points[4] = new Point(); points[4].x = -szB;                         points[4].y = -szD;                // stern starboard
+
+        // Rotate ship. Each ship has its own coordinate system with
+        // origin in the ais-position of the ship
+        double theta = toRadians(CoordinateConverter.compass2cartesian(heading));
+
+        for (Point point : points) {
+            double x = point.x * cos(theta) + point.y * sin(theta);
+            double y = point.x * sin(theta) + point.y * cos(theta);
+            point.x = x;
+            point.y = y;
+        }
+
+        // Convert ship coordinates into geographic coordinates and a KML geometry
+        LinearRing shipGeometry = parentPlacemark
+            .createAndSetLinearRing()
+            .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+
+        CoordinateConverter coordinateConverter = new CoordinateConverter(lon, lat);
+        for (Point point : points) {
+            shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.x, point.y), coordinateConverter.y2Lat(point.x, point.y));
+        }
+
+        return shipGeometry;
+    }
+
+    private static final class Point { double x, y; }
+
 }
