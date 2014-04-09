@@ -29,11 +29,9 @@ import dk.dma.ais.utils.coordinates.CoordinateConverter;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Predicate;
 
-import java.io.Closeable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -50,78 +48,60 @@ import static java.lang.Math.toRadians;
  * When the sink is closed it dumps the entire target state to the output stream in KML format.
  *
  */
-class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements AutoCloseable, Closeable {
+class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
-    /**
-     * The output stream which KML output will be written to.
-     */
-    private final OutputStream outputStream;
-
-    /**
-     * The tracker which will be used to build the scenario that will be written as KML.
-     */
+    /** The tracker which will be used to build the scenario that will be written as KML. */
     private final ScenarioTracker scenarioTracker = new ScenarioTracker();
 
-    /**
-     * Only AisPackets passing this filter will be passed to the scenarioTracker.
-     */
-    private final Predicate<AisPacket> filter;
+    /** Only AisPackets passing this filter will be passed to the scenarioTracker. */
+    private final Predicate<? super AisPacket> filter;
 
-    /**
-     * Style only
-     */
-    private final Predicate<AisPacket> style1Packets;
-    private final Predicate<AisPacket> style2Packets;
-    private final Predicate<AisPacket> style3Packets;
+    // Style only
+    private final Predicate<? super AisPacket> style1Packets;
+    private final Predicate<? super AisPacket> style2Packets;
+    private final Predicate<? super AisPacket> style3Packets;
 
     private static final String STYLE1_TAG = "Ship1Style";
     private static final String STYLE2_TAG = "Ship2Style";
     private static final String STYLE3_TAG = "Ship3Style";
 
-    public AisPacketKMLOutputSink(OutputStream outputStream) {
-        this.outputStream = outputStream;
-        this.filter = AisPacketFilters.ACCEPT;
-        this.style1Packets = AisPacketFilters.REJECT;
-        this.style2Packets = AisPacketFilters.REJECT;
-        this.style3Packets = AisPacketFilters.REJECT;
+    public AisPacketKMLOutputSink() {
+        this.filter = Predicate.TRUE;
+        this.style1Packets = Predicate.FALSE;
+        this.style2Packets = Predicate.FALSE;
+        this.style3Packets = Predicate.FALSE;
     }
 
     /**
      * Create a sink that writes KML contents to outputStream - but build the scenario only from
      * AisPackets which comply with the filter predicate.
      *
-     * @param outputStream the stream to write the KML output to.
      * @param filter a filter predicate for pre-filtering of AisPackets.
      */
-    public AisPacketKMLOutputSink(OutputStream outputStream, Predicate<AisPacket> filter) {
-        this.outputStream = outputStream;
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter) {
         this.filter = filter;
-        this.style1Packets = AisPacketFilters.REJECT;
-        this.style2Packets = AisPacketFilters.REJECT;
-        this.style3Packets = AisPacketFilters.REJECT;
+        this.style1Packets = Predicate.FALSE;
+        this.style2Packets = Predicate.FALSE;
+        this.style3Packets = Predicate.FALSE;
     }
 
     /**
      * Create a sink that writes KML contents to outputStream - but build the scenario only from
      * AisPackets which comply with the filter predicate.
      *
-     * @param outputStream the stream to write the KML output to.
-     * @param filter a filter predicate for pre-filtering of AisPackets.
-     * @param style1Packets Apply primary KML styling to packets which pass this predicate.
-     * @param style2Packets Apply secondary KML styling to packets which pass this predicate.
-     * @param style3Packets Apply tertiary KML styling to packets which pass this predicate.
+     * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param style1Packets Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param style2Packets Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param style3Packets Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMLOutputSink(OutputStream outputStream, Predicate<AisPacket> filter, Predicate<AisPacket> style1Packets, Predicate<AisPacket> style2Packets, Predicate<AisPacket> style3Packets) {
-        this.outputStream = outputStream;
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> style1Packets, Predicate<? super AisPacket> style2Packets, Predicate<? super AisPacket> style3Packets) {
         this.filter = filter;
         this.style1Packets = style1Packets;
         this.style2Packets = style2Packets;
         this.style3Packets = style3Packets;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void process(OutputStream stream, AisPacket packet, long count) throws IOException {
         if (filter.test(packet)) {
@@ -139,30 +119,25 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> implements Auto
         }
     }
 
+    public void footer(OutputStream outputStream, long count) throws IOException {
+        Kml kml = createKml();
+        kml.marshal(outputStream);
+    }
+
     public static void main(String[] args) throws IOException {
-        Path i = Paths.get("/Users/tbsalling/Documents/tbsalling.dk/Udvikling/SFS/demo/sprint-1/AisAbnormal/ais-ab-stat-builder/data/ais-sample.txt");
-        Path o = Paths.get("/Users/tbsalling/Desktop/test.kml");
-        FileOutputStream fis = new FileOutputStream(o.toFile());
-        AisPacketReader reader = AisPacketReader.createFromFile(i, true);
-        try (AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(fis, new Predicate<AisPacket>() {
+        Predicate<AisPacket> filter = new Predicate<AisPacket>() {
             @Override
             public boolean test(AisPacket aisPacket) {
                 return aisPacket.tryGetAisMessage().getUserId() == 477325700;
             }
-        }, AisPacketFilters.ACCEPT, AisPacketFilters.REJECT, AisPacketFilters.REJECT
-        )) {
+        };
+
+        AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(filter, Predicate.TRUE, Predicate.FALSE, Predicate.FALSE);
+
+        try (FileOutputStream fis = new FileOutputStream(Paths.get("/Users/tbsalling/Desktop/test.kml").toFile())) {
+            AisPacketReader reader = AisPacketReader.createFromFile(Paths.get("/Users/tbsalling/Desktop/ais-sample.txt"), true);
             reader.writeTo(fis, kmlOutputSink);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() throws IOException {
-        Kml kml = createKml();
-        kml.marshal(outputStream);
-        outputStream.close();
     }
 
     private Kml createKml() throws IOException {

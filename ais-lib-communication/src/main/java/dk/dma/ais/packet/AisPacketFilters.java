@@ -43,20 +43,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class AisPacketFilters extends AisPacketFiltersBase {
 
-    public static final Predicate<AisPacket> ACCEPT = new Predicate<AisPacket>() {
-        @Override
-        public boolean test(AisPacket aisPacket) {
-            return true;
-        }
-    };
-
-    public static final Predicate<AisPacket> REJECT = new Predicate<AisPacket>() {
-        @Override
-        public boolean test(AisPacket aisPacket) {
-            return false;
-        }
-    };
-
     public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
         requireNonNull(messageType);
         requireNonNull(predicate);

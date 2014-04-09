@@ -32,6 +32,7 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.util.function.Predicate;
 
 /**
  * Common sink that can be used to convert AIS packets to text.
@@ -181,4 +182,17 @@ public class AisPacketOutputSinks {
     public static OutputStreamSink<AisPacket> newTableSink(String columns, boolean writeHeader, String seperator) {
         return new AisPacketOutputSinkTable(columns, writeHeader, seperator);
     }
+
+    public static OutputStreamSink<AisPacket> newKmlSink() {
+        return new AisPacketKMLOutputSink();
+    }
+
+    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter) {
+        return new AisPacketKMLOutputSink(filter);
+    }
+
+    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> style1, Predicate<? super AisPacket> style2, Predicate<? super AisPacket> style3) {
+        return new AisPacketKMLOutputSink(filter, style1, style2, style3);
+    }
+
 }
