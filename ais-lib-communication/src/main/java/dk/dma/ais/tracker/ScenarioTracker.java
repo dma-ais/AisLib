@@ -16,14 +16,18 @@
 package dk.dma.ais.tracker;
 
 import com.google.common.collect.ImmutableSet;
+
+import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
+import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketStream;
 import dk.dma.ais.packet.AisPacketStream.Subscription;
 import dk.dma.enav.util.function.Consumer;
+
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -112,16 +116,26 @@ public class ScenarioTracker implements Tracker {
     }
 
     public void update(AisPacket p) {
-        AisMessage message = p.tryGetAisMessage();
-        int mmsi = message.getUserId();
-        Target target;
-        if (! targets.containsKey(mmsi)) {
-            target = new Target();
-            targets.put(mmsi, target);
-        } else {
-            target = targets.get(mmsi);
+        AisMessage message;
+        try {
+            message = p.getAisMessage();
+            int mmsi = message.getUserId();
+            Target target;
+            if (! targets.containsKey(mmsi)) {
+                target = new Target();
+                targets.put(mmsi, target);
+            } else {
+                target = targets.get(mmsi);
+            }
+            target.update(p);
+            
+            
+        } catch (AisMessageException | SixbitException e) {
+            // fail silently on unparsable packets 
+            //e.printStackTrace();
         }
-        target.update(p);
+        
+        
     }
 
     public void tagTarget(int mmsi, Object tag) {
@@ -183,7 +197,7 @@ public class ScenarioTracker implements Tracker {
                 float lat = (float) positionMessage.getPos().getLatitudeDouble();
                 float lon = (float) positionMessage.getPos().getLongitudeDouble();
                 int hdg = positionMessage.getTrueHeading();
-                long timestamp = positionMessage.getSourceTag().getTimestamp().getTime();
+                long timestamp = p.getBestTimestamp();
                 positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, hdg));
             } else if (message instanceof AisMessage5) {
                 AisMessage5 message5 = (AisMessage5) message;
