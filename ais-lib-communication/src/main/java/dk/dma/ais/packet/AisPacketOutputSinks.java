@@ -141,6 +141,11 @@ public class AisPacketOutputSinks {
             }
         }
     };
+    
+    /** A sink that transforms ais stream into kml. */
+    public static final OutputStreamSink<AisPacket> OUTPUT_TO_KML = newKmlSink();
+    
+    
 
     /**
      * Filters a list of packets according to their timestamp.
