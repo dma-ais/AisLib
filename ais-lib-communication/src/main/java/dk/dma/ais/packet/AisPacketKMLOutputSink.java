@@ -246,7 +246,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     private void createKmlMovementsFolder(Folder kmlNode) {
-        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargets();
+        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -260,7 +260,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             int c = 0;
             Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
             if (positionReportReports.size() > 0) {
-                Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getMmsi() + " " + target.getName()).withDescription("Movements for " + target.getMmsi());
+                Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
 
                 for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
                     Placemark placemark = targetFolder
@@ -295,7 +295,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     private void createKmlTracksFolder(Folder kmlNode, Predicate<ScenarioTracker.Target> trackFor) {
-        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargets();
+        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
         Folder tracksFolder = kmlNode.createAndAddFolder()
                 .withName("Tracks")

@@ -16,13 +16,13 @@
 package dk.dma.ais.tracker;
 
 import com.google.common.collect.ImmutableSet;
-
+import com.google.common.collect.Sets;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.ais.message.IPositionMessage;
+import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketStream;
@@ -31,9 +31,9 @@ import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Consumer;
-
 import org.apache.commons.lang.StringUtils;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
@@ -127,6 +127,19 @@ public class ScenarioTracker implements Tracker {
         return ImmutableSet.copyOf(targets.values());
     }
 
+    /**
+     * Return all targets involved in this scenario and with a known location (ie. located inside of the bounding box).
+     * @return
+     */
+    public Set<Target> getTargetsHavingPositionUpdates() {
+        return Sets.filter(getTargets(), new com.google.common.base.Predicate<Target>() {
+            @Override
+            public boolean apply(@Nullable Target target) {
+                return target.hasPosition();
+            }
+        });
+    }
+
     public void update(AisPacket p) {
         AisMessage message;
         try {
@@ -139,8 +152,8 @@ public class ScenarioTracker implements Tracker {
             } else {
                 target = targets.get(mmsi);
             }
-            if (message instanceof IPositionMessage) {
-                updateBoundingBox((IPositionMessage) message);
+            if (message instanceof IVesselPositionMessage) {
+                updateBoundingBox((IVesselPositionMessage) message);
             }
             target.update(p);
         } catch (AisMessageException | SixbitException e) {
@@ -157,12 +170,16 @@ public class ScenarioTracker implements Tracker {
 
     private BoundingBox boundingBox;
 
-    private void updateBoundingBox(IPositionMessage positionMessage) {
-        Position position = positionMessage.getPos().getGeoLocation();
-        if (boundingBox == null) {
-            boundingBox = BoundingBox.create(position, position, CoordinateSystem.CARTESIAN);
-        } else {
-            boundingBox = boundingBox.include(BoundingBox.create(position, position, CoordinateSystem.CARTESIAN));
+    private void updateBoundingBox(IVesselPositionMessage positionMessage) {
+        if (positionMessage.isPositionValid()) {
+            Position position = positionMessage.getValidPosition();
+            if (position != null) {
+                if (boundingBox == null) {
+                    boundingBox = BoundingBox.create(position, position, CoordinateSystem.CARTESIAN);
+                } else {
+                    boundingBox = boundingBox.include(BoundingBox.create(position, position, CoordinateSystem.CARTESIAN));
+                }
+            }
         }
     }
 
@@ -211,16 +228,22 @@ public class ScenarioTracker implements Tracker {
             return tags.contains(tag);
         }
 
+        public boolean hasPosition() {
+            return positionReports.size() > 0;
+        }
+
         private void update(AisPacket p) {
             AisMessage message = p.tryGetAisMessage();
             checkOrSetMmsi(message);
             if (message instanceof AisPositionMessage) {
                 AisPositionMessage positionMessage = (AisPositionMessage) message;
-                float lat = (float) positionMessage.getPos().getLatitudeDouble();
-                float lon = (float) positionMessage.getPos().getLongitudeDouble();
-                int hdg = positionMessage.getTrueHeading();
-                long timestamp = p.getBestTimestamp();
-                positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, hdg));
+                if (positionMessage.isPositionValid()) {
+                    float lat = (float) positionMessage.getPos().getLatitudeDouble();
+                    float lon = (float) positionMessage.getPos().getLongitudeDouble();
+                    int hdg = positionMessage.getTrueHeading();
+                    long timestamp = p.getBestTimestamp();
+                    positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, hdg));
+                }
             } else if (message instanceof AisMessage5) {
                 AisMessage5 message5 = (AisMessage5) message;
                 name = aisStringToJavaString(message5.getName());

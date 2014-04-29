@@ -200,6 +200,31 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         });
     }
 
+    /**
+     * Block position messages outside of given area; let all other messages pass.
+     *
+     * @param area The area that the position messages must reside inside.
+     * @return
+     */
+    @SuppressWarnings("unused")
+    public static Predicate<AisPacket> filterRelaxedOnMessagePositionWithin(final Area area) {
+        requireNonNull(area);
+        return new Predicate<AisPacket>() {
+            public boolean test(AisPacket packet) {
+                Position position = null;
+                AisMessage message = packet.tryGetAisMessage();
+                if (message instanceof IPositionMessage) {
+                    position = ((IPositionMessage) message).getPos().getGeoLocation();
+                }
+                return position == null ? true : area.contains(position);
+            }
+
+            public String toString() {
+                return "position within = " + area;
+            }
+        };
+    }
+
     @SuppressWarnings("unused")
     public static Predicate<AisPacket> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
         return new Predicate<AisPacket>() {
