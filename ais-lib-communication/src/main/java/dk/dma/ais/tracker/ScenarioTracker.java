@@ -22,10 +22,14 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.AisPositionMessage;
+import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketStream;
 import dk.dma.ais.packet.AisPacketStream.Subscription;
+import dk.dma.enav.model.geometry.BoundingBox;
+import dk.dma.enav.model.geometry.CoordinateSystem;
+import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Consumer;
 
 import org.apache.commons.lang.StringUtils;
@@ -108,6 +112,14 @@ public class ScenarioTracker implements Tracker {
     }
 
     /**
+     * Get bounding box containing all movements in this scenario.
+     * @return
+     */
+    public BoundingBox boundingBox() {
+        return boundingBox;
+    }
+
+    /**
      * Return all targets involved in this scenario.
      * @return
      */
@@ -127,15 +139,14 @@ public class ScenarioTracker implements Tracker {
             } else {
                 target = targets.get(mmsi);
             }
+            if (message instanceof IPositionMessage) {
+                updateBoundingBox((IPositionMessage) message);
+            }
             target.update(p);
-            
-            
         } catch (AisMessageException | SixbitException e) {
             // fail silently on unparsable packets 
             //e.printStackTrace();
         }
-        
-        
     }
 
     public void tagTarget(int mmsi, Object tag) {
@@ -143,6 +154,17 @@ public class ScenarioTracker implements Tracker {
     }
 
     private final Map<Integer, Target> targets = new TreeMap<>();
+
+    private BoundingBox boundingBox;
+
+    private void updateBoundingBox(IPositionMessage positionMessage) {
+        Position position = positionMessage.getPos().getGeoLocation();
+        if (boundingBox == null) {
+            boundingBox = BoundingBox.create(position, position, CoordinateSystem.CARTESIAN);
+        } else {
+            boundingBox = boundingBox.include(BoundingBox.create(position, position, CoordinateSystem.CARTESIAN));
+        }
+    }
 
     private static String aisStringToJavaString(String aisString) {
         return aisString.replace('@',' ').trim();

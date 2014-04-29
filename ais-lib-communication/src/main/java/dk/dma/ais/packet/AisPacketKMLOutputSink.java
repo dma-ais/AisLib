@@ -27,6 +27,7 @@ import de.micromata.opengis.kml.v_2_2_0.Style;
 import dk.dma.ais.tracker.ScenarioTracker;
 import dk.dma.ais.utils.coordinates.CoordinateConverter;
 import dk.dma.commons.util.io.OutputStreamSink;
+import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.util.function.Predicate;
 
 import java.io.FileOutputStream;
@@ -56,10 +57,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     /** Only AisPackets passing this filter will be passed to the scenarioTracker. */
     private final Predicate<? super AisPacket> filter;
 
-    // Style only
-    private final Predicate<? super AisPacket> style1Packets;
-    private final Predicate<? super AisPacket> style2Packets;
-    private final Predicate<? super AisPacket> style3Packets;
+    private final Predicate<? super AisPacket> primaryPacket;
+    private final Predicate<? super AisPacket> secondaryPacket;
+    private final Predicate<? super AisPacket> tertiaryPacket;
 
     private static final String STYLE1_TAG = "Ship1Style";
     private static final String STYLE2_TAG = "Ship2Style";
@@ -67,9 +67,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     public AisPacketKMLOutputSink() {
         this.filter = Predicate.TRUE;
-        this.style1Packets = Predicate.FALSE;
-        this.style2Packets = Predicate.FALSE;
-        this.style3Packets = Predicate.FALSE;
+        this.primaryPacket = Predicate.FALSE;
+        this.secondaryPacket = Predicate.FALSE;
+        this.tertiaryPacket = Predicate.FALSE;
     }
 
     /**
@@ -80,9 +80,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      */
     public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter) {
         this.filter = filter;
-        this.style1Packets = Predicate.FALSE;
-        this.style2Packets = Predicate.FALSE;
-        this.style3Packets = Predicate.FALSE;
+        this.primaryPacket = Predicate.FALSE;
+        this.secondaryPacket = Predicate.FALSE;
+        this.tertiaryPacket = Predicate.FALSE;
     }
 
     /**
@@ -90,15 +90,15 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * AisPackets which comply with the filter predicate.
      *
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param style1Packets Apply primary KML styling to targets which are updated by packets that pass this predicate.
-     * @param style2Packets Apply secondary KML styling to targets which are updated by packets that pass this predicate.
-     * @param style3Packets Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
+     * @param primaryPacket Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param secondaryPacket Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param tertiaryPacket Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> style1Packets, Predicate<? super AisPacket> style2Packets, Predicate<? super AisPacket> style3Packets) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> primaryPacket, Predicate<? super AisPacket> secondaryPacket, Predicate<? super AisPacket> tertiaryPacket) {
         this.filter = filter;
-        this.style1Packets = style1Packets;
-        this.style2Packets = style2Packets;
-        this.style3Packets = style3Packets;
+        this.primaryPacket = primaryPacket;
+        this.secondaryPacket = secondaryPacket;
+        this.tertiaryPacket = tertiaryPacket;
     }
 
     /** {@inheritDoc} */
@@ -107,13 +107,13 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         if (filter.test(packet)) {
             scenarioTracker.update(packet);
 
-            if (style1Packets.test(packet)) {
+            if (primaryPacket.test(packet)) {
                 scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE1_TAG);
             }
-            if (style2Packets.test(packet)) {
+            if (secondaryPacket.test(packet)) {
                 scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE2_TAG);
             }
-            if (style3Packets.test(packet)) {
+            if (tertiaryPacket.test(packet)) {
                 scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE3_TAG);
             }
         }
@@ -134,9 +134,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(filter, Predicate.TRUE, Predicate.FALSE, Predicate.FALSE);
 
-        try (FileOutputStream fis = new FileOutputStream(Paths.get("/Users/tbsalling/Desktop/test.kml").toFile())) {
+        try (FileOutputStream fos = new FileOutputStream(Paths.get("/Users/tbsalling/Desktop/test.kml").toFile())) {
             AisPacketReader reader = AisPacketReader.createFromFile(Paths.get("/Users/tbsalling/Desktop/ais-sample.txt"), true);
-            reader.writeTo(fis, kmlOutputSink);
+            reader.writeTo(fos, kmlOutputSink);
         }
     }
 
@@ -154,11 +154,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         Folder rootFolder = document.createAndAddFolder().withName(scenarioTracker.scenarioBegin().toString());
 
+        // Generate bounding box
+        createKmlBoundingBox(rootFolder);
+
         // Generate situation folder
         createKmlSituationFolder(rootFolder);
 
         // Generate tracks folder
-        createKmlTracksFolder(rootFolder);
+        createKmlTracksFolder(rootFolder, new Predicate<ScenarioTracker.Target>() {
+            @Override
+            public boolean test(ScenarioTracker.Target target) {
+                return target.isTagged(STYLE1_TAG) || target.isTagged(STYLE2_TAG);
+            }
+        });
 
         // Generate movements folder
         createKmlMovementsFolder(rootFolder);
@@ -167,12 +175,31 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     private void createKmlStyles(Document document) {
+
+        // For colors - http://www.zonums.com/gmaps/kml_color/
+
+        document
+            .createAndAddStyle()
+            .withId("bbox")
+            .createAndSetLineStyle()
+                .withColor("cccc00b0")
+                .withWidth(2.5);
+
+        Style shipDefaultStyle = document
+            .createAndAddStyle()
+            .withId("ShipDefaultStyle");
+        shipDefaultStyle.createAndSetLineStyle()
+                .withWidth(2)
+                .withColor("2014F0FA");
+        shipDefaultStyle.createAndSetPolyStyle()
+                .withColor("FF14F0FA");
+
         Style ship1Style = document
                 .createAndAddStyle()
                 .withId(STYLE1_TAG);
         ship1Style.createAndSetLineStyle()
             .withWidth(2)
-            .withColor("ff00ff00");
+            .withColor("8000ff00");
         ship1Style.createAndSetPolyStyle()
             .withColor("ff00ff00");
 
@@ -181,7 +208,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withId(STYLE2_TAG);
         ship2Style.createAndSetLineStyle()
             .withWidth(2)
-            .withColor("ff0000ff");
+            .withColor("800000ff");
         ship2Style.createAndSetPolyStyle()
             .withColor("ff0000ff");
 
@@ -190,9 +217,25 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withId(STYLE3_TAG);
         ship3Style.createAndSetLineStyle()
             .withWidth(2)
-            .withColor("ff7fffff");
+            .withColor("807fffff");
         ship3Style.createAndSetPolyStyle()
             .withColor("ff7fffff");
+    }
+
+    private void createKmlBoundingBox(Folder kmlNode) {
+        BoundingBox bbox = scenarioTracker.boundingBox();
+
+        kmlNode.createAndAddPlacemark()
+            .withId("bbox")
+            .withStyleUrl("#bbox")
+            .withName("Bounding box")
+            .withVisibility(true)
+            .createAndSetLinearRing()
+                .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat())
+                .addToCoordinates(bbox.getMaxLon(), bbox.getMinLat())
+                .addToCoordinates(bbox.getMinLon(), bbox.getMinLat())
+                .addToCoordinates(bbox.getMinLon(), bbox.getMaxLat())
+                .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat());
     }
 
     private void createKmlSituationFolder(Folder kmlNode) {
@@ -217,8 +260,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             int c = 0;
             Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
             if (positionReportReports.size() > 0) {
+                Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getMmsi() + " " + target.getName()).withDescription("Movements for " + target.getMmsi());
+
                 for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
-                    Placemark placemark = movementFolder
+                    Placemark placemark = targetFolder
                             .createAndAddPlacemark()
                             .withVisibility(true)
                             .withId(target.getMmsi() + "-" + c++).withName(target.getName());
@@ -249,7 +294,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private void createKmlTracksFolder(Folder kmlNode) {
+    private void createKmlTracksFolder(Folder kmlNode, Predicate<ScenarioTracker.Target> trackFor) {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargets();
 
         Folder tracksFolder = kmlNode.createAndAddFolder()
@@ -258,27 +303,37 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withVisibility(false);
 
         for (ScenarioTracker.Target target : targets) {
-            Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
-            if (positionReportReports.size() > 0) {
-                Placemark placemark = tracksFolder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
-                LineString lineString = placemark.createAndSetLineString();
-                for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
-                    lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
+            if (trackFor.test(target)) {
+                Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
+                if (positionReportReports.size() > 0) {
+                    Placemark placemark = tracksFolder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
+                    LineString lineString = placemark.createAndSetLineString();
+                    for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
+                        lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
+                    }
+                    addStyles(placemark, target);
                 }
-                addStyles(placemark, target);
             }
         }
     }
 
     private void addStyles(Placemark placemark, ScenarioTracker.Target target) {
+        boolean styleAdded = false;
+
         if (target.isTagged(STYLE1_TAG)) {
             placemark.withStyleUrl("#" + STYLE1_TAG);
+            styleAdded = true;
         }
         if (target.isTagged(STYLE2_TAG)) {
             placemark.withStyleUrl("#" + STYLE2_TAG);
+            styleAdded = true;
         }
         if (target.isTagged(STYLE3_TAG)) {
             placemark.withStyleUrl("#" + STYLE3_TAG);
+            styleAdded = true;
+        }
+        if (!styleAdded) {
+            placemark.withStyleUrl("#ShipDefaultStyle");
         }
     }
 
