@@ -232,6 +232,22 @@ public class ScenarioTracker implements Tracker {
             return positionReports.size() > 0;
         }
 
+        /** Return position at at time atTime - interpolated if no nearby report exists */
+        public PositionReport getPositionReportAt(Date atTime) {
+            PositionReport positionReportAt = positionReports.get(atTime);
+            if (positionReportAt == null) {
+                /* interpolate */
+                Date t1 = positionReports.lowerKey(atTime);
+                Date t2 = positionReports.higherKey(atTime);
+
+                /* TODO assume that t1 and t2 both exist. Otherwise we need to code a bit more */
+                positionReportAt = positionReports.get(t1);
+
+            }
+
+            return positionReportAt;
+        }
+
         private void update(AisPacket p) {
             AisMessage message = p.tryGetAisMessage();
             checkOrSetMmsi(message);

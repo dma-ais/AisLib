@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.packet;
 
+import com.google.common.collect.Sets;
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
 import de.micromata.opengis.kml.v_2_2_0.Document;
@@ -29,6 +30,7 @@ import dk.dma.ais.utils.coordinates.CoordinateConverter;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.util.function.Predicate;
+import net.jcip.annotations.NotThreadSafe;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,6 +38,7 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -49,6 +52,7 @@ import static java.lang.Math.toRadians;
  * When the sink is closed it dumps the entire target state to the output stream in KML format.
  *
  */
+@NotThreadSafe
 class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     /** The tracker which will be used to build the scenario that will be written as KML. */
@@ -57,19 +61,28 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     /** Only AisPackets passing this filter will be passed to the scenarioTracker. */
     private final Predicate<? super AisPacket> filter;
 
-    private final Predicate<? super AisPacket> primaryPacket;
-    private final Predicate<? super AisPacket> secondaryPacket;
-    private final Predicate<? super AisPacket> tertiaryPacket;
+    private final Predicate<? super AisPacket> isPrimaryTarget;
+    private final Predicate<? super AisPacket> isSecondaryTarget;
+    private final Predicate<? super AisPacket> isTertiaryTarget;
+    private final Predicate<? super AisPacket> triggerSnapshot;
 
     private static final String STYLE1_TAG = "Ship1Style";
     private static final String STYLE2_TAG = "Ship2Style";
     private static final String STYLE3_TAG = "Ship3Style";
 
+    private final Set<Long> snapshotTimes = Sets.newTreeSet();
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    static {
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
     public AisPacketKMLOutputSink() {
         this.filter = Predicate.TRUE;
-        this.primaryPacket = Predicate.FALSE;
-        this.secondaryPacket = Predicate.FALSE;
-        this.tertiaryPacket = Predicate.FALSE;
+        this.isPrimaryTarget = Predicate.FALSE;
+        this.isSecondaryTarget = Predicate.FALSE;
+        this.isTertiaryTarget = Predicate.FALSE;
+        this.triggerSnapshot = Predicate.FALSE;
     }
 
     /**
@@ -80,9 +93,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      */
     public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter) {
         this.filter = filter;
-        this.primaryPacket = Predicate.FALSE;
-        this.secondaryPacket = Predicate.FALSE;
-        this.tertiaryPacket = Predicate.FALSE;
+        this.isPrimaryTarget = Predicate.FALSE;
+        this.isSecondaryTarget = Predicate.FALSE;
+        this.isTertiaryTarget = Predicate.FALSE;
+        this.triggerSnapshot = Predicate.FALSE;
     }
 
     /**
@@ -90,15 +104,16 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * AisPackets which comply with the filter predicate.
      *
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param primaryPacket Apply primary KML styling to targets which are updated by packets that pass this predicate.
-     * @param secondaryPacket Apply secondary KML styling to targets which are updated by packets that pass this predicate.
-     * @param tertiaryPacket Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isTertiaryTarget Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> primaryPacket, Predicate<? super AisPacket> secondaryPacket, Predicate<? super AisPacket> tertiaryPacket) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot) {
         this.filter = filter;
-        this.primaryPacket = primaryPacket;
-        this.secondaryPacket = secondaryPacket;
-        this.tertiaryPacket = tertiaryPacket;
+        this.isPrimaryTarget = isPrimaryTarget;
+        this.isSecondaryTarget = isSecondaryTarget;
+        this.isTertiaryTarget = isTertiaryTarget;
+        this.triggerSnapshot = triggerSnapshot;
     }
 
     /** {@inheritDoc} */
@@ -107,14 +122,17 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         if (filter.test(packet)) {
             scenarioTracker.update(packet);
 
-            if (primaryPacket.test(packet)) {
+            if (isPrimaryTarget.test(packet)) {
                 scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE1_TAG);
             }
-            if (secondaryPacket.test(packet)) {
+            if (isSecondaryTarget.test(packet)) {
                 scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE2_TAG);
             }
-            if (tertiaryPacket.test(packet)) {
+            if (isTertiaryTarget.test(packet)) {
                 scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE3_TAG);
+            }
+            if (triggerSnapshot.test(packet)) {
+                this.snapshotTimes.add(packet.getBestTimestamp());
             }
         }
     }
@@ -132,7 +150,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             }
         };
 
-        AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(filter, Predicate.TRUE, Predicate.FALSE, Predicate.FALSE);
+        AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(filter, Predicate.TRUE, Predicate.FALSE, Predicate.FALSE, Predicate.FALSE);
 
         try (FileOutputStream fos = new FileOutputStream(Paths.get("/Users/tbsalling/Desktop/test.kml").toFile())) {
             AisPacketReader reader = AisPacketReader.createFromFile(Paths.get("/Users/tbsalling/Desktop/ais-sample.txt"), true);
@@ -158,7 +176,13 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         createKmlBoundingBox(rootFolder);
 
         // Generate situation folder
-        createKmlSituationFolder(rootFolder);
+        if (snapshotTimes.size() >= 1) {
+            createKmlSituationFolder(rootFolder, snapshotTimes.iterator().next());
+
+            if (snapshotTimes.size() > 1) {
+                System.err.println("Only generates KML snapshot folder for first timestamp marked.");
+            }
+        }
 
         // Generate tracks folder
         createKmlTracksFolder(rootFolder, new Predicate<ScenarioTracker.Target>() {
@@ -175,9 +199,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     private void createKmlStyles(Document document) {
-
         // For colors - http://www.zonums.com/gmaps/kml_color/
-
         document
             .createAndAddStyle()
             .withId("bbox")
@@ -238,18 +260,23 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat());
     }
 
-    private void createKmlSituationFolder(Folder kmlNode) {
-        kmlNode.createAndAddFolder()
-            .withName("Situation")
-            .withOpen(false)
-            .withVisibility(false);
+    private void createKmlSituationFolder(Folder kmlNode, long atTime) {
+        Folder situationFolder = kmlNode.createAndAddFolder()
+                .withName("Situation")
+                .withDescription(new Date(atTime).toString())
+                .withOpen(false)
+                .withVisibility(false);
+
+        Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
+
+        for (ScenarioTracker.Target target : targets) {
+            ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(atTime));
+            createKmlShipPlacemark(situationFolder, target.getMmsi(), target.getName(), positionReport.getTimestamp(), positionReport.getTimestamp() + 7000, positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getHeading(), target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), getStyle(target));
+        }
     }
 
     private void createKmlMovementsFolder(Folder kmlNode) {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         Folder movementFolder = kmlNode.createAndAddFolder()
                 .withName("Movements")
@@ -263,32 +290,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
 
                 for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
-                    Placemark placemark = targetFolder
-                            .createAndAddPlacemark()
-                            .withVisibility(true)
-                            .withId(target.getMmsi() + "-" + c++).withName(target.getName());
-
-                    Boundary boundary = placemark.createAndSetPolygon().createAndSetOuterBoundaryIs();
-                    boundary.setLinearRing(
-                            createKmlShipGeometry(
-                                    boundary,
-                                    positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getHeading(),
-                                    target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard()
-                            )
-                    );
-
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeZone(TimeZone.getTimeZone("Europe/Copenhagen"));
-                    calendar.setTimeInMillis(positionReport.getTimestamp());
-                    String begin = dateFormat.format(calendar.getTime());
-                    calendar.setTimeInMillis(positionReport.getTimestamp() + 7000);
-                    String end = dateFormat.format(calendar.getTime());
-
-                    placemark.createAndSetTimeSpan()
-                            .withBegin(begin)
-                            .withEnd(end);
-
-                    addStyles(placemark, target);
+                    createKmlShipPlacemark(targetFolder, target.getMmsi(), target.getName(), positionReport.getTimestamp(), positionReport.getTimestamp() + 7000, positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getHeading(),
+                            target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), getStyle(target));
                 }
             }
         }
@@ -311,37 +314,51 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
                         lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
                     }
-                    addStyles(placemark, target);
+                    placemark.withStyleUrl(getStyle(target));
                 }
             }
         }
     }
 
-    private void addStyles(Placemark placemark, ScenarioTracker.Target target) {
-        boolean styleAdded = false;
-
+    private static String getStyle(ScenarioTracker.Target target) {
         if (target.isTagged(STYLE1_TAG)) {
-            placemark.withStyleUrl("#" + STYLE1_TAG);
-            styleAdded = true;
+            return STYLE1_TAG;
+        } else if (target.isTagged(STYLE2_TAG)) {
+            return STYLE2_TAG;
+        } else if (target.isTagged(STYLE3_TAG)) {
+            return STYLE3_TAG;
+        } else {
+            return "ShipDefaultStyle";
         }
-        if (target.isTagged(STYLE2_TAG)) {
-            placemark.withStyleUrl("#" + STYLE2_TAG);
-            styleAdded = true;
-        }
-        if (target.isTagged(STYLE3_TAG)) {
-            placemark.withStyleUrl("#" + STYLE3_TAG);
-            styleAdded = true;
-        }
-        if (!styleAdded) {
-            placemark.withStyleUrl("#ShipDefaultStyle");
-        }
+    }
+
+    private static void createKmlShipPlacemark(Folder targetFolder, String mmsi, String name, long timespanBegin, long timespanEnd, float latitude, float longitude, int heading, int toBow, int toStern, int toPort, int toStarboard, String style) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("Europe/Copenhagen"));
+        calendar.setTimeInMillis(timespanBegin);
+        String begin = DATE_FORMAT.format(calendar.getTime());
+        calendar.setTimeInMillis(timespanEnd);
+        String end = DATE_FORMAT.format(calendar.getTime());
+
+        Placemark placemark = targetFolder
+                .createAndAddPlacemark()
+                .withVisibility(true)
+                .withId(mmsi)
+                .withName(name)
+                .withStyleUrl("#" + style);
+
+        placemark.createAndSetTimeSpan()
+                .withBegin(begin)
+                .withEnd(end);
+
+        createKmlShipGeometry(placemark, latitude, longitude, heading, toBow, toStern, toPort, toStarboard);
     }
 
     /**
      * Create a KML geometry to symbolize a ship at the given position, at the given heading and with the
      * given dimensions.
      *
-     * @param parentPlacemark
+     * @param placemark Parent node
      * @param lat Ship's positional latitude in degrees.
      * @param lon Ship's positional longitude in degrees.
      * @param heading Ship's heading in degrees; 0 being north, 90 being east.
@@ -351,7 +368,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * @param toStarbord Distance in meters from ship's position reference to starboard side at maximum beam.
      * @return
      */
-    private static LinearRing createKmlShipGeometry(Boundary parentPlacemark, double lat, double lon, int heading, int toBow /* A */, int toStern /* B */, int toPort /* C */, int toStarbord /* D */) {
+    private static Boundary createKmlShipGeometry(Placemark placemark, double lat, double lon, int heading, int toBow /* A */, int toStern /* B */, int toPort /* C */, int toStarbord /* D */) {
         // If the ship dimensions are not found then create a small ship
         if (toBow < 0 || toStern < 0) {
             toBow = 20;
@@ -389,7 +406,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
 
         // Convert ship coordinates into geographic coordinates and a KML geometry
-        LinearRing shipGeometry = parentPlacemark
+        LinearRing shipGeometry = placemark
             .createAndSetLinearRing()
             .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
 
@@ -398,7 +415,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.x, point.y), coordinateConverter.y2Lat(point.x, point.y));
         }
 
-        return shipGeometry;
+        Boundary boundary = placemark.createAndSetPolygon().createAndSetOuterBoundaryIs();
+        boundary.setLinearRing(shipGeometry);
+
+        return boundary;
     }
 
     private static final class Point { double x, y; }
