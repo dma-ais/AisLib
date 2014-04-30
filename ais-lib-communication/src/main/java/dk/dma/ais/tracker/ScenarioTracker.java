@@ -30,6 +30,7 @@ import dk.dma.ais.packet.AisPacketStream.Subscription;
 import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.model.geometry.PositionTime;
 import dk.dma.enav.util.function.Consumer;
 import org.apache.commons.lang.StringUtils;
 
@@ -237,14 +238,11 @@ public class ScenarioTracker implements Tracker {
             PositionReport positionReportAt = positionReports.get(atTime);
             if (positionReportAt == null) {
                 /* interpolate */
-                Date t1 = positionReports.lowerKey(atTime);
-                Date t2 = positionReports.higherKey(atTime);
-
+                PositionReport pr1 = positionReports.lowerEntry(atTime).getValue();
+                PositionReport pr2 = positionReports.higherEntry(atTime).getValue();
                 /* TODO assume that t1 and t2 both exist. Otherwise we need to code a bit more */
-                positionReportAt = positionReports.get(t1);
-
+                positionReportAt = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getHeading());
             }
-
             return positionReportAt;
         }
 
@@ -288,32 +286,37 @@ public class ScenarioTracker implements Tracker {
         private final TreeMap<Date, PositionReport> positionReports = new TreeMap<>();
 
         public final class PositionReport {
-            private PositionReport(long timestamp, float latitude, float longitude, int heading) {
-                this.timestamp = timestamp;
-                this.latitude = latitude;
-                this.longitude = longitude;
+            private PositionReport(PositionTime pt, int heading) {
+                this.positionTime = pt;
                 this.heading = heading;
             }
 
+            private PositionReport(long timestamp, float latitude, float longitude, int heading) {
+                this.positionTime = PositionTime.create(latitude, longitude, timestamp);
+                this.heading = heading;
+            }
+
+            public PositionTime getPositionTime() {
+                return positionTime;
+            }
+
             public long getTimestamp() {
-                return timestamp;
+                return positionTime.getTime();
             }
 
-            public float getLatitude() {
-                return latitude;
+            public double getLatitude() {
+                return positionTime.getLatitude();
             }
 
-            public float getLongitude() {
-                return longitude;
+            public double getLongitude() {
+                return positionTime.getLongitude();
             }
 
             public int getHeading() {
                 return heading;
             }
 
-            private final long timestamp;
-            private final float latitude;
-            private final float longitude;
+            private final PositionTime positionTime;
             private final int heading;
         }
     }

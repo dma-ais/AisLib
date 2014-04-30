@@ -269,8 +269,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
+        final Date t = new Date(atTime);
         for (ScenarioTracker.Target target : targets) {
-            ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(atTime));
+            ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(t);
             createKmlShipPlacemark(situationFolder, target.getMmsi(), target.getName(), positionReport.getTimestamp(), positionReport.getTimestamp() + 7000, positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getHeading(), target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), getStyle(target));
         }
     }
@@ -332,7 +333,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private static void createKmlShipPlacemark(Folder targetFolder, String mmsi, String name, long timespanBegin, long timespanEnd, float latitude, float longitude, int heading, int toBow, int toStern, int toPort, int toStarboard, String style) {
+    private static void createKmlShipPlacemark(Folder targetFolder, String mmsi, String name, long timespanBegin, long timespanEnd, double latitude, double longitude, int heading, int toBow, int toStern, int toPort, int toStarboard, String style) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("Europe/Copenhagen"));
         calendar.setTimeInMillis(timespanBegin);

@@ -16,6 +16,7 @@
 
 package dk.dma.ais.tracker;
 
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,9 +25,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Created by tbsalling on 07/04/14.
@@ -87,6 +90,49 @@ public class ScenarioTrackerTest {
         assertEquals("212204000", targets[2].getName());
         assertEquals("219000119", targets[3].getName());
         assertEquals("MOSVIK", targets[30].getName());
+    }
+
+    @Test
+    public void testGetPositionReportAt() {
+        final String[] NMEA_TEST_STRINGS = {
+            // GatehouseSourceTag [baseMmsi=2190067, country=DK, region=, timestamp=Thu Apr 10 15:30:38 CEST 2014]
+            // [msgId=1, repeat=0, userId=219000606, cog=2010, navStatus=0, pos=(33024530,6010902) = (33024530,6010902), posAcc=1, raim=0, specialManIndicator=0, rot=0, sog=108, spare=0, syncState=1, trueHeading=200, utcSec=60, slotTimeout=2, subMessage=1427]
+            "$PGHP,1,2014,4,10,13,30,38,88,219,,2190067,1,26*1E\r\n" +
+            "!BSVDM,1,1,,B,13@ng7P01dPeo0dOOb4WnVAp0`FC,0*26",
+
+            // GatehouseSourceTag [baseMmsi=2190067, country=DK, region=, timestamp=Thu Apr 10 15:31:18 CEST 2014]
+            // [msgId=1, repeat=0, userId=219000606, cog=2010, navStatus=0, pos=(33023417,6010117) = (33023417,6010117), posAcc=1, raim=0, specialManIndicator=0, rot=0, sog=108, spare=0, syncState=1, trueHeading=199, utcSec=60, slotTimeout=0, subMessage=2263]
+            "$PGHP,1,2014,4,10,13,31,18,678,219,,2190067,1,03*23\r\n" +
+            "!BSVDM,1,1,,B,13@ng7P01dPen`:OOUfGnV?p0PSG,0*03"
+        };
+
+        assertEquals(0, scenarioTracker.getTargets().size());
+
+        scenarioTracker.update(AisPacket.from(NMEA_TEST_STRINGS[0]));
+        scenarioTracker.update(AisPacket.from(NMEA_TEST_STRINGS[1]));
+
+        assertEquals(1, scenarioTracker.getTargets().size());
+        ScenarioTracker.Target target = scenarioTracker.getTargets().iterator().next();
+
+        Iterator<ScenarioTracker.Target.PositionReport> positionReportIterator = target.getPositionReports().iterator();
+        ScenarioTracker.Target.PositionReport pr1 = positionReportIterator.next();
+        ScenarioTracker.Target.PositionReport pr2 = positionReportIterator.next();
+        final long t1 = pr1.getTimestamp();
+        final long t2 = pr2.getTimestamp();
+
+        assertNotEquals(pr1.getLatitude(), pr2.getLatitude(), 0.001);
+        assertNotEquals(pr1.getLongitude(), pr2.getLongitude(), 0.001);
+        assertEquals(1397136638088L, t1);
+        assertEquals(1397136678678L, t2);
+
+        final long t = (t2-t1)/2 + t1;  // Half-way between t1 and t2
+        assertEquals(1397136658383L, t);
+
+        ScenarioTracker.Target.PositionReport interpolatedPosition = target.getPositionReportAt(new Date(t));
+        assertEquals((pr1.getLatitude() + pr2.getLatitude())/2, interpolatedPosition.getLatitude(), 1e-16);
+        assertEquals((pr1.getLongitude() + pr2.getLongitude())/2, interpolatedPosition.getLongitude(), 1e-16);
+        assertEquals(200, interpolatedPosition.getHeading());
+        assertEquals(t, interpolatedPosition.getTimestamp());
     }
 
 }
