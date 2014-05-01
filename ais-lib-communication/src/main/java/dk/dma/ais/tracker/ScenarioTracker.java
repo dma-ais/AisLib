@@ -233,15 +233,20 @@ public class ScenarioTracker implements Tracker {
             return positionReports.size() > 0;
         }
 
-        /** Return position at at time atTime - interpolated if no nearby report exists */
+        /** Return position at at time atTime - interpolate or dead reckon if no nearby report exists */
         public PositionReport getPositionReportAt(Date atTime) {
             PositionReport positionReportAt = positionReports.get(atTime);
             if (positionReportAt == null) {
-                /* interpolate */
+                /* no position report at desired time - will estime using interpolation or dead reckoning */
                 PositionReport pr1 = positionReports.lowerEntry(atTime).getValue();
-                PositionReport pr2 = positionReports.higherEntry(atTime).getValue();
-                /* TODO assume that t1 and t2 both exist. Otherwise we need to code a bit more */
-                positionReportAt = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getHeading());
+                PositionReport pr2;
+                Map.Entry<Date, PositionReport> higherEntry = positionReports.higherEntry(atTime);
+                if (higherEntry != null) {
+                    pr2 = higherEntry.getValue();
+                    positionReportAt = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading());
+                } else {
+                    positionReportAt = new PositionReport(PositionTime.createExtrapolated(pr1.getPositionTime(), pr1.getCog(), pr1.getSog(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading());
+                }
             }
             return positionReportAt;
         }
@@ -252,11 +257,13 @@ public class ScenarioTracker implements Tracker {
             if (message instanceof AisPositionMessage) {
                 AisPositionMessage positionMessage = (AisPositionMessage) message;
                 if (positionMessage.isPositionValid()) {
-                    float lat = (float) positionMessage.getPos().getLatitudeDouble();
-                    float lon = (float) positionMessage.getPos().getLongitudeDouble();
-                    int hdg = positionMessage.getTrueHeading();
-                    long timestamp = p.getBestTimestamp();
-                    positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, hdg));
+                    final float lat = (float) positionMessage.getPos().getLatitudeDouble();
+                    final float lon = (float) positionMessage.getPos().getLongitudeDouble();
+                    final int hdg = positionMessage.getTrueHeading();
+                    final float cog = positionMessage.getCog() / 10.0f;
+                    final float sog = positionMessage.getSog() / 10.0f;
+                    final long timestamp = p.getBestTimestamp();
+                    positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, cog, sog, hdg));
                 }
             } else if (message instanceof AisMessage5) {
                 AisMessage5 message5 = (AisMessage5) message;
@@ -286,13 +293,17 @@ public class ScenarioTracker implements Tracker {
         private final TreeMap<Date, PositionReport> positionReports = new TreeMap<>();
 
         public final class PositionReport {
-            private PositionReport(PositionTime pt, int heading) {
+            private PositionReport(PositionTime pt, float cog, float sog, int heading) {
                 this.positionTime = pt;
+                this.cog = cog;
+                this.sog = sog;
                 this.heading = heading;
             }
 
-            private PositionReport(long timestamp, float latitude, float longitude, int heading) {
+            private PositionReport(long timestamp, float latitude, float longitude, float cog, float sog, int heading) {
                 this.positionTime = PositionTime.create(latitude, longitude, timestamp);
+                this.cog = cog;
+                this.sog = sog;
                 this.heading = heading;
             }
 
@@ -312,11 +323,21 @@ public class ScenarioTracker implements Tracker {
                 return positionTime.getLongitude();
             }
 
+            public float getCog() {
+                return cog;
+            }
+
+            public float getSog() {
+                return sog;
+            }
+
             public int getHeading() {
                 return heading;
             }
 
             private final PositionTime positionTime;
+            private final float cog;
+            private final float sog;
             private final int heading;
         }
     }

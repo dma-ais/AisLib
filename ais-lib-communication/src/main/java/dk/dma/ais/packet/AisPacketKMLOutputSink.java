@@ -26,9 +26,9 @@ import de.micromata.opengis.kml.v_2_2_0.LinearRing;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Style;
 import dk.dma.ais.tracker.ScenarioTracker;
-import dk.dma.ais.utils.coordinates.CoordinateConverter;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.BoundingBox;
+import dk.dma.enav.model.geometry.util.CoordinateConverter;
 import dk.dma.enav.util.function.Predicate;
 import net.jcip.annotations.NotThreadSafe;
 
@@ -267,12 +267,15 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withOpen(false)
                 .withVisibility(false);
 
+        BoundingBox bbox = scenarioTracker.boundingBox();
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
         final Date t = new Date(atTime);
         for (ScenarioTracker.Target target : targets) {
-            ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(t);
-            createKmlShipPlacemark(situationFolder, target.getMmsi(), target.getName(), positionReport.getTimestamp(), positionReport.getTimestamp() + 7000, positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getHeading(), target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), getStyle(target));
+            ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t);
+            if (bbox.contains(estimatedPosition.getPositionTime())) {
+                createKmlShipPlacemark(situationFolder, target.getMmsi(), target.getName(), estimatedPosition.getTimestamp(), estimatedPosition.getTimestamp() + 7000, estimatedPosition.getLatitude(), estimatedPosition.getLongitude(), estimatedPosition.getHeading(), target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), getStyle(target));
+            }
         }
     }
 
