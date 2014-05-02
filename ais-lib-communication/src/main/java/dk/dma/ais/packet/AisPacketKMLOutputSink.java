@@ -28,7 +28,9 @@ import de.micromata.opengis.kml.v_2_2_0.Style;
 import dk.dma.ais.tracker.ScenarioTracker;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.BoundingBox;
-import dk.dma.enav.model.geometry.util.CoordinateConverter;
+import dk.dma.enav.model.geometry.Ellipse;
+import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.util.CoordinateConverter;
 import dk.dma.enav.util.function.Predicate;
 import net.jcip.annotations.NotThreadSafe;
 
@@ -39,9 +41,11 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import static dk.dma.enav.safety.SafetyZones.safetyZone;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
@@ -274,7 +278,24 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         for (ScenarioTracker.Target target : targets) {
             ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t);
             if (bbox.contains(estimatedPosition.getPositionTime())) {
-                createKmlShipPlacemark(situationFolder, target.getMmsi(), target.getName(), estimatedPosition.getTimestamp(), estimatedPosition.getTimestamp() + 7000, estimatedPosition.getLatitude(), estimatedPosition.getLongitude(), estimatedPosition.getHeading(), target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), getStyle(target));
+                createKmlShipPlacemark(
+                    situationFolder,
+                    target.getMmsi(),
+                    target.getName(),
+                    estimatedPosition.getTimestamp(),
+                    estimatedPosition.getTimestamp() + 7000,
+                    estimatedPosition.getLatitude(),
+                    estimatedPosition.getLongitude(),
+                    estimatedPosition.getCog(),
+                    estimatedPosition.getSog(),
+                    estimatedPosition.getHeading(),
+                    target.getToBow(),
+                    target.getToStern(),
+                    target.getToPort(),
+                    target.getToStarboard(),
+                    target.isTagged(STYLE1_TAG),
+                    getStyle(target)
+                );
             }
         }
     }
@@ -294,8 +315,24 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
 
                 for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
-                    createKmlShipPlacemark(targetFolder, target.getMmsi(), target.getName(), positionReport.getTimestamp(), positionReport.getTimestamp() + 7000, positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getHeading(),
-                            target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), getStyle(target));
+                    createKmlShipPlacemark(
+                            targetFolder,
+                            target.getMmsi(),
+                            target.getName(),
+                            positionReport.getTimestamp(),
+                            positionReport.getTimestamp() + 7000,
+                            positionReport.getLatitude(),
+                            positionReport.getLongitude(),
+                            positionReport.getCog(),
+                            positionReport.getSog(),
+                            positionReport.getHeading(),
+                            target.getToBow(),
+                            target.getToStern(),
+                            target.getToPort(),
+                            target.getToStarboard(),
+                            target.isTagged(STYLE1_TAG),
+                            getStyle(target)
+                    );
                 }
             }
         }
@@ -336,7 +373,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private static void createKmlShipPlacemark(Folder targetFolder, String mmsi, String name, long timespanBegin, long timespanEnd, double latitude, double longitude, int heading, int toBow, int toStern, int toPort, int toStarboard, String style) {
+    private static void createKmlShipPlacemark(Folder targetFolder, String mmsi, String name, long timespanBegin, long timespanEnd, double latitude, double longitude, float cog, float sog, int heading, float toBow, float toStern, float toPort, float toStarboard, boolean safetyZoneEllipse, String style) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("Europe/Copenhagen"));
         calendar.setTimeInMillis(timespanBegin);
@@ -344,35 +381,71 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         calendar.setTimeInMillis(timespanEnd);
         String end = DATE_FORMAT.format(calendar.getTime());
 
-        Placemark placemark = targetFolder
+        Placemark placemarkForShip = targetFolder
                 .createAndAddPlacemark()
                 .withVisibility(true)
                 .withId(mmsi)
                 .withName(name)
                 .withStyleUrl("#" + style);
 
-        placemark.createAndSetTimeSpan()
+        placemarkForShip.createAndSetTimeSpan()
                 .withBegin(begin)
                 .withEnd(end);
 
-        createKmlShipGeometry(placemark, latitude, longitude, heading, toBow, toStern, toPort, toStarboard);
+        addKmlShipGeometry(placemarkForShip, latitude, longitude, heading, toBow, toStern, toPort, toStarboard);
+
+        if (safetyZoneEllipse) {
+            Placemark placemarkForEllipse = targetFolder
+                    .createAndAddPlacemark()
+                    .withVisibility(true)
+                    .withId(mmsi + "-ellipse")
+                    .withName(name + "'s ellipse")
+                    .withStyleUrl("#" + style);
+
+            placemarkForEllipse.createAndSetTimeSpan()
+                    .withBegin(begin)
+                    .withEnd(end);
+
+            addKmlEllipseGeometry(placemarkForEllipse, latitude, longitude, cog, sog, toStern+toBow, toPort+toStarboard, toStern, toStarboard);
+        }
     }
 
     /**
-     * Create a KML geometry to symbolize a ship at the given position, at the given heading and with the
-     * given dimensions.
-     *
-     * @param placemark Parent node
-     * @param lat Ship's positional latitude in degrees.
-     * @param lon Ship's positional longitude in degrees.
-     * @param heading Ship's heading in degrees; 0 being north, 90 being east.
-     * @param toBow Distance in meters from ship's position reference to ship's bow.
-     * @param toStern Distance in meters from ship's position reference to ship's stern.
-     * @param toPort Distance in meters from ship's position reference to port side at maximum beam.
-     * @param toStarbord Distance in meters from ship's position reference to starboard side at maximum beam.
-     * @return
+     * Create a KML geometry to symbolize a safety zone ellipses.
      */
-    private static Boundary createKmlShipGeometry(Placemark placemark, double lat, double lon, int heading, int toBow /* A */, int toStern /* B */, int toPort /* C */, int toStarbord /* D */) {
+    private static void addKmlEllipseGeometry(Placemark placemark, double latitude, double longitude, float cog, float sog, float loa, float beam, float dimStern, float dimStarbord) {
+        Position p = Position.create(latitude, longitude);
+        Ellipse safetyZone = safetyZone(p, p, cog, sog, loa, beam, dimStern, dimStarbord);
+
+        List<Position> perimeter = safetyZone.samplePerimeter(64);
+
+        // Convert points into geographic coordinates and a KML geometry
+        LinearRing shipGeometry = placemark
+                .createAndSetLinearRing()
+                .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+
+        for (Position position : perimeter) {
+            shipGeometry.addToCoordinates(position.getLongitude(), position.getLatitude());
+        }
+        // Close linear ring
+        shipGeometry.addToCoordinates(perimeter.get(0).getLongitude(), perimeter.get(0).getLatitude());
+    }
+
+    /**
+    * Create a KML geometry to symbolize a ship at the given position, at the given heading and with the
+    * given dimensions.
+    *
+    * @param placemark Parent node
+    * @param lat Ship's positional latitude in degrees.
+    * @param lon Ship's positional longitude in degrees.
+    * @param heading Ship's heading in degrees; 0 being north, 90 being east.
+    * @param toBow Distance in meters from ship's position reference to ship's bow.
+    * @param toStern Distance in meters from ship's position reference to ship's stern.
+    * @param toPort Distance in meters from ship's position reference to port side at maximum beam.
+    * @param toStarbord Distance in meters from ship's position reference to starboard side at maximum beam.
+    * @return
+    */
+    private static void addKmlShipGeometry(Placemark placemark, double lat, double lon, float heading, float toBow /* A */, float toStern /* B */, float toPort /* C */, float toStarbord /* D */) {
         // If the ship dimensions are not found then create a small ship
         if (toBow < 0 || toStern < 0) {
             toBow = 20;
@@ -383,10 +456,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             toStarbord = toPort;
         }
 
-        int szA = toBow;
-        int szB = toStern;
-        int szC = toPort;
-        int szD = toStarbord;
+        float szA = toBow;
+        float szB = toStern;
+        float szC = toPort;
+        float szD = toStarbord;
 
         // The ship consists of 5 points which are stored in shipPnts()
         // To begin with the points are in meters
@@ -415,14 +488,14 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
 
         CoordinateConverter coordinateConverter = new CoordinateConverter(lon, lat);
+        Boundary boundary = placemark.createAndSetPolygon().createAndSetOuterBoundaryIs();
+
+        boundary.setLinearRing(shipGeometry);
         for (Point point : points) {
             shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.x, point.y), coordinateConverter.y2Lat(point.x, point.y));
         }
-
-        Boundary boundary = placemark.createAndSetPolygon().createAndSetOuterBoundaryIs();
-        boundary.setLinearRing(shipGeometry);
-
-        return boundary;
+        // Close linear ring
+        shipGeometry.addToCoordinates(coordinateConverter.x2Lon(points[0].x, points[0].y), coordinateConverter.y2Lat(points[0].x, points[0].y));
     }
 
     private static final class Point { double x, y; }

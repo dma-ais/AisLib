@@ -62,6 +62,11 @@
       <version>0.1</version>
     </dependency>
     <dependency>
+      <groupId>dk.dma.enav</groupId>
+      <artifactId>enav-util</artifactId>
+      <version>0.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>dk.dma.3rdparty</groupId>
       <artifactId>jsr166e</artifactId>
       <version>${dependencies.jsr166e.version}</version>
