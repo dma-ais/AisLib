@@ -32,6 +32,7 @@ import dk.dma.enav.model.geometry.Ellipse;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.CoordinateConverter;
 import dk.dma.enav.util.function.Predicate;
+import dk.dma.enav.util.geometry.Point;
 import net.jcip.annotations.NotThreadSafe;
 
 import java.io.FileOutputStream;
@@ -465,21 +466,17 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         // To begin with the points are in meters
         Point[] points = new Point[5];
         
-        points[0] = new Point(); points[0].x = -szB;                         points[0].y = szC;                 // stern port
-        points[1] = new Point(); points[1].x = points[0].x + 0.85*(szA+szB); points[1].y = points[0].y;
-        points[2] = new Point(); points[2].x = szA;                          points[2].y = szC - (szC+szD)/2.0; // bow
-        points[3] = new Point(); points[3].x = points[1].x;                  points[3].y = -szD;
-        points[4] = new Point(); points[4].x = -szB;                         points[4].y = -szD;                // stern starboard
+        points[0] = new Point(-szB,                  szC);                 // stern port
+        points[1] = new Point(-szB + 0.85*(szA+szB), szC);
+        points[2] = new Point(szA,                   szC - (szC+szD)/2.0); // bow
+        points[3] = new Point(-szB + 0.85*(szA+szB), -szD);
+        points[4] = new Point(-szB,                  -szD);                // stern starboard
 
         // Rotate ship. Each ship has its own coordinate system with
         // origin in the ais-position of the ship
-        double theta = toRadians(CoordinateConverter.compass2cartesian(heading));
-
-        for (Point point : points) {
-            double x = point.x * cos(theta) + point.y * sin(theta);
-            double y = point.x * sin(theta) + point.y * cos(theta);
-            point.x = x;
-            point.y = y;
+        double thetaDeg = CoordinateConverter.compass2cartesian(heading);
+        for (int i = 0; i < points.length; i++) {
+            points[i] = points[i].rotate(Point.ORIGIN, thetaDeg);
         }
 
         // Convert ship coordinates into geographic coordinates and a KML geometry
@@ -492,12 +489,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         boundary.setLinearRing(shipGeometry);
         for (Point point : points) {
-            shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.x, point.y), coordinateConverter.y2Lat(point.x, point.y));
+            shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.getX(), point.getY()), coordinateConverter.y2Lat(point.getX(), point.getY()));
         }
         // Close linear ring
-        shipGeometry.addToCoordinates(coordinateConverter.x2Lon(points[0].x, points[0].y), coordinateConverter.y2Lat(points[0].x, points[0].y));
+        shipGeometry.addToCoordinates(coordinateConverter.x2Lon(points[0].getX(), points[0].getY()), coordinateConverter.y2Lat(points[0].getX(), points[0].getY()));
     }
-
-    private static final class Point { double x, y; }
-
 }
