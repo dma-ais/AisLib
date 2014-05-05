@@ -47,9 +47,6 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import static dk.dma.enav.safety.SafetyZones.safetyZone;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-import static java.lang.Math.toRadians;
 
 /**
  * This class receives AisPacket and use them to build a scenario
@@ -75,12 +72,17 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private static final String STYLE2_TAG = "Ship2Style";
     private static final String STYLE3_TAG = "Ship3Style";
 
+    private static final String ESTIMATED_EXTENSION = "Estimated";
+
     private final Set<Long> snapshotTimes = Sets.newTreeSet();
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
+
+    /** Timespan for KML positions */
+    private static final int KML_POSITION_TIMESPAN_SECS = 1;
 
     public AisPacketKMLOutputSink() {
         this.filter = Predicate.TRUE;
@@ -167,10 +169,17 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         Kml kml = new Kml();
 
         Document document = kml.createAndSetDocument()
-                .withDescription("Scenario starting " + scenarioTracker.scenarioBegin()
-                        + " and ending " + scenarioTracker.scenarioEnd())
-                .withName("Abnormal event")
-                .withOpen(true);
+            .withDescription("Scenario starting " + scenarioTracker.scenarioBegin() + " and ending " + scenarioTracker.scenarioEnd())
+            .withName("Abnormal event")
+            .withOpen(true);
+
+        document.createAndSetCamera()
+                .withAltitude(1000)
+                .withHeading(0)
+                .withTilt(0)
+                .withLatitude((scenarioTracker.boundingBox().getMaxLat() + scenarioTracker.boundingBox().getMinLat())/2.0)
+                .withLongitude((scenarioTracker.boundingBox().getMaxLon() + scenarioTracker.boundingBox().getMinLon())/2.0)
+                .withAltitudeMode(AltitudeMode.ABSOLUTE);
 
         // Create all ship styles
         createKmlStyles(document);
@@ -203,7 +212,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         return kml;
     }
 
-    private void createKmlStyles(Document document) {
+    private static void createKmlStyles(Document document) {
         // For colors - http://www.zonums.com/gmaps/kml_color/
         document
             .createAndAddStyle()
@@ -212,41 +221,26 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withColor("cccc00b0")
                 .withWidth(2.5);
 
-        Style shipDefaultStyle = document
+        createStyle(document, "ShipDefaultStyle", 2, "2014F0FA", "FF14F0FA");
+
+        createStyle(document, STYLE1_TAG, 2, "8000ff00", "ff00ff00");
+        createStyle(document, STYLE2_TAG, 2, "800000ff", "ff0000ff");
+        createStyle(document, STYLE3_TAG, 2, "807fffff", "ff7fffff");
+
+        createStyle(document, STYLE1_TAG + ESTIMATED_EXTENSION, 2, "4000ff00", "8000ff00");
+        createStyle(document, STYLE2_TAG + ESTIMATED_EXTENSION, 2, "400000ff", "800000ff");
+        createStyle(document, STYLE3_TAG + ESTIMATED_EXTENSION, 2, "407fffff", "807fffff");
+    }
+
+    private static void createStyle(Document document, String styleName, int width, String lineColor, String polyColor) {
+        Style style = document
             .createAndAddStyle()
-            .withId("ShipDefaultStyle");
-        shipDefaultStyle.createAndSetLineStyle()
-                .withWidth(2)
-                .withColor("2014F0FA");
-        shipDefaultStyle.createAndSetPolyStyle()
-                .withColor("FF14F0FA");
-
-        Style ship1Style = document
-                .createAndAddStyle()
-                .withId(STYLE1_TAG);
-        ship1Style.createAndSetLineStyle()
-            .withWidth(2)
-            .withColor("8000ff00");
-        ship1Style.createAndSetPolyStyle()
-            .withColor("ff00ff00");
-
-        Style ship2Style = document
-                .createAndAddStyle()
-                .withId(STYLE2_TAG);
-        ship2Style.createAndSetLineStyle()
-            .withWidth(2)
-            .withColor("800000ff");
-        ship2Style.createAndSetPolyStyle()
-            .withColor("ff0000ff");
-
-        Style ship3Style = document
-                .createAndAddStyle()
-                .withId(STYLE3_TAG);
-        ship3Style.createAndSetLineStyle()
-            .withWidth(2)
-            .withColor("807fffff");
-        ship3Style.createAndSetPolyStyle()
-            .withColor("ff7fffff");
+            .withId(styleName);
+        style.createAndSetLineStyle()
+            .withWidth(width)
+            .withColor(lineColor);
+        style.createAndSetPolyStyle()
+            .withColor(polyColor);
     }
 
     private void createKmlBoundingBox(Folder kmlNode) {
@@ -277,14 +271,14 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         final Date t = new Date(atTime);
         for (ScenarioTracker.Target target : targets) {
-            ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t);
+            ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t, 10);
             if (bbox.contains(estimatedPosition.getPositionTime())) {
                 createKmlShipPlacemark(
                     situationFolder,
                     target.getMmsi(),
                     target.getName(),
                     estimatedPosition.getTimestamp(),
-                    estimatedPosition.getTimestamp() + 7000,
+                    estimatedPosition.getTimestamp() + KML_POSITION_TIMESPAN_SECS*1000 - 1,
                     estimatedPosition.getLatitude(),
                     estimatedPosition.getLongitude(),
                     estimatedPosition.getCog(),
@@ -295,7 +289,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     target.getToPort(),
                     target.getToStarboard(),
                     target.isTagged(STYLE1_TAG),
-                    getStyle(target)
+                    getStyle(target, false)
                 );
             }
         }
@@ -310,31 +304,36 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withVisibility(false);
 
         for (ScenarioTracker.Target target : targets) {
-            int c = 0;
-            Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
-            if (positionReportReports.size() > 0) {
-                Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
+            Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
 
-                for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
-                    createKmlShipPlacemark(
-                            targetFolder,
-                            target.getMmsi(),
-                            target.getName(),
-                            positionReport.getTimestamp(),
-                            positionReport.getTimestamp() + 7000,
-                            positionReport.getLatitude(),
-                            positionReport.getLongitude(),
-                            positionReport.getCog(),
-                            positionReport.getSog(),
-                            positionReport.getHeading(),
-                            target.getToBow(),
-                            target.getToStern(),
-                            target.getToPort(),
-                            target.getToStarboard(),
-                            target.isTagged(STYLE1_TAG),
-                            getStyle(target)
-                    );
-                }
+            Date timeOfFirstPositionReport = target.timeOfFirstPositionReport();
+            Date timeOfLastPositionReport = target.timeOfLastPositionReport();
+
+            final long t1 = timeOfFirstPositionReport.getTime();
+            final long t2 = timeOfLastPositionReport.getTime();
+            final int  dt = KML_POSITION_TIMESPAN_SECS*1000;
+
+            for (long t = t1; t <= t2; t += dt) {
+                ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(t), KML_POSITION_TIMESPAN_SECS);
+
+                createKmlShipPlacemark(
+                        targetFolder,
+                        target.getMmsi(),
+                        target.getName(),
+                        t - (dt - 1),
+                        t,
+                        positionReport.getLatitude(),
+                        positionReport.getLongitude(),
+                        positionReport.getCog(),
+                        positionReport.getSog(),
+                        positionReport.getHeading(),
+                        target.getToBow(),
+                        target.getToStern(),
+                        target.getToPort(),
+                        target.getToStarboard(),
+                        false,
+                        getStyle(target, positionReport.isEstimated())
+                );
             }
         }
     }
@@ -356,19 +355,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
                         lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
                     }
-                    placemark.withStyleUrl(getStyle(target));
+                    placemark.withStyleUrl(getStyle(target, false));
                 }
             }
         }
     }
 
-    private static String getStyle(ScenarioTracker.Target target) {
+    private static String getStyle(ScenarioTracker.Target target, boolean estimatedPosition) {
         if (target.isTagged(STYLE1_TAG)) {
-            return STYLE1_TAG;
+            return STYLE1_TAG + (estimatedPosition ? ESTIMATED_EXTENSION : "");
         } else if (target.isTagged(STYLE2_TAG)) {
-            return STYLE2_TAG;
+            return STYLE2_TAG + (estimatedPosition ? ESTIMATED_EXTENSION : "");
         } else if (target.isTagged(STYLE3_TAG)) {
-            return STYLE3_TAG;
+            return STYLE3_TAG + (estimatedPosition ? ESTIMATED_EXTENSION : "");
         } else {
             return "ShipDefaultStyle";
         }
@@ -464,13 +463,13 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         // The ship consists of 5 points which are stored in shipPnts()
         // To begin with the points are in meters
-        Point[] points = new Point[5];
-        
-        points[0] = new Point(-szB,                  szC);                 // stern port
-        points[1] = new Point(-szB + 0.85*(szA+szB), szC);
-        points[2] = new Point(szA,                   szC - (szC+szD)/2.0); // bow
-        points[3] = new Point(-szB + 0.85*(szA+szB), -szD);
-        points[4] = new Point(-szB,                  -szD);                // stern starboard
+        Point[] points = new Point[] {
+            new Point(-szB, szC),                     // stern port
+            new Point(-szB + 0.85*(szA + szB), szC),
+            new Point(szA, szC - (szC + szD)/2.0),    // bow
+            new Point(-szB + 0.85*(szA + szB), -szD),
+            new Point(-szB, -szD)                     // stern starboard
+        };
 
         // Rotate ship. Each ship has its own coordinate system with
         // origin in the ais-position of the ship
@@ -491,7 +490,5 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         for (Point point : points) {
             shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.getX(), point.getY()), coordinateConverter.y2Lat(point.getX(), point.getY()));
         }
-        // Close linear ring
-        shipGeometry.addToCoordinates(coordinateConverter.x2Lon(points[0].getX(), points[0].getY()), coordinateConverter.y2Lat(points[0].getX(), points[0].getY()));
     }
 }

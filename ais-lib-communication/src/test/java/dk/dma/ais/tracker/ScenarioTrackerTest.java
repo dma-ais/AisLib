@@ -124,15 +124,25 @@ public class ScenarioTrackerTest {
         assertNotEquals(pr1.getLongitude(), pr2.getLongitude(), 0.001);
         assertEquals(1397136638088L, t1);
         assertEquals(1397136678678L, t2);
+        assertEquals(false, pr1.isEstimated());
+        assertEquals(false, pr2.isEstimated());
 
         final long t = (t2-t1)/2 + t1;  // Half-way between t1 and t2
         assertEquals(1397136658383L, t);
 
-        ScenarioTracker.Target.PositionReport interpolatedPosition = target.getPositionReportAt(new Date(t));
+        ScenarioTracker.Target.PositionReport interpolatedPosition = target.getPositionReportAt(new Date(t), 5);
         assertEquals((pr1.getLatitude() + pr2.getLatitude())/2, interpolatedPosition.getLatitude(), 1e-16);
         assertEquals((pr1.getLongitude() + pr2.getLongitude())/2, interpolatedPosition.getLongitude(), 1e-16);
         assertEquals(200, interpolatedPosition.getHeading());
         assertEquals(t, interpolatedPosition.getTimestamp());
+        assertEquals(true, interpolatedPosition.isEstimated());
+
+        ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(new Date(t), 20);
+        assertEquals(true, estimatedPosition.isEstimated());
+
+        ScenarioTracker.Target.PositionReport reportedPosition = target.getPositionReportAt(new Date(t), 21);
+        assertEquals(false, reportedPosition.isEstimated());
+        assertEquals(pr1, reportedPosition);
     }
 
 }

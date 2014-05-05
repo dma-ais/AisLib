@@ -32,10 +32,13 @@ import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
 import dk.dma.enav.util.function.Consumer;
+import net.jcip.annotations.Immutable;
+import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,6 +53,7 @@ import java.util.TreeMap;
  *
  * @author Thomas Borg Salling
  */
+@NotThreadSafe
 public class ScenarioTracker implements Tracker {
 
     @Override
@@ -188,6 +192,7 @@ public class ScenarioTracker implements Tracker {
         return aisString.replace('@',' ').trim();
     }
 
+    @NotThreadSafe
     public final class Target implements Cloneable {
 
         public Target() {
@@ -233,22 +238,56 @@ public class ScenarioTracker implements Tracker {
             return positionReports.size() > 0;
         }
 
-        /** Return position at at time atTime - interpolate or dead reckon if no nearby report exists */
-        public PositionReport getPositionReportAt(Date atTime) {
-            PositionReport positionReportAt = positionReports.get(atTime);
-            if (positionReportAt == null) {
-                /* no position report at desired time - will estime using interpolation or dead reckoning */
+        public Date timeOfFirstPositionReport() {
+            return positionReports.firstKey();
+        }
+
+        public Date timeOfLastPositionReport() {
+            return positionReports.lastKey();
+        }
+
+        /**
+         *  Return position at at time atTime. If a real position report which is not older than 'maxAge' seconds compared to
+         *  atTime exists, then that real AIS-based position report will be returned. Otherwise a position report will
+         *  be inter- or extrapolated to provide an estimated position report.
+         *
+         * @param atTime The time at which to return a position report.
+         * @param maxAge The max. no. of seconds to look back in history for a position report before estimating one.
+         * @return An AIS-based or estimated position report.
+         */
+        public PositionReport getPositionReportAt(Date atTime, int maxAge) {
+            PositionReport positionReport = getPositionReportNear(atTime, maxAge);
+            if (positionReport == null) {
+                /* no position report at desired time - will estimate using interpolation or dead reckoning */
                 PositionReport pr1 = positionReports.lowerEntry(atTime).getValue();
                 PositionReport pr2;
                 Map.Entry<Date, PositionReport> higherEntry = positionReports.higherEntry(atTime);
                 if (higherEntry != null) {
                     pr2 = higherEntry.getValue();
-                    positionReportAt = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading());
+                    positionReport = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
                 } else {
-                    positionReportAt = new PositionReport(PositionTime.createExtrapolated(pr1.getPositionTime(), pr1.getCog(), pr1.getSog(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading());
+                    positionReport = new PositionReport(PositionTime.createExtrapolated(pr1.getPositionTime(), pr1.getCog(), pr1.getSog(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
                 }
             }
-            return positionReportAt;
+            return positionReport;
+        }
+
+        /**
+         * Get or estimate a position report. If a real position report exists somewhere in the range
+         * (atTime - deltaSeconds; atTime] then return this report. Otherwise return null.
+         *
+         * @param atTime the time to which to look for a position report.
+         * @param deltaSeconds the maximum number of seconds to go back to find a matching position report.
+         * @return a matching position report or null.
+         */
+        PositionReport getPositionReportNear(Date atTime, int deltaSeconds) {
+            Map.Entry<Date, PositionReport> positionReportEntry = positionReports.floorEntry(atTime);
+            if (positionReportEntry != null) {
+                if (positionReportEntry.getKey().getTime() < atTime.getTime() - deltaSeconds*1000) {
+                    positionReportEntry = null;
+                }
+            }
+            return positionReportEntry == null ? null : positionReportEntry.getValue();
         }
 
         private void update(AisPacket p) {
@@ -263,7 +302,7 @@ public class ScenarioTracker implements Tracker {
                     final float cog = positionMessage.getCog() / 10.0f;
                     final float sog = positionMessage.getSog() / 10.0f;
                     final long timestamp = p.getBestTimestamp();
-                    positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, cog, sog, hdg));
+                    positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, cog, sog, hdg, false));
                 }
             } else if (message instanceof AisMessage5) {
                 AisMessage5 message5 = (AisMessage5) message;
@@ -292,19 +331,22 @@ public class ScenarioTracker implements Tracker {
         private final Set<Object> tags = new HashSet<>();
         private final TreeMap<Date, PositionReport> positionReports = new TreeMap<>();
 
+        @Immutable
         public final class PositionReport {
-            private PositionReport(PositionTime pt, float cog, float sog, int heading) {
+            private PositionReport(PositionTime pt, float cog, float sog, int heading, boolean estimated) {
                 this.positionTime = pt;
                 this.cog = cog;
                 this.sog = sog;
                 this.heading = heading;
+                this.estimated = estimated;
             }
 
-            private PositionReport(long timestamp, float latitude, float longitude, float cog, float sog, int heading) {
+            private PositionReport(long timestamp, float latitude, float longitude, float cog, float sog, int heading, boolean estimated) {
                 this.positionTime = PositionTime.create(latitude, longitude, timestamp);
                 this.cog = cog;
                 this.sog = sog;
                 this.heading = heading;
+                this.estimated = estimated;
             }
 
             public PositionTime getPositionTime() {
@@ -335,10 +377,29 @@ public class ScenarioTracker implements Tracker {
                 return heading;
             }
 
+            public boolean isEstimated() {
+                return estimated;
+            }
+
+            @Override
+            public String toString() {
+                final StringBuffer sb = new StringBuffer("PositionReport{");
+                sb.append("positionTime=").append(positionTime);
+                sb.append(", cog=").append(cog);
+                sb.append(", sog=").append(sog);
+                sb.append(", heading=").append(heading);
+                sb.append(", estimated=").append(estimated);
+                sb.append('}');
+                return sb.toString();
+            }
+
             private final PositionTime positionTime;
             private final float cog;
             private final float sog;
             private final int heading;
+
+            /** true of position is inter- or extrapolated. false if position is received from AIS */
+            private final boolean estimated;
         }
     }
 }
