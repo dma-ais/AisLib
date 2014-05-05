@@ -272,24 +272,24 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         final Date t = new Date(atTime);
         for (ScenarioTracker.Target target : targets) {
             ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t, 10);
-            if (bbox.contains(estimatedPosition.getPositionTime())) {
+            if (estimatedPosition != null && bbox.contains(estimatedPosition.getPositionTime())) {
                 createKmlShipPlacemark(
-                    situationFolder,
-                    target.getMmsi(),
-                    target.getName(),
-                    estimatedPosition.getTimestamp(),
-                    estimatedPosition.getTimestamp() + KML_POSITION_TIMESPAN_SECS*1000 - 1,
-                    estimatedPosition.getLatitude(),
-                    estimatedPosition.getLongitude(),
-                    estimatedPosition.getCog(),
-                    estimatedPosition.getSog(),
-                    estimatedPosition.getHeading(),
-                    target.getToBow(),
-                    target.getToStern(),
-                    target.getToPort(),
-                    target.getToStarboard(),
-                    target.isTagged(STYLE1_TAG),
-                    getStyle(target, false)
+                        situationFolder,
+                        target.getMmsi(),
+                        target.getName(),
+                        estimatedPosition.getTimestamp(),
+                        estimatedPosition.getTimestamp() + KML_POSITION_TIMESPAN_SECS*1000 - 1,
+                        estimatedPosition.getLatitude(),
+                        estimatedPosition.getLongitude(),
+                        estimatedPosition.getCog(),
+                        estimatedPosition.getSog(),
+                        estimatedPosition.getHeading(),
+                        target.getToBow(),
+                        target.getToStern(),
+                        target.getToPort(),
+                        target.getToStarboard(),
+                        target.isTagged(STYLE1_TAG),
+                        getStyle(target, false)
                 );
             }
         }

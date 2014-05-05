@@ -259,14 +259,17 @@ public class ScenarioTracker implements Tracker {
             PositionReport positionReport = getPositionReportNear(atTime, maxAge);
             if (positionReport == null) {
                 /* no position report at desired time - will estimate using interpolation or dead reckoning */
-                PositionReport pr1 = positionReports.lowerEntry(atTime).getValue();
-                PositionReport pr2;
-                Map.Entry<Date, PositionReport> higherEntry = positionReports.higherEntry(atTime);
-                if (higherEntry != null) {
-                    pr2 = higherEntry.getValue();
-                    positionReport = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
-                } else {
-                    positionReport = new PositionReport(PositionTime.createExtrapolated(pr1.getPositionTime(), pr1.getCog(), pr1.getSog(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
+                Map.Entry<Date, PositionReport> entry1 = positionReports.lowerEntry(atTime);
+                if (entry1 != null) {
+                    PositionReport pr1 = entry1.getValue();
+                    PositionReport pr2;
+                    Map.Entry<Date, PositionReport> higherEntry = positionReports.higherEntry(atTime);
+                    if (higherEntry != null) {
+                        pr2 = higherEntry.getValue();
+                        positionReport = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
+                    } else {
+                        positionReport = new PositionReport(PositionTime.createExtrapolated(pr1.getPositionTime(), pr1.getCog(), pr1.getSog(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
+                    }
                 }
             }
             return positionReport;
