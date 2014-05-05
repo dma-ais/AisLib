@@ -20,6 +20,7 @@ import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Predicate;
+import dk.dma.enav.util.function.Supplier;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -198,6 +199,10 @@ public class AisPacketOutputSinks {
 
     public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot) {
         return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, isTertiaryTarget, triggerSnapshot);
+    }
+
+    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
+        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, isTertiaryTarget, triggerSnapshot, supplyTitle, supplyDescription);
     }
 
 }

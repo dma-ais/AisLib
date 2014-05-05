@@ -32,6 +32,7 @@ import dk.dma.enav.model.geometry.Ellipse;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.CoordinateConverter;
 import dk.dma.enav.util.function.Predicate;
+import dk.dma.enav.util.function.Supplier;
 import dk.dma.enav.util.geometry.Point;
 import net.jcip.annotations.NotThreadSafe;
 
@@ -68,6 +69,12 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private final Predicate<? super AisPacket> isTertiaryTarget;
     private final Predicate<? super AisPacket> triggerSnapshot;
 
+    /** KML folder title */
+    private final Supplier<? extends String> title;
+
+    /** KML folder description */
+    private final Supplier<? extends String> description;
+
     private static final String STYLE1_TAG = "Ship1Style";
     private static final String STYLE2_TAG = "Ship2Style";
     private static final String STYLE3_TAG = "Ship3Style";
@@ -90,6 +97,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.isSecondaryTarget = Predicate.FALSE;
         this.isTertiaryTarget = Predicate.FALSE;
         this.triggerSnapshot = Predicate.FALSE;
+        this.title = supplyDefaultTitle;
+        this.description = supplyDefaultDescription;
     }
 
     /**
@@ -104,6 +113,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.isSecondaryTarget = Predicate.FALSE;
         this.isTertiaryTarget = Predicate.FALSE;
         this.triggerSnapshot = Predicate.FALSE;
+        this.title = supplyDefaultTitle;
+        this.description = supplyDefaultDescription;
     }
 
     /**
@@ -121,6 +132,29 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.isSecondaryTarget = isSecondaryTarget;
         this.isTertiaryTarget = isTertiaryTarget;
         this.triggerSnapshot = triggerSnapshot;
+        this.title = supplyDefaultTitle;
+        this.description = supplyDefaultDescription;
+    }
+
+    /**
+     * Create a sink that writes KML contents to outputStream - but build the scenario only from
+     * AisPackets which comply with the filter predicate.
+     *
+     * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isTertiaryTarget Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
+     * @param supplyTitle Supplier of KML folder title
+     * @param supplyDescription Supplier of KML folder description
+     */
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
+        this.filter = filter;
+        this.isPrimaryTarget = isPrimaryTarget;
+        this.isSecondaryTarget = isSecondaryTarget;
+        this.isTertiaryTarget = isTertiaryTarget;
+        this.triggerSnapshot = triggerSnapshot;
+        this.title = supplyTitle == null ? supplyDefaultTitle : supplyTitle;
+        this.description = supplyDescription == null ? supplyDefaultDescription : supplyDescription;
     }
 
     /** {@inheritDoc} */
@@ -165,16 +199,30 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
+    private Supplier<String> supplyDefaultTitle = new Supplier<String>() {
+        @Override
+        public String get() {
+            return "Abnormal event";
+        }
+    };
+
+    private Supplier<String> supplyDefaultDescription = new Supplier<String>() {
+        @Override
+        public String get() {
+            return "Scenario starting " + scenarioTracker.scenarioBegin() + " and ending " + scenarioTracker.scenarioEnd();
+        }
+    };
+
     private Kml createKml() throws IOException {
         Kml kml = new Kml();
 
         Document document = kml.createAndSetDocument()
-            .withDescription("Scenario starting " + scenarioTracker.scenarioBegin() + " and ending " + scenarioTracker.scenarioEnd())
-            .withName("Abnormal event")
+            .withDescription(description.get())
+            .withName(title.get())
             .withOpen(true);
 
         document.createAndSetCamera()
-                .withAltitude(1000)
+                .withAltitude(2000)
                 .withHeading(0)
                 .withTilt(0)
                 .withLatitude((scenarioTracker.boundingBox().getMaxLat() + scenarioTracker.boundingBox().getMinLat())/2.0)
@@ -184,7 +232,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         // Create all ship styles
         createKmlStyles(document);
 
-        Folder rootFolder = document.createAndAddFolder().withName(scenarioTracker.scenarioBegin().toString());
+        Folder rootFolder = document.createAndAddFolder().withName(scenarioTracker.scenarioBegin().toString() + " - " + scenarioTracker.scenarioEnd().toString());
 
         // Generate bounding box
         createKmlBoundingBox(rootFolder);
