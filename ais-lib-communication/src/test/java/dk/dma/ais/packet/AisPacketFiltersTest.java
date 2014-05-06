@@ -30,6 +30,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.TimeZone;
+
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceBasestation;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
@@ -50,6 +52,10 @@ public class AisPacketFiltersTest {
     AisPacket pkgStatic2;
     AisPacket pkgStatic3;
     AisPacket pkgPosition1;
+
+    static {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Copenhagen")); // Filter expressions are in DK local time
+    }
 
     @Before
     public void setup() {
