@@ -66,7 +66,6 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     private final Predicate<? super AisPacket> isPrimaryTarget;
     private final Predicate<? super AisPacket> isSecondaryTarget;
-    private final Predicate<? super AisPacket> isTertiaryTarget;
     private final Predicate<? super AisPacket> triggerSnapshot;
 
     /** KML folder title */
@@ -74,6 +73,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     /** KML folder description */
     private final Supplier<? extends String> description;
+
+    /** KML movement folder interpolation step */
+    private final Supplier<? extends Integer> movementInterpolationStep;
 
     private static final String STYLE1_TAG = "Ship1Style";
     private static final String STYLE2_TAG = "Ship2Style";
@@ -88,17 +90,17 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    /** Timespan for KML positions */
+    /** Timespan for KML positions in situation and movement folders */
     private static final int KML_POSITION_TIMESPAN_SECS = 1;
 
     public AisPacketKMLOutputSink() {
         this.filter = Predicate.TRUE;
         this.isPrimaryTarget = Predicate.FALSE;
         this.isSecondaryTarget = Predicate.FALSE;
-        this.isTertiaryTarget = Predicate.FALSE;
         this.triggerSnapshot = Predicate.FALSE;
-        this.title = supplyDefaultTitle;
-        this.description = supplyDefaultDescription;
+        this.title = defaultTitleSupplier;
+        this.description = defaultDescriptionSupplier;
+        this.movementInterpolationStep = defaultMovementInterpolationStepSupplier;
     }
 
     /**
@@ -111,10 +113,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.filter = filter;
         this.isPrimaryTarget = Predicate.FALSE;
         this.isSecondaryTarget = Predicate.FALSE;
-        this.isTertiaryTarget = Predicate.FALSE;
         this.triggerSnapshot = Predicate.FALSE;
-        this.title = supplyDefaultTitle;
-        this.description = supplyDefaultDescription;
+        this.title = defaultTitleSupplier;
+        this.description = defaultDescriptionSupplier;
+        this.movementInterpolationStep = defaultMovementInterpolationStepSupplier;
     }
 
     /**
@@ -124,16 +126,16 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
      * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
      * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
-     * @param isTertiaryTarget Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends Integer> movementInterpolationStepSupplier) {
         this.filter = filter;
         this.isPrimaryTarget = isPrimaryTarget;
         this.isSecondaryTarget = isSecondaryTarget;
-        this.isTertiaryTarget = isTertiaryTarget;
         this.triggerSnapshot = triggerSnapshot;
-        this.title = supplyDefaultTitle;
-        this.description = supplyDefaultDescription;
+        this.title = defaultTitleSupplier;
+        this.description = defaultDescriptionSupplier;
+        this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier : movementInterpolationStepSupplier;
+
     }
 
     /**
@@ -143,18 +145,17 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
      * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
      * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
-     * @param isTertiaryTarget Apply tertiary KML styling to targets which are updated by packets that pass this predicate.
      * @param supplyTitle Supplier of KML folder title
      * @param supplyDescription Supplier of KML folder description
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
         this.filter = filter;
         this.isPrimaryTarget = isPrimaryTarget;
         this.isSecondaryTarget = isSecondaryTarget;
-        this.isTertiaryTarget = isTertiaryTarget;
         this.triggerSnapshot = triggerSnapshot;
-        this.title = supplyTitle == null ? supplyDefaultTitle : supplyTitle;
-        this.description = supplyDescription == null ? supplyDefaultDescription : supplyDescription;
+        this.title = supplyTitle == null ? defaultTitleSupplier : supplyTitle;
+        this.description = supplyDescription == null ? defaultDescriptionSupplier : supplyDescription;
+        this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier : movementInterpolationStepSupplier;
     }
 
     /** {@inheritDoc} */
@@ -168,9 +169,6 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             }
             if (isSecondaryTarget.test(packet)) {
                 scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE2_TAG);
-            }
-            if (isTertiaryTarget.test(packet)) {
-                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE3_TAG);
             }
             if (triggerSnapshot.test(packet)) {
                 this.snapshotTimes.add(packet.getBestTimestamp());
@@ -191,7 +189,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             }
         };
 
-        AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(filter, Predicate.TRUE, Predicate.FALSE, Predicate.FALSE, Predicate.FALSE);
+        AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(filter);
 
         try (FileOutputStream fos = new FileOutputStream(Paths.get("/Users/tbsalling/Desktop/test.kml").toFile())) {
             AisPacketReader reader = AisPacketReader.createFromFile(Paths.get("/Users/tbsalling/Desktop/ais-sample.txt"), true);
@@ -199,17 +197,24 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private Supplier<String> supplyDefaultTitle = new Supplier<String>() {
+    private Supplier<String> defaultTitleSupplier = new Supplier<String>() {
         @Override
         public String get() {
             return "Abnormal event";
         }
     };
 
-    private Supplier<String> supplyDefaultDescription = new Supplier<String>() {
+    private Supplier<String> defaultDescriptionSupplier = new Supplier<String>() {
         @Override
         public String get() {
             return "Scenario starting " + scenarioTracker.scenarioBegin() + " and ending " + scenarioTracker.scenarioEnd();
+        }
+    };
+
+    private Supplier<Integer> defaultMovementInterpolationStepSupplier = new Supplier<Integer>() {
+        @Override
+        public Integer get() {
+            return null;
         }
     };
 
@@ -346,6 +351,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private void createKmlMovementsFolder(Folder kmlNode) {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
+        final boolean useInterpolation = movementInterpolationStep.get() != null && movementInterpolationStep.get() > 0;
+
         Folder movementFolder = kmlNode.createAndAddFolder()
                 .withName("Movements")
                 .withOpen(true)
@@ -353,35 +360,53 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         for (ScenarioTracker.Target target : targets) {
             Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
-
-            Date timeOfFirstPositionReport = target.timeOfFirstPositionReport();
-            Date timeOfLastPositionReport = target.timeOfLastPositionReport();
-
-            final long t1 = timeOfFirstPositionReport.getTime();
-            final long t2 = timeOfLastPositionReport.getTime();
-            final int  dt = KML_POSITION_TIMESPAN_SECS*1000;
-
-            for (long t = t1; t <= t2; t += dt) {
-                ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(t), KML_POSITION_TIMESPAN_SECS);
-
-                createKmlShipPlacemark(
-                        targetFolder,
-                        target.getMmsi(),
-                        target.getName(),
-                        t - (dt - 1),
-                        t,
-                        positionReport.getLatitude(),
-                        positionReport.getLongitude(),
-                        positionReport.getCog(),
-                        positionReport.getSog(),
-                        positionReport.getHeading(),
-                        target.getToBow(),
-                        target.getToStern(),
-                        target.getToPort(),
-                        target.getToStarboard(),
-                        false,
-                        getStyle(target, positionReport.isEstimated())
-                );
+            if (useInterpolation) {
+                final long t1 = target.timeOfFirstPositionReport().getTime();
+                final long t2 = target.timeOfLastPositionReport().getTime();
+                final int dt = movementInterpolationStep.get()*1000;
+                for (long t = t1; t <= t2; t += dt) {
+                    ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(t), KML_POSITION_TIMESPAN_SECS);
+                    createKmlShipPlacemark(
+                            targetFolder,
+                            target.getMmsi(),
+                            target.getName(),
+                            t - (dt - 1),
+                            t,
+                            positionReport.getLatitude(),
+                            positionReport.getLongitude(),
+                            positionReport.getCog(),
+                            positionReport.getSog(),
+                            positionReport.getHeading(),
+                            target.getToBow(),
+                            target.getToStern(),
+                            target.getToPort(),
+                            target.getToStarboard(),
+                            false,
+                            getStyle(target, positionReport.isEstimated())
+                    );
+                }
+            } else {
+                Set<ScenarioTracker.Target.PositionReport> positionReports = target.getPositionReports();
+                for (ScenarioTracker.Target.PositionReport positionReport : positionReports) {
+                    createKmlShipPlacemark(
+                            targetFolder,
+                            target.getMmsi(),
+                            target.getName(),
+                            positionReport.getTimestamp(),
+                            positionReport.getTimestamp() + 7000,
+                            positionReport.getLatitude(),
+                            positionReport.getLongitude(),
+                            positionReport.getCog(),
+                            positionReport.getSog(),
+                            positionReport.getHeading(),
+                            target.getToBow(),
+                            target.getToStern(),
+                            target.getToPort(),
+                            target.getToStarboard(),
+                            false,
+                            getStyle(target, positionReport.isEstimated())
+                    );
+                }
             }
         }
     }

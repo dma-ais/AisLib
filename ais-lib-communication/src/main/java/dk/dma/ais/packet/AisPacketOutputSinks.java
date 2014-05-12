@@ -197,12 +197,12 @@ public class AisPacketOutputSinks {
         return new AisPacketKMLOutputSink(filter);
     }
 
-    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot) {
-        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, isTertiaryTarget, triggerSnapshot);
+    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends Integer> movementInterpolationStep) {
+        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, movementInterpolationStep);
     }
 
-    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> isTertiaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
-        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, isTertiaryTarget, triggerSnapshot, supplyTitle, supplyDescription);
+    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends Integer> movementInterpolationStep, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
+        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, movementInterpolationStep, supplyTitle, supplyDescription);
     }
 
 }
