@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import static dk.dma.enav.safety.SafetyZones.safetyZone;
+import static java.lang.Math.min;
 
 /**
  * This class receives AisPacket and use them to build a scenario
@@ -387,13 +388,24 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 }
             } else {
                 Set<ScenarioTracker.Target.PositionReport> positionReports = target.getPositionReports();
-                for (ScenarioTracker.Target.PositionReport positionReport : positionReports) {
+
+                ScenarioTracker.Target.PositionReport[] positionReportsArray = positionReports.toArray(new ScenarioTracker.Target.PositionReport[positionReports.size()]);
+                for (int i = 0; i < positionReportsArray.length; i++) {
+                    ScenarioTracker.Target.PositionReport positionReport = positionReportsArray[i];
+                    ScenarioTracker.Target.PositionReport nextPositionReport = null;
+                    if (i < positionReportsArray.length - 1) {
+                        nextPositionReport = positionReportsArray[i+1];
+                    }
+
+                    final long maxTimespan = 10000L;
+                    long timespan = min(nextPositionReport!=null ? nextPositionReport.getTimestamp() - positionReport.getTimestamp() - 1 : maxTimespan, maxTimespan);
+
                     createKmlShipPlacemark(
                             targetFolder,
                             target.getMmsi(),
                             target.getName(),
                             positionReport.getTimestamp(),
-                            positionReport.getTimestamp() + 7000,
+                            positionReport.getTimestamp() + timespan,
                             positionReport.getLatitude(),
                             positionReport.getLongitude(),
                             positionReport.getCog(),
