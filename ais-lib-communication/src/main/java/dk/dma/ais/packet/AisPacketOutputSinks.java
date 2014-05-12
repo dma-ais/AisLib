@@ -144,7 +144,9 @@ public class AisPacketOutputSinks {
     };
     
     /** A sink that transforms ais stream into kml. */
-    public static final OutputStreamSink<AisPacket> OUTPUT_TO_KML = newKmlSink();
+    public static final OutputStreamSink<AisPacket> OUTPUT_TO_KML() {
+        return new AisPacketKMLOutputSink();
+    };
     
     
 
