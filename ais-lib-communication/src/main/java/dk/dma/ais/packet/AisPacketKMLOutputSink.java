@@ -15,9 +15,11 @@
  */
 package dk.dma.ais.packet;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
+import de.micromata.opengis.kml.v_2_2_0.Coordinate;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
@@ -86,9 +88,16 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     private final Set<Long> snapshotTimes = Sets.newTreeSet();
 
+    private final Calendar calendar = Calendar.getInstance();
+
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    private static final SimpleDateFormat DATE_FORMAT_DTG = new SimpleDateFormat("ddHHmm'Z' MMM yy");
+    static {
+        DATE_FORMAT_DTG.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     /** Timespan for KML positions in situation and movement folders */
@@ -261,7 +270,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         });
 
         // Generate movements folder
-        createKmlMovementsFolder(rootFolder);
+        createKmlMovementsAndIconsFolders(rootFolder);
 
         return kml;
     }
@@ -327,7 +336,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         for (ScenarioTracker.Target target : targets) {
             ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t, 10);
             if (estimatedPosition != null && bbox.contains(estimatedPosition.getPositionTime())) {
-                createKmlShipPlacemark(
+                createKmlShipShapePlacemark(
                         situationFolder,
                         target.getMmsi(),
                         target.getName(),
@@ -345,45 +354,71 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         target.isTagged(STYLE1_TAG),
                         getStyle(target, false)
                 );
+                createKmlShipIconPlacemark(
+                        situationFolder,
+                        estimatedPosition.getTimestamp(),
+                        estimatedPosition.getTimestamp() + KML_POSITION_TIMESPAN_SECS*1000 - 1,
+                        estimatedPosition.getLatitude(),
+                        estimatedPosition.getLongitude(),
+                        estimatedPosition.getCog(),
+                        getShipDescription(target, estimatedPosition)
+                );
             }
         }
     }
 
-    private void createKmlMovementsFolder(Folder kmlNode) {
+    private void createKmlMovementsAndIconsFolders(Folder kmlNode) {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
         final boolean useInterpolation = movementInterpolationStep.get() != null && movementInterpolationStep.get() > 0;
 
-        Folder movementFolder = kmlNode.createAndAddFolder()
+        Folder movementFolder = kmlNode
+            .createAndAddFolder()
                 .withName("Movements")
-                .withOpen(true)
+                .withOpen(false)
+                .withVisibility(false);
+
+        Folder iconFolder = kmlNode
+            .createAndAddFolder()
+                .withName("Icons")
+                .withOpen(false)
                 .withVisibility(false);
 
         for (ScenarioTracker.Target target : targets) {
-            Folder targetFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
+            Folder targetShipShapeFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
+            Folder targetShipIconFolder = iconFolder.createAndAddFolder().withName(target.getName()).withDescription("Icons for MMSI " + target.getMmsi());
             if (useInterpolation) {
                 final long t1 = target.timeOfFirstPositionReport().getTime();
                 final long t2 = target.timeOfLastPositionReport().getTime();
                 final int dt = movementInterpolationStep.get()*1000;
                 for (long t = t1; t <= t2; t += dt) {
                     ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(t), KML_POSITION_TIMESPAN_SECS);
-                    createKmlShipPlacemark(
-                            targetFolder,
-                            target.getMmsi(),
-                            target.getName(),
-                            t - (dt - 1),
-                            t,
-                            positionReport.getLatitude(),
-                            positionReport.getLongitude(),
-                            positionReport.getCog(),
-                            positionReport.getSog(),
-                            positionReport.getHeading(),
-                            target.getToBow(),
-                            target.getToStern(),
-                            target.getToPort(),
-                            target.getToStarboard(),
-                            false,
-                            getStyle(target, positionReport.isEstimated())
+                    createKmlShipShapePlacemark(
+                        targetShipShapeFolder,
+                        target.getMmsi(),
+                        target.getName(),
+                        t - (dt - 1),
+                        t,
+                        positionReport.getLatitude(),
+                        positionReport.getLongitude(),
+                        positionReport.getCog(),
+                        positionReport.getSog(),
+                        positionReport.getHeading(),
+                        target.getToBow(),
+                        target.getToStern(),
+                        target.getToPort(),
+                        target.getToStarboard(),
+                        false,
+                        getStyle(target, positionReport.isEstimated())
+                    );
+                    createKmlShipIconPlacemark(
+                        targetShipIconFolder,
+                        t - (dt - 1),
+                        t,
+                        positionReport.getLatitude(),
+                        positionReport.getLongitude(),
+                        positionReport.getCog(),
+                        getShipDescription(target, positionReport)
                     );
                 }
             } else {
@@ -400,8 +435,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     final long maxTimespan = 10000L;
                     long timespan = min(nextPositionReport!=null ? nextPositionReport.getTimestamp() - positionReport.getTimestamp() - 1 : maxTimespan, maxTimespan);
 
-                    createKmlShipPlacemark(
-                            targetFolder,
+                    createKmlShipShapePlacemark(
+                            targetShipShapeFolder,
                             target.getMmsi(),
                             target.getName(),
                             positionReport.getTimestamp(),
@@ -418,9 +453,61 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                             false,
                             getStyle(target, positionReport.isEstimated())
                     );
+                    createKmlShipIconPlacemark(
+                            targetShipIconFolder,
+                            positionReport.getTimestamp(),
+                            positionReport.getTimestamp() + timespan,
+                            positionReport.getLatitude(),
+                            positionReport.getLongitude(),
+                            positionReport.getCog(),
+                            getShipDescription(target, positionReport)
+                    );
                 }
             }
         }
+    }
+
+    private String getShipDescription(ScenarioTracker.Target target, ScenarioTracker.Target.PositionReport positionReport) {
+        StringBuffer desc = new StringBuffer(512);
+
+        desc.append("<h2>");
+        desc.append(target.getName());
+        desc.append("</h2>");
+
+        calendar.setTimeInMillis(positionReport.getTimestamp());
+
+        desc.append("<table width=\"300\">");
+        addKmlTableRow(desc, "MMSI", target.getMmsi(), "");
+        addKmlTableRow(desc, "IMO", target.getImo(), "");
+        addKmlTableRow(desc, "LOA", target.getToBow() + target.getToStern(), "m");
+        addKmlTableRow(desc, "BEAM", target.getToStarboard() + target.getToPort(), "m");
+        desc.append("<tr><td><hr></td><td><hr></td></tr>");
+        addKmlTableRow(desc, "DST", target.getDestination(), "");
+        desc.append("<tr><td><hr></td><td><hr></td></tr>");
+        addKmlTableRow(desc, "DTG", DATE_FORMAT_DTG.format(calendar.getTime()).toUpperCase(), "");
+        addKmlTableRow(desc, "POS", positionReport.getPositionTime().toString(), "");
+        addKmlTableRow(desc, "SRC", positionReport.isEstimated() ? "Estimated":"AIS", "");
+        addKmlTableRow(desc, "HDG", positionReport.getHeading(), "deg");
+        addKmlTableRow(desc, "COG", positionReport.getCog(), "deg");
+        addKmlTableRow(desc, "SOG", positionReport.getSog(), "kts");
+        addKmlTableRow(desc, "NAV", positionReport.getNavigationalStatus(), "");
+        desc.append("</table>");
+
+        desc.append("<p><a href=\"http://www.marinetraffic.com/en/ais/details/ships/");
+        desc.append(target.getMmsi());
+        desc.append("\">Lookup on marinetraffic.com</a></p>");
+
+        return desc.toString();
+    }
+
+    private static void addKmlTableRow(StringBuffer table, Object c1, Object c2, Object c3) {
+        table.append("<tr><td>");
+        table.append(c1);
+        table.append("</td><td>");
+        table.append(c2);
+        table.append(" ");
+        table.append(c3);
+        table.append("</td></tr>");
     }
 
     private void createKmlTracksFolder(Folder kmlNode, Predicate<ScenarioTracker.Target> trackFor) {
@@ -458,30 +545,28 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private static void createKmlShipPlacemark(Folder targetFolder, String mmsi, String name, long timespanBegin, long timespanEnd, double latitude, double longitude, float cog, float sog, int heading, float toBow, float toStern, float toPort, float toStarboard, boolean safetyZoneEllipse, String style) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("Europe/Copenhagen"));
+    private void createKmlShipShapePlacemark(Folder targetFolder, String mmsi, String name, long timespanBegin, long timespanEnd, double latitude, double longitude, float cog, float sog, int heading, float toBow, float toStern, float toPort, float toStarboard, boolean safetyZoneEllipse, String style) {
         calendar.setTimeInMillis(timespanBegin);
         String begin = DATE_FORMAT.format(calendar.getTime());
         calendar.setTimeInMillis(timespanEnd);
         String end = DATE_FORMAT.format(calendar.getTime());
 
-        Placemark placemarkForShip = targetFolder
-                .createAndAddPlacemark()
+        Placemark placemarkForShipShape = targetFolder
+            .createAndAddPlacemark()
                 .withVisibility(true)
                 .withId(mmsi)
                 .withName(name)
                 .withStyleUrl("#" + style);
 
-        placemarkForShip.createAndSetTimeSpan()
+        placemarkForShipShape.createAndSetTimeSpan()
                 .withBegin(begin)
                 .withEnd(end);
 
-        addKmlShipGeometry(placemarkForShip, latitude, longitude, heading, toBow, toStern, toPort, toStarboard);
+        addKmlShipGeometry(placemarkForShipShape, latitude, longitude, heading, toBow, toStern, toPort, toStarboard);
 
         if (safetyZoneEllipse) {
             Placemark placemarkForEllipse = targetFolder
-                    .createAndAddPlacemark()
+                .createAndAddPlacemark()
                     .withVisibility(true)
                     .withId(mmsi + "-ellipse")
                     .withName(name + "'s ellipse")
@@ -493,6 +578,40 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
             addKmlEllipseGeometry(placemarkForEllipse, latitude, longitude, cog, sog, toStern+toBow, toPort+toStarboard, toStern, toStarboard);
         }
+    }
+
+    private void createKmlShipIconPlacemark(Folder targetFolder, long timespanBegin, long timespanEnd, double latitude, double longitude, float cog, String description) {
+        calendar.setTimeInMillis(timespanBegin);
+        String begin = DATE_FORMAT.format(calendar.getTime());
+        calendar.setTimeInMillis(timespanEnd);
+        String end = DATE_FORMAT.format(calendar.getTime());
+
+        Placemark placemarkForShipIcon = targetFolder
+            .createAndAddPlacemark()
+                .withDescription("");
+
+        Style style = placemarkForShipIcon
+            .createAndAddStyle()
+                .withId("shipIconStyle");
+
+        style.createAndSetBalloonStyle()
+            .withText(description);
+
+        style.createAndSetIconStyle()
+            .withScale(1.0)
+            .withHeading((int) cog)
+            .createAndSetIcon()
+                .withHref("http://earth.google.com/images/kml-icons/track-directional/track-0.png");
+
+        placemarkForShipIcon
+            .createAndSetPoint()
+                .withCoordinates(Lists.newArrayList(new Coordinate(longitude, latitude)))
+                .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+
+        placemarkForShipIcon
+            .createAndSetTimeSpan()
+                .withBegin(begin)
+                .withEnd(end);
     }
 
     /**

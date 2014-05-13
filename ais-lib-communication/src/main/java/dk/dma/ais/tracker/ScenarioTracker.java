@@ -23,6 +23,7 @@ import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
+import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketStream;
@@ -205,6 +206,14 @@ public class ScenarioTracker implements Tracker {
             return String.valueOf(mmsi);
         }
 
+        public int getImo() {
+            return imo;
+        }
+
+        public String getDestination() {
+            return destination == null ? "" : destination;
+        }
+
         public Set<PositionReport> getPositionReports() {
             return ImmutableSet.copyOf(positionReports.values());
         }
@@ -265,9 +274,9 @@ public class ScenarioTracker implements Tracker {
                     Map.Entry<Date, PositionReport> higherEntry = positionReports.higherEntry(atTime);
                     if (higherEntry != null) {
                         pr2 = higherEntry.getValue();
-                        positionReport = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
+                        positionReport = new PositionReport(PositionTime.createInterpolated(pr1.getPositionTime(), pr2.getPositionTime(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), pr1.getNavigationalStatus(), true);
                     } else {
-                        positionReport = new PositionReport(PositionTime.createExtrapolated(pr1.getPositionTime(), pr1.getCog(), pr1.getSog(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), true);
+                        positionReport = new PositionReport(PositionTime.createExtrapolated(pr1.getPositionTime(), pr1.getCog(), pr1.getSog(), atTime.getTime()), pr1.getCog(), pr1.getSog(), pr1.getHeading(), pr1.getNavigationalStatus(), true);
                     }
                 }
             }
@@ -303,12 +312,15 @@ public class ScenarioTracker implements Tracker {
                     final int hdg = positionMessage.getTrueHeading();
                     final float cog = positionMessage.getCog() / 10.0f;
                     final float sog = positionMessage.getSog() / 10.0f;
+                    final int nav = positionMessage.getNavStatus();
                     final long timestamp = p.getBestTimestamp();
-                    positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, cog, sog, hdg, false));
+                    positionReports.put(new Date(timestamp), new PositionReport(timestamp, lat,lon, cog, sog, hdg, NavigationalStatus.get(nav), false));
                 }
             } else if (message instanceof AisMessage5) {
                 AisMessage5 message5 = (AisMessage5) message;
                 name = aisStringToJavaString(message5.getName());
+                destination = aisStringToJavaString(message5.getDest());
+                imo = (int) message5.getImo();
                 toBow = message5.getDimBow();
                 toStern = message5.getDimStern();
                 toPort = message5.getDimPort();
@@ -327,27 +339,29 @@ public class ScenarioTracker implements Tracker {
             }
         }
 
-        private String name;
-        private int mmsi=-1, toBow=-1, toStern=-1, toPort=-1, toStarboard=-1;
+        private String name, destination;
+        private int mmsi=-1, imo=-1, toBow=-1, toStern=-1, toPort=-1, toStarboard=-1;
 
         private final Set<Object> tags = new HashSet<>();
         private final TreeMap<Date, PositionReport> positionReports = new TreeMap<>();
 
         @Immutable
         public final class PositionReport {
-            private PositionReport(PositionTime pt, float cog, float sog, int heading, boolean estimated) {
+            private PositionReport(PositionTime pt, float cog, float sog, int heading, NavigationalStatus navstat, boolean estimated) {
                 this.positionTime = pt;
                 this.cog = cog;
                 this.sog = sog;
                 this.heading = heading;
+                this.navstat = navstat;
                 this.estimated = estimated;
             }
 
-            private PositionReport(long timestamp, float latitude, float longitude, float cog, float sog, int heading, boolean estimated) {
+            private PositionReport(long timestamp, float latitude, float longitude, float cog, float sog, int heading, NavigationalStatus navstat, boolean estimated) {
                 this.positionTime = PositionTime.create(latitude, longitude, timestamp);
                 this.cog = cog;
                 this.sog = sog;
                 this.heading = heading;
+                this.navstat = navstat;
                 this.estimated = estimated;
             }
 
@@ -379,6 +393,8 @@ public class ScenarioTracker implements Tracker {
                 return heading;
             }
 
+            public NavigationalStatus getNavigationalStatus() { return navstat; }
+
             public boolean isEstimated() {
                 return estimated;
             }
@@ -390,6 +406,7 @@ public class ScenarioTracker implements Tracker {
                 sb.append(", cog=").append(cog);
                 sb.append(", sog=").append(sog);
                 sb.append(", heading=").append(heading);
+                sb.append(", navstat=").append(navstat);
                 sb.append(", estimated=").append(estimated);
                 sb.append('}');
                 return sb.toString();
@@ -399,6 +416,8 @@ public class ScenarioTracker implements Tracker {
             private final float cog;
             private final float sog;
             private final int heading;
+            private NavigationalStatus navstat;
+
 
             /** true of position is inter- or extrapolated. false if position is received from AIS */
             private final boolean estimated;
