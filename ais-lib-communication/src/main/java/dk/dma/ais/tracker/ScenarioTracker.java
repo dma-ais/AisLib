@@ -24,6 +24,7 @@ import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.message.NavigationalStatus;
+import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketStream;
@@ -214,8 +215,12 @@ public class ScenarioTracker implements Tracker {
             return destination == null ? "" : destination;
         }
 
-        public Set<PositionReport> getPositionReports() {
-            return ImmutableSet.copyOf(positionReports.values());
+        public String getCargoType() {
+            return shipTypeCargo == null ? null : shipTypeCargo.prettyCargo();
+        }
+
+        public String getShipType() {
+            return shipTypeCargo == null ? null : shipTypeCargo.prettyType();
         }
 
         public int getToBow() {
@@ -244,6 +249,10 @@ public class ScenarioTracker implements Tracker {
 
         public boolean hasPosition() {
             return positionReports.size() > 0;
+        }
+
+        public Set<PositionReport> getPositionReports() {
+            return ImmutableSet.copyOf(positionReports.values());
         }
 
         public Date timeOfFirstPositionReport() {
@@ -319,6 +328,7 @@ public class ScenarioTracker implements Tracker {
             } else if (message instanceof AisMessage5) {
                 AisMessage5 message5 = (AisMessage5) message;
                 name = aisStringToJavaString(message5.getName());
+                shipTypeCargo = new ShipTypeCargo(message5.getShipType());
                 destination = aisStringToJavaString(message5.getDest());
                 imo = (int) message5.getImo();
                 toBow = message5.getDimBow();
@@ -341,6 +351,7 @@ public class ScenarioTracker implements Tracker {
 
         private String name, destination;
         private int mmsi=-1, imo=-1, toBow=-1, toStern=-1, toPort=-1, toStarboard=-1;
+        private ShipTypeCargo shipTypeCargo;
 
         private final Set<Object> tags = new HashSet<>();
         private final TreeMap<Date, PositionReport> positionReports = new TreeMap<>();
@@ -407,6 +418,7 @@ public class ScenarioTracker implements Tracker {
                 sb.append(", sog=").append(sog);
                 sb.append(", heading=").append(heading);
                 sb.append(", navstat=").append(navstat);
+                sb.append(", shipTypeCargo=").append(shipTypeCargo);
                 sb.append(", estimated=").append(estimated);
                 sb.append('}');
                 return sb.toString();
@@ -416,8 +428,7 @@ public class ScenarioTracker implements Tracker {
             private final float cog;
             private final float sog;
             private final int heading;
-            private NavigationalStatus navstat;
-
+            private final NavigationalStatus navstat;
 
             /** true of position is inter- or extrapolated. false if position is received from AIS */
             private final boolean estimated;

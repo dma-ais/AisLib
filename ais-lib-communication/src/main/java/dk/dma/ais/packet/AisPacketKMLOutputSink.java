@@ -496,10 +496,12 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         desc.append("<table width=\"300\">");
         addKmlTableRow(desc, "MMSI", target.getMmsi(), "");
         addKmlTableRow(desc, "IMO", target.getImo(), "");
+        addKmlTableRow(desc, "TYPE", target.getShipType(), "");
         addKmlTableRow(desc, "LOA", target.getToBow() + target.getToStern(), "m");
         addKmlTableRow(desc, "BEAM", target.getToStarboard() + target.getToPort(), "m");
         desc.append("<tr><td><hr></td><td><hr></td></tr>");
         addKmlTableRow(desc, "DST", target.getDestination(), "");
+        addKmlTableRow(desc, "CARGO", target.getCargoType(), "");
         desc.append("<tr><td><hr></td><td><hr></td></tr>");
         addKmlTableRow(desc, "DTG", DATE_FORMAT_DTG.format(calendar.getTime()).toUpperCase(), "");
         addKmlTableRow(desc, "POS", positionReport.getPositionTime().toString(), "");
