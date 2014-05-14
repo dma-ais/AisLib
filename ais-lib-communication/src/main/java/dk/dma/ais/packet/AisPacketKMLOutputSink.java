@@ -86,11 +86,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     /** KML movement folder interpolation step */
     private final Supplier<? extends Integer> movementInterpolationStep;
 
-    private static final String STYLE1_TAG = "Ship1Style";
-    private static final String STYLE2_TAG = "Ship2Style";
-    private static final String STYLE3_TAG = "Ship3Style";
+    private static final String KML_STYLE_PRIMARY_SHIP = "Ship1Style";
+    private static final String KML_STYLE_SECONDARY_SHIP = "Ship2Style";
+    private static final String KML_STYLE_OTHER_SHIP = "ShipDefaultStyle";
 
-    private static final String ESTIMATED_EXTENSION = "Estimated";
+    private static final String KML_STYLE_EXTENSION_ESTIMATED_POSITION = "Estimated";
+
+    private static final String KML_COLOR_PRIMARY_SHIP = "00ff00";
+    private static final String KML_COLOR_SECONDARY_SHIP = "0000ff";
+    private static final String KML_COLOR_OTHER_SHIP = "14f0fa";
+
+    private static final String HTML_COLOR_PRIMARY_SHIP = "#00ff00";
+    private static final String HTML_COLOR_SECONDARY_SHIP = "#ff0000";
+    private static final String HTML_COLOR_OTHER_SHIP = "#faf014";
 
     private final Set<Long> snapshotTimes = Sets.newTreeSet();
 
@@ -185,10 +193,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             scenarioTracker.update(packet);
 
             if (isPrimaryTarget.test(packet)) {
-                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE1_TAG);
+                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), KML_STYLE_PRIMARY_SHIP);
             }
             if (isSecondaryTarget.test(packet)) {
-                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), STYLE2_TAG);
+                scenarioTracker.tagTarget(packet.tryGetAisMessage().getUserId(), KML_STYLE_SECONDARY_SHIP);
             }
             if (triggerSnapshot.test(packet)) {
                 this.snapshotTimes.add(packet.getBestTimestamp());
@@ -275,7 +283,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         createKmlTracksFolder(rootFolder, new Predicate<ScenarioTracker.Target>() {
             @Override
             public boolean test(ScenarioTracker.Target target) {
-                return target.isTagged(STYLE1_TAG) || target.isTagged(STYLE2_TAG);
+                return target.isTagged(KML_STYLE_PRIMARY_SHIP) || target.isTagged(KML_STYLE_SECONDARY_SHIP);
             }
         });
 
@@ -294,15 +302,11 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withColor("cccc00b0")
                 .withWidth(2.5);
 
-        createStyle(document, "ShipDefaultStyle", 2, "2014F0FA", "FF14F0FA");
-
-        createStyle(document, STYLE1_TAG, 2, "8000ff00", "ff00ff00");
-        createStyle(document, STYLE2_TAG, 2, "800000ff", "ff0000ff");
-        createStyle(document, STYLE3_TAG, 2, "807fffff", "ff7fffff");
-
-        createStyle(document, STYLE1_TAG + ESTIMATED_EXTENSION, 2, "4000ff00", "8000ff00");
-        createStyle(document, STYLE2_TAG + ESTIMATED_EXTENSION, 2, "400000ff", "800000ff");
-        createStyle(document, STYLE3_TAG + ESTIMATED_EXTENSION, 2, "407fffff", "807fffff");
+        createStyle(document, KML_STYLE_OTHER_SHIP, 2, "20"+ KML_COLOR_OTHER_SHIP, "FF"+ KML_COLOR_OTHER_SHIP);
+        createStyle(document, KML_STYLE_PRIMARY_SHIP, 2, "80"+ KML_COLOR_PRIMARY_SHIP, "ff"+ KML_COLOR_PRIMARY_SHIP);
+        createStyle(document, KML_STYLE_SECONDARY_SHIP, 2, "80"+ KML_COLOR_SECONDARY_SHIP, "ff"+ KML_COLOR_SECONDARY_SHIP);
+        createStyle(document, KML_STYLE_PRIMARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "40"+ KML_COLOR_PRIMARY_SHIP, "80"+ KML_COLOR_PRIMARY_SHIP);
+        createStyle(document, KML_STYLE_SECONDARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "40"+ KML_COLOR_SECONDARY_SHIP, "80"+ KML_COLOR_SECONDARY_SHIP);
     }
 
     private static void createStyle(Document document, String styleName, int width, String lineColor, String polyColor) {
@@ -343,6 +347,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
         final Date t = new Date(atTime);
+
+        ScenarioTracker.Target primaryTarget=null, secondaryTarget=null;
+        ScenarioTracker.Target.PositionReport primaryPositionReport=null, secondaryPositionReport=null;
+
         for (ScenarioTracker.Target target : targets) {
             ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t, 10);
             if (estimatedPosition != null && bbox.contains(estimatedPosition.getPositionTime())) {
@@ -350,8 +358,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         situationFolder,
                         target.getMmsi(),
                         target.getName(),
-                        null, // estimatedPosition.getTimestamp(),
-                        null, // estimatedPosition.getTimestamp() + KML_POSITION_TIMESPAN_SECS*1000 - 1,
+                        null,
+                        null,
                         estimatedPosition.getLatitude(),
                         estimatedPosition.getLongitude(),
                         estimatedPosition.getCog(),
@@ -361,27 +369,29 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         target.getToStern(),
                         target.getToPort(),
                         target.getToStarboard(),
-                        target.isTagged(STYLE1_TAG),
+                        target.isTagged(KML_STYLE_PRIMARY_SHIP),
                         getStyle(target, false)
                 );
                 createKmlShipIconPlacemark(
                         situationFolder,
-                        null, // estimatedPosition.getTimestamp(),
-                        null, // estimatedPosition.getTimestamp() + KML_POSITION_TIMESPAN_SECS*1000 - 1,
+                        null,
+                        null,
                         estimatedPosition.getLatitude(),
                         estimatedPosition.getLongitude(),
                         estimatedPosition.getCog(),
-                        getShipDescription(target, estimatedPosition)
+                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, estimatedPosition, null, null)
                 );
-                if (target.isTagged(STYLE1_TAG)) {
-                    createSituationPlacemark(
-                            situationFolder,
-                            estimatedPosition.getLatitude(),
-                            estimatedPosition.getLongitude()
-                    );
+                if (primaryTarget == null && target.isTagged(KML_STYLE_PRIMARY_SHIP)) {
+                    primaryTarget = target;
+                    primaryPositionReport = estimatedPosition;
+                }
+                if (secondaryTarget == null && target.isTagged(KML_STYLE_SECONDARY_SHIP)) {
+                    secondaryTarget = target;
+                    secondaryPositionReport = estimatedPosition;
                 }
             }
         }
+        createSituationPlacemark(situationFolder, primaryTarget, primaryPositionReport, secondaryTarget, secondaryPositionReport);
     }
 
     private void createKmlMovementsAndIconsFolders(Folder kmlNode) {
@@ -435,7 +445,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         positionReport.getLatitude(),
                         positionReport.getLongitude(),
                         positionReport.getCog(),
-                        getShipDescription(target, positionReport)
+                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null)
                     );
                 }
             } else {
@@ -477,55 +487,78 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                             positionReport.getLatitude(),
                             positionReport.getLongitude(),
                             positionReport.getCog(),
-                            getShipDescription(target, positionReport)
+                            "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null)
                     );
                 }
             }
         }
     }
 
-    private String getShipDescription(ScenarioTracker.Target target, ScenarioTracker.Target.PositionReport positionReport) {
+    private String generateHtmlEventDescription() {
+        return snapshotDescriptionSupplier.get();
+    }
+
+    private String generateHtmlShipDescription(ScenarioTracker.Target target1, ScenarioTracker.Target.PositionReport positionReport1,
+                                               ScenarioTracker.Target target2, ScenarioTracker.Target.PositionReport positionReport2) {
+        String dtg1 = null, dtg2 = null;
+        if (positionReport1 != null) {
+            calendar.setTimeInMillis(positionReport1.getTimestamp());
+            dtg1 = DATE_FORMAT_DTG.format(calendar.getTime()).toUpperCase();
+        }
+        if (positionReport2 != null) {
+            calendar.setTimeInMillis(positionReport2.getTimestamp());
+            dtg2 = DATE_FORMAT_DTG.format(calendar.getTime()).toUpperCase();
+        }
+
+        String ref1 = null, ref2 = null;
+        if (target1 != null) {
+            ref1 = "<a href=\"http://www.marinetraffic.com/en/ais/details/ships/" + target1.getMmsi() + "\">marinetraffic.com</a>";
+        }
+        if (target2 != null) {
+            ref2 = "<a href=\"http://www.marinetraffic.com/en/ais/details/ships/" + target2.getMmsi() + "\">marinetraffic.com</a>";
+        }
+
         StringBuffer desc = new StringBuffer(512);
-
-        desc.append("<h2>");
-        desc.append(target.getName());
-        desc.append("</h2>");
-
-        calendar.setTimeInMillis(positionReport.getTimestamp());
-
-        desc.append("<table width=\"300\">");
-        addKmlTableRow(desc, "MMSI", target.getMmsi(), "");
-        addKmlTableRow(desc, "IMO", target.getImo(), "");
-        addKmlTableRow(desc, "TYPE", target.getShipType(), "");
-        addKmlTableRow(desc, "LOA", target.getToBow() + target.getToStern(), "m");
-        addKmlTableRow(desc, "BEAM", target.getToStarboard() + target.getToPort(), "m");
-        desc.append("<tr><td><hr></td><td><hr></td></tr>");
-        addKmlTableRow(desc, "DST", target.getDestination(), "");
-        addKmlTableRow(desc, "CARGO", target.getCargoType(), "");
-        desc.append("<tr><td><hr></td><td><hr></td></tr>");
-        addKmlTableRow(desc, "DTG", DATE_FORMAT_DTG.format(calendar.getTime()).toUpperCase(), "");
-        addKmlTableRow(desc, "POS", positionReport.getPositionTime().toString(), "");
-        addKmlTableRow(desc, "SRC", positionReport.isEstimated() ? "Estimated":"AIS", "");
-        addKmlTableRow(desc, "HDG", positionReport.getHeading(), "deg");
-        addKmlTableRow(desc, "COG", Float.valueOf(positionReport.getCog()).intValue(), "deg");
-        addKmlTableRow(desc, "SOG", positionReport.getSog(), "kts");
-        addKmlTableRow(desc, "NAV", positionReport.getNavigationalStatus(), "");
-        desc.append("</table>");
-
-        desc.append("<p><a href=\"http://www.marinetraffic.com/en/ais/details/ships/");
-        desc.append(target.getMmsi());
-        desc.append("\">Lookup on marinetraffic.com</a></p>");
+        desc.append("<div><table width=\"300\">");
+        if (target1 != null && target2 != null) {
+            generateHtmlTableRow(desc, "", "<h4 style=\"color:" + HTML_COLOR_PRIMARY_SHIP + ";\">Primary</h4>", "<h4 style=\"color:" + HTML_COLOR_SECONDARY_SHIP + ";\">Secondary</h4>", "");
+            generateHtmlTableRow(desc, "", "", "", "");
+        }
+        generateHtmlTableRow(desc, "NAME",  target1 == null ? null : target1.getName(),                              target2 == null ? null : target2.getName(),                               "");
+        generateHtmlTableRow(desc, "MMSI",  target1 == null ? null : target1.getMmsi(),                              target2 == null ? null : target2.getMmsi(),                               "");
+        generateHtmlTableRow(desc, "IMO",   target1 == null ? null : target1.getImo(),                               target2 == null ? null : target2.getImo(),                                "");
+        generateHtmlTableRow(desc, "TYPE",  target1 == null ? null : target1.getShipType(),                          target2 == null ? null : target2.getShipType(),                           "");
+        generateHtmlTableRow(desc, "LOA",   target1 == null ? null : target1.getToBow() + target1.getToStern(),      target2 == null ? null : target2.getToBow() + target2.getToStern(),      "m");
+        generateHtmlTableRow(desc, "BEAM",  target1 == null ? null : target1.getToStarboard() + target1.getToPort(), target2 == null ? null : target2.getToStarboard() + target2.getToPort(), "m");
+        desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
+        generateHtmlTableRow(desc, "DST",   target1 == null ? null : target1.getDestination(),                       target2 == null ? null : target2.getDestination(),                        "");
+        generateHtmlTableRow(desc, "CARGO", target1 == null ? null : target1.getCargoType(),                         target2 == null ? null : target2.getCargoType(),                          "");
+        desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
+        generateHtmlTableRow(desc, "DTG",   dtg1, dtg2, "");
+        generateHtmlTableRow(desc, "POS",   positionReport1 == null ? null : positionReport1.getPositionTime(),                   positionReport2 == null ? null : positionReport2.getPositionTime(),                      "");
+        generateHtmlTableRow(desc, "SRC",   positionReport1 == null ? null : positionReport1.isEstimated() ? "Estimated" : "AIS", positionReport2 == null ? null : positionReport2.isEstimated() ? "Estimated" : "AIS",    "");
+        generateHtmlTableRow(desc, "HDG",   positionReport1 == null ? null : positionReport1.getHeading(),                        positionReport2 == null ? null : positionReport2.getHeading(),                        "deg");
+        generateHtmlTableRow(desc, "COG",   positionReport1 == null ? null : Float.valueOf(positionReport1.getCog()).intValue(),  positionReport2 == null ? null : Float.valueOf(positionReport2.getCog()).intValue(),  "deg");
+        generateHtmlTableRow(desc, "SOG",   positionReport1 == null ? null : positionReport1.getSog(),                            positionReport2 == null ? null : positionReport2.getSog(),                            "kts");
+        generateHtmlTableRow(desc, "NAV",   positionReport1 == null ? null : positionReport1.getNavigationalStatus(),             positionReport2 == null ? null : positionReport2.getNavigationalStatus(),                "");
+        desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
+        generateHtmlTableRow(desc, "REF",   ref1, ref2, "");
+        desc.append("</table></div>");
 
         return desc.toString();
     }
 
-    private static void addKmlTableRow(StringBuffer table, Object c1, Object c2, Object c3) {
+    private static void generateHtmlTableRow(StringBuffer table, String legend, Object c1, Object c2, String unit) {
         table.append("<tr><td>");
-        table.append(c1);
+        table.append(legend);
         table.append("</td><td>");
-        table.append(c2);
-        table.append(" ");
-        table.append(c3);
+        table.append(c1 == null ? "" : c1);
+        table.append(c1 == null ? "" : " ");
+        table.append(c1 == null ? "" : unit);
+        table.append("</td><td>");
+        table.append(c2 == null ? "" : c2);
+        table.append(c2 == null ? "" : " ");
+        table.append(c2 == null ? "" : unit);
         table.append("</td></tr>");
     }
 
@@ -553,14 +586,12 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     private static String getStyle(ScenarioTracker.Target target, boolean estimatedPosition) {
-        if (target.isTagged(STYLE1_TAG)) {
-            return STYLE1_TAG + (estimatedPosition ? ESTIMATED_EXTENSION : "");
-        } else if (target.isTagged(STYLE2_TAG)) {
-            return STYLE2_TAG + (estimatedPosition ? ESTIMATED_EXTENSION : "");
-        } else if (target.isTagged(STYLE3_TAG)) {
-            return STYLE3_TAG + (estimatedPosition ? ESTIMATED_EXTENSION : "");
+        if (target.isTagged(KML_STYLE_PRIMARY_SHIP)) {
+            return KML_STYLE_PRIMARY_SHIP + (estimatedPosition ? KML_STYLE_EXTENSION_ESTIMATED_POSITION : "");
+        } else if (target.isTagged(KML_STYLE_SECONDARY_SHIP)) {
+            return KML_STYLE_SECONDARY_SHIP + (estimatedPosition ? KML_STYLE_EXTENSION_ESTIMATED_POSITION : "");
         } else {
-            return "ShipDefaultStyle";
+            return KML_STYLE_OTHER_SHIP;
         }
     }
 
@@ -647,7 +678,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private void createSituationPlacemark(Folder targetFolder, double latitude, double longitude) {
+    private void createSituationPlacemark(Folder targetFolder, ScenarioTracker.Target primaryTarget, ScenarioTracker.Target.PositionReport primaryPositionReport, ScenarioTracker.Target secondaryTarget, ScenarioTracker.Target.PositionReport secondaryPositionReport) {
+
         Placemark placemarkForSituationIcon = targetFolder
             .createAndAddPlacemark()
                 .withDescription(snapshotDescriptionSupplier.get());
@@ -658,7 +690,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         style
             .createAndSetBalloonStyle()
-                .withText(snapshotDescriptionSupplier.get());
+                .withText("<h2>Situation</h2>" + generateHtmlEventDescription() + "<h2>Involved vessels</h2>" + generateHtmlShipDescription(primaryTarget, primaryPositionReport, secondaryTarget, secondaryPositionReport));
 
         style.createAndSetIconStyle()
                 .withScale(1.0)
@@ -667,7 +699,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         placemarkForSituationIcon
             .createAndSetPoint()
-                .withCoordinates(Lists.newArrayList(new Coordinate(longitude, latitude)))
+                .withCoordinates(Lists.newArrayList(new Coordinate(primaryPositionReport.getLongitude(), primaryPositionReport.getLatitude())))
                 .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
     }
 
