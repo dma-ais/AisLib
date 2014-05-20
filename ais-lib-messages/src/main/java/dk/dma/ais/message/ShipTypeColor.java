@@ -15,31 +15,46 @@
  */
 package dk.dma.ais.message;
 
-import static java.util.Objects.requireNonNull;
+import dk.dma.ais.message.ShipTypeCargo.ShipType;
 
 import java.util.HashMap;
 
-import dk.dma.ais.message.ShipTypeCargo.ShipType;
+import static java.util.Objects.requireNonNull;
 
 /**
- * 
  * @author Kasper Nielsen
  */
 public enum ShipTypeColor {
-    BLUE(ShipType.PASSENGER), GREY(ShipType.UNDEFINED, ShipType.UNKNOWN), GREEN(ShipType.CARGO), ORANGE(
-            ShipType.FISHING), PURPLE(ShipType.SAILING, ShipType.PLEASURE), RED(ShipType.TANKER), TURQUOISE, YELLOW(
-            ShipType.HSC, ShipType.WIG);
+    BLUE(ShipType.PASSENGER),
+    GREY(ShipType.UNDEFINED, ShipType.UNKNOWN),
+    GREEN(ShipType.CARGO),
+    ORANGE(ShipType.FISHING),
+    PURPLE(ShipType.SAILING, ShipType.PLEASURE),
+    RED(ShipType.TANKER),
+    TURQUOISE,
+    YELLOW(ShipType.HSC, ShipType.WIG);
 
-    private final HashMap<ShipType, ShipTypeColor> mappings = new HashMap<>();
+    private static final HashMap<ShipType, ShipTypeColor> REVERSE_LOOKUP = new HashMap<>();
+    private final ShipType[] shipTypes;
 
-    ShipTypeColor(ShipType... types) {
-        for (ShipType t : types) {
-            mappings.put(requireNonNull(t), this);
+    static {
+        for (ShipTypeColor shipTypeColor : ShipTypeColor.values()) {
+            for (ShipType shipType : shipTypeColor.shipTypes) {
+                REVERSE_LOOKUP.put(shipType, shipTypeColor);
+            }
         }
     }
 
-    public ShipTypeColor getColor(ShipType type) {
-        ShipTypeColor c = mappings.get(requireNonNull(type));
+    private ShipTypeColor(ShipType... shipTypes) {
+        this.shipTypes = shipTypes;
+    }
+
+    public ShipType[] getShipTypes() {
+        return shipTypes;
+    }
+
+    public static ShipTypeColor getColor(ShipType type) {
+        ShipTypeColor c = REVERSE_LOOKUP.get(requireNonNull(type));
         return c == null ? ShipTypeColor.TURQUOISE : c;
     }
 }
