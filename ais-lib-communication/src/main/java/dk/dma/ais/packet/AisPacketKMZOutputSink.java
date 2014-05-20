@@ -103,9 +103,9 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
             zos.write(VESSEL_BLUE_PNG);
             zos.putNextEntry(new ZipEntry("icons/vessel_blue_moored.png"));
             zos.write(VESSEL_BLUE_MOORED_PNG);
-            zos.putNextEntry(new ZipEntry("icons/vessel_gray.png"));
+            zos.putNextEntry(new ZipEntry("icons/vessel_grey.png"));
             zos.write(VESSEL_GRAY_PNG);
-            zos.putNextEntry(new ZipEntry("icons/vessel_gray_moored.png"));
+            zos.putNextEntry(new ZipEntry("icons/vessel_grey_moored.png"));
             zos.write(VESSEL_GRAY_MOORED_PNG);
             zos.putNextEntry(new ZipEntry("icons/vessel_green.png"));
             zos.write(VESSEL_GREEN_PNG);
