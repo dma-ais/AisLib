@@ -27,12 +27,15 @@ import de.micromata.opengis.kml.v_2_2_0.LineString;
 import de.micromata.opengis.kml.v_2_2_0.LinearRing;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Style;
+import dk.dma.ais.message.NavigationalStatus;
+import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.tracker.ScenarioTracker;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Ellipse;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.CoordinateConverter;
+import dk.dma.enav.util.function.BiFunction;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.enav.util.function.Supplier;
 import dk.dma.enav.util.geometry.Point;
@@ -62,29 +65,48 @@ import static java.lang.Math.min;
 @NotThreadSafe
 class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
-    /** The tracker which will be used to build the scenario that will be written as KML. */
+    /**
+     * The tracker which will be used to build the scenario that will be written as KML.
+     */
     private final ScenarioTracker scenarioTracker = new ScenarioTracker();
 
-    /** Only AisPackets passing this filter will be passed to the scenarioTracker. */
+    /**
+     * Only AisPackets passing this filter will be passed to the scenarioTracker.
+     */
     private final Predicate<? super AisPacket> filter;
 
     private final Predicate<? super AisPacket> isPrimaryTarget;
     private final Predicate<? super AisPacket> isSecondaryTarget;
 
-    /** This predicate returns true when a packet should trigger a snapshot */
+    /**
+     * This predicate returns true when a packet should trigger a snapshot
+     */
     private final Predicate<? super AisPacket> triggerSnapshot;
 
-    /** This function supplies an HTML description of a snapshot triggered by predicate 'triggerSnapshot' */
+    /**
+     * This function supplies an HTML description of a snapshot triggered by predicate 'triggerSnapshot'
+     */
     private final Supplier<? extends String> snapshotDescriptionSupplier;
 
-    /** KML folder title */
+    /**
+     * KML folder title
+     */
     private final Supplier<? extends String> title;
 
-    /** KML folder description */
+    /**
+     * KML folder description
+     */
     private final Supplier<? extends String> description;
 
-    /** KML movement folder interpolation step */
+    /**
+     * KML movement folder interpolation step
+     */
     private final Supplier<? extends Integer> movementInterpolationStep;
+
+    /**
+     * KML vessel icon href
+     */
+    private final BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier;
 
     private static final String KML_STYLE_PRIMARY_SHIP = "Ship1Style";
     private static final String KML_STYLE_SECONDARY_SHIP = "Ship2Style";
@@ -105,16 +127,20 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private final Calendar calendar = Calendar.getInstance();
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private static final SimpleDateFormat DATE_FORMAT_DTG = new SimpleDateFormat("ddHHmm'Z' MMM yy");
+
     static {
         DATE_FORMAT_DTG.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    /** Timespan for KML positions in situation and movement folders */
+    /**
+     * Timespan for KML positions in situation and movement folders
+     */
     private static final int KML_POSITION_TIMESPAN_SECS = 1;
 
     public AisPacketKMLOutputSink() {
@@ -126,6 +152,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.title = defaultTitleSupplier;
         this.description = defaultDescriptionSupplier;
         this.movementInterpolationStep = defaultMovementInterpolationStepSupplier;
+        this.iconHrefSupplier = defaultIconHrefSupplier;
     }
 
     /**
@@ -143,6 +170,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.title = defaultTitleSupplier;
         this.description = defaultDescriptionSupplier;
         this.movementInterpolationStep = defaultMovementInterpolationStepSupplier;
+        this.iconHrefSupplier = defaultIconHrefSupplier;
     }
 
     /**
@@ -153,7 +181,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
      * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         this.filter = filter;
         this.isPrimaryTarget = isPrimaryTarget;
         this.isSecondaryTarget = isSecondaryTarget;
@@ -162,7 +190,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.title = defaultTitleSupplier;
         this.description = defaultDescriptionSupplier;
         this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier : movementInterpolationStepSupplier;
-
+        this.iconHrefSupplier = (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? defaultIconHrefSupplier : iconHrefSupplier);
     }
 
     /**
@@ -175,7 +203,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * @param supplyTitle Supplier of KML folder title
      * @param supplyDescription Supplier of KML folder description
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         this.filter = filter;
         this.isPrimaryTarget = isPrimaryTarget;
         this.isSecondaryTarget = isSecondaryTarget;
@@ -184,9 +212,12 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.title = supplyTitle == null ? defaultTitleSupplier : supplyTitle;
         this.description = supplyDescription == null ? defaultDescriptionSupplier : supplyDescription;
         this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier : movementInterpolationStepSupplier;
+        this.iconHrefSupplier = (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? defaultIconHrefSupplier : iconHrefSupplier);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void process(OutputStream stream, AisPacket packet, long count) throws IOException {
         if (filter.test(packet)) {
@@ -246,7 +277,14 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     };
 
-    private Kml createKml() throws IOException {
+    private BiFunction<ShipTypeCargo, NavigationalStatus, String> defaultIconHrefSupplier = new BiFunction<ShipTypeCargo, NavigationalStatus, String>() {
+        @Override
+        public String apply(ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus) {
+            return "http://earth.google.com/images/kml-icons/track-directional/track-0.png";
+        }
+    };
+
+    protected Kml createKml() throws IOException {
         Kml kml = new Kml();
 
         Document document = kml.createAndSetDocument()
@@ -374,6 +412,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 );
                 createKmlShipIconPlacemark(
                         situationFolder,
+                        target.getShipTypeCargo(),
+                        estimatedPosition.getNavigationalStatus(),
                         null,
                         null,
                         estimatedPosition.getLatitude(),
@@ -440,6 +480,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     );
                     createKmlShipIconPlacemark(
                         targetShipIconFolder,
+                        target.getShipTypeCargo(),
+                        positionReport.getNavigationalStatus(),
                         t - (dt - 100),
                         t,
                         positionReport.getLatitude(),
@@ -460,34 +502,36 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     }
 
                     final long maxTimespan = 10000L;
-                    long timespan = min(nextPositionReport!=null ? nextPositionReport.getTimestamp() - positionReport.getTimestamp() - 1 : maxTimespan, maxTimespan);
+                    final long timespan = min(nextPositionReport!=null ? nextPositionReport.getTimestamp() - positionReport.getTimestamp() - 1 : maxTimespan, maxTimespan);
 
                     createKmlShipShapePlacemark(
-                            targetShipShapeFolder,
-                            target.getMmsi(),
-                            target.getName(),
-                            positionReport.getTimestamp(),
-                            positionReport.getTimestamp() + timespan,
-                            positionReport.getLatitude(),
-                            positionReport.getLongitude(),
-                            positionReport.getCog(),
-                            positionReport.getSog(),
-                            positionReport.getHeading(),
-                            target.getToBow(),
-                            target.getToStern(),
-                            target.getToPort(),
-                            target.getToStarboard(),
-                            false,
-                            getStyle(target, positionReport.isEstimated())
+                        targetShipShapeFolder,
+                        target.getMmsi(),
+                        target.getName(),
+                        positionReport.getTimestamp(),
+                        positionReport.getTimestamp() + timespan,
+                        positionReport.getLatitude(),
+                        positionReport.getLongitude(),
+                        positionReport.getCog(),
+                        positionReport.getSog(),
+                        positionReport.getHeading(),
+                        target.getToBow(),
+                        target.getToStern(),
+                        target.getToPort(),
+                        target.getToStarboard(),
+                        false,
+                        getStyle(target, positionReport.isEstimated())
                     );
                     createKmlShipIconPlacemark(
-                            targetShipIconFolder,
-                            positionReport.getTimestamp(),
-                            positionReport.getTimestamp() + timespan,
-                            positionReport.getLatitude(),
-                            positionReport.getLongitude(),
-                            positionReport.getCog(),
-                            "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null)
+                        targetShipIconFolder,
+                        target.getShipTypeCargo(),
+                        positionReport.getNavigationalStatus(),
+                        positionReport.getTimestamp(),
+                        positionReport.getTimestamp() + timespan,
+                        positionReport.getLatitude(),
+                        positionReport.getLongitude(),
+                        positionReport.getCog(),
+                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null)
                     );
                 }
             }
@@ -527,12 +571,12 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         generateHtmlTableRow(desc, "NAME",  target1 == null ? null : target1.getName(),                              target2 == null ? null : target2.getName(),                               "");
         generateHtmlTableRow(desc, "MMSI",  target1 == null ? null : target1.getMmsi(),                              target2 == null ? null : target2.getMmsi(),                               "");
         generateHtmlTableRow(desc, "IMO",   target1 == null ? null : target1.getImo(),                               target2 == null ? null : target2.getImo(),                                "");
-        generateHtmlTableRow(desc, "TYPE",  target1 == null ? null : target1.getShipType(),                          target2 == null ? null : target2.getShipType(),                           "");
+        generateHtmlTableRow(desc, "TYPE",  target1 == null ? null : target1.getShipTypeAsString(),                          target2 == null ? null : target2.getShipTypeAsString(),                           "");
         generateHtmlTableRow(desc, "LOA",   target1 == null ? null : target1.getToBow() + target1.getToStern(),      target2 == null ? null : target2.getToBow() + target2.getToStern(),      "m");
         generateHtmlTableRow(desc, "BEAM",  target1 == null ? null : target1.getToStarboard() + target1.getToPort(), target2 == null ? null : target2.getToStarboard() + target2.getToPort(), "m");
         desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
         generateHtmlTableRow(desc, "DST",   target1 == null ? null : target1.getDestination(),                       target2 == null ? null : target2.getDestination(),                        "");
-        generateHtmlTableRow(desc, "CARGO", target1 == null ? null : target1.getCargoType(),                         target2 == null ? null : target2.getCargoType(),                          "");
+        generateHtmlTableRow(desc, "CARGO", target1 == null ? null : target1.getCargoTypeAsString(),                         target2 == null ? null : target2.getCargoTypeAsString(),                          "");
         desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
         generateHtmlTableRow(desc, "DTG",   dtg1, dtg2, "");
         generateHtmlTableRow(desc, "POS",   positionReport1 == null ? null : positionReport1.getPositionTime(),                   positionReport2 == null ? null : positionReport2.getPositionTime(),                      "");
@@ -638,7 +682,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private void createKmlShipIconPlacemark(Folder targetFolder, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, String description) {
+    private void createKmlShipIconPlacemark(Folder targetFolder, ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, String description) {
         String begin = null;
         String end = null;
         if (timespanBegin != null && timespanEnd != null) {
@@ -663,7 +707,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             .withScale(1.0)
             .withHeading((int) cog)
             .createAndSetIcon()
-                .withHref("http://earth.google.com/images/kml-icons/track-directional/track-0.png");
+                .withHref(iconHrefSupplier.apply(shipTypeCargo, navigationalStatus));
 
         placemarkForShipIcon
             .createAndSetPoint()

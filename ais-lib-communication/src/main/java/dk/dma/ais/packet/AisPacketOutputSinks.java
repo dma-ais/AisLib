@@ -17,8 +17,11 @@ package dk.dma.ais.packet;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
+import dk.dma.ais.message.NavigationalStatus;
+import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.Position;
+import dk.dma.enav.util.function.BiFunction;
 import dk.dma.enav.util.function.Predicate;
 import dk.dma.enav.util.function.Supplier;
 
@@ -199,12 +202,28 @@ public class AisPacketOutputSinks {
         return new AisPacketKMLOutputSink(filter);
     }
 
-    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep) {
-        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep);
+    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, iconHrefSupplier);
     }
 
-    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription) {
-        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription);
+    public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+        return new AisPacketKMLOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
+    }
+
+    public static OutputStreamSink<AisPacket> newKmzSink() {
+        return new AisPacketKMZOutputSink();
+    }
+
+    public static OutputStreamSink<AisPacket> newKmzSink(Predicate<? super AisPacket> filter) {
+        return new AisPacketKMZOutputSink(filter);
+    }
+
+    public static OutputStreamSink<AisPacket> newKmzSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+        return new AisPacketKMZOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, iconHrefSupplier);
+    }
+
+    public static OutputStreamSink<AisPacket> newKmzSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+        return new AisPacketKMZOutputSink(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
     }
 
 }

@@ -215,11 +215,13 @@ public class ScenarioTracker implements Tracker {
             return destination == null ? "" : destination;
         }
 
-        public String getCargoType() {
+        public ShipTypeCargo getShipTypeCargo() { return shipTypeCargo; }
+
+        public String getCargoTypeAsString() {
             return shipTypeCargo == null ? null : shipTypeCargo.prettyCargo();
         }
 
-        public String getShipType() {
+        public String getShipTypeAsString() {
             return shipTypeCargo == null ? null : shipTypeCargo.prettyType();
         }
 
