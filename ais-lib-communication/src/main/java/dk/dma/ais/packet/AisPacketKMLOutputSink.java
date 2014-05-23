@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
+import de.micromata.opengis.kml.v_2_2_0.Camera;
 import de.micromata.opengis.kml.v_2_2_0.Coordinate;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
@@ -54,6 +55,7 @@ import java.util.TimeZone;
 
 import static dk.dma.enav.safety.SafetyZones.safetyZone;
 import static java.lang.Math.min;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * This class receives AisPacket and use them to build a scenario
@@ -266,7 +268,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private Supplier<String> defaultDescriptionSupplier = new Supplier<String>() {
         @Override
         public String get() {
-            return "Scenario starting " + scenarioTracker.scenarioBegin() + " and ending " + scenarioTracker.scenarioEnd();
+            StringBuffer description = new StringBuffer();
+            Date scenarioBegin = scenarioTracker.scenarioBegin();
+            Date scenarioEnd = scenarioTracker.scenarioEnd();
+            if (scenarioBegin != null) {
+                description.append("Scenario");
+                description.append(" starting ");
+                description.append(scenarioBegin.toString());
+                if (scenarioEnd != null) {
+                    description.append(" and ending ");
+                    description.append(scenarioEnd.toString());
+                }
+            }
+            return description.toString();
         }
     };
 
@@ -287,23 +301,48 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     protected Kml createKml() throws IOException {
         Kml kml = new Kml();
 
-        Document document = kml.createAndSetDocument()
-            .withDescription(description.get())
-            .withName(title.get())
-            .withOpen(true);
+        Document document = kml.createAndSetDocument().withOpen(true);
 
-        document.createAndSetCamera()
-                .withAltitude(2000)
-                .withHeading(0)
-                .withTilt(0)
+        String docDesc = description.get();
+        if (! isBlank(docDesc)) {
+            document.withDescription(docDesc);
+        }
+
+        String docTitle = title.get();
+        if (! isBlank(docTitle)) {
+            document.withName(docTitle);
+        }
+
+        Camera camera = document.createAndSetCamera()
+            .withAltitude(2000)
+            .withHeading(0)
+            .withTilt(0)
+            .withAltitudeMode(AltitudeMode.ABSOLUTE);
+
+        if (scenarioTracker.boundingBox() != null) {
+            camera
                 .withLatitude((scenarioTracker.boundingBox().getMaxLat() + scenarioTracker.boundingBox().getMinLat())/2.0)
-                .withLongitude((scenarioTracker.boundingBox().getMaxLon() + scenarioTracker.boundingBox().getMinLon())/2.0)
-                .withAltitudeMode(AltitudeMode.ABSOLUTE);
+                .withLongitude((scenarioTracker.boundingBox().getMaxLon() + scenarioTracker.boundingBox().getMinLon())/2.0);
+        }
 
         // Create all ship styles
         createKmlStyles(document);
 
-        Folder rootFolder = document.createAndAddFolder().withName(scenarioTracker.scenarioBegin().toString() + " - " + scenarioTracker.scenarioEnd().toString());
+        Folder rootFolder = document.createAndAddFolder().withName("Vessel scenario");
+
+        StringBuffer rootFolderName = new StringBuffer();
+        Date scenarioBegin = scenarioTracker.scenarioBegin();
+        Date scenarioEnd = scenarioTracker.scenarioEnd();
+        if (scenarioBegin != null) {
+            rootFolderName.append(scenarioBegin.toString());
+            if (scenarioEnd != null) {
+                rootFolderName.append(" - ");
+            }
+        }
+        if (scenarioEnd != null) {
+            rootFolderName.append(scenarioEnd.toString());
+        }
+        rootFolder.withDescription(rootFolderName.toString());
 
         // Generate bounding box
         createKmlBoundingBox(rootFolder);
@@ -361,17 +400,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private void createKmlBoundingBox(Folder kmlNode) {
         BoundingBox bbox = scenarioTracker.boundingBox();
 
-        kmlNode.createAndAddPlacemark()
-            .withId("bbox")
-            .withStyleUrl("#bbox")
-            .withName("Bounding box")
-            .withVisibility(true)
-            .createAndSetLinearRing()
-                .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat())
-                .addToCoordinates(bbox.getMaxLon(), bbox.getMinLat())
-                .addToCoordinates(bbox.getMinLon(), bbox.getMinLat())
-                .addToCoordinates(bbox.getMinLon(), bbox.getMaxLat())
-                .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat());
+        if (bbox != null) {
+            kmlNode.createAndAddPlacemark()
+                .withId("bbox")
+                .withStyleUrl("#bbox")
+                .withName("Bounding box")
+                .withVisibility(true)
+                .createAndSetLinearRing()
+                    .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat())
+                    .addToCoordinates(bbox.getMaxLon(), bbox.getMinLat())
+                    .addToCoordinates(bbox.getMinLon(), bbox.getMinLat())
+                    .addToCoordinates(bbox.getMinLon(), bbox.getMaxLat())
+                    .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat());
+        }
     }
 
     private void createKmlSituationFolder(Folder kmlNode, long atTime) {

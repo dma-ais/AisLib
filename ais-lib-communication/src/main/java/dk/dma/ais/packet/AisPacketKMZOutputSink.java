@@ -66,7 +66,7 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
             (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? (new BiFunction<ShipTypeCargo, NavigationalStatus, String>() {
                 @Override
                 public String apply(ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus) {
-                    ShipTypeColor color = ShipTypeColor.getColor(shipTypeCargo.getShipType());
+                    ShipTypeColor color = ShipTypeColor.getColor(shipTypeCargo == null ? ShipTypeCargo.ShipType.UNKNOWN : shipTypeCargo.getShipType());
                     return "icons/vessel_" + color.toString().toLowerCase() + (navigationalStatus != NavigationalStatus.MOORED ? "" : "_moored") + ".png";
                 }
             }) : iconHrefSupplier)
@@ -88,7 +88,7 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
             (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? (new BiFunction<ShipTypeCargo, NavigationalStatus, String>() {
                 @Override
                 public String apply(ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus) {
-                    ShipTypeColor color = ShipTypeColor.getColor(shipTypeCargo.getShipType());
+                    ShipTypeColor color = ShipTypeColor.getColor(shipTypeCargo == null ? ShipTypeCargo.ShipType.UNKNOWN : shipTypeCargo.getShipType());
                     return "icons/vessel_" + color.toString().toLowerCase() + (navigationalStatus != NavigationalStatus.MOORED ? "" : "_moored") + ".png";
                 }
             }) : iconHrefSupplier)
