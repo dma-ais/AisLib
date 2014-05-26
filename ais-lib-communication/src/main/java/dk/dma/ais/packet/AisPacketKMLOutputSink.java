@@ -360,12 +360,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
 
         // Generate tracks folder
-        createKmlTracksFolder(rootFolder, new Predicate<ScenarioTracker.Target>() {
-            @Override
-            public boolean test(ScenarioTracker.Target target) {
-                return target.isTagged(KML_STYLE_PRIMARY_SHIP) || target.isTagged(KML_STYLE_SECONDARY_SHIP);
-            }
-        });
+        createKmlTracksFolder(rootFolder, Predicate.TRUE);
 
         // Generate movements folder
         createKmlMovementsAndIconsFolders(rootFolder);
@@ -656,7 +651,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         table.append("</td></tr>");
     }
 
-    private void createKmlTracksFolder(Folder kmlNode, Predicate<ScenarioTracker.Target> trackFor) {
+    private void createKmlTracksFolder(Folder kmlNode, Predicate<? super ScenarioTracker.Target> trackFor) {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
         Folder tracksFolder = kmlNode.createAndAddFolder()
