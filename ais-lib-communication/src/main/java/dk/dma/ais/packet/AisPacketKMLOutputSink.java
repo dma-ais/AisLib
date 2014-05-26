@@ -328,7 +328,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         // Create all ship styles
         createKmlStyles(document);
 
-        Folder rootFolder = document.createAndAddFolder().withName("Vessel scenario");
+        Folder rootFolder = document.createAndAddFolder()
+            .withName("Vessel scenario")
+            .withOpen(true)
+            .withVisibility(true);
 
         StringBuffer rootFolderName = new StringBuffer();
         Date scenarioBegin = scenarioTracker.scenarioBegin();
@@ -449,7 +452,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         target.getToPort(),
                         target.getToStarboard(),
                         target.isTagged(KML_STYLE_PRIMARY_SHIP),
-                        getStyle(target, false)
+                        getStyle(target, false),
+                        true
                 );
                 createKmlShipIconPlacemark(
                         situationFolder,
@@ -460,7 +464,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         estimatedPosition.getLatitude(),
                         estimatedPosition.getLongitude(),
                         estimatedPosition.getCog(),
-                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, estimatedPosition, null, null)
+                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, estimatedPosition, null, null),
+                        true
                 );
                 if (primaryTarget == null && target.isTagged(KML_STYLE_PRIMARY_SHIP)) {
                     primaryTarget = target;
@@ -517,7 +522,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         target.getToPort(),
                         target.getToStarboard(),
                         false,
-                        getStyle(target, positionReport.isEstimated())
+                        getStyle(target, positionReport.isEstimated()),
+                        false
                     );
                     createKmlShipIconPlacemark(
                         targetShipIconFolder,
@@ -528,7 +534,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         positionReport.getLatitude(),
                         positionReport.getLongitude(),
                         positionReport.getCog(),
-                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null)
+                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null),
+                        false
                     );
                 }
             } else {
@@ -561,7 +568,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         target.getToPort(),
                         target.getToStarboard(),
                         false,
-                        getStyle(target, positionReport.isEstimated())
+                        getStyle(target, positionReport.isEstimated()),
+                        false
                     );
                     createKmlShipIconPlacemark(
                         targetShipIconFolder,
@@ -572,7 +580,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         positionReport.getLatitude(),
                         positionReport.getLongitude(),
                         positionReport.getCog(),
-                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null)
+                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null),
+                        false
                     );
                 }
             }
@@ -680,7 +689,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private void createKmlShipShapePlacemark(Folder targetFolder, String mmsi, String name, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, float sog, int heading, float toBow, float toStern, float toPort, float toStarboard, boolean safetyZoneEllipse, String style) {
+    private void createKmlShipShapePlacemark(Folder targetFolder, String mmsi, String name, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, float sog, int heading, float toBow, float toStern, float toPort, float toStarboard, boolean safetyZoneEllipse, String style, boolean visible) {
         String begin = null;
         String end = null;
         if (timespanBegin != null && timespanEnd != null) {
@@ -692,7 +701,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         Placemark placemarkForShipShape = targetFolder
             .createAndAddPlacemark()
-                .withVisibility(true)
+                .withVisibility(visible)
                 .withId(mmsi)
                 .withName(name)
                 .withStyleUrl("#" + style);
@@ -708,7 +717,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         if (safetyZoneEllipse) {
             Placemark placemarkForEllipse = targetFolder
                 .createAndAddPlacemark()
-                    .withVisibility(true)
+                    .withVisibility(visible)
                     .withId(mmsi + "-ellipse")
                     .withName(name + "'s ellipse")
                     .withStyleUrl("#" + style);
@@ -723,7 +732,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private void createKmlShipIconPlacemark(Folder targetFolder, ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, String description) {
+    private void createKmlShipIconPlacemark(Folder targetFolder, ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, String description, boolean visible) {
         String begin = null;
         String end = null;
         if (timespanBegin != null && timespanEnd != null) {
@@ -735,6 +744,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         Placemark placemarkForShipIcon = targetFolder
             .createAndAddPlacemark()
+                .withVisibility(visible)
                 .withDescription("");
 
         Style style = placemarkForShipIcon
