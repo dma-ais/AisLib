@@ -26,7 +26,7 @@ import dk.dma.ais.sentence.Vdm;
  * aircraft involved in SAR operations should not use transmit this message. The
  * default reporting interval for this message should be 10 seconds.
  */
-public class AisMessage9 extends AisMessage {
+public class AisMessage9 extends AisMessage implements IPositionMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
