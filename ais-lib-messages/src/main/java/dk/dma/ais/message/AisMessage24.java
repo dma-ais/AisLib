@@ -44,7 +44,7 @@ public class AisMessage24 extends AisStaticCommon {
      * Unique identification of the Unit by a number as defined by the manufacturer (option; “@@@@@@@” = not available =
      * default)
      */
-    long vendorId; // 42 bits
+    String vendorId; // 7x6 (42) bits
 
     /**
      * Spare bits
@@ -82,7 +82,7 @@ public class AisMessage24 extends AisStaticCommon {
 
         // Handle part B
         this.shipType = (int) binArray.getVal(8);
-        this.vendorId = binArray.getVal(42);
+        this.vendorId = binArray.getString(7);
         this.callsign = binArray.getString(7);
         this.dimBow = (int) binArray.getVal(9);
         this.dimStern = (int) binArray.getVal(9);
@@ -104,11 +104,11 @@ public class AisMessage24 extends AisStaticCommon {
         this.partNumber = partNumber;
     }
 
-    public long getVendorId() {
+    public String getVendorId() {
         return vendorId;
     }
 
-    public void setVendorId(long vendorId) {
+    public void setVendorId(String vendorId) {
         this.vendorId = vendorId;
     }
 
