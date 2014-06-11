@@ -231,6 +231,18 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     public int getRot() {
         return rot;
     }
+    
+    public Float getSensorRot() {
+        if (rot == 128) {
+            return null;
+        }
+        int signedRot = (int)(byte)rot;
+        float sensorRot = (float)Math.pow(signedRot / 4.733, 2);
+        if (signedRot < 0) {
+            sensorRot *= -1;
+        }
+        return sensorRot;
+    }
 
     public void setRot(int rot) {
         this.rot = rot;

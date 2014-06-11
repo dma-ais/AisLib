@@ -51,4 +51,5 @@ public class AisMessageTest {
         msg.setUserId(970_015_654);
         assertEquals(AisTargetType.SART, msg.getTargetType());
     }
+    
 }
