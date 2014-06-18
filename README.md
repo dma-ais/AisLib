@@ -198,6 +198,8 @@ public void accept(AisMessage aisMessage) {
 }
 ```
 
+[See UML diagram of messages](ais-lib-messages/src/main/doc/ais-messages-diagram.jpg)
+
 ### Multiple sources ###
 
 The example below shows how messages from multiple sources can be handled by a single
