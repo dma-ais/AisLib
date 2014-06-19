@@ -707,11 +707,65 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withOpen(false)
                 .withVisibility(false);
 
+        Folder cargoTracksFolder = null;
+        Folder tankersTracksFolder = null;
+        Folder passengerTracksFolder = null;
+        Folder fishingTracksFolder = null;
+        Folder classBTracksFolder = null;
+        Folder otherTracksFolder = null;
+
         for (ScenarioTracker.Target target : targets) {
             if (trackFor.test(target)) {
                 Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
                 if (positionReportReports.size() > 0) {
-                    Placemark placemark = tracksFolder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
+
+                    Folder folder = null;
+
+                    ShipTypeCargo shipTypeCargo = target.getShipTypeCargo();
+                    if (shipTypeCargo != null) {
+                        ShipTypeCargo.ShipType shipType = shipTypeCargo.getShipType();
+                        switch(shipType) {
+                            case CARGO:
+                                if (cargoTracksFolder == null) {
+                                    cargoTracksFolder = tracksFolder.createAndAddFolder().withName("Cargo").withOpen(false).withVisibility(false);
+                                }
+                                folder = cargoTracksFolder;
+                                break;
+                            case TANKER:
+                                if (tankersTracksFolder == null) {
+                                    tankersTracksFolder = tracksFolder.createAndAddFolder().withName("Tankers").withOpen(false).withVisibility(false);
+                                }
+                                folder = tankersTracksFolder;
+                                break;
+                            case PASSENGER:
+                                if (passengerTracksFolder == null) {
+                                    passengerTracksFolder = tracksFolder.createAndAddFolder().withName("Passenger").withOpen(false).withVisibility(false);
+                                }
+                                folder = passengerTracksFolder;
+                                break;
+                            case FISHING:
+                                if (fishingTracksFolder == null) {
+                                    fishingTracksFolder = tracksFolder.createAndAddFolder().withName("Fishing").withOpen(false).withVisibility(false);
+                                }
+                                folder = fishingTracksFolder;
+                                break;
+                            case PLEASURE:
+                            case SAILING:
+                                if (classBTracksFolder == null) {
+                                    classBTracksFolder = tracksFolder.createAndAddFolder().withName("Class B").withOpen(false).withVisibility(false);
+                                }
+                                folder = classBTracksFolder;
+                                break;
+                        }
+                    }
+                    if (folder == null) {
+                        if (otherTracksFolder == null) {
+                            otherTracksFolder = tracksFolder.createAndAddFolder().withName("Other").withOpen(false).withVisibility(false);
+                        }
+                        folder = otherTracksFolder;
+                    }
+
+                    Placemark placemark = folder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
 
                     Style style = placemark
                         .createAndAddStyle()
