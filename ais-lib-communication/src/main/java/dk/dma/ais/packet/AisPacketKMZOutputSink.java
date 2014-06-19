@@ -58,11 +58,16 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
      * AisPackets which comply with the filter predicate.
      *
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
      * @param isPrimaryTarget Apply primary KMZ styling to targets which are updated by packets that pass this predicate.
      * @param isSecondaryTarget Apply secondary KMZ styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMZOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
-        super(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStepSupplier,
+    public AisPacketKMZOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+        super(filter,
+            createSituationFolder, createMovementsFolder, createTracksFolder,
+            isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStepSupplier,
             (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? (new BiFunction<ShipTypeCargo, NavigationalStatus, String>() {
                 @Override
                 public String apply(ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus) {
@@ -78,13 +83,18 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
      * AisPackets which comply with the filter predicate.
      *
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
      * @param isPrimaryTarget Apply primary KMZ styling to targets which are updated by packets that pass this predicate.
      * @param isSecondaryTarget Apply secondary KMZ styling to targets which are updated by packets that pass this predicate.
      * @param supplyTitle Supplier of KMZ folder title
      * @param supplyDescription Supplier of KMZ folder description
      */
-    public AisPacketKMZOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
-        super(filter, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStepSupplier, supplyTitle, supplyDescription,
+    public AisPacketKMZOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+        super(filter,
+            createSituationFolder, createMovementsFolder, createTracksFolder,
+            isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStepSupplier, supplyTitle, supplyDescription,
             (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? (new BiFunction<ShipTypeCargo, NavigationalStatus, String>() {
                 @Override
                 public String apply(ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus) {

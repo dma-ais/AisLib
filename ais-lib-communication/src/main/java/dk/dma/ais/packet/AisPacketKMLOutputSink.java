@@ -41,6 +41,8 @@ import dk.dma.enav.util.function.Predicate;
 import dk.dma.enav.util.function.Supplier;
 import dk.dma.enav.util.geometry.Point;
 import net.jcip.annotations.NotThreadSafe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -67,6 +69,16 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 @NotThreadSafe
 class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AisPacketKMLOutputSink.class);
+
+    static {
+        LOG.debug("AisPacketKMLOutputSink loaded.");
+    }
+
+    {
+        LOG.debug(getClass().getSimpleName() + " created (" + this + ").");
+    }
+
     /**
      * The tracker which will be used to build the scenario that will be written as KML.
      */
@@ -76,6 +88,15 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * Only AisPackets passing this filter will be passed to the scenarioTracker.
      */
     private final Predicate<? super AisPacket> filter;
+
+    /** Include the 'situation' folder in the generated KML */
+    final boolean createSituationFolder;
+
+    /** Include the 'movements' folder in the generated KML */
+    final boolean createMovementsFolder;
+
+    /** Include the 'tracks' folder in the generated KML */
+    final boolean createTracksFolder;
 
     private final Predicate<? super AisPacket> isPrimaryTarget;
     private final Predicate<? super AisPacket> isSecondaryTarget;
@@ -147,6 +168,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     public AisPacketKMLOutputSink() {
         this.filter = Predicate.TRUE;
+        this.createSituationFolder = true;
+        this.createMovementsFolder = true;
+        this.createTracksFolder = true;
         this.isPrimaryTarget = Predicate.FALSE;
         this.isSecondaryTarget = Predicate.FALSE;
         this.triggerSnapshot = Predicate.FALSE;
@@ -165,6 +189,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      */
     public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter) {
         this.filter = filter;
+        this.createSituationFolder = true;
+        this.createMovementsFolder = true;
+        this.createTracksFolder = true;
         this.isPrimaryTarget = Predicate.FALSE;
         this.isSecondaryTarget = Predicate.FALSE;
         this.triggerSnapshot = Predicate.FALSE;
@@ -180,11 +207,17 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * AisPackets which comply with the filter predicate.
      *
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
      * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
      * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         this.filter = filter;
+        this.createSituationFolder = createSituationFolder;
+        this.createMovementsFolder = createMovementsFolder;
+        this.createTracksFolder = createTracksFolder;
         this.isPrimaryTarget = isPrimaryTarget;
         this.isSecondaryTarget = isSecondaryTarget;
         this.triggerSnapshot = triggerSnapshot;
@@ -200,13 +233,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * AisPackets which comply with the filter predicate.
      *
      * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
      * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
      * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
      * @param supplyTitle Supplier of KML folder title
      * @param supplyDescription Supplier of KML folder description
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         this.filter = filter;
+        this.createSituationFolder = createSituationFolder;
+        this.createMovementsFolder = createMovementsFolder;
+        this.createTracksFolder = createTracksFolder;
         this.isPrimaryTarget = isPrimaryTarget;
         this.isSecondaryTarget = isSecondaryTarget;
         this.triggerSnapshot = triggerSnapshot;
@@ -215,6 +254,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.description = supplyDescription == null ? defaultDescriptionSupplier : supplyDescription;
         this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier : movementInterpolationStepSupplier;
         this.iconHrefSupplier = (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? defaultIconHrefSupplier : iconHrefSupplier);
+        System.out.println(toString());
     }
 
     /**
@@ -351,7 +391,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         createKmlBoundingBox(rootFolder);
 
         // Generate situation folder
-        if (snapshotTimes.size() >= 1) {
+        if (createSituationFolder && snapshotTimes.size() >= 1) {
             createKmlSituationFolder(rootFolder, snapshotTimes.iterator().next());
 
             if (snapshotTimes.size() > 1) {
@@ -360,10 +400,14 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
 
         // Generate tracks folder
-        createKmlTracksFolder(rootFolder, Predicate.TRUE);
+        if (createTracksFolder) {
+            createKmlTracksFolder(rootFolder, Predicate.TRUE);
+        }
 
         // Generate movements folder
-        createKmlMovementsAndIconsFolders(rootFolder);
+        if (createMovementsFolder) {
+            createKmlMovementsAndIconsFolders(rootFolder);
+        }
 
         return kml;
     }
