@@ -65,6 +65,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  * When the sink is closed it dumps the entire target state to the output stream in KML format.
  *
  * TODO Even though the triggerSnapshot predicate encourages generation of multiple snapshots, only one is currently supported.
+ *
+ * @author Thomas Borg Salling <tbsalling@tbsalling.dk>
  */
 @NotThreadSafe
 class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
@@ -421,11 +423,11 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 .withColor("cccc00b0")
                 .withWidth(2.5);
 
-        createStyle(document, KML_STYLE_OTHER_SHIP, 2, "20"+ KML_COLOR_OTHER_SHIP, "FF"+ KML_COLOR_OTHER_SHIP);
+        createStyle(document, KML_STYLE_OTHER_SHIP, 2, "60"+ KML_COLOR_OTHER_SHIP, "FF"+ KML_COLOR_OTHER_SHIP);
         createStyle(document, KML_STYLE_PRIMARY_SHIP, 2, "80"+ KML_COLOR_PRIMARY_SHIP, "ff"+ KML_COLOR_PRIMARY_SHIP);
         createStyle(document, KML_STYLE_SECONDARY_SHIP, 2, "80"+ KML_COLOR_SECONDARY_SHIP, "ff"+ KML_COLOR_SECONDARY_SHIP);
-        createStyle(document, KML_STYLE_PRIMARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "40"+ KML_COLOR_PRIMARY_SHIP, "80"+ KML_COLOR_PRIMARY_SHIP);
-        createStyle(document, KML_STYLE_SECONDARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "40"+ KML_COLOR_SECONDARY_SHIP, "80"+ KML_COLOR_SECONDARY_SHIP);
+        createStyle(document, KML_STYLE_PRIMARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "60"+ KML_COLOR_PRIMARY_SHIP, "80"+ KML_COLOR_PRIMARY_SHIP);
+        createStyle(document, KML_STYLE_SECONDARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "60"+ KML_COLOR_SECONDARY_SHIP, "80"+ KML_COLOR_SECONDARY_SHIP);
     }
 
     private static void createStyle(Document document, String styleName, int width, String lineColor, String polyColor) {
@@ -667,14 +669,16 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         generateHtmlTableRow(desc, "DST",   target1 == null ? null : target1.getDestination(),                       target2 == null ? null : target2.getDestination(),                        "");
         generateHtmlTableRow(desc, "CARGO", target1 == null ? null : target1.getCargoTypeAsString(),                         target2 == null ? null : target2.getCargoTypeAsString(),                          "");
         desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
-        generateHtmlTableRow(desc, "DTG",   dtg1, dtg2, "");
-        generateHtmlTableRow(desc, "POS",   positionReport1 == null ? null : positionReport1.getPositionTime(),                   positionReport2 == null ? null : positionReport2.getPositionTime(),                      "");
-        generateHtmlTableRow(desc, "SRC",   positionReport1 == null ? null : positionReport1.isEstimated() ? "Estimated" : "AIS", positionReport2 == null ? null : positionReport2.isEstimated() ? "Estimated" : "AIS",    "");
-        generateHtmlTableRow(desc, "HDG",   positionReport1 == null ? null : positionReport1.getHeading(),                        positionReport2 == null ? null : positionReport2.getHeading(),                        "deg");
-        generateHtmlTableRow(desc, "COG",   positionReport1 == null ? null : Float.valueOf(positionReport1.getCog()).intValue(),  positionReport2 == null ? null : Float.valueOf(positionReport2.getCog()).intValue(),  "deg");
-        generateHtmlTableRow(desc, "SOG",   positionReport1 == null ? null : positionReport1.getSog(),                            positionReport2 == null ? null : positionReport2.getSog(),                            "kts");
-        generateHtmlTableRow(desc, "NAV",   positionReport1 == null ? null : positionReport1.getNavigationalStatus(),             positionReport2 == null ? null : positionReport2.getNavigationalStatus(),                "");
-        desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
+        if (positionReport1 != null || positionReport2 != null) {
+            generateHtmlTableRow(desc, "DTG", dtg1, dtg2, "");
+            generateHtmlTableRow(desc, "POS", positionReport1 == null ? null : positionReport1.getPositionTime(), positionReport2 == null ? null : positionReport2.getPositionTime(), "");
+            generateHtmlTableRow(desc, "SRC", positionReport1 == null ? null : positionReport1.isEstimated() ? "Estimated" : "AIS", positionReport2 == null ? null : positionReport2.isEstimated() ? "Estimated" : "AIS", "");
+            generateHtmlTableRow(desc, "HDG", positionReport1 == null ? null : positionReport1.getHeading(), positionReport2 == null ? null : positionReport2.getHeading(), "deg");
+            generateHtmlTableRow(desc, "COG", positionReport1 == null ? null : Float.valueOf(positionReport1.getCog()).intValue(), positionReport2 == null ? null : Float.valueOf(positionReport2.getCog()).intValue(), "deg");
+            generateHtmlTableRow(desc, "SOG", positionReport1 == null ? null : positionReport1.getSog(), positionReport2 == null ? null : positionReport2.getSog(), "kts");
+            generateHtmlTableRow(desc, "NAV", positionReport1 == null ? null : positionReport1.getNavigationalStatus(), positionReport2 == null ? null : positionReport2.getNavigationalStatus(), "");
+            desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
+        }
         generateHtmlTableRow(desc, "REF",   ref1, ref2, "");
         desc.append("</table></div>");
 
@@ -708,11 +712,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 Set<ScenarioTracker.Target.PositionReport> positionReportReports = target.getPositionReports();
                 if (positionReportReports.size() > 0) {
                     Placemark placemark = tracksFolder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
+
+                    Style style = placemark
+                        .createAndAddStyle()
+                            .withId("_" + target.getName() + "TrackStyle");
+                    style.createAndSetBalloonStyle()
+                        .withText("<h2>Vessel details</h2>" + generateHtmlShipDescription(target, null, null, null));
+
+                    placemark.withStyleUrl(getStyle(target, false));
+
                     LineString lineString = placemark.createAndSetLineString();
                     for (ScenarioTracker.Target.PositionReport positionReport : positionReportReports) {
                         lineString.addToCoordinates(positionReport.getLongitude(), positionReport.getLatitude());
                     }
-                    placemark.withStyleUrl(getStyle(target, false));
                 }
             }
         }
