@@ -587,7 +587,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
                 aisPacketStream.add(p);          // Update state
                 final int mmsi = getMmsi(p);     // Get MMSI in question
                 final AisPosition pos = getPosition(mmsi); // Extract - if we know it
-                return pos == null ? false : area.contains(pos.getGeoLocation());
+                return (pos == null || pos.getGeoLocation() == null) ? false : area.contains(pos.getGeoLocation());
             }
             public String toString() {
                 return "pos within " + area;
