@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.Serializable;
 import java.util.Map;
 
+import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage24;
 import dk.dma.ais.message.AisPositionMessage;
@@ -56,6 +57,9 @@ public final class TargetInfo implements Serializable {
     final int heading;
     final byte navStatus;
     final float sog;
+    
+    //Warning a mutable object
+    AisTarget aisTarget;
 
     // The latest static info
     final long staticTimestamp;
@@ -83,6 +87,13 @@ public final class TargetInfo implements Serializable {
         this.staticData1 = staticData1;
         this.staticData2 = staticData2;
         this.staticShipType = staticShipType;
+        
+        // Caching for getAisTarget()
+        this.aisTarget = TargetInfoToAisTarget.generateAisTarget(this);
+    }
+
+    public AisTarget getAisTarget() {
+        return aisTarget;
     }
 
     /**
