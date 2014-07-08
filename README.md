@@ -48,7 +48,7 @@ You're encouraged to contribute to AisLib. Fork the code from
 
 ## License ##
 
-This library is provided under the LGPL, version 3.
+This library is licensed under the Apache License, Version 2.0.
 
 ## Examples ##
 
