@@ -40,7 +40,7 @@ import dk.dma.enav.model.geometry.Position;
 public final class TargetInfo implements Serializable {
 
     /** serialVersionUID. */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     /** The MMSI number of the target. */
     final int mmsi;
@@ -58,8 +58,8 @@ public final class TargetInfo implements Serializable {
     final byte navStatus;
     final float sog;
     
-    //Warning a mutable object
-    AisTarget aisTarget;
+    //Do not want serialization of mutable complex object
+    transient AisTarget aisTarget;
 
     // The latest static info
     final long staticTimestamp;
@@ -89,11 +89,11 @@ public final class TargetInfo implements Serializable {
         this.staticShipType = staticShipType;
         
         // Caching for getAisTarget()
-        this.aisTarget = TargetInfoToAisTarget.generateAisTarget(this);
+        this.aisTarget = getAisTarget();
     }
 
     public AisTarget getAisTarget() {
-        return aisTarget;
+        return aisTarget == null ? TargetInfoToAisTarget.generateAisTarget(this) : aisTarget ;
     }
 
     /**
