@@ -20,7 +20,7 @@ the use.
 
 ## Prerequisites ##
 
-* Java 1.7
+* Java 8
 * Maven 3
 
 ## Building ##
