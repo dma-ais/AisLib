@@ -67,11 +67,6 @@
       <version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>dk.dma.3rdparty</groupId>
-      <artifactId>jsr166e</artifactId>
-      <version>${dependencies.jsr166e.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
       <version>1.30</version>
