@@ -289,7 +289,7 @@ downsampleFilter.registerReceiver(handler);
 // Make doublet filter with default window of 10 secs.
 // Set down sample filter as recipient of doublet filered messages
 MessageHandlerFilter doubletFilter = new MessageHandlerFilter(new DuplicateFilter());
-doubletFilter.registerReceiver(doubletFilter);
+doubletFilter.registerReceiver(downsampleFilter);
 
 // Make reader
 AisReader reader = AisReaders.createReader(host, port);
