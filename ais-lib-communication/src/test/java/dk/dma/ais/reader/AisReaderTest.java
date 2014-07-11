@@ -82,7 +82,7 @@ public class AisReaderTest {
 
         System.out.println("Sending sentences on UDP port " + port);
         // Send UDP packets
-        URL url = ClassLoader.getSystemResource("stream_example.txt");
+        URL url = ClassLoader.getSystemResource("replay_dump.txt");
         Assert.assertNotNull(url);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Assert.assertNotNull(in);
@@ -98,7 +98,7 @@ public class AisReaderTest {
         reader.stopReader();
         reader.join();
         sendSocket.close();
-        Assert.assertEquals(4033, count.get().intValue());        
+        Assert.assertEquals(50, count.get().intValue());        
     }
 
 }

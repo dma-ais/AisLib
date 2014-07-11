@@ -54,7 +54,7 @@ This library is licensed under the Apache License, Version 2.0.
 
 ### Simple read and message handling ###
 
-Reading from files or TCP connections is very simple with AisLib. In the example below messages
+Reading from files or TCP/UDP connections is very simple with AisLib. In the example below messages
 are read from a file.
 
 ```java
@@ -69,7 +69,7 @@ reader.start();
 reader.join();
 ```
 
-Reading using a TCP connection is just as easy
+Reading using a TCP connection:
 
 ```java
 AisReader reader = AisReaders.createReader("localhost", 4001);
@@ -91,6 +91,20 @@ reader.setReconnectInterval(1000);
 
 A read timeout can be defined for the reader. If no data is received within this period
 the connection will be closed and a reconnect will be tried.
+
+Reading using an UDP connection:
+
+```java
+AisReader reader = AisReaders.createUdpReader(8888);
+reader.registerHandler(new Consumer<AisMessage>() {
+	@Override
+	public void accept(AisMessage aisMessage) {
+		System.out.println("message id: " + aisMessage.getMsgId());
+	}
+});
+reader.start();
+reader.join();
+```
 
 ### Reading raw message packets ###
 
@@ -144,6 +158,8 @@ methods can be used.
    * `createReader(String hostname, int port)` - Creates a reader connection to host:port.
    * `createReader(String commaHostPort)` - Creates a {@link AisTcpReader} from a list of one or more hosts on the
 form: host1:port1,...,hostN:portN. If more than one host/port round robin will be used.
+   * `createUdpReader(int port)` - Creates a UDP reader reading from port on any interface.
+   * `createUdpReader(String address, int port)` - Creates a UDP reader reading from port on interface with address.
    * `createReaderFromInputStream(InputStream inputStream)` - Creates a reader reading from an input stream.
    * `createReaderFromFile(String filename)` - Creates a reader reading from a file. If the filename suffix is '.zip' or '.gz',
 zip or gzip decompression will be applied respectively.
