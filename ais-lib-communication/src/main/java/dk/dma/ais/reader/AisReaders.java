@@ -94,6 +94,27 @@ public class AisReaders {
         r.addHostPort(HostAndPort.fromParts(hostname, port));
         return r;
     }
+    
+    /**
+     * Creates a {@link AisUdpReader} listening on port for any interface
+     * 
+     * @param port
+     * @return
+     */
+    public static AisUdpReader createUdpReader(int port) {
+        return createUdpReader(null, port);
+    }
+
+    /**
+     * Creates a {@link AisUdpReader} listening on ip and port
+     * 
+     * @param address
+     * @param port
+     * @return
+     */
+    public static AisUdpReader createUdpReader(String address, int port) {
+        return new AisUdpReader(address, port);
+    }
 
     public static AisReader createReaderFromInputStream(InputStream inputStream) {
         return new AisStreamReader(inputStream);

@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import dk.dma.ais.configuration.reader.AisFileReaderConfiguration;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.enav.util.function.Consumer;
 
