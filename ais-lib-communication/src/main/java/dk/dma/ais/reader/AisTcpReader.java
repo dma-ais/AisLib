@@ -240,6 +240,6 @@ public class AisTcpReader extends AisReader {
     }
 
     public String toString() {
-        return "RoundRobinTcpReader [sourceIf = " + getSourceId() + ", current host=" + currentHost() + "]";
+        return "AisTcpReader [sourceId = " + getSourceId() + ", current host=" + currentHost() + "]";
     }
 }

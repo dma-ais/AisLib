@@ -37,8 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.net.HostAndPort;
 
 /**
- * Factory and utility methods for {@link AisReader}, {@link AisTcpReader}, and {@link AisReaderGroup} classes defined
- * in this package.
+ * Factory and utility methods for {@link AisReader}, {@link AisTcpReader}, {@link AisUdpReader}, 
+ * and {@link AisReaderGroup} classes defined in this package.
  * 
  * @author Kasper Nielsen
  */

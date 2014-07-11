@@ -33,12 +33,15 @@ import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.packet.AisPacketStream;
+import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.queue.BlockingMessageQueue;
 import dk.dma.ais.queue.IMessageQueue;
 import dk.dma.ais.queue.IQueueEntryHandler;
 import dk.dma.ais.queue.MessageQueueOverflowException;
 import dk.dma.ais.queue.MessageQueueReader;
 import dk.dma.ais.sentence.Abk;
+import dk.dma.ais.transform.AisPacketTaggingTransformer;
+import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedResource;
 import dk.dma.enav.util.function.Consumer;
@@ -74,6 +77,9 @@ public abstract class AisReader extends Thread {
 
     /** The source id. */
     private String sourceId;
+    
+    /** Transformer adding source id */
+    private AisPacketTaggingTransformer transformer;
 
     /**
      * The method to do the actual sending
@@ -142,7 +148,7 @@ public abstract class AisReader extends Thread {
     }
 
     /**
-     * The main read loop
+     * The main read loop to use if sentences in stream
      * 
      * @param stream
      *            the generic input stream to read from
@@ -156,30 +162,38 @@ public abstract class AisReader extends Thread {
             }
         }) {
             AisPacket packet = null;
-            while ((packet = s.readPacket(sourceId)) != null) {
-                linesRead.incrementAndGet();
+            while ((packet = s.readPacket()) != null) {
+                distribute(packet);
+            }
+        }
+    }
+    
+    protected void distribute(AisPacket packet) {
+        linesRead.incrementAndGet();
+        
+        if (transformer != null) { // tag the packet with the source if non-null
+            packet = transformer.transform(packet);
+        }
 
-                for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
-                    packetHandler.accept(packet);
-                }
+        for (Consumer<? super AisPacket> packetHandler : packetHandlers) {
+            packetHandler.accept(packet);
+        }
 
-                // Distribute AIS message
-                if (handlers.size() > 0) {
-                    AisMessage message = null;
-                    // Parse AIS message
-                    try {
-                        message = packet.getAisMessage();
-                    } catch (AisMessageException me) {
-                        LOG.info("AIS message exception: " + me.getMessage() + " vdm: "
-                                + packet.getVdm().getOrgLinesJoined());
-                    } catch (SixbitException se) {
-                        LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
-                    }
-                    if (message != null) { // Distribute message
-                        for (Consumer<AisMessage> aisHandler : handlers) {
-                            aisHandler.accept(message);
-                        }
-                    }
+        // Distribute AIS message
+        if (handlers.size() > 0) {
+            AisMessage message = null;
+            // Parse AIS message
+            try {
+                message = packet.getAisMessage();
+            } catch (AisMessageException me) {
+                LOG.info("AIS message exception: " + me.getMessage() + " vdm: "
+                        + packet.getVdm().getOrgLinesJoined());
+            } catch (SixbitException se) {
+                LOG.info("Sixbit error: " + se.getMessage() + " vdm: " + packet.getVdm().getOrgLinesJoined());
+            }
+            if (message != null) { // Distribute message
+                for (Consumer<AisMessage> aisHandler : handlers) {
+                    aisHandler.accept(message);
                 }
             }
         }
@@ -277,6 +291,13 @@ public abstract class AisReader extends Thread {
 
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
+        if (sourceId != null) {
+            AisPacketTags tagging = new AisPacketTags();
+            tagging.setSourceId(sourceId);
+            transformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING, tagging);
+        } else {
+            transformer = null;
+        }
     }
 
     /**

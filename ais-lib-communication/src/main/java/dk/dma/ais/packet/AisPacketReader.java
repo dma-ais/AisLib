@@ -42,8 +42,6 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.sentence.Abk;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
-import dk.dma.ais.transform.AisPacketTaggingTransformer;
-import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 import dk.dma.commons.util.io.CountingInputStream;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.Consumer;
@@ -186,16 +184,6 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
         }
     }
 
-    /**
-     * Reads the next AisPacket. Or returns null if the end of the stream has been reached
-     *
-     * @throws IOException
-     *             if an exception occurred while reading the packet
-     */
-    public AisPacket readPacket() throws IOException {
-        return readPacket(null);
-    }
-
     @SafeVarargs
     public final void forEachRemaining(Consumer<? super AisPacket>... consumers) throws IOException {
         requireNonNull(consumers);
@@ -222,20 +210,18 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
     }
 
     /**
-     * @param source
-     *            the source to tag the packet with
      * @return the next packet or null if the end of the stream has been reached
      * @throws IOException
      *             if an exception occurred while reading the packet
      */
-    public AisPacket readPacket(String source) throws IOException {
-        return readPacket0(source);
+    public AisPacket readPacket() throws IOException {
+        return readPacket0();
     }
 
     /**
-     * Reads the next AisPacket using the specified source id.
+     * Reads the next AisPacket
      */
-    AisPacket readPacket0(String source) throws IOException {
+    AisPacket readPacket0() throws IOException {
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             if (closed) {
                 return null;
@@ -243,13 +229,6 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
             AisPacket p = handleLine(line);
             if (p != null) {
                 packetsRead.incrementAndGet();
-                if (source != null) { // tag the packet with the source if non-null
-                    AisPacketTags tagging = new AisPacketTags();
-                    tagging.setSourceId(source);
-                    AisPacketTaggingTransformer tranformer = new AisPacketTaggingTransformer(Policy.PREPEND_MISSING,
-                            tagging);
-                    return tranformer.transform(p);
-                }
                 return p;
             }
         }
@@ -324,18 +303,18 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
 
             /** {@inheritDoc} */
             @Override
-            AisPacket readPacket0(String source) throws IOException {
+            AisPacket readPacket0() throws IOException {
                 if (!isFirst && e == null) {
                     return null; // already empty
                 } else if (isFirst) {
                     e = zis.getNextEntry();
                     isFirst = false;
                 }
-                AisPacket p = super.readPacket0(source);
+                AisPacket p = super.readPacket0();
                 // while the packet is null and we still have more zip entries
                 while (p == null && e != null) {
                     e = zis.getNextEntry();
-                    p = super.readPacket0(source);
+                    p = super.readPacket0();
                 }
                 return p;
             }
