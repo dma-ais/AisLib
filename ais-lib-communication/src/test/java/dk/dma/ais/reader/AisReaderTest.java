@@ -93,7 +93,7 @@ public class AisReaderTest {
                 Thread.sleep(1);
             }
         }
-        System.out.println("Done sentences on UDP port " + port);
+        System.out.println("Done sending on UDP port " + port);
         Thread.sleep(500);
         reader.stopReader();
         reader.join();

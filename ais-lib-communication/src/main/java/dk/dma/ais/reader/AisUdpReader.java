@@ -56,27 +56,6 @@ public class AisUdpReader extends AisReader {
             }
             LOG.error("Failed to listen for datagrams", e);
         }
-        
-        
-//        byte[] receiveData = new byte[256];
-//
-//        try {
-//            socket.set(new DatagramSocket(addr));
-//            while (!isShutdown()) {
-//                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-//                socket.get().receive(receivePacket);
-//                String sentence = new String(receivePacket.getData(), 0, receivePacket.getLength(), Charsets.US_ASCII);
-//                
-//                
-//            }
-//            
-//
-//        } catch (IOException e) {
-//            if (isShutdown() || isInterrupted()) {
-//                return;
-//            }
-//            LOG.error("Failed to listen for UDP: " + e);
-//        }
     }
 
     @Override
@@ -101,5 +80,5 @@ public class AisUdpReader extends AisReader {
     public String toString() {
         return "AisUdpReader [sourceId = " + getSourceId() + "]";
     }
-    
+
 }
