@@ -16,10 +16,13 @@ package dk.dma.ais.tracker;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import jsr166e.ConcurrentHashMapV8;
 import jsr166e.ConcurrentHashMapV8.Action;
@@ -40,6 +43,7 @@ import dk.dma.enav.util.function.Predicate;
 /**
  * 
  * @author Kasper Nielsen
+ * @author Jens Tuxen
  */
 public class TargetTracker implements Tracker {
 
@@ -60,6 +64,29 @@ public class TargetTracker implements Tracker {
             }
         });
         return la.intValue();
+    }
+    
+    /**
+     * Find all targets (including duplicates from other sources) which matches bipredicate
+     * @param predicate
+     * @return
+     */
+    public Collection<TargetInfo> findTargets(
+            final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+        requireNonNull(predicate);
+        
+        final ConcurrentLinkedDeque<TargetInfo> tis = new ConcurrentLinkedDeque<TargetInfo>();
+        
+        targets.forEachValue(10, new Action<MmsiTarget>() {
+            public void apply(MmsiTarget t) {
+                for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
+                    if (predicate.test(e.getKey(), e.getValue())) {
+                        tis.add(e.getValue());
+                    }
+                }
+            }
+        });
+        return tis;
     }
 
     /**
