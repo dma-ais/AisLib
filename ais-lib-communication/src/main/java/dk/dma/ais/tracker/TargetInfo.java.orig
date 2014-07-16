@@ -96,7 +96,10 @@ public final class TargetInfo implements Serializable {
         // Caching for AisPackets
         this.staticAisPacket1 = getStaticAisPacket1();
         this.staticAisPacket2 = getStaticAisPacket2();
+<<<<<<< HEAD
         this.positionAisPacket = getPositionPacket();
+=======
+>>>>>>> f96ecaac39642f83e43bc40621ba777ad228700b
         
         // Caching for getAisTarget()
         this.aisTarget = getAisTarget();
@@ -191,7 +194,7 @@ public final class TargetInfo implements Serializable {
     public AisPacket getStaticAisPacket1() {
         if (staticData1 != null && staticAisPacket1 == null) {
             return AisPacket.fromByteArray(staticData1);
-    }
+        }
         return staticAisPacket1; 
     }
     
@@ -199,7 +202,7 @@ public final class TargetInfo implements Serializable {
         if (staticData2 != null && staticAisPacket2 == null) {
             return AisPacket.fromByteArray(staticData2);
         }
-        return staticAisPacket2; 
+        return staticAisPacket1; 
     }    
 
     /**
