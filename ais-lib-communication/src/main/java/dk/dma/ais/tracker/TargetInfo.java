@@ -191,7 +191,7 @@ public final class TargetInfo implements Serializable {
     public AisPacket getStaticAisPacket1() {
         if (staticData1 != null && staticAisPacket1 == null) {
             return AisPacket.fromByteArray(staticData1);
-    }
+        }
         return staticAisPacket1; 
     }
     
