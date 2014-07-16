@@ -60,6 +60,11 @@ public final class TargetInfo implements Serializable {
     
     //Do not want serialization of mutable complex object
     transient AisTarget aisTarget;
+    //further caching
+    transient AisPacket positionAisPacket;
+    transient AisPacket staticAisPacket1;
+    transient AisPacket staticAisPacket2;
+    
 
     // The latest static info
     final long staticTimestamp;
@@ -87,6 +92,11 @@ public final class TargetInfo implements Serializable {
         this.staticData1 = staticData1;
         this.staticData2 = staticData2;
         this.staticShipType = staticShipType;
+        
+        // Caching for AisPackets
+        this.staticAisPacket1 = getStaticAisPacket1();
+        this.staticAisPacket2 = getStaticAisPacket2();
+        this.positionAisPacket = getPositionPacket();
         
         // Caching for getAisTarget()
         this.aisTarget = getAisTarget();
@@ -152,7 +162,7 @@ public final class TargetInfo implements Serializable {
      * @return the latest received position packet
      */
     public AisPacket getPositionPacket() {
-        return positionPacket == null ? null : AisPacket.fromByteArray(positionPacket);
+        return positionPacket == null ? null : (positionAisPacket == null ? AisPacket.fromByteArray(positionPacket) : positionAisPacket);
     }
 
     /**
@@ -172,11 +182,25 @@ public final class TargetInfo implements Serializable {
         if (staticData1 == null) {
             return new AisPacket[0];
         } else if (staticData2 == null) {
-            return new AisPacket[] { AisPacket.fromByteArray(staticData1) };
+            return new AisPacket[] { getStaticAisPacket1() };
         } else {
-            return new AisPacket[] { AisPacket.fromByteArray(staticData1), AisPacket.fromByteArray(staticData2) };
+            return new AisPacket[] { getStaticAisPacket1(), getStaticAisPacket2() };
         }
     }
+
+    public AisPacket getStaticAisPacket1() {
+        if (staticData1 != null && staticAisPacket1 == null) {
+            return AisPacket.fromByteArray(staticData1);
+        }
+        return staticAisPacket1; 
+    }
+    
+    public AisPacket getStaticAisPacket2() {
+        if (staticData2 != null && staticAisPacket2 == null) {
+            return AisPacket.fromByteArray(staticData2);
+        }
+        return staticAisPacket1; 
+    }    
 
     /**
      * Returns true if we have positional information.
