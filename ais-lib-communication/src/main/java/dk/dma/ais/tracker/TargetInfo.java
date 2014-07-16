@@ -38,7 +38,7 @@ import dk.dma.enav.model.geometry.Position;
  * @author Kasper Nielsen
  */
 public final class TargetInfo implements Serializable {
-
+    
     /** serialVersionUID. */
     private static final long serialVersionUID = 2L;
 
@@ -90,6 +90,46 @@ public final class TargetInfo implements Serializable {
         
         // Caching for getAisTarget()
         this.aisTarget = getAisTarget();
+    }
+    
+    public int getMmsi() {
+        return mmsi;
+    }
+
+    public AisTargetType getTargetType() {
+        return targetType;
+    }
+
+    public long getPositionTimestamp() {
+        return positionTimestamp;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public float getCog() {
+        return cog;
+    }
+
+    public int getHeading() {
+        return heading;
+    }
+
+    public byte getNavStatus() {
+        return navStatus;
+    }
+
+    public float getSog() {
+        return sog;
+    }
+
+    public long getStaticTimestamp() {
+        return staticTimestamp;
+    }
+
+    public int getStaticShipType() {
+        return staticShipType;
     }
 
     public AisTarget getAisTarget() {
