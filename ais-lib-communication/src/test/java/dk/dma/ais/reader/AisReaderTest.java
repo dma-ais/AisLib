@@ -64,9 +64,9 @@ public class AisReaderTest {
 
     @Test
     public void udpReaderTest() throws InterruptedException, IOException {
-        int port = 49552;
+        final int port = 49552;
         
-        DatagramSocket sendSocket = new DatagramSocket();
+        final DatagramSocket sendSocket = new DatagramSocket();
         
         final AtomicReference<Integer> count = new AtomicReference<>(0);
         
@@ -84,14 +84,27 @@ public class AisReaderTest {
         // Send UDP packets
         URL url = ClassLoader.getSystemResource("replay_dump.txt");
         Assert.assertNotNull(url);
+        
+        final InetAddress addr = InetAddress.getLocalHost();
+        Assert.assertNotNull(addr);
+        
         try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Assert.assertNotNull(in);
-            String line;
-            while ((line = in.readLine()) != null) {
-                line = line.trim() + "\r\n";
-                sendSocket.send(new DatagramPacket(line.getBytes(StandardCharsets.US_ASCII), 0, line.length(), InetAddress.getLocalHost(), port));
-                Thread.sleep(1);
-            }
+            
+            in.lines().forEachOrdered(new java.util.function.Consumer<String>() {
+
+                @Override
+                public void accept(String line) {
+                    line = line.trim() + "\r\n";
+                    try {
+                        sendSocket.send(new DatagramPacket(line.getBytes(StandardCharsets.US_ASCII), 0, line.length(), addr, port));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                
+            });
+            
         }
         System.out.println("Done sending on UDP port " + port);
         Thread.sleep(500);
