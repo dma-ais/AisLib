@@ -25,6 +25,7 @@ import dk.dma.ais.message.AisMessage1;
 import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.message.AisMessage6;
 import dk.dma.ais.message.AisMessage8;
+import dk.dma.ais.message.AisMessage27;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.binary.Capability;
 import dk.dma.ais.message.binary.MetHyd11;
@@ -159,6 +160,26 @@ public class MessageTest {
     }
 
     @Test
+    public void testMsg27() throws SentenceException, AisMessageException, SixbitException {
+        String sentence = "!AIVDM,1,1,,A,KLr:8BvSGc`=CSLA,0*52";
+        Vdm vdm = new Vdm();
+        int result = vdm.parse(sentence);
+        Assert.assertEquals("vdm parse failed", result, 0);
+        Assert.assertEquals("wrong message id", 27, vdm.getMsgId());
+        AisMessage27 msg = (AisMessage27) AisMessage.getInstance(vdm);
+        Assert.assertEquals(msg.getCog(), 452);
+        Assert.assertEquals(msg.getGnssPosStatus(), 0);
+        Assert.assertEquals(msg.getPos().getRawLatitude(), 67239);
+        Assert.assertEquals(msg.getPos().getRawLongitude(), 55214);
+        Assert.assertEquals(msg.getMsgId(), 27);
+        Assert.assertEquals(msg.getNavStatus(), 10);
+        Assert.assertEquals(msg.getPosAcc(), 1);
+        Assert.assertEquals(msg.getRaim(), 1);
+        Assert.assertEquals(msg.getSog(), 6);
+        Assert.assertEquals(msg.getSpare(), 1);
+    }
+
+    @Test
     public void decodeMsg5Test() throws SentenceException, SixbitException, AisMessageException {
         String line1 = "!BSVDM,2,1,1,B,53@oTQ@2Ad4tuL9S:21=@EHq>2222098D4dE:20l1p?555o@0>QTQA1DR@j@,0*66";
         String line2 = "!BSVDM,2,2,1,B,H8888888880,2*4F";
@@ -228,5 +249,4 @@ public class MessageTest {
         AisMessage msg = AisMessage.getInstance(vdm);
         System.out.println("sentenceStr: " + msg);
     }
-
 }

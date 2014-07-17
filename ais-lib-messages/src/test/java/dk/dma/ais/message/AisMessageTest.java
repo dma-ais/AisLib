@@ -45,6 +45,7 @@ public class AisMessageTest {
         assertEquals(AisTargetType.B, new AisMessage19().getTargetType());
         assertEquals(AisTargetType.ATON, new AisMessage21().getTargetType());
         assertEquals(AisTargetType.B, new AisMessage24().getTargetType());
+        assertEquals(AisTargetType.A, new AisMessage27().getTargetType());
 
         AisMessage1 msg = new AisMessage1();
         msg.setUserId(970_015_654);
