@@ -201,7 +201,8 @@ public abstract class AisMessage implements Serializable {
         } else if (AisMessage18.class.isAssignableFrom(type) || AisMessage19.class.isAssignableFrom(type)
                 || AisMessage24.class.isAssignableFrom(type)) {
             return AisTargetType.B;
-        } else if (AisPositionMessage.class.isAssignableFrom(type) || AisMessage5.class.isAssignableFrom(type)) {
+        } else if (AisPositionMessage.class.isAssignableFrom(type) || AisMessage5.class.isAssignableFrom(type)
+                || AisMessage27.class.isAssignableFrom(type)) {
             return AisTargetType.A;
         }
         return null;

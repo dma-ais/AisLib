@@ -163,15 +163,14 @@ public class MessageTest {
         AisMessage27 msg = (AisMessage27) AisMessage.getInstance(vdm);
         Assert.assertEquals(msg.getCog(), 452);
         Assert.assertEquals(msg.getGnssPosStatus(), 0);
-        Assert.assertEquals(msg.getLat(), 67239);
-        Assert.assertEquals(msg.getLon(), 55214);
+        Assert.assertEquals(msg.getPos().getRawLatitude(), 67239);
+        Assert.assertEquals(msg.getPos().getRawLongitude(), 55214);
         Assert.assertEquals(msg.getMsgId(), 27);
         Assert.assertEquals(msg.getNavStatus(), 10);
         Assert.assertEquals(msg.getPosAcc(), 1);
         Assert.assertEquals(msg.getRaim(), 1);
         Assert.assertEquals(msg.getSog(), 6);
         Assert.assertEquals(msg.getSpare(), 1);
-        System.out.println(msg.toString());
     }
 
     @Test

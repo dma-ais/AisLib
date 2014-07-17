@@ -32,14 +32,9 @@ public class AisMessage27 extends AisMessage {
     private int navStatus; // 4 bits
 
     /**
-     * Longitude in 1/10 min.
+     * Longitude and latitude in 1/10 min.
      */
-    private int lon; // 18 bits
-
-    /**
-     * Latitude in 1/10 min.
-     */
-    private int lat; // 17 bits
+    private AisPosition pos;
 
     /**
      * Speed over ground (0-62 knots) 63 = not available = default.
@@ -81,8 +76,10 @@ public class AisMessage27 extends AisMessage {
         this.posAcc = (int) binArray.getVal(1);
         this.raim = (int) binArray.getVal(1);
         this.navStatus = (int) binArray.getVal(4);
-        this.lon = (int) binArray.getVal(18);
-        this.lat = (int) binArray.getVal(17);
+        this.pos = new AisPosition();
+        this.pos.setRawLongitude(binArray.getVal(18));
+        this.pos.setRawLatitude(binArray.getVal(17));
+        this.pos.set1817();
         this.sog = (int) binArray.getVal(6);
         this.cog = (int) binArray.getVal(9);
         this.gnssPosStatus = (int) binArray.getVal(1);
@@ -95,8 +92,8 @@ public class AisMessage27 extends AisMessage {
         encoder.addVal(posAcc, 1);
         encoder.addVal(raim, 1);
         encoder.addVal(navStatus, 4);
-        encoder.addVal(lon, 18);
-        encoder.addVal(lat, 17);
+        encoder.addVal(this.pos.getRawLongitude(), 18);
+        encoder.addVal(this.pos.getRawLatitude(), 17);
         encoder.addVal(sog, 6);
         encoder.addVal(cog, 9);
         encoder.addVal(spare, 1);
@@ -124,17 +121,11 @@ public class AisMessage27 extends AisMessage {
     public void setNavStatus(int navStatus) {
         this.navStatus = navStatus;
     }
-    public int getLon() {
-        return lon;
+    public AisPosition getPos() {
+        return pos;
     }
-    public void setLon(int lon) {
-        this.lon = lon;
-    }
-    public int getLat() {
-        return lat;
-    }
-    public void setLat(int lat) {
-        this.lat = lat;
+    public void setPos(AisPosition pos) {
+        this.pos = pos;
     }
     public int getSog() {
         return sog;
@@ -163,13 +154,12 @@ public class AisMessage27 extends AisMessage {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append(super.toString()).append(", ");
         builder.append("posAcc=").append(posAcc);
         builder.append(", raim=").append(raim);
         builder.append(", navStatus=").append(navStatus);
-        builder.append(", lon=").append(lon);
-        builder.append(", lat=").append(lat);
+        builder.append(", pos=").append(pos);
         builder.append(", sog=").append(sog);
         builder.append(", cog=").append(cog);
         builder.append(", gnssPosStatus=").append(gnssPosStatus);
