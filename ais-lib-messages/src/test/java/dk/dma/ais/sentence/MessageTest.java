@@ -16,11 +16,17 @@ package dk.dma.ais.sentence;
 
 import java.util.Date;
 
-import dk.dma.ais.message.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.AisMessage1;
+import dk.dma.ais.message.AisMessage4;
+import dk.dma.ais.message.AisMessage6;
+import dk.dma.ais.message.AisMessage8;
+import dk.dma.ais.message.AisMessage27;
+import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.message.binary.Capability;
 import dk.dma.ais.message.binary.MetHyd11;
 
