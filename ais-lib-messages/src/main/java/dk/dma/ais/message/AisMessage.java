@@ -301,6 +301,9 @@ public abstract class AisMessage implements Serializable {
         case 24:
             message = new AisMessage24(vdm);
             break;
+        case 27:
+            message = new AisMessage27(vdm);
+            break;
         default:
             throw new AisMessageException("Unknown AIS message id " + vdm.getMsgId());
         }

@@ -180,7 +180,7 @@ public class AisPosition {
     /**
      * Set the raw longitude as received from AIS
      * 
-     * @param rawLatitude
+     * @param rawLongitude
      */
     public void setRawLongitude(long rawLongitude) {
         this.rawLongitude = rawLongitude;
