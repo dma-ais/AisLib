@@ -61,9 +61,8 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
     private int cog; // 9 bits
 
     /**
-     * Status of current GNSS position. 0 = Position is the current GNSS
-     * position; 1 = Reported position is not the current GNSS position
-     * = default.
+     * Status of current GNSS position. 0 = Position is the current GNSS position; 1 = Reported position is not the current GNSS
+     * position = default.
      */
     private int gnssPosStatus; // 1 bit
 
@@ -117,51 +116,67 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
+
     public int getPosAcc() {
         return posAcc;
     }
+
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
     }
+
     public int getRaim() {
         return raim;
     }
+
     public void setRaim(int raim) {
         this.raim = raim;
     }
+
     public int getNavStatus() {
         return navStatus;
     }
+
     public void setNavStatus(int navStatus) {
         this.navStatus = navStatus;
     }
+
     public AisPosition getPos() {
         return pos;
     }
+
     public void setPos(AisPosition pos) {
         this.pos = pos;
     }
+
     public int getSog() {
         return sog;
     }
+
     public void setSog(int sog) {
         this.sog = sog;
     }
+
     public int getCog() {
         return cog;
     }
+
     public void setCog(int cog) {
         this.cog = cog;
     }
+
     public int getGnssPosStatus() {
         return gnssPosStatus;
     }
+
     public void setGnssPosStatus(int gnssPosStatus) {
         this.gnssPosStatus = gnssPosStatus;
     }
+
     public int getSpare() {
         return spare;
     }
+
     public void setSpare(int spare) {
         this.spare = spare;
     }
