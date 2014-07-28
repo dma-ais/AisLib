@@ -147,6 +147,14 @@ public class AisPosition {
     }
 
     /**
+     * Set the resolution to be 18 and 17 bits for longitude and latitude respectively
+     */
+    public void set1817() {
+        resolution = 10.0;
+        bitCorrection = 10;
+    }
+
+    /**
      * Set signed latitude
      */
     public void setLatitude(long latitude) {
@@ -180,7 +188,7 @@ public class AisPosition {
     /**
      * Set the raw longitude as received from AIS
      * 
-     * @param rawLatitude
+     * @param rawLongitude
      */
     public void setRawLongitude(long rawLongitude) {
         this.rawLongitude = rawLongitude;
