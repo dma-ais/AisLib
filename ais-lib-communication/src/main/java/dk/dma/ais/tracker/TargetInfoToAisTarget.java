@@ -15,7 +15,7 @@
 package dk.dma.ais.tracker;
 
 import java.util.Objects;
-import java.util.TreeSet;
+import java.util.PriorityQueue;
 
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.data.AisTarget;
@@ -24,13 +24,15 @@ import dk.dma.ais.packet.AisPacket;
 
 /**
  * Neccessary Evil for legacy resources and convenience
+ * 
  * @author Jens Tuxen
  *
  */
 public class TargetInfoToAisTarget {
-    
-    static TreeSet<AisPacket> getPacketsInOrder(TargetInfo ti) {
-        TreeSet<AisPacket> messages = new TreeSet<>();
+
+    static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
+        // Min-Heap = Oldest first when creating AisTarget (natural)
+        PriorityQueue<AisPacket> messages = new PriorityQueue<>();
 
         for (AisPacket p : ti.getStaticPackets()) {
             try {
@@ -47,7 +49,6 @@ public class TargetInfoToAisTarget {
         return messages;
     }
 
-
     public static AisTarget generateAisTarget(TargetInfo ti) {
         return generateAisTarget(getPacketsInOrder(ti));
     }
@@ -61,10 +62,10 @@ public class TargetInfoToAisTarget {
      * @return
      */
     static AisTarget updateAisTarget(AisTarget aisTarget,
-            TreeSet<AisPacket> messages) {
-        for (AisPacket p : messages.descendingSet()) {
+            PriorityQueue<AisPacket> messages) {
+        while (!messages.isEmpty()) {
             try {
-                aisTarget.update(p.getAisMessage());
+                aisTarget.update(messages.poll().getAisMessage());
             } catch (AisMessageException | SixbitException
                     | NullPointerException e) {
                 // pass
@@ -77,40 +78,15 @@ public class TargetInfoToAisTarget {
         return aisTarget;
     }
 
-    @SuppressWarnings("unused")
-    private AisTarget updateAisTarget(AisTarget aisTarget, TargetInfo ti) {
-        return updateAisTarget(aisTarget, getPacketsInOrder(ti));
-    }
-    
-
-    /**
-     * Generate AisTarget with first packet being p
-     * 
-     * @param p
-     *            ais packet
-     * @param messages
-     *            ordered ais packets
-     * @return AisTarget
-     */
-    @SuppressWarnings("unused")
-    private AisTarget generateAisTarget(final AisPacket p,
-            final TreeSet<AisPacket> messages) {
-        AisTarget aisTarget = AisTarget.createTarget(p.tryGetAisMessage());
-        return updateAisTarget(aisTarget, messages);
-    }
-
-    static AisTarget generateAisTarget(TreeSet<AisPacket> messages) {
+    static AisTarget generateAisTarget(PriorityQueue<AisPacket> messages) {
         AisTarget aisTarget = null;
-        for (AisPacket packet : messages.descendingSet()) {
-            aisTarget = AisTarget.createTarget(packet.tryGetAisMessage());
 
-            if (aisTarget != null) {
-                break;
-            }
+        while (aisTarget == null && !messages.isEmpty()) {
+            aisTarget = AisTarget.createTarget(messages.poll()
+                    .tryGetAisMessage());
         }
 
         return updateAisTarget(aisTarget, messages);
     }
-    
-    
+
 }
