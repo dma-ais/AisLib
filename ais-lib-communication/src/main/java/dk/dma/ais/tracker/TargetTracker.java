@@ -46,6 +46,12 @@ import dk.dma.enav.util.function.Consumer;
  * @author Jens Tuxen
  */
 public class TargetTracker implements Tracker {
+    private static final Predicate<? super Object> PREDICATETRUE = new Predicate<Object>() {
+        @Override
+        public boolean test(Object o) {
+            return true;
+        }
+    };
 
     /** All targets that we are currently monitoring. */
     final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>();
@@ -199,11 +205,11 @@ public class TargetTracker implements Tracker {
     }
 
     public TargetInfo getNewest(int mmsi) {
-        return getNewest(mmsi, PredicateTRUE);
+        return getNewest(mmsi, PREDICATETRUE);
     }
 
     public Entry<AisPacketSource, TargetInfo> getNewestEntry(int mmsi) {
-        return getNewestEntry(mmsi, PredicateTRUE);
+        return getNewestEntry(mmsi, PREDICATETRUE);
     }
 
     public Enumeration<AisPacketSource> getAisPacketSources(int mmsi) {
@@ -401,10 +407,5 @@ public class TargetTracker implements Tracker {
         }
     }
     
-    static final Predicate<? super Object> PredicateTRUE = new Predicate<Object>() {
-        @Override
-        public boolean test(Object o) {
-            return true;
-        }
-    };
+
 }
