@@ -14,13 +14,25 @@
  */
 package dk.dma.ais.tracker;
 
+import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Objects;
 import java.util.PriorityQueue;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.data.AisTarget;
+import dk.dma.ais.data.AisVesselStatic;
+import dk.dma.ais.data.AisVesselTarget;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketSource;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReaders;
+import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
 
 /**
  * Neccessary Evil for legacy resources and convenience
@@ -31,8 +43,15 @@ import dk.dma.ais.packet.AisPacket;
 public class TargetInfoToAisTarget {
 
     static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
+        
         // Min-Heap = Oldest first when creating AisTarget (natural)
         PriorityQueue<AisPacket> messages = new PriorityQueue<>();
+        
+        try {
+            Objects.requireNonNull(ti);
+        } catch (NullPointerException e) {
+            return messages;
+        }
 
         for (AisPacket p : ti.getStaticPackets()) {
             try {
@@ -43,7 +62,11 @@ public class TargetInfoToAisTarget {
         }
 
         if (ti.hasPositionInfo()) {
-            messages.add(ti.getPositionPacket());
+            try {
+                messages.add(ti.getPositionPacket());
+            } catch (NullPointerException exc) {
+                //pass
+            }
         }
 
         return messages;
@@ -64,18 +87,39 @@ public class TargetInfoToAisTarget {
     static AisTarget updateAisTarget(AisTarget aisTarget,
             PriorityQueue<AisPacket> messages) {
         while (!messages.isEmpty()) {
-            try {
-                aisTarget.update(messages.poll().getAisMessage());
-            } catch (AisMessageException | SixbitException
-                    | NullPointerException e) {
-                // pass
-            } catch (IllegalArgumentException exc) {
-                // happens when we try to update ClassA with ClassB and visa
-                // versa
-                // the youngest (newest report) takes president
-            }
+            aisTarget = updateWithNewestTakingPrecedent(aisTarget, messages.poll());
         }
         return aisTarget;
+    }
+    
+    /**
+     * Newest AisTarget takes precedent when sources have conflicting Class A/B packets.
+     * @param t
+     * @param m
+     * @return
+     */
+    static AisTarget updateWithNewestTakingPrecedent(AisTarget t, AisPacket m) {
+        try {
+            t.update(m.tryGetAisMessage());
+        } catch (NullPointerException e) {
+            // pass
+        } catch (IllegalArgumentException exc) {
+            // happens when we try to update ClassA with ClassB and visa
+            // versa
+            // the youngest (newest report) takes president
+            
+            AisTarget tmp = AisTarget.createTarget(m.tryGetAisMessage());
+            
+            if (tmp != null && tmp.getLastReport() != null) {
+                if (t != null && t.getLastReport() != null) {
+                    return (tmp.getLastReport().after(t.getLastReport())) ? tmp : t;
+                }
+                return tmp;
+            }
+            
+        }
+        return t;
+        
     }
 
     static AisTarget generateAisTarget(PriorityQueue<AisPacket> messages) {
@@ -87,6 +131,56 @@ public class TargetInfoToAisTarget {
         }
 
         return updateAisTarget(aisTarget, messages);
+    }
+
+    public static void main(String[] args) throws IOException,
+            InterruptedException {
+        AisReader reader = AisReaders.createDirectoryReader("src/test",
+                "s*.txt", true);
+
+        TargetTracker tt = new TargetTracker();
+        tt.readFromStream(reader.stream());
+
+        reader.start();
+        reader.join();
+
+        tt.targets.values().forEach(new Consumer<MmsiTarget>() {
+
+            @Override
+            public void accept(MmsiTarget t) {
+                System.out.println("TARGET "+t.mmsi);
+                TargetInfo ti = t
+                        .getNewest(new Predicate<AisPacketSource>() {
+
+                            @Override
+                            public boolean test(AisPacketSource t) {
+                                return t != null;
+                            }
+                        });
+                AisTarget k = generateAisTarget(ti);
+                if (k != null && k instanceof AisVesselTarget) {
+                    AisVesselStatic avs = ((AisVesselTarget)k).getVesselStatic();
+                    if (avs != null) {
+                        System.out.println(avs.getName());
+                    }
+                    
+                }
+                
+                for (AisPacket l : getPacketsInOrder(ti)) {
+                    
+                    System.out.println(l.getBestTimestamp());
+                    AisMessage m = l.tryGetAisMessage();
+                    
+                    if (m instanceof AisMessage5) {
+                        System.out.println("MY NAME IS "+((AisMessage5)m).getName());
+                    }
+
+                }
+                System.out.println("TARGET END "+t.mmsi);
+
+            }
+        });
+
     }
 
 }
