@@ -167,8 +167,7 @@ public class TargetTracker implements Tracker {
         /* lambda expressions not supported with source 1.7
         return targets.values().stream().sequential()
                 .map(o -> o.getNewest(sourcePredicate))
-                .filter(ti -> targetPredicate.test((TargetInfo) ti))
-                .collect(Collectors.toList());
+                .filter(ti -> targetPredicate.test((TargetInfo) ti));
         */
         
         return targets.values().stream().parallel().map(new Function<MmsiTarget, TargetInfo>() {
