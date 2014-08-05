@@ -15,19 +15,16 @@
 package dk.dma.ais.tracker;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselStatic;
 import dk.dma.ais.data.AisVesselTarget;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
-import dk.dma.ais.message.AisMessageException;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
 import dk.dma.ais.reader.AisReader;
