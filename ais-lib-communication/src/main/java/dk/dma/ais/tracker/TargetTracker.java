@@ -18,15 +18,18 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jsr166e.LongAdder;
@@ -38,7 +41,6 @@ import dk.dma.ais.packet.AisPacketStream;
 import dk.dma.ais.packet.AisPacketStream.Subscription;
 import dk.dma.ais.reader.AisReaderGroup;
 import dk.dma.enav.util.function.Consumer;
-
 
 /**
  * 
@@ -54,7 +56,8 @@ public class TargetTracker implements Tracker {
     };
 
     /** All targets that we are currently monitoring. */
-    final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>();
+    final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>(
+            200000);
 
     public int countNumberOfReports(
             final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
@@ -81,7 +84,7 @@ public class TargetTracker implements Tracker {
      * @param predicate
      * @return
      */
-    public Collection<TargetInfo> findTargets(
+    public Collection<TargetInfo> findTargetsIncludingDuplicates(
             final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
         requireNonNull(predicate);
 
@@ -125,7 +128,7 @@ public class TargetTracker implements Tracker {
         });
         return la.intValue();
     }
-    
+
     public int size() {
         return targets.size();
     }
@@ -157,34 +160,49 @@ public class TargetTracker implements Tracker {
 
         return result;
     }
-    
+
     public Stream<TargetInfo> findTargets8(
             final Predicate<? super AisPacketSource> sourcePredicate,
             final Predicate<? super TargetInfo> targetPredicate) {
         requireNonNull(sourcePredicate);
         requireNonNull(targetPredicate);
 
-        /* lambda expressions not supported with source 1.7
-        return targets.values().stream().sequential()
-                .map(o -> o.getNewest(sourcePredicate))
-                .filter(ti -> targetPredicate.test((TargetInfo) ti));
-        */
-        
-        return targets.values().stream().parallel().map(new Function<MmsiTarget, TargetInfo>() {
+        /*
+         * lambda expressions not supported with source 1.7 return
+         * targets.values().stream().sequential() .map(o ->
+         * o.getNewest(sourcePredicate)) .filter(ti ->
+         * targetPredicate.test((TargetInfo) ti));
+         */
+
+        return targets.values().stream().parallel()
+                .map(new Function<MmsiTarget, TargetInfo>() {
                     @Override
                     public TargetInfo apply(MmsiTarget t) {
                         return t.getNewest(sourcePredicate);
                     }
-                }).parallel().filter(new java.util.function.Predicate<TargetInfo>() {
+                }).parallel()
+                .filter(new java.util.function.Predicate<TargetInfo>() {
                     @Override
                     public boolean test(TargetInfo t) {
-                        return t!= null && targetPredicate.test(t);
+                        return t != null && targetPredicate.test(t);
                     }
                 });
     }
-    
 
-          
+    public Collection<TargetInfo> findTargets8List(
+            final Predicate<? super AisPacketSource> sourcePredicate,
+            final Predicate<? super TargetInfo> targetPredicate) {
+
+        return findTargets8(sourcePredicate,targetPredicate).collect(Collectors.toCollection(new Supplier<ConcurrentLinkedQueue<TargetInfo>>() {
+
+            @Override
+            public ConcurrentLinkedQueue<TargetInfo> get() {
+                // TODO Auto-generated method stub
+                return new ConcurrentLinkedQueue<TargetInfo>();
+            }
+        }));
+
+    }
 
     /**
      * Subscribes to all packets via {@link AisReaderGroup#stream()} from the
@@ -211,8 +229,8 @@ public class TargetTracker implements Tracker {
         return getNewestEntry(mmsi, PREDICATETRUE);
     }
 
-    public Enumeration<AisPacketSource> getAisPacketSources(int mmsi) {
-        return targets.get(mmsi).keys();
+    public Set<AisPacketSource> getAisPacketSources(int mmsi) {
+        return targets.get(mmsi).keySet();
     }
 
     public TargetInfo getNewest(int mmsi,
@@ -350,14 +368,17 @@ public class TargetTracker implements Tracker {
      * sources.
      */
     @SuppressWarnings("serial")
-    static class MmsiTarget extends
-            ConcurrentHashMap<AisPacketSource, TargetInfo> {
+    static class MmsiTarget extends ConcurrentHashMap<AisPacketSource, TargetInfo> {
 
         /** The MMSI number */
         final int mmsi;
 
         /** A cache of AIS messages 24 part 0. */
         final ConcurrentHashMap<AisPacketSource, byte[]> msg24Part0 = new ConcurrentHashMap<>();
+
+        //switch to implements and then
+        //final Cache<AisPacketSource, TargetInfo> cache = CacheBuilder
+        //        .newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build();
 
         MmsiTarget(int mmsi) {
             this.mmsi = mmsi;
@@ -372,7 +393,7 @@ public class TargetTracker implements Tracker {
          */
         TargetInfo getNewest(Predicate<? super AisPacketSource> predicate) {
             TargetInfo best = null;
-            for (Entry<AisPacketSource, TargetInfo> i : entrySet()) {
+            for (Entry<AisPacketSource, TargetInfo> i : this.entrySet()) {
                 if (predicate.test(i.getKey())) {
                     // if more than one target matches the predicate
                     // we merge two at a. Taking the newest static information
@@ -404,7 +425,94 @@ public class TargetTracker implements Tracker {
 
             return bestEntry;
         }
+
+        //Switch to implements and use a guava cache for automatic AisPacketSource eviction
+        /*
+        @Override
+        public int size() {
+            return cache.asMap().size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return cache.asMap().isEmpty();
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return cache.asMap().containsKey(key);
+        }
+
+        @Override
+        public boolean containsValue(Object value) {
+            return cache.asMap().containsValue(value);
+        }
+
+        @Override
+        public TargetInfo get(Object key) {
+            return cache.asMap().get(key);
+        }
+
+        @Override
+        public TargetInfo put(AisPacketSource key, TargetInfo value) {
+            return cache.asMap().put(key, value);
+        }
+
+        @Override
+        public TargetInfo remove(Object key) {
+            return cache.asMap().remove(key);
+        }
+
+        @Override
+        public void putAll(
+                Map<? extends AisPacketSource, ? extends TargetInfo> m) {
+            cache.asMap().putAll(m);
+
+        }
+
+        @Override
+        public void clear() {
+            cache.asMap().clear();
+        }
+
+        @Override
+        public Set<AisPacketSource> keySet() {
+            return cache.asMap().keySet();
+        }
+
+        @Override
+        public Collection<TargetInfo> values() {
+            return cache.asMap().values();
+        }
+
+        @Override
+        public Set<java.util.Map.Entry<AisPacketSource, TargetInfo>> entrySet() {
+            return cache.asMap().entrySet();
+        }
+
+        @Override
+        public TargetInfo putIfAbsent(AisPacketSource key, TargetInfo value) {
+            // TODO Auto-generated method stub
+            return cache.asMap().putIfAbsent(key, value);
+        }
+
+        @Override
+        public boolean remove(Object key, Object value) {
+            return cache.asMap().remove(key, value);
+        }
+
+        @Override
+        public boolean replace(AisPacketSource key, TargetInfo oldValue,
+                TargetInfo newValue) {
+            return cache.asMap().replace(key, oldValue, newValue);
+        }
+
+        @Override
+        public TargetInfo replace(AisPacketSource key, TargetInfo value) {
+            return cache.asMap().replace(key, value);
+        }
+        */
+
     }
-    
 
 }
