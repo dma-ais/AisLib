@@ -42,7 +42,7 @@ public class TargetTrackerTest {
 
     @Before
     public void setUp() throws Exception {
-        aisVesselTargets = new HashMap<>();;
+        aisVesselTargets = new HashMap<>();
         Path testdata = Paths.get("src/test/resources/");
         aisReader = AisReaders.createDirectoryReader(testdata.toString(), "*.txt", true);
         
@@ -95,7 +95,7 @@ public class TargetTrackerTest {
             if (t instanceof AisVesselTarget) {
                 if (((AisVesselTarget) t).getVesselStatic() != null) {
                     String n = ((AisVesselTarget) t).getVesselStatic().getName();
-                    if (n != null && n != "") {
+                    if (n != null && !n.equals("")) {
                         
                         names.add(n);
                         
