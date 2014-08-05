@@ -15,6 +15,8 @@
 package dk.dma.ais.tracker;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
@@ -70,7 +72,13 @@ public class TargetInfoToAisTarget {
     }
 
     public static AisTarget generateAisTarget(TargetInfo ti) {
-        return generateAisTarget(getPacketsInOrder(ti));
+
+        PriorityQueue<AisPacket> normal = getPacketsInOrder(ti);
+        PriorityQueue<AisPacket> reversed = new PriorityQueue<AisPacket>(normal.size(), Collections.reverseOrder());
+        reversed.addAll(normal);
+        AisTarget a = generateAisTarget(normal);
+        updateAisTarget(a, reversed);
+        return a;
     }
 
     /**
