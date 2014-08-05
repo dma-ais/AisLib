@@ -94,12 +94,12 @@ public final class TargetInfo implements Serializable {
         this.staticShipType = staticShipType;
         
         // Caching for AisPackets
-        this.staticAisPacket1 = getStaticAisPacket1();
-        this.staticAisPacket2 = getStaticAisPacket2();
-        this.positionAisPacket = getPositionPacket();
+        //this.staticAisPacket1 = getStaticAisPacket1();
+        //this.staticAisPacket2 = getStaticAisPacket2();
+        //this.positionAisPacket = getPositionPacket();
         
         // Caching for getAisTarget()
-        this.aisTarget = getAisTarget();
+        //this.aisTarget = getAisTarget();
     }
     
     public int getMmsi() {
@@ -144,6 +144,7 @@ public final class TargetInfo implements Serializable {
 
     public AisTarget getAisTarget() {
         return aisTarget == null ? TargetInfoToAisTarget.generateAisTarget(this) : aisTarget ;
+        //return TargetInfoToAisTarget.generateAisTarget(this);
     }
 
     /**
@@ -353,5 +354,8 @@ public final class TargetInfo implements Serializable {
             }
         }
         return existing;
+        
+        
     }
+
 }
