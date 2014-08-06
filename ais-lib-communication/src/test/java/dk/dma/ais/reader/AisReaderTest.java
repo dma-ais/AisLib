@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,7 +65,16 @@ public class AisReaderTest {
 
     @Test
     public void udpReaderTest() throws InterruptedException, IOException {
-        final int port = 49552;
+        int portTmp = 49552;
+        for (int i=49552; i<49600; i++) {
+            if (available(i)) {
+                portTmp = i;
+                
+                break;
+            }
+        }
+        
+        final int port = portTmp;
         
         final DatagramSocket sendSocket = new DatagramSocket();
         
@@ -88,6 +98,8 @@ public class AisReaderTest {
         final InetAddress addr = InetAddress.getLocalHost();
         Assert.assertNotNull(addr);
         
+        
+        
         try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
             Assert.assertNotNull(in);
             
@@ -107,11 +119,19 @@ public class AisReaderTest {
             
         }
         System.out.println("Done sending on UDP port " + port);
-        Thread.sleep(500);
+        Thread.sleep(3000); // slow cloudbees?
         reader.stopReader();
         reader.join();
         sendSocket.close();
         Assert.assertEquals(50, count.get().intValue());        
+    }
+    
+    private static boolean available(int port) {
+        try (Socket ignored = new Socket("localhost", port)) {
+            return false;
+        } catch (IOException ignored) {
+            return true;
+        }
     }
 
 }
