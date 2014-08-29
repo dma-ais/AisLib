@@ -1,64 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>dk.dma</groupId>
-    <artifactId>dma-root-pom</artifactId>
-    <version>17</version>
-  </parent>
+	<parent>
+		<groupId>dk.dma</groupId>
+		<artifactId>dma-root-pom</artifactId>
+		<version>17</version>
+	</parent>
 
-  <groupId>dk.dma.ais.lib</groupId>
-  <artifactId>ais-parent</artifactId>
-  <version>2.1-SNAPSHOT</version>
-  <name>AIS Parent</name>
-  <packaging>pom</packaging>
-  <description>This parent pom for AIS</description>
+	<groupId>dk.dma.ais.lib</groupId>
+	<artifactId>ais-parent</artifactId>
+	<version>2.1-SNAPSHOT</version>
+	<name>AIS Parent</name>
+	<packaging>pom</packaging>
+	<description>This parent pom for AIS</description>
 
-  <scm>
-    <connection>scm:git:git@github.com:dma-ais/AisLib.git</connection>
-    <developerConnection>scm:git:git@github.com:dma-ais/AisLib.git</developerConnection>
-    <url>https://github.com/dma-ais/AisLib</url>
-    <tag>HEAD</tag>
-  </scm>
-  
-  <modules>
-    <module>ais-lib-messages</module>
-    <module>ais-lib-communication</module>    
-    <module>ais-lib-utils</module>
-    <module>ais-lib-cli</module>
-  </modules>
+	<scm>
+		<connection>scm:git:git@github.com:dma-ais/AisLib.git</connection>
+		<developerConnection>scm:git:git@github.com:dma-ais/AisLib.git</developerConnection>
+		<url>https://github.com/dma-ais/AisLib</url>
+		<tag>HEAD</tag>
+	</scm>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${dependencies.slf4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${dependencies.slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.jcip</groupId>
-      <artifactId>jcip-annotations</artifactId>
-      <version>1.0</version>
-    </dependency>
-  </dependencies>
+	<modules>
+		<module>ais-lib-messages</module>
+		<module>ais-lib-communication</module>
+		<module>ais-lib-utils</module>
+		<module>ais-lib-cli</module>
+	</modules>
 
-  <repositories>
-    <repository>
-      <id>dma-releases</id>
-      <name>Dma Release Repository</name>
-      <url>http://repository-dma.forge.cloudbees.com/release/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+	<profiles>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${dependencies.slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${dependencies.slf4j.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.jcip</groupId>
+			<artifactId>jcip-annotations</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>dma-releases</id>
+			<name>Dma Release Repository</name>
+			<url>http://repository-dma.forge.cloudbees.com/release/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>
