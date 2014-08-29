@@ -10,7 +10,7 @@
 
 	<groupId>dk.dma.ais.lib</groupId>
 	<artifactId>ais-parent</artifactId>
-	<version>2.1</version>
+	<version>2.2-SNAPSHOT</version>
 	<name>AIS Parent</name>
 	<packaging>pom</packaging>
 	<description>This parent pom for AIS</description>
@@ -19,7 +19,7 @@
 		<connection>scm:git:git@github.com:dma-ais/AisLib.git</connection>
 		<developerConnection>scm:git:git@github.com:dma-ais/AisLib.git</developerConnection>
 		<url>https://github.com/dma-ais/AisLib</url>
-		<tag>v2.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<modules>
