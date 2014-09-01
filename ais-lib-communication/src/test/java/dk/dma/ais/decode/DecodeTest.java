@@ -49,7 +49,7 @@ import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 public class DecodeTest {
 

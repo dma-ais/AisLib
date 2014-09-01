@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.Service;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketStream;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * A reader group organizes a group of readers.

@@ -23,7 +23,7 @@ import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.IPositionMessage;
 import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 
 /**
  * Simple filtering based on the location of targets. Filtered on a list of geometries.

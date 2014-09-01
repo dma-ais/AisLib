@@ -17,7 +17,7 @@ package dk.dma.ais.bus.tcp;
 import java.net.Socket;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * TCP server for reading clients

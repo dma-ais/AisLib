@@ -23,7 +23,7 @@ import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.SendException;
 import dk.dma.ais.reader.SendRequest;
 import dk.dma.ais.sentence.Abk;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 public final class SrmSend implements Consumer<Abk> {
 

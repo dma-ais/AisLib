@@ -14,7 +14,7 @@
  */
 package dk.dma.ais.packet;
 
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterBaseVisitor;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser.OrAndContext;

@@ -20,7 +20,7 @@ import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Provider class that uses an AisReader to provide AIS packets

@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 public class ReplayTest {
 

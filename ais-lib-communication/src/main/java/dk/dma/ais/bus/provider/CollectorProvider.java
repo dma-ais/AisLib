@@ -17,7 +17,7 @@ package dk.dma.ais.bus.provider;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Provider that allows to push packets onto the bus 

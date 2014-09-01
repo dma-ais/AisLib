@@ -14,8 +14,27 @@
  */
 package dk.dma.ais.utils.filter;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.zip.GZIPOutputStream;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
+
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.filter.ExpressionFilter;
 import dk.dma.ais.filter.IPacketFilter;
@@ -39,29 +58,12 @@ import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.util.function.Consumer;
-import org.apache.commons.lang.StringUtils;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Command line tool to do various AIS reading, filtering and writing
  */
 public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPacket> {
-    
+
     @Parameter(names = "-f", description = "Read from file filename (gzip or zip uncompression applied if filename ends with .gz or .zip respectively)")
     String filename;
 
@@ -115,25 +117,33 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
 
     @Parameter(names = "-o", description = "Output file. Default stdout.")
     String outFile;
-    
+
     @Parameter(names = "-split", description = "Split into multiple output files with this maximum size in bytes. Files will be postfixed with a running number.")
     Long splitSize;
-    
+
     @Parameter(names = "-z", description = "Compress output files")
     boolean compress;
 
     private final SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-    
+
     private PrintStream out;
+
     private long start;
+
     private long end;
+
     private long msgCount;
+
     private long bytes;
+
     private volatile boolean stop;
+
     private final List<IPacketFilter> filters = new CopyOnWriteArrayList<>();
+
     private final FilterSettings filter = new FilterSettings();
-    
+
     private int fileCounter;
+
     private int currentFileBytes;
 
     public AisFilter() {
@@ -173,9 +183,9 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
         // Add regions
         filter.parseRegions(regions);
 
-        // Output stream        
+        // Output stream
         if (outFile == null) {
-            out = System.out;            
+            out = System.out;
         }
 
         // Message handler
@@ -193,7 +203,7 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
         if (geometry != null) {
             LocationFilter locationFilter = new LocationFilter();
             Area a = getGeometry(geometry);
-            locationFilter.addFilterGeometry(a.contains());
+            locationFilter.addFilterGeometry(e -> a.contains(e));
             filters.add(locationFilter);
         }
 
@@ -209,14 +219,14 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
             if (aisReader.getStatus() == Status.DISCONNECTED) {
                 break;
             }
-            if (runtime > 0 && (System.currentTimeMillis() - start > runtime)) {
+            if (runtime > 0 && System.currentTimeMillis() - start > runtime) {
                 stop = true;
                 aisReader.stopReader();
                 break;
             }
         }
     }
-    
+
     private PrintStream getNextOutputStram() {
         if (outFile == null) {
             throw new Error("No output stream and no out file argument given");
@@ -243,16 +253,16 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to open output file: " + filename, e);
-        }        
+        }
     }
-    
+
     @Override
-    public void accept(AisPacket packet) {        
+    public void accept(AisPacket packet) {
         if (out == null) {
             // Open new output stream
             out = getNextOutputStram();
         }
-        
+
         end = System.currentTimeMillis();
         if (start == 0) {
             start = end;
@@ -333,7 +343,7 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
 
         // Print tag line packet
         out.print(packet.getStringMessage() + "\r\n");
-        
+
         // Count bytes
         bytes += packet.getStringMessage().length() + 2;
         currentFileBytes += packet.getStringMessage().length() + 2;
@@ -361,14 +371,13 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
                 try {
                     AisApplicationMessage appMessage = binaryMessage.getApplicationMessage();
                     out.println(appMessage);
-                } catch (SixbitException e) {
-                }
+                } catch (SixbitException e) {}
             }
             out.println("---------------------------");
         }
-        
+
         // Maybe time for new outfile
-        if (splitSize != null && currentFileBytes >= splitSize) {            
+        if (splitSize != null && currentFileBytes >= splitSize) {
             out.close();
             out = null;
             currentFileBytes = 0;
@@ -405,7 +414,7 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
         System.out.println("KB/s     : " + String.format(Locale.US, "%.2f", kbytes / elapsedSecs));
         System.out.println("Kbps     : " + String.format(Locale.US, "%.2f", kbytes * 8.0 / elapsedSecs));
     }
-    
+
     @Override
     public void shutdown() {
         stop = true;
@@ -434,12 +443,14 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
         System.out.println("Usage: AisFilter [options]");
         System.out.println("\t-t        TCP round robin connection to host1:port1 ... hostN:portN");
         System.out
-                .println("\t-f        Read from file filename (gzip or zip uncompression applied if filename ends with .gz or .zip)");
+        .println("\t-f        Read from file filename (gzip or zip uncompression applied if filename ends with .gz or .zip)");
         System.out.println("\t-d        Directory to scan for files to read");
         System.out.println("\t-r        Recursive directory scan for files");
-        System.out.println("\t-name     Glob pattern for files to read. '.zip' and '.gz' files are decompressed automatically");
+        System.out
+                .println("\t-name     Glob pattern for files to read. '.zip' and '.gz' files are decompressed automatically");
         System.out.println("\t-o        Write output to file");
-        System.out.println("\t-split    Split into multiple output files with this maximum size in bytes, files will be postfixed with a running number");
+        System.out
+                .println("\t-split    Split into multiple output files with this maximum size in bytes, files will be postfixed with a running number");
         System.out.println("\t-z        Compress output files with gzip");
         System.out.println("\t-timeout  TCP read timeout in seconds, default none");
         System.out.println("\t-bs       b1,...,bN comma separated list of base station MMSI's");
@@ -453,7 +464,7 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
         System.out.println("\t-df       Do doublet filtering (default off)");
         System.out.println("\t-exp      Filter by expression. See ExpressionFilter.g4");
         System.out
-                .println("\t-geo      Filter by geometry. Circle: 'circle,lat,lon,radius' Bounding box: 'bb,lat1,lon1,lat2,lon2' ");
+        .println("\t-geo      Filter by geometry. Circle: 'circle,lat,lon,radius' Bounding box: 'bb,lat1,lon1,lat2,lon2' ");
         System.out.println("\t-help     Show this help");
     }
 
@@ -461,7 +472,8 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                System.err.println("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage());
+                System.err.println("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": "
+                        + e.getMessage());
                 System.exit(-1);
             }
         });

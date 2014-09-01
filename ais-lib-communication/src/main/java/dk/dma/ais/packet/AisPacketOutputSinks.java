@@ -20,9 +20,9 @@ import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.util.function.BiFunction;
-import dk.dma.enav.util.function.Predicate;
-import dk.dma.enav.util.function.Supplier;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import java.io.IOException;
 import java.io.OutputStream;

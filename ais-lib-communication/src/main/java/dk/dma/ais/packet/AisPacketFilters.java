@@ -15,6 +15,13 @@
 
 package dk.dma.ais.packet;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.function.Predicate;
+
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
@@ -29,13 +36,6 @@ import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Area;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
-import dk.dma.enav.util.function.Predicate;
-
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * @author Kasper Nielsen
@@ -47,7 +47,9 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         requireNonNull(predicate);
         return new AbstractMessagePredicate() {
             /**
-             * If AisMessage m is of the given messageType, then evaluate its predicate. Otherwise ignore it and return true.
+             * If AisMessage m is of the given messageType, then evaluate its predicate. Otherwise ignore it and return
+             * true.
+             *
              * @param m
              * @return
              */
@@ -92,7 +94,8 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Returns a predicate that will filter packets based on the base station source tag.
      *
-     * @param ids the id of the base stations for which packets should be accepted
+     * @param ids
+     *            the id of the base stations for which packets should be accepted
      * @return the predicate
      */
     public static Predicate<AisPacket> filterOnSourceBasestation(String... ids) {
@@ -106,7 +109,8 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Returns a predicate that will filter packets based on the country of the source tag.
      *
-     * @param countries the countries for which packets should be accepted
+     * @param countries
+     *            the countries for which packets should be accepted
      * @return the predicate
      */
     public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
@@ -160,7 +164,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
             public boolean test(AisPacket p) {
                 boolean test = false;
                 for (int i = 0; i < sourceTypes.length; i++) {
-                    //return sourceType == p.getTags().getSourceType();
+                    // return sourceType == p.getTags().getSourceType();
                     if (sourceTypes[i].equals(p.getTags().getSourceType())) {
                         test = true;
                     }
@@ -177,7 +181,8 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Filter on message to have known position inside given area.
      *
-     * @param area The area that the position must reside inside.
+     * @param area
+     *            The area that the position must reside inside.
      * @return
      */
     @SuppressWarnings("unused")
@@ -202,7 +207,8 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Block position messages outside of given area; let all other messages pass.
      *
-     * @param area The area that the position messages must reside inside.
+     * @param area
+     *            The area that the position messages must reside inside.
      * @return
      */
     @SuppressWarnings("unused")
@@ -248,7 +254,8 @@ public class AisPacketFilters extends AisPacketFiltersBase {
      * @return
      */
     @SuppressWarnings("unused")
-    protected static Predicate<AisPacket> filterOnMessageReceiveTime(final CompareToOperator operator, final int calendarField, final int value) {
+    protected static Predicate<AisPacket> filterOnMessageReceiveTime(final CompareToOperator operator,
+            final int calendarField, final int value) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = false;
@@ -479,7 +486,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         if (calendarField == Calendar.MONTH) {
             value = value + 1;
         } else if (calendarField == Calendar.DAY_OF_WEEK) {
-            value = (value - 1 + 8)%8;  // 1 = man, 7 = sun
+            value = (value - 1 + 8) % 8; // 1 = man, 7 = sun
         }
         return value;
     }
@@ -551,7 +558,8 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     }
 
     @SuppressWarnings("unused")
-    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final CompareToOperator operator, final Integer navstatus) {
+    public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final CompareToOperator operator,
+            final Integer navstatus) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
                 boolean pass = false;
@@ -661,7 +669,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
                 boolean pass = false;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof IVesselPositionMessage) {
-                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getSog()/10.0), sog, operator);
+                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getSog() / 10.0), sog, operator);
                 }
                 return pass;
             }
@@ -679,7 +687,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
                 boolean pass = false;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof IVesselPositionMessage) {
-                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getCog()/10.0), cog, operator);
+                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getCog() / 10.0), cog, operator);
                 }
                 return pass;
             }
@@ -697,7 +705,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
                 boolean pass = false;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof IVesselPositionMessage) {
-                    pass = compare((float) (((IVesselPositionMessage) aisMessage).getTrueHeading()), hdg, operator);
+                    pass = compare((float) ((IVesselPositionMessage) aisMessage).getTrueHeading(), hdg, operator);
                 }
                 return pass;
             }
@@ -715,7 +723,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
                 boolean pass = false;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof IPositionMessage) {
-                    pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLongitudeDouble()), lon, operator);
+                    pass = compare((float) ((IPositionMessage) aisMessage).getPos().getLongitudeDouble(), lon, operator);
                 }
                 return pass;
             }
@@ -733,7 +741,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
                 boolean pass = false;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof IPositionMessage) {
-                    pass = compare((float) (((IPositionMessage) aisMessage).getPos().getLatitudeDouble()), lat, operator);
+                    pass = compare((float) ((IPositionMessage) aisMessage).getPos().getLatitudeDouble(), lat, operator);
                 }
                 return pass;
             }
@@ -751,7 +759,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
                 boolean pass = false;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof AisMessage5) {
-                    pass = compare((float) (((AisMessage5) aisMessage).getDraught()/10.0), draught, operator);
+                    pass = compare((float) (((AisMessage5) aisMessage).getDraught() / 10.0), draught, operator);
                 }
                 return pass;
             }
@@ -1061,7 +1069,8 @@ public class AisPacketFilters extends AisPacketFiltersBase {
                 boolean pass = false;
                 AisMessage aisMessage = p.tryGetAisMessage();
                 if (aisMessage instanceof IVesselPositionMessage) {
-                    pass = inRange(min, max, (float) ((IVesselPositionMessage) aisMessage).getPos().getLongitudeDouble());
+                    pass = inRange(min, max, (float) ((IVesselPositionMessage) aisMessage).getPos()
+                            .getLongitudeDouble());
                 }
                 return pass;
             }
@@ -1116,7 +1125,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
 
     // ---
 
-    abstract static class AbstractMessagePredicate extends Predicate<AisPacket> {
+    abstract static class AbstractMessagePredicate implements Predicate<AisPacket> {
 
         abstract boolean test(AisMessage message);
 
@@ -1133,7 +1142,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * A non thread-safe predicate (statefull) that can be used sample duration/distance.
      */
-    static class SamplerFilter extends Predicate<AisPacket> {
+    static class SamplerFilter implements Predicate<AisPacket> {
 
         /**
          * The latest received position that was accepted, or null if no position has been received.

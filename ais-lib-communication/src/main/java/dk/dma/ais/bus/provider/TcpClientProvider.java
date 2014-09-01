@@ -32,7 +32,7 @@ import dk.dma.ais.bus.tcp.TcpClient;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpReadClient;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Round robin TCP client provider

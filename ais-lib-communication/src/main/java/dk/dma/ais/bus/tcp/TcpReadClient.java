@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * A reading TCP client

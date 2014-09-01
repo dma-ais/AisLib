@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 public class PositionHandler implements Consumer<AisMessage> {
 

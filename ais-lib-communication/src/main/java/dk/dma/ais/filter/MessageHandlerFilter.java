@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import net.jcip.annotations.ThreadSafe;
 
 import dk.dma.ais.message.AisMessage;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Message handler filter

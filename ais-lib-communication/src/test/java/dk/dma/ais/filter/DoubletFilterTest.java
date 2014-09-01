@@ -21,7 +21,7 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.AisTcpReader;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 public class DoubletFilterTest {
 

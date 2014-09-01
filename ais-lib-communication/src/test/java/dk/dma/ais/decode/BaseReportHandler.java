@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Example AIS message handler that saves MMSI for the base stations observed

@@ -27,8 +27,8 @@ import jsr166e.ConcurrentHashMapV8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.enav.util.function.Consumer;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * The default implements of {@link AisPacketStream}.

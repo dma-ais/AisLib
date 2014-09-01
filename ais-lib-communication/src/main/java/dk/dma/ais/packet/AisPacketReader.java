@@ -44,7 +44,7 @@ import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.commons.util.io.CountingInputStream;
 import dk.dma.commons.util.io.OutputStreamSink;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Class for reading AIS packet streams.

@@ -18,9 +18,9 @@ import com.google.common.io.Files;
 import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.message.ShipTypeColor;
-import dk.dma.enav.util.function.BiFunction;
-import dk.dma.enav.util.function.Predicate;
-import dk.dma.enav.util.function.Supplier;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.jcip.annotations.NotThreadSafe;
 
 import java.io.BufferedOutputStream;

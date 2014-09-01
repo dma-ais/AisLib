@@ -33,7 +33,7 @@ import com.google.inject.Injector;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketFilters;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 
 /**
  * @author Jens Tuxen

@@ -17,7 +17,7 @@ package dk.dma.ais.configuration.filter.geometry;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
 import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 
 @XmlSeeAlso({ CircleGeometryConfiguration.class })
 public abstract class GeometryConfiguration {

@@ -17,7 +17,7 @@ package dk.dma.ais.filter;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketFilters;
 import dk.dma.enav.model.geometry.BoundingBox;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 
 import java.util.List;
 

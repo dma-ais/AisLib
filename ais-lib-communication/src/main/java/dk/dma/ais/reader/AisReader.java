@@ -44,7 +44,7 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedResource;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.

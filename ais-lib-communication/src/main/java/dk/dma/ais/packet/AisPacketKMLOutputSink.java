@@ -14,8 +14,30 @@
  */
 package dk.dma.ais.packet;
 
+import static dk.dma.enav.safety.SafetyZones.safetyZone;
+import static java.lang.Math.min;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.function.Predicate;
+
+import net.jcip.annotations.NotThreadSafe;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
 import de.micromata.opengis.kml.v_2_2_0.Camera;
@@ -35,35 +57,17 @@ import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Ellipse;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.CoordinateConverter;
-import dk.dma.enav.util.function.BiFunction;
-import dk.dma.enav.util.function.Predicate;
-import dk.dma.enav.util.function.Supplier;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import dk.dma.enav.util.geometry.Point;
-import net.jcip.annotations.NotThreadSafe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-
-import static dk.dma.enav.safety.SafetyZones.safetyZone;
-import static java.lang.Math.min;
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * This class receives AisPacket and use them to build a scenario
  *
  * When the sink is closed it dumps the entire target state to the output stream in KML format.
  *
- * TODO Even though the triggerSnapshot predicate encourages generation of multiple snapshots, only one is currently supported.
+ * TODO Even though the triggerSnapshot predicate encourages generation of multiple snapshots, only one is currently
+ * supported.
  *
  * @author Thomas Borg Salling <tbsalling@tbsalling.dk>
  */
@@ -100,6 +104,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     final boolean createTracksFolder;
 
     private final Predicate<? super AisPacket> isPrimaryTarget;
+
     private final Predicate<? super AisPacket> isSecondaryTarget;
 
     /**
@@ -133,17 +138,23 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private final BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier;
 
     private static final String KML_STYLE_PRIMARY_SHIP = "Ship1Style";
+
     private static final String KML_STYLE_SECONDARY_SHIP = "Ship2Style";
+
     private static final String KML_STYLE_OTHER_SHIP = "ShipDefaultStyle";
 
     private static final String KML_STYLE_EXTENSION_ESTIMATED_POSITION = "Estimated";
 
     private static final String KML_COLOR_PRIMARY_SHIP = "00ff00";
+
     private static final String KML_COLOR_SECONDARY_SHIP = "0000ff";
+
     private static final String KML_COLOR_OTHER_SHIP = "14f0fa";
 
     private static final String HTML_COLOR_PRIMARY_SHIP = "#00ff00";
+
     private static final String HTML_COLOR_SECONDARY_SHIP = "#ff0000";
+
     private static final String HTML_COLOR_OTHER_SHIP = "#faf014";
 
     private final Set<Long> snapshotTimes = Sets.newTreeSet();
@@ -168,13 +179,13 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private static final int KML_POSITION_TIMESPAN_SECS = 1;
 
     public AisPacketKMLOutputSink() {
-        this.filter = Predicate.TRUE;
+        this.filter = e -> true;
         this.createSituationFolder = true;
         this.createMovementsFolder = true;
         this.createTracksFolder = true;
-        this.isPrimaryTarget = Predicate.FALSE;
-        this.isSecondaryTarget = Predicate.FALSE;
-        this.triggerSnapshot = Predicate.FALSE;
+        this.isPrimaryTarget = e -> false;
+        this.isSecondaryTarget = e -> false;
+        this.triggerSnapshot = e -> false;
         this.snapshotDescriptionSupplier = null;
         this.title = defaultTitleSupplier;
         this.description = defaultDescriptionSupplier;
@@ -183,19 +194,20 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     /**
-     * Create a sink that writes KML contents to outputStream - but build the scenario only from
-     * AisPackets which comply with the filter predicate.
+     * Create a sink that writes KML contents to outputStream - but build the scenario only from AisPackets which comply
+     * with the filter predicate.
      *
-     * @param filter a filter predicate for pre-filtering of AisPackets.
+     * @param filter
+     *            a filter predicate for pre-filtering of AisPackets.
      */
     public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter) {
         this.filter = filter;
         this.createSituationFolder = true;
         this.createMovementsFolder = true;
         this.createTracksFolder = true;
-        this.isPrimaryTarget = Predicate.FALSE;
-        this.isSecondaryTarget = Predicate.FALSE;
-        this.triggerSnapshot = Predicate.FALSE;
+        this.isPrimaryTarget = e -> false;
+        this.isSecondaryTarget = e -> false;
+        this.triggerSnapshot = e -> false;
         this.snapshotDescriptionSupplier = null;
         this.title = defaultTitleSupplier;
         this.description = defaultDescriptionSupplier;
@@ -204,17 +216,28 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     /**
-     * Create a sink that writes KML contents to outputStream - but build the scenario only from
-     * AisPackets which comply with the filter predicate.
+     * Create a sink that writes KML contents to outputStream - but build the scenario only from AisPackets which comply
+     * with the filter predicate.
      *
-     * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
-     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
-     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
-     * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
-     * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param filter
+     *            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder
+     *            create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder
+     *            create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder
+     *            create and populate the 'tracks' folder in the generated KML
+     * @param isPrimaryTarget
+     *            Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget
+     *            Apply secondary KML styling to targets which are updated by packets that pass this predicate.
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder,
+            boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget,
+            Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot,
+            Supplier<? extends String> snapshotDescriptionSupplier,
+            Supplier<? extends Integer> movementInterpolationStepSupplier,
+            BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         this.filter = filter;
         this.createSituationFolder = createSituationFolder;
         this.createMovementsFolder = createMovementsFolder;
@@ -225,24 +248,40 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.snapshotDescriptionSupplier = snapshotDescriptionSupplier;
         this.title = defaultTitleSupplier;
         this.description = defaultDescriptionSupplier;
-        this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier : movementInterpolationStepSupplier;
-        this.iconHrefSupplier = (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? defaultIconHrefSupplier : iconHrefSupplier);
+        this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier
+                : movementInterpolationStepSupplier;
+        this.iconHrefSupplier = (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? defaultIconHrefSupplier
+                : iconHrefSupplier);
     }
 
     /**
-     * Create a sink that writes KML contents to outputStream - but build the scenario only from
-     * AisPackets which comply with the filter predicate.
+     * Create a sink that writes KML contents to outputStream - but build the scenario only from AisPackets which comply
+     * with the filter predicate.
      *
-     * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
-     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
-     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
-     * @param isPrimaryTarget Apply primary KML styling to targets which are updated by packets that pass this predicate.
-     * @param isSecondaryTarget Apply secondary KML styling to targets which are updated by packets that pass this predicate.
-     * @param supplyTitle Supplier of KML folder title
-     * @param supplyDescription Supplier of KML folder description
+     * @param filter
+     *            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder
+     *            create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder
+     *            create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder
+     *            create and populate the 'tracks' folder in the generated KML
+     * @param isPrimaryTarget
+     *            Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget
+     *            Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param supplyTitle
+     *            Supplier of KML folder title
+     * @param supplyDescription
+     *            Supplier of KML folder description
      */
-    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
+    public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder,
+            boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget,
+            Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot,
+            Supplier<? extends String> snapshotDescriptionSupplier,
+            Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle,
+            Supplier<? extends String> supplyDescription,
+            BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         this.filter = filter;
         this.createSituationFolder = createSituationFolder;
         this.createMovementsFolder = createMovementsFolder;
@@ -253,8 +292,10 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         this.snapshotDescriptionSupplier = snapshotDescriptionSupplier;
         this.title = supplyTitle == null ? defaultTitleSupplier : supplyTitle;
         this.description = supplyDescription == null ? defaultDescriptionSupplier : supplyDescription;
-        this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier : movementInterpolationStepSupplier;
-        this.iconHrefSupplier = (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? defaultIconHrefSupplier : iconHrefSupplier);
+        this.movementInterpolationStep = movementInterpolationStepSupplier == null ? defaultMovementInterpolationStepSupplier
+                : movementInterpolationStepSupplier;
+        this.iconHrefSupplier = (BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String>) (iconHrefSupplier == null ? defaultIconHrefSupplier
+                : iconHrefSupplier);
         System.out.println(toString());
     }
 
@@ -294,7 +335,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         AisPacketKMLOutputSink kmlOutputSink = new AisPacketKMLOutputSink(filter);
 
         try (FileOutputStream fos = new FileOutputStream(Paths.get("/Users/tbsalling/Desktop/test.kml").toFile())) {
-            AisPacketReader reader = AisPacketReader.createFromFile(Paths.get("/Users/tbsalling/Desktop/ais-sample.txt"), true);
+            AisPacketReader reader = AisPacketReader.createFromFile(
+                    Paths.get("/Users/tbsalling/Desktop/ais-sample.txt"), true);
             reader.writeTo(fos, kmlOutputSink);
         }
     }
@@ -345,34 +387,30 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         Document document = kml.createAndSetDocument().withOpen(true);
 
         String docDesc = description.get();
-        if (! isBlank(docDesc)) {
+        if (!isBlank(docDesc)) {
             document.withDescription(docDesc);
         }
 
         String docTitle = title.get();
-        if (! isBlank(docTitle)) {
+        if (!isBlank(docTitle)) {
             document.withName(docTitle);
         }
 
-        Camera camera = document.createAndSetCamera()
-            .withAltitude(2000)
-            .withHeading(0)
-            .withTilt(0)
-            .withAltitudeMode(AltitudeMode.ABSOLUTE);
+        Camera camera = document.createAndSetCamera().withAltitude(2000).withHeading(0).withTilt(0)
+                .withAltitudeMode(AltitudeMode.ABSOLUTE);
 
         if (scenarioTracker.boundingBox() != null) {
-            camera
-                .withLatitude((scenarioTracker.boundingBox().getMaxLat() + scenarioTracker.boundingBox().getMinLat())/2.0)
-                .withLongitude((scenarioTracker.boundingBox().getMaxLon() + scenarioTracker.boundingBox().getMinLon())/2.0);
+            camera.withLatitude(
+                    (scenarioTracker.boundingBox().getMaxLat() + scenarioTracker.boundingBox().getMinLat()) / 2.0)
+                    .withLongitude(
+                            (scenarioTracker.boundingBox().getMaxLon() + scenarioTracker.boundingBox().getMinLon()) / 2.0);
         }
 
         // Create all ship styles
         createKmlStyles(document);
 
-        Folder rootFolder = document.createAndAddFolder()
-            .withName("Vessel scenario")
-            .withOpen(true)
-            .withVisibility(true);
+        Folder rootFolder = document.createAndAddFolder().withName("Vessel scenario").withOpen(true)
+                .withVisibility(true);
 
         StringBuffer rootFolderName = new StringBuffer();
         Date scenarioBegin = scenarioTracker.scenarioBegin();
@@ -402,7 +440,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         // Generate tracks folder
         if (createTracksFolder) {
-            createKmlTracksFolder(rootFolder, Predicate.TRUE);
+            createKmlTracksFolder(rootFolder, e -> true);
         }
 
         // Generate movements folder
@@ -415,42 +453,30 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     private static void createKmlStyles(Document document) {
         // For colors - http://www.zonums.com/gmaps/kml_color/
-        document
-            .createAndAddStyle()
-            .withId("bbox")
-            .createAndSetLineStyle()
-                .withColor("cccc00b0")
-                .withWidth(2.5);
+        document.createAndAddStyle().withId("bbox").createAndSetLineStyle().withColor("cccc00b0").withWidth(2.5);
 
-        createStyle(document, KML_STYLE_OTHER_SHIP, 2, "60"+ KML_COLOR_OTHER_SHIP, "FF"+ KML_COLOR_OTHER_SHIP);
-        createStyle(document, KML_STYLE_PRIMARY_SHIP, 2, "80"+ KML_COLOR_PRIMARY_SHIP, "ff"+ KML_COLOR_PRIMARY_SHIP);
-        createStyle(document, KML_STYLE_SECONDARY_SHIP, 2, "80"+ KML_COLOR_SECONDARY_SHIP, "ff"+ KML_COLOR_SECONDARY_SHIP);
-        createStyle(document, KML_STYLE_PRIMARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "60"+ KML_COLOR_PRIMARY_SHIP, "80"+ KML_COLOR_PRIMARY_SHIP);
-        createStyle(document, KML_STYLE_SECONDARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "60"+ KML_COLOR_SECONDARY_SHIP, "80"+ KML_COLOR_SECONDARY_SHIP);
+        createStyle(document, KML_STYLE_OTHER_SHIP, 2, "60" + KML_COLOR_OTHER_SHIP, "FF" + KML_COLOR_OTHER_SHIP);
+        createStyle(document, KML_STYLE_PRIMARY_SHIP, 2, "80" + KML_COLOR_PRIMARY_SHIP, "ff" + KML_COLOR_PRIMARY_SHIP);
+        createStyle(document, KML_STYLE_SECONDARY_SHIP, 2, "80" + KML_COLOR_SECONDARY_SHIP, "ff"
+                + KML_COLOR_SECONDARY_SHIP);
+        createStyle(document, KML_STYLE_PRIMARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "60"
+                + KML_COLOR_PRIMARY_SHIP, "80" + KML_COLOR_PRIMARY_SHIP);
+        createStyle(document, KML_STYLE_SECONDARY_SHIP + KML_STYLE_EXTENSION_ESTIMATED_POSITION, 2, "60"
+                + KML_COLOR_SECONDARY_SHIP, "80" + KML_COLOR_SECONDARY_SHIP);
     }
 
     private static void createStyle(Document document, String styleName, int width, String lineColor, String polyColor) {
-        Style style = document
-            .createAndAddStyle()
-            .withId(styleName);
-        style.createAndSetLineStyle()
-            .withWidth(width)
-            .withColor(lineColor);
-        style.createAndSetPolyStyle()
-            .withColor(polyColor);
+        Style style = document.createAndAddStyle().withId(styleName);
+        style.createAndSetLineStyle().withWidth(width).withColor(lineColor);
+        style.createAndSetPolyStyle().withColor(polyColor);
     }
 
     private void createKmlBoundingBox(Folder kmlNode) {
         BoundingBox bbox = scenarioTracker.boundingBox();
 
         if (bbox != null) {
-            kmlNode.createAndAddPlacemark()
-                .withId("bbox")
-                .withStyleUrl("#bbox")
-                .withName("Bounding box")
-                .withVisibility(true)
-                .createAndSetLinearRing()
-                    .addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat())
+            kmlNode.createAndAddPlacemark().withId("bbox").withStyleUrl("#bbox").withName("Bounding box")
+            .withVisibility(true).createAndSetLinearRing().addToCoordinates(bbox.getMaxLon(), bbox.getMaxLat())
                     .addToCoordinates(bbox.getMaxLon(), bbox.getMinLat())
                     .addToCoordinates(bbox.getMinLon(), bbox.getMinLat())
                     .addToCoordinates(bbox.getMinLon(), bbox.getMaxLat())
@@ -459,54 +485,29 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     private void createKmlSituationFolder(Folder kmlNode, long atTime) {
-        Folder situationFolder = kmlNode.createAndAddFolder()
-                .withName("Situation")
-                .withDescription(new Date(atTime).toString())
-                .withOpen(false)
-                .withVisibility(false);
+        Folder situationFolder = kmlNode.createAndAddFolder().withName("Situation")
+                .withDescription(new Date(atTime).toString()).withOpen(false).withVisibility(false);
 
         BoundingBox bbox = scenarioTracker.boundingBox();
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
         final Date t = new Date(atTime);
 
-        ScenarioTracker.Target primaryTarget=null, secondaryTarget=null;
-        ScenarioTracker.Target.PositionReport primaryPositionReport=null, secondaryPositionReport=null;
+        ScenarioTracker.Target primaryTarget = null, secondaryTarget = null;
+        ScenarioTracker.Target.PositionReport primaryPositionReport = null, secondaryPositionReport = null;
 
         for (ScenarioTracker.Target target : targets) {
             ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t, 10);
             if (estimatedPosition != null && bbox.contains(estimatedPosition.getPositionTime())) {
-                createKmlShipShapePlacemark(
-                        situationFolder,
-                        target.getMmsi(),
-                        target.getName(),
-                        null,
-                        null,
-                        estimatedPosition.getLatitude(),
-                        estimatedPosition.getLongitude(),
-                        estimatedPosition.getCog(),
-                        estimatedPosition.getSog(),
-                        estimatedPosition.getHeading(),
-                        target.getToBow(),
-                        target.getToStern(),
-                        target.getToPort(),
-                        target.getToStarboard(),
-                        target.isTagged(KML_STYLE_PRIMARY_SHIP),
-                        getStyle(target, false),
-                        true
-                );
-                createKmlShipIconPlacemark(
-                        situationFolder,
-                        target.getShipTypeCargo(),
-                        estimatedPosition.getNavigationalStatus(),
-                        null,
-                        null,
-                        estimatedPosition.getLatitude(),
-                        estimatedPosition.getLongitude(),
-                        estimatedPosition.getCog(),
-                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, estimatedPosition, null, null),
-                        true
-                );
+                createKmlShipShapePlacemark(situationFolder, target.getMmsi(), target.getName(), null, null,
+                        estimatedPosition.getLatitude(), estimatedPosition.getLongitude(), estimatedPosition.getCog(),
+                        estimatedPosition.getSog(), estimatedPosition.getHeading(), target.getToBow(),
+                        target.getToStern(), target.getToPort(), target.getToStarboard(),
+                        target.isTagged(KML_STYLE_PRIMARY_SHIP), getStyle(target, false), true);
+                createKmlShipIconPlacemark(situationFolder, target.getShipTypeCargo(),
+                        estimatedPosition.getNavigationalStatus(), null, null, estimatedPosition.getLatitude(),
+                        estimatedPosition.getLongitude(), estimatedPosition.getCog(), "<h2>Vessel details</h2>"
+                                + generateHtmlShipDescription(target, estimatedPosition, null, null), true);
                 if (primaryTarget == null && target.isTagged(KML_STYLE_PRIMARY_SHIP)) {
                     primaryTarget = target;
                     primaryPositionReport = estimatedPosition;
@@ -517,7 +518,8 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 }
             }
         }
-        createSituationPlacemark(situationFolder, primaryTarget, primaryPositionReport, secondaryTarget, secondaryPositionReport);
+        createSituationPlacemark(situationFolder, primaryTarget, primaryPositionReport, secondaryTarget,
+                secondaryPositionReport);
     }
 
     private void createKmlMovementsAndIconsFolders(Folder kmlNode) {
@@ -525,104 +527,60 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         final boolean useInterpolation = movementInterpolationStep.get() != null && movementInterpolationStep.get() > 0;
 
-        Folder movementFolder = kmlNode
-            .createAndAddFolder()
-                .withName("Movements")
-                .withOpen(false)
+        Folder movementFolder = kmlNode.createAndAddFolder().withName("Movements").withOpen(false)
                 .withVisibility(false);
 
-        Folder iconFolder = kmlNode
-            .createAndAddFolder()
-                .withName("Icons")
-                .withOpen(false)
-                .withVisibility(false);
+        Folder iconFolder = kmlNode.createAndAddFolder().withName("Icons").withOpen(false).withVisibility(false);
 
         for (ScenarioTracker.Target target : targets) {
-            Folder targetShipShapeFolder = movementFolder.createAndAddFolder().withName(target.getName()).withDescription("Movements for MMSI " + target.getMmsi());
-            Folder targetShipIconFolder = iconFolder.createAndAddFolder().withName(target.getName()).withDescription("Icons for MMSI " + target.getMmsi());
+            Folder targetShipShapeFolder = movementFolder.createAndAddFolder().withName(target.getName())
+                    .withDescription("Movements for MMSI " + target.getMmsi());
+            Folder targetShipIconFolder = iconFolder.createAndAddFolder().withName(target.getName())
+                    .withDescription("Icons for MMSI " + target.getMmsi());
             if (useInterpolation) {
                 final long t1 = target.timeOfFirstPositionReport().getTime();
                 final long t2 = target.timeOfLastPositionReport().getTime();
-                final int dt = movementInterpolationStep.get()*1000;
+                final int dt = movementInterpolationStep.get() * 1000;
                 for (long t = t1; t <= t2; t += dt) {
-                    ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(t), KML_POSITION_TIMESPAN_SECS);
-                    createKmlShipShapePlacemark(
-                        targetShipShapeFolder,
-                        target.getMmsi(),
-                        target.getName(),
-                        t - (dt - 100),
-                        t,
-                        positionReport.getLatitude(),
-                        positionReport.getLongitude(),
-                        positionReport.getCog(),
-                        positionReport.getSog(),
-                        positionReport.getHeading(),
-                        target.getToBow(),
-                        target.getToStern(),
-                        target.getToPort(),
-                        target.getToStarboard(),
-                        false,
-                        getStyle(target, positionReport.isEstimated()),
-                        false
-                    );
-                    createKmlShipIconPlacemark(
-                        targetShipIconFolder,
-                        target.getShipTypeCargo(),
-                        positionReport.getNavigationalStatus(),
-                        t - (dt - 100),
-                        t,
-                        positionReport.getLatitude(),
-                        positionReport.getLongitude(),
-                        positionReport.getCog(),
-                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null),
-                        false
-                    );
+                    ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(t),
+                            KML_POSITION_TIMESPAN_SECS);
+                    createKmlShipShapePlacemark(targetShipShapeFolder, target.getMmsi(), target.getName(), t
+                            - (dt - 100), t, positionReport.getLatitude(), positionReport.getLongitude(),
+                            positionReport.getCog(), positionReport.getSog(), positionReport.getHeading(),
+                            target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), false,
+                            getStyle(target, positionReport.isEstimated()), false);
+                    createKmlShipIconPlacemark(targetShipIconFolder, target.getShipTypeCargo(),
+                            positionReport.getNavigationalStatus(), t - (dt - 100), t, positionReport.getLatitude(),
+                            positionReport.getLongitude(), positionReport.getCog(), "<h2>Vessel details</h2>"
+                                    + generateHtmlShipDescription(target, positionReport, null, null), false);
                 }
             } else {
                 Set<ScenarioTracker.Target.PositionReport> positionReports = target.getPositionReports();
 
-                ScenarioTracker.Target.PositionReport[] positionReportsArray = positionReports.toArray(new ScenarioTracker.Target.PositionReport[positionReports.size()]);
+                ScenarioTracker.Target.PositionReport[] positionReportsArray = positionReports
+                        .toArray(new ScenarioTracker.Target.PositionReport[positionReports.size()]);
                 for (int i = 0; i < positionReportsArray.length; i++) {
                     ScenarioTracker.Target.PositionReport positionReport = positionReportsArray[i];
                     ScenarioTracker.Target.PositionReport nextPositionReport = null;
                     if (i < positionReportsArray.length - 1) {
-                        nextPositionReport = positionReportsArray[i+1];
+                        nextPositionReport = positionReportsArray[i + 1];
                     }
 
                     final long maxTimespan = 10000L;
-                    final long timespan = min(nextPositionReport!=null ? nextPositionReport.getTimestamp() - positionReport.getTimestamp() - 1 : maxTimespan, maxTimespan);
+                    final long timespan = min(nextPositionReport != null ? nextPositionReport.getTimestamp()
+                            - positionReport.getTimestamp() - 1 : maxTimespan, maxTimespan);
 
-                    createKmlShipShapePlacemark(
-                        targetShipShapeFolder,
-                        target.getMmsi(),
-                        target.getName(),
-                        positionReport.getTimestamp(),
-                        positionReport.getTimestamp() + timespan,
-                        positionReport.getLatitude(),
-                        positionReport.getLongitude(),
-                        positionReport.getCog(),
-                        positionReport.getSog(),
-                        positionReport.getHeading(),
-                        target.getToBow(),
-                        target.getToStern(),
-                        target.getToPort(),
-                        target.getToStarboard(),
-                        false,
-                        getStyle(target, positionReport.isEstimated()),
-                        false
-                    );
-                    createKmlShipIconPlacemark(
-                        targetShipIconFolder,
-                        target.getShipTypeCargo(),
-                        positionReport.getNavigationalStatus(),
-                        positionReport.getTimestamp(),
-                        positionReport.getTimestamp() + timespan,
-                        positionReport.getLatitude(),
-                        positionReport.getLongitude(),
-                        positionReport.getCog(),
-                        "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, positionReport, null, null),
-                        false
-                    );
+                    createKmlShipShapePlacemark(targetShipShapeFolder, target.getMmsi(), target.getName(),
+                            positionReport.getTimestamp(), positionReport.getTimestamp() + timespan,
+                            positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getCog(),
+                            positionReport.getSog(), positionReport.getHeading(), target.getToBow(),
+                            target.getToStern(), target.getToPort(), target.getToStarboard(), false,
+                            getStyle(target, positionReport.isEstimated()), false);
+                    createKmlShipIconPlacemark(targetShipIconFolder, target.getShipTypeCargo(),
+                            positionReport.getNavigationalStatus(), positionReport.getTimestamp(),
+                            positionReport.getTimestamp() + timespan, positionReport.getLatitude(),
+                            positionReport.getLongitude(), positionReport.getCog(), "<h2>Vessel details</h2>"
+                                    + generateHtmlShipDescription(target, positionReport, null, null), false);
                 }
             }
         }
@@ -632,8 +590,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         return snapshotDescriptionSupplier.get();
     }
 
-    private String generateHtmlShipDescription(ScenarioTracker.Target target1, ScenarioTracker.Target.PositionReport positionReport1,
-                                               ScenarioTracker.Target target2, ScenarioTracker.Target.PositionReport positionReport2) {
+    private String generateHtmlShipDescription(ScenarioTracker.Target target1,
+            ScenarioTracker.Target.PositionReport positionReport1, ScenarioTracker.Target target2,
+            ScenarioTracker.Target.PositionReport positionReport2) {
         String dtg1 = null, dtg2 = null;
         if (positionReport1 != null) {
             calendar.setTimeInMillis(positionReport1.getTimestamp());
@@ -646,39 +605,58 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         String ref1 = null, ref2 = null;
         if (target1 != null) {
-            ref1 = "<a href=\"http://www.marinetraffic.com/en/ais/details/ships/" + target1.getMmsi() + "\">marinetraffic.com</a>";
+            ref1 = "<a href=\"http://www.marinetraffic.com/en/ais/details/ships/" + target1.getMmsi()
+                    + "\">marinetraffic.com</a>";
         }
         if (target2 != null) {
-            ref2 = "<a href=\"http://www.marinetraffic.com/en/ais/details/ships/" + target2.getMmsi() + "\">marinetraffic.com</a>";
+            ref2 = "<a href=\"http://www.marinetraffic.com/en/ais/details/ships/" + target2.getMmsi()
+                    + "\">marinetraffic.com</a>";
         }
 
         StringBuffer desc = new StringBuffer(512);
         desc.append("<div><table width=\"300\">");
         if (target1 != null && target2 != null) {
-            generateHtmlTableRow(desc, "", "<h4 style=\"color:" + HTML_COLOR_PRIMARY_SHIP + ";\">Primary</h4>", "<h4 style=\"color:" + HTML_COLOR_SECONDARY_SHIP + ";\">Secondary</h4>", "");
+            generateHtmlTableRow(desc, "", "<h4 style=\"color:" + HTML_COLOR_PRIMARY_SHIP + ";\">Primary</h4>",
+                    "<h4 style=\"color:" + HTML_COLOR_SECONDARY_SHIP + ";\">Secondary</h4>", "");
             generateHtmlTableRow(desc, "", "", "", "");
         }
-        generateHtmlTableRow(desc, "NAME",  target1 == null ? null : target1.getName(),                              target2 == null ? null : target2.getName(),                               "");
-        generateHtmlTableRow(desc, "MMSI",  target1 == null ? null : target1.getMmsi(),                              target2 == null ? null : target2.getMmsi(),                               "");
-        generateHtmlTableRow(desc, "IMO",   target1 == null ? null : target1.getImo(),                               target2 == null ? null : target2.getImo(),                                "");
-        generateHtmlTableRow(desc, "TYPE",  target1 == null ? null : target1.getShipTypeAsString(),                          target2 == null ? null : target2.getShipTypeAsString(),                           "");
-        generateHtmlTableRow(desc, "LOA",   target1 == null ? null : target1.getToBow() + target1.getToStern(),      target2 == null ? null : target2.getToBow() + target2.getToStern(),      "m");
-        generateHtmlTableRow(desc, "BEAM",  target1 == null ? null : target1.getToStarboard() + target1.getToPort(), target2 == null ? null : target2.getToStarboard() + target2.getToPort(), "m");
+        generateHtmlTableRow(desc, "NAME", target1 == null ? null : target1.getName(),
+                target2 == null ? null : target2.getName(), "");
+        generateHtmlTableRow(desc, "MMSI", target1 == null ? null : target1.getMmsi(),
+                target2 == null ? null : target2.getMmsi(), "");
+        generateHtmlTableRow(desc, "IMO", target1 == null ? null : target1.getImo(),
+                target2 == null ? null : target2.getImo(), "");
+        generateHtmlTableRow(desc, "TYPE", target1 == null ? null : target1.getShipTypeAsString(),
+                target2 == null ? null : target2.getShipTypeAsString(), "");
+        generateHtmlTableRow(desc, "LOA", target1 == null ? null : target1.getToBow() + target1.getToStern(),
+                target2 == null ? null : target2.getToBow() + target2.getToStern(), "m");
+        generateHtmlTableRow(desc, "BEAM", target1 == null ? null : target1.getToStarboard() + target1.getToPort(),
+                target2 == null ? null : target2.getToStarboard() + target2.getToPort(), "m");
         desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
-        generateHtmlTableRow(desc, "DST",   target1 == null ? null : target1.getDestination(),                       target2 == null ? null : target2.getDestination(),                        "");
-        generateHtmlTableRow(desc, "CARGO", target1 == null ? null : target1.getCargoTypeAsString(),                         target2 == null ? null : target2.getCargoTypeAsString(),                          "");
+        generateHtmlTableRow(desc, "DST", target1 == null ? null : target1.getDestination(), target2 == null ? null
+                : target2.getDestination(), "");
+        generateHtmlTableRow(desc, "CARGO", target1 == null ? null : target1.getCargoTypeAsString(),
+                target2 == null ? null : target2.getCargoTypeAsString(), "");
         desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
         if (positionReport1 != null || positionReport2 != null) {
             generateHtmlTableRow(desc, "DTG", dtg1, dtg2, "");
-            generateHtmlTableRow(desc, "POS", positionReport1 == null ? null : positionReport1.getPositionTime(), positionReport2 == null ? null : positionReport2.getPositionTime(), "");
-            generateHtmlTableRow(desc, "SRC", positionReport1 == null ? null : positionReport1.isEstimated() ? "Estimated" : "AIS", positionReport2 == null ? null : positionReport2.isEstimated() ? "Estimated" : "AIS", "");
-            generateHtmlTableRow(desc, "HDG", positionReport1 == null ? null : positionReport1.getHeading(), positionReport2 == null ? null : positionReport2.getHeading(), "deg");
-            generateHtmlTableRow(desc, "COG", positionReport1 == null ? null : Float.valueOf(positionReport1.getCog()).intValue(), positionReport2 == null ? null : Float.valueOf(positionReport2.getCog()).intValue(), "deg");
-            generateHtmlTableRow(desc, "SOG", positionReport1 == null ? null : positionReport1.getSog(), positionReport2 == null ? null : positionReport2.getSog(), "kts");
-            generateHtmlTableRow(desc, "NAV", positionReport1 == null ? null : positionReport1.getNavigationalStatus(), positionReport2 == null ? null : positionReport2.getNavigationalStatus(), "");
+            generateHtmlTableRow(desc, "POS", positionReport1 == null ? null : positionReport1.getPositionTime(),
+                    positionReport2 == null ? null : positionReport2.getPositionTime(), "");
+            generateHtmlTableRow(desc, "SRC", positionReport1 == null ? null
+                    : positionReport1.isEstimated() ? "Estimated" : "AIS", positionReport2 == null ? null
+                            : positionReport2.isEstimated() ? "Estimated" : "AIS", "");
+            generateHtmlTableRow(desc, "HDG", positionReport1 == null ? null : positionReport1.getHeading(),
+                    positionReport2 == null ? null : positionReport2.getHeading(), "deg");
+            generateHtmlTableRow(desc, "COG", positionReport1 == null ? null : Float.valueOf(positionReport1.getCog())
+                    .intValue(), positionReport2 == null ? null : Float.valueOf(positionReport2.getCog()).intValue(),
+                    "deg");
+            generateHtmlTableRow(desc, "SOG", positionReport1 == null ? null : positionReport1.getSog(),
+                    positionReport2 == null ? null : positionReport2.getSog(), "kts");
+            generateHtmlTableRow(desc, "NAV", positionReport1 == null ? null : positionReport1.getNavigationalStatus(),
+                    positionReport2 == null ? null : positionReport2.getNavigationalStatus(), "");
             desc.append("<tr><td><hr></td><td><hr></td><td><hr></td></tr>");
         }
-        generateHtmlTableRow(desc, "REF",   ref1, ref2, "");
+        generateHtmlTableRow(desc, "REF", ref1, ref2, "");
         desc.append("</table></div>");
 
         return desc.toString();
@@ -701,10 +679,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     private void createKmlTracksFolder(Folder kmlNode, Predicate<? super ScenarioTracker.Target> trackFor) {
         Set<ScenarioTracker.Target> targets = scenarioTracker.getTargetsHavingPositionUpdates();
 
-        Folder tracksFolder = kmlNode.createAndAddFolder()
-                .withName("Tracks")
-                .withOpen(false)
-                .withVisibility(false);
+        Folder tracksFolder = kmlNode.createAndAddFolder().withName("Tracks").withOpen(false).withVisibility(false);
 
         Folder cargoTracksFolder = null;
         Folder tankersTracksFolder = null;
@@ -723,54 +698,59 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     ShipTypeCargo shipTypeCargo = target.getShipTypeCargo();
                     if (shipTypeCargo != null) {
                         ShipTypeCargo.ShipType shipType = shipTypeCargo.getShipType();
-                        switch(shipType) {
-                            case CARGO:
-                                if (cargoTracksFolder == null) {
-                                    cargoTracksFolder = tracksFolder.createAndAddFolder().withName("Cargo").withOpen(false).withVisibility(false);
-                                }
-                                folder = cargoTracksFolder;
-                                break;
-                            case TANKER:
-                                if (tankersTracksFolder == null) {
-                                    tankersTracksFolder = tracksFolder.createAndAddFolder().withName("Tankers").withOpen(false).withVisibility(false);
-                                }
-                                folder = tankersTracksFolder;
-                                break;
-                            case PASSENGER:
-                                if (passengerTracksFolder == null) {
-                                    passengerTracksFolder = tracksFolder.createAndAddFolder().withName("Passenger").withOpen(false).withVisibility(false);
-                                }
-                                folder = passengerTracksFolder;
-                                break;
-                            case FISHING:
-                                if (fishingTracksFolder == null) {
-                                    fishingTracksFolder = tracksFolder.createAndAddFolder().withName("Fishing").withOpen(false).withVisibility(false);
-                                }
-                                folder = fishingTracksFolder;
-                                break;
-                            case PLEASURE:
-                            case SAILING:
-                                if (classBTracksFolder == null) {
-                                    classBTracksFolder = tracksFolder.createAndAddFolder().withName("Class B").withOpen(false).withVisibility(false);
-                                }
-                                folder = classBTracksFolder;
-                                break;
+                        switch (shipType) {
+                        case CARGO:
+                            if (cargoTracksFolder == null) {
+                                cargoTracksFolder = tracksFolder.createAndAddFolder().withName("Cargo").withOpen(false)
+                                        .withVisibility(false);
+                            }
+                            folder = cargoTracksFolder;
+                            break;
+                        case TANKER:
+                            if (tankersTracksFolder == null) {
+                                tankersTracksFolder = tracksFolder.createAndAddFolder().withName("Tankers")
+                                        .withOpen(false).withVisibility(false);
+                            }
+                            folder = tankersTracksFolder;
+                            break;
+                        case PASSENGER:
+                            if (passengerTracksFolder == null) {
+                                passengerTracksFolder = tracksFolder.createAndAddFolder().withName("Passenger")
+                                        .withOpen(false).withVisibility(false);
+                            }
+                            folder = passengerTracksFolder;
+                            break;
+                        case FISHING:
+                            if (fishingTracksFolder == null) {
+                                fishingTracksFolder = tracksFolder.createAndAddFolder().withName("Fishing")
+                                        .withOpen(false).withVisibility(false);
+                            }
+                            folder = fishingTracksFolder;
+                            break;
+                        case PLEASURE:
+                        case SAILING:
+                            if (classBTracksFolder == null) {
+                                classBTracksFolder = tracksFolder.createAndAddFolder().withName("Class B")
+                                        .withOpen(false).withVisibility(false);
+                            }
+                            folder = classBTracksFolder;
+                            break;
                         }
                     }
                     if (folder == null) {
                         if (otherTracksFolder == null) {
-                            otherTracksFolder = tracksFolder.createAndAddFolder().withName("Other").withOpen(false).withVisibility(false);
+                            otherTracksFolder = tracksFolder.createAndAddFolder().withName("Other").withOpen(false)
+                                    .withVisibility(false);
                         }
                         folder = otherTracksFolder;
                     }
 
-                    Placemark placemark = folder.createAndAddPlacemark().withId(target.getMmsi()).withName(target.getName());
+                    Placemark placemark = folder.createAndAddPlacemark().withId(target.getMmsi())
+                            .withName(target.getName());
 
-                    Style style = placemark
-                        .createAndAddStyle()
-                            .withId("_" + target.getName() + "TrackStyle");
-                    style.createAndSetBalloonStyle()
-                        .withText("<h2>Vessel details</h2>" + generateHtmlShipDescription(target, null, null, null));
+                    Style style = placemark.createAndAddStyle().withId("_" + target.getName() + "TrackStyle");
+                    style.createAndSetBalloonStyle().withText(
+                            "<h2>Vessel details</h2>" + generateHtmlShipDescription(target, null, null, null));
 
                     placemark.withStyleUrl(getStyle(target, false));
 
@@ -793,7 +773,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
-    private void createKmlShipShapePlacemark(Folder targetFolder, String mmsi, String name, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, float sog, int heading, float toBow, float toStern, float toPort, float toStarboard, boolean safetyZoneEllipse, String style, boolean visible) {
+    private void createKmlShipShapePlacemark(Folder targetFolder, String mmsi, String name, Long timespanBegin,
+            Long timespanEnd, double latitude, double longitude, float cog, float sog, int heading, float toBow,
+            float toStern, float toPort, float toStarboard, boolean safetyZoneEllipse, String style, boolean visible) {
         String begin = null;
         String end = null;
         if (timespanBegin != null && timespanEnd != null) {
@@ -803,40 +785,31 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             end = DATE_FORMAT.format(calendar.getTime());
         }
 
-        Placemark placemarkForShipShape = targetFolder
-            .createAndAddPlacemark()
-                .withVisibility(visible)
-                .withId(mmsi)
-                .withName(name)
-                .withStyleUrl("#" + style);
+        Placemark placemarkForShipShape = targetFolder.createAndAddPlacemark().withVisibility(visible).withId(mmsi)
+                .withName(name).withStyleUrl("#" + style);
 
         if (begin != null && end != null) {
-            placemarkForShipShape.createAndSetTimeSpan()
-                .withBegin(begin)
-                .withEnd(end);
+            placemarkForShipShape.createAndSetTimeSpan().withBegin(begin).withEnd(end);
         }
 
         addKmlShipGeometry(placemarkForShipShape, latitude, longitude, heading, toBow, toStern, toPort, toStarboard);
 
         if (safetyZoneEllipse) {
-            Placemark placemarkForEllipse = targetFolder
-                .createAndAddPlacemark()
-                    .withVisibility(visible)
-                    .withId(mmsi + "-ellipse")
-                    .withName(name + "'s ellipse")
-                    .withStyleUrl("#" + style);
+            Placemark placemarkForEllipse = targetFolder.createAndAddPlacemark().withVisibility(visible)
+                    .withId(mmsi + "-ellipse").withName(name + "'s ellipse").withStyleUrl("#" + style);
 
             if (begin != null && end != null) {
-                placemarkForEllipse.createAndSetTimeSpan()
-                    .withBegin(begin)
-                    .withEnd(end);
+                placemarkForEllipse.createAndSetTimeSpan().withBegin(begin).withEnd(end);
             }
 
-            addKmlEllipseGeometry(placemarkForEllipse, latitude, longitude, cog, sog, toStern+toBow, toPort+toStarboard, toStern, toStarboard);
+            addKmlEllipseGeometry(placemarkForEllipse, latitude, longitude, cog, sog, toStern + toBow, toPort
+                    + toStarboard, toStern, toStarboard);
         }
     }
 
-    private void createKmlShipIconPlacemark(Folder targetFolder, ShipTypeCargo shipTypeCargo, NavigationalStatus navigationalStatus, Long timespanBegin, Long timespanEnd, double latitude, double longitude, float cog, String description, boolean visible) {
+    private void createKmlShipIconPlacemark(Folder targetFolder, ShipTypeCargo shipTypeCargo,
+            NavigationalStatus navigationalStatus, Long timespanBegin, Long timespanEnd, double latitude,
+            double longitude, float cog, String description, boolean visible) {
         String begin = null;
         String end = null;
         if (timespanBegin != null && timespanEnd != null) {
@@ -846,75 +819,63 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
             end = DATE_FORMAT.format(calendar.getTime());
         }
 
-        Placemark placemarkForShipIcon = targetFolder
-            .createAndAddPlacemark()
-                .withVisibility(visible)
+        Placemark placemarkForShipIcon = targetFolder.createAndAddPlacemark().withVisibility(visible)
                 .withDescription("");
 
-        Style style = placemarkForShipIcon
-            .createAndAddStyle()
-                .withId("shipIconStyle");
+        Style style = placemarkForShipIcon.createAndAddStyle().withId("shipIconStyle");
 
-        style.createAndSetBalloonStyle()
-            .withText(description);
+        style.createAndSetBalloonStyle().withText(description);
 
-        style.createAndSetIconStyle()
-            .withScale(1.0)
-            .withHeading((int) cog)
-            .createAndSetIcon()
+        style.createAndSetIconStyle().withScale(1.0).withHeading((int) cog).createAndSetIcon()
                 .withHref(iconHrefSupplier.apply(shipTypeCargo, navigationalStatus));
 
-        placemarkForShipIcon
-            .createAndSetPoint()
+        placemarkForShipIcon.createAndSetPoint()
                 .withCoordinates(Lists.newArrayList(new Coordinate(longitude, latitude)))
                 .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
 
         if (begin != null && end != null) {
-            placemarkForShipIcon
-                .createAndSetTimeSpan()
-                    .withBegin(begin)
-                    .withEnd(end);
+            placemarkForShipIcon.createAndSetTimeSpan().withBegin(begin).withEnd(end);
         }
     }
 
-    private void createSituationPlacemark(Folder targetFolder, ScenarioTracker.Target primaryTarget, ScenarioTracker.Target.PositionReport primaryPositionReport, ScenarioTracker.Target secondaryTarget, ScenarioTracker.Target.PositionReport secondaryPositionReport) {
+    private void createSituationPlacemark(Folder targetFolder, ScenarioTracker.Target primaryTarget,
+            ScenarioTracker.Target.PositionReport primaryPositionReport, ScenarioTracker.Target secondaryTarget,
+            ScenarioTracker.Target.PositionReport secondaryPositionReport) {
 
-        Placemark placemarkForSituationIcon = targetFolder
-            .createAndAddPlacemark()
-                .withDescription(snapshotDescriptionSupplier.get());
+        Placemark placemarkForSituationIcon = targetFolder.createAndAddPlacemark().withDescription(
+                snapshotDescriptionSupplier.get());
 
-        Style style = placemarkForSituationIcon
-            .createAndAddStyle()
-                .withId("situationIconStyle");
+        Style style = placemarkForSituationIcon.createAndAddStyle().withId("situationIconStyle");
 
-        style
-            .createAndSetBalloonStyle()
-                .withText("<h2>Situation</h2>" + generateHtmlEventDescription() + "<h2>Involved vessels</h2>" + generateHtmlShipDescription(primaryTarget, primaryPositionReport, secondaryTarget, secondaryPositionReport));
+        style.createAndSetBalloonStyle().withText(
+                "<h2>Situation</h2>"
+                        + generateHtmlEventDescription()
+                        + "<h2>Involved vessels</h2>"
+                        + generateHtmlShipDescription(primaryTarget, primaryPositionReport, secondaryTarget,
+                                secondaryPositionReport));
 
-        style.createAndSetIconStyle()
-                .withScale(1.0)
-                .createAndSetIcon()
-                    .withHref("http://maps.google.com/mapfiles/kml/pal3/icon33.png");
+        style.createAndSetIconStyle().withScale(1.0).createAndSetIcon()
+        .withHref("http://maps.google.com/mapfiles/kml/pal3/icon33.png");
 
         placemarkForSituationIcon
-            .createAndSetPoint()
-                .withCoordinates(Lists.newArrayList(new Coordinate(primaryPositionReport.getLongitude(), primaryPositionReport.getLatitude())))
-                .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+        .createAndSetPoint()
+                .withCoordinates(
+                Lists.newArrayList(new Coordinate(primaryPositionReport.getLongitude(), primaryPositionReport
+                        .getLatitude()))).withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
     }
 
     /**
      * Create a KML geometry to symbolize a safety zone ellipses.
      */
-    private static void addKmlEllipseGeometry(Placemark placemark, double latitude, double longitude, float cog, float sog, float loa, float beam, float dimStern, float dimStarbord) {
+    private static void addKmlEllipseGeometry(Placemark placemark, double latitude, double longitude, float cog,
+            float sog, float loa, float beam, float dimStern, float dimStarbord) {
         Position p = Position.create(latitude, longitude);
         Ellipse safetyZone = safetyZone(p, p, cog, sog, loa, beam, dimStern, dimStarbord);
 
         List<Position> perimeter = safetyZone.samplePerimeter(64);
 
         // Convert points into geographic coordinates and a KML geometry
-        LinearRing shipGeometry = placemark
-                .createAndSetLinearRing()
-                .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+        LinearRing shipGeometry = placemark.createAndSetLinearRing().withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
 
         for (Position position : perimeter) {
             shipGeometry.addToCoordinates(position.getLongitude(), position.getLatitude());
@@ -924,20 +885,29 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     /**
-    * Create a KML geometry to symbolize a ship at the given position, at the given heading and with the
-    * given dimensions.
-    *
-    * @param placemark Parent node
-    * @param lat Ship's positional latitude in degrees.
-    * @param lon Ship's positional longitude in degrees.
-    * @param heading Ship's heading in degrees; 0 being north, 90 being east.
-    * @param toBow Distance in meters from ship's position reference to ship's bow.
-    * @param toStern Distance in meters from ship's position reference to ship's stern.
-    * @param toPort Distance in meters from ship's position reference to port side at maximum beam.
-    * @param toStarbord Distance in meters from ship's position reference to starboard side at maximum beam.
-    * @return
-    */
-    private static void addKmlShipGeometry(Placemark placemark, double lat, double lon, float heading, float toBow /* A */, float toStern /* B */, float toPort /* C */, float toStarbord /* D */) {
+     * Create a KML geometry to symbolize a ship at the given position, at the given heading and with the given
+     * dimensions.
+     *
+     * @param placemark
+     *            Parent node
+     * @param lat
+     *            Ship's positional latitude in degrees.
+     * @param lon
+     *            Ship's positional longitude in degrees.
+     * @param heading
+     *            Ship's heading in degrees; 0 being north, 90 being east.
+     * @param toBow
+     *            Distance in meters from ship's position reference to ship's bow.
+     * @param toStern
+     *            Distance in meters from ship's position reference to ship's stern.
+     * @param toPort
+     *            Distance in meters from ship's position reference to port side at maximum beam.
+     * @param toStarbord
+     *            Distance in meters from ship's position reference to starboard side at maximum beam.
+     * @return
+     */
+    private static void addKmlShipGeometry(Placemark placemark, double lat, double lon, float heading,
+            float toBow /* A */, float toStern /* B */, float toPort /* C */, float toStarbord /* D */) {
         // If the ship dimensions are not found then create a small ship
         if (toBow < 0 || toStern < 0) {
             toBow = 20;
@@ -955,12 +925,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         // The ship consists of 5 points which are stored in shipPnts()
         // To begin with the points are in meters
-        Point[] points = new Point[] {
-            new Point(-szB, szC),                     // stern port
-            new Point(-szB + 0.85*(szA + szB), szC),
-            new Point(szA, szC - (szC + szD)/2.0),    // bow
-            new Point(-szB + 0.85*(szA + szB), -szD),
-            new Point(-szB, -szD)                     // stern starboard
+        Point[] points = new Point[] { new Point(-szB, szC), // stern port
+                new Point(-szB + 0.85 * (szA + szB), szC), new Point(szA, szC - (szC + szD) / 2.0), // bow
+                new Point(-szB + 0.85 * (szA + szB), -szD), new Point(-szB, -szD) // stern starboard
         };
 
         // Rotate ship. Each ship has its own coordinate system with
@@ -971,16 +938,15 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
 
         // Convert ship coordinates into geographic coordinates and a KML geometry
-        LinearRing shipGeometry = placemark
-            .createAndSetLinearRing()
-            .withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
+        LinearRing shipGeometry = placemark.createAndSetLinearRing().withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND);
 
         CoordinateConverter coordinateConverter = new CoordinateConverter(lon, lat);
         Boundary boundary = placemark.createAndSetPolygon().createAndSetOuterBoundaryIs();
 
         boundary.setLinearRing(shipGeometry);
         for (Point point : points) {
-            shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.getX(), point.getY()), coordinateConverter.y2Lat(point.getX(), point.getY()));
+            shipGeometry.addToCoordinates(coordinateConverter.x2Lon(point.getX(), point.getY()),
+                    coordinateConverter.y2Lat(point.getX(), point.getY()));
         }
     }
 }

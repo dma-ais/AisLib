@@ -17,19 +17,19 @@ package dk.dma.ais.lib;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 
 import com.beust.jcommander.Parameter;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Predicate;
 
 /**
  * This class provides common functionality for filtering {@link AisPacket AIS packets}.
- * 
+ *
  * @author Kasper Nielsen
  */
-public class CommandLineAisPacketFilter extends Predicate<AisPacket> {
+public class CommandLineAisPacketFilter implements Predicate<AisPacket> {
 
     @Parameter(names = "-start", description = "[Filter] Start date (inclusive), format == yyyy-MM-dd")
     private volatile Date start;

@@ -44,9 +44,9 @@ import dk.dma.enav.util.function.EConsumer;
 
 /**
  * Converts a set of files into another sink format
- * 
+ *
  * @author Jens Tuxen
- * 
+ *
  */
 public class FileConvert extends AbstractCommandLineTool {
 
@@ -72,13 +72,12 @@ public class FileConvert extends AbstractCommandLineTool {
 
     /**
      * getOutputSinks
-     * 
+     *
      * @return
      */
     static final List<String> getOutputSinks() {
         LinkedList<String> methods = new LinkedList<String>();
-        Field[] declaredMethods = AisPacketOutputSinks.class
-                .getDeclaredFields();
+        Field[] declaredMethods = AisPacketOutputSinks.class.getDeclaredFields();
         for (Field m : declaredMethods) {
             if (m.getName().startsWith("OUTPUT")) {
                 methods.add(m.getName());
@@ -89,15 +88,16 @@ public class FileConvert extends AbstractCommandLineTool {
 
     /** {@inheritDoc} */
     @Override
-    protected void run(Injector injector) throws Exception {        
+    protected void run(Injector injector) throws Exception {
         @SuppressWarnings("unchecked")
-        final OutputStreamSink<AisPacket> sink = (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
+        final OutputStreamSink<AisPacket> sink = (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(
+                outputSinkFormat).get(null);
 
-        //final long start = System.currentTimeMillis();
+        // final long start = System.currentTimeMillis();
         final AtomicInteger count = new AtomicInteger();
-        
+
         final EConsumer<String> consumer = new EConsumer<String>() {
-            
+
             public void process(BufferedOutputStream bos, AisPacket p) throws IOException {
                 sink.process(bos, p, count.getAndIncrement());
             }
@@ -111,29 +111,25 @@ public class FileConvert extends AbstractCommandLineTool {
                 if (keepFileStructure) {
                     Path relative;
                     if (path.isAbsolute()) {
-                        relative = path.subpath(1, path.getNameCount()-1);
+                        relative = path.subpath(1, path.getNameCount() - 1);
                     } else {
                         relative = path;
                     }
-                    endPath = Paths.get(convertTo.toString(),
-                            relative.toString());
-                    
+                    endPath = Paths.get(convertTo.toString(), relative.toString());
+
                     new File(endPath.toString()).mkdirs();
                 } else {
                     endPath = convertTo;
                 }
 
-                final BufferedOutputStream bos = new BufferedOutputStream(
-                        new FileOutputStream(Paths.get(
-                                endPath.toString(),
-                                path.getFileName().toString()+fileEnding).toFile()), 209715); // 200kb
-                                                                 // buffer
+                final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(Paths.get(
+                        endPath.toString(), path.getFileName().toString() + fileEnding).toFile()), 209715); // 200kb
+                // buffer
 
-                
-                try (AisPacketReader apis = AisPacketReader
-                        .createFromFile(path, true)) {
-                                      
-                    while (true) {            
+
+                try (AisPacketReader apis = AisPacketReader.createFromFile(path, true)) {
+
+                    while (true) {
                         AisPacket p = null;
                         p = apis.readPacket();
                         if (p == null) {
@@ -143,29 +139,30 @@ public class FileConvert extends AbstractCommandLineTool {
                     }
 
                 } catch (IOException e) {
-                    //continue, but log error
+                    // continue, but log error
                     LOG.error(e.toString());
-                    //throw e;
-                    
+                    // throw e;
+
                 } finally {
                     bos.close();
                 }
-                //long ms = System.currentTimeMillis() - start;
-                
-                
-                LOG.debug("Finished processing file, " + count
-                        + " packets was imported in total. Current Path: " + path);
+                // long ms = System.currentTimeMillis() - start;
+
+
+                LOG.debug("Finished processing file, " + count + " packets was imported in total. Current Path: "
+                        + path);
 
             }
 
         };
-        
-        /* Creates a pool of executors, 4 threads.
-         * Each thread will open a file using an aispacket reader, 10000 files can be submitted to the queue (memory limit)
-         * Afterwards, the calling thread will execute the job instead.
+
+        /*
+         * Creates a pool of executors, 4 threads. Each thread will open a file using an aispacket reader, 10000 files
+         * can be submitted to the queue (memory limit) Afterwards, the calling thread will execute the job instead.
          */
-        ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10000),new ThreadPoolExecutor.CallerRunsPolicy());
-        for (final String s: sources) {
+        ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<Runnable>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+        for (final String s : sources) {
             threadpoolexecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -175,11 +172,11 @@ public class FileConvert extends AbstractCommandLineTool {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    
+
                 }
             });
         }
-        
+
         threadpoolexecutor.awaitTermination(999, TimeUnit.DAYS);
     }
 

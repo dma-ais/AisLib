@@ -14,19 +14,22 @@
  */
 package dk.dma.ais.configuration.filter.geometry;
 
+import java.util.function.Predicate;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.util.function.Predicate;
 
 @XmlRootElement
 public class CircleGeometryConfiguration extends GeometryConfiguration {
 
     private double lat;
+
     private double lon;
+
     private double radius;
 
     public CircleGeometryConfiguration() {
@@ -60,7 +63,7 @@ public class CircleGeometryConfiguration extends GeometryConfiguration {
     @Override
     @XmlTransient
     public Predicate<? super Position> getPredicate() {
-        return new Circle(lat, lon, radius, CoordinateSystem.GEODETIC).contains();
+        return e -> new Circle(lat, lon, radius, CoordinateSystem.GEODETIC).contains(e);
     }
 
 }

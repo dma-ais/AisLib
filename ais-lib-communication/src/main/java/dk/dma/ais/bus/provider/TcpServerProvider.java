@@ -20,7 +20,7 @@ import dk.dma.ais.bus.tcp.TcpReadServer;
 import dk.dma.ais.bus.tcp.TcpServer;
 import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Server providing TCP connections for receiving date

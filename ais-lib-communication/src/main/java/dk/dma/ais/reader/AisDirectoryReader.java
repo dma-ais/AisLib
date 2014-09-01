@@ -15,7 +15,7 @@
 package dk.dma.ais.reader;
 
 import dk.dma.ais.sentence.Abk;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

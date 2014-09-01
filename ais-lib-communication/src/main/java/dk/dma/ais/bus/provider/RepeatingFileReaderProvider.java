@@ -31,7 +31,7 @@ import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.ReplayTransformer;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Provider that reads repeatedly from the same file

@@ -17,7 +17,7 @@ package dk.dma.ais.packet;
 import dk.dma.ais.message.AisMessage1;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.sentence.SentenceException;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 import org.junit.Before;
 import org.junit.Test;
 

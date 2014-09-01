@@ -25,7 +25,7 @@ import org.junit.Test;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 public class AnonymousTransformTest implements Consumer<AisPacket> {
 

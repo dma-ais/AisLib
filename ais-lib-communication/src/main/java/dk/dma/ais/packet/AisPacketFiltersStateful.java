@@ -22,7 +22,7 @@ import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.tracker.TargetInfo;
 import dk.dma.ais.tracker.TargetTracker;
 import dk.dma.enav.model.geometry.Area;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.Arrays;

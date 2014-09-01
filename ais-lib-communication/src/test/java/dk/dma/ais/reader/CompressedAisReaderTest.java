@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Use AisReader to assert that both zip and gz works

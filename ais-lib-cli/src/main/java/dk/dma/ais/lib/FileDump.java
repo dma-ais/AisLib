@@ -35,7 +35,7 @@ import dk.dma.commons.management.ManagedResource;
 import dk.dma.commons.service.AbstractBatchedStage;
 import dk.dma.commons.service.io.MessageToFileService;
 import dk.dma.commons.util.io.IoUtil;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Writes AisData to a directory.

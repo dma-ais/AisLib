@@ -24,7 +24,7 @@ import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterLexer;
 import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterParser;
 import org.antlr.v4.runtime.ANTLRInputStream;

@@ -21,7 +21,7 @@ import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.bus.AisBusElement;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Consumer that distributes consumed packets from the bus to

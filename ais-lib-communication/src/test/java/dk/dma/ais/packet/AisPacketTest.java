@@ -30,7 +30,7 @@ import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.sentence.SentenceException;
-import dk.dma.enav.util.function.Consumer;
+import java.util.function.Consumer;
 
 public class AisPacketTest {
 

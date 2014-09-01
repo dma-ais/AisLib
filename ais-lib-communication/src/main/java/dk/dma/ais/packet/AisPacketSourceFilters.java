@@ -17,7 +17,7 @@ package dk.dma.ais.packet;
 import com.google.common.collect.ImmutableSet;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 
 import java.util.Arrays;
 

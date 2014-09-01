@@ -16,7 +16,7 @@ package dk.dma.ais.filter;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketFilters;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Predicate;
 
 /**
  * Filtering using string expression

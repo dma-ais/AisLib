@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.commons.util.io.OutputStreamSink;
-import dk.dma.enav.util.function.Consumer;
-import dk.dma.enav.util.function.Predicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * A stream of packets.
