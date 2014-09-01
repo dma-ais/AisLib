@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -67,8 +68,11 @@ public class FileConvert extends AbstractCommandLineTool {
     @Parameter(names = "-fileEnding", required = false, description = "File ending")
     String fileEnding = ".txt";
 
-    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML]")
+    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
+    
+    @Parameter(names = "-columns", required = false, description = "Optional coulmns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
+    String columns;
 
     /**
      * getOutputSinks
@@ -89,9 +93,9 @@ public class FileConvert extends AbstractCommandLineTool {
     /** {@inheritDoc} */
     @Override
     protected void run(Injector injector) throws Exception {
-        @SuppressWarnings("unchecked")
-        final OutputStreamSink<AisPacket> sink = (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(
-                outputSinkFormat).get(null);
+        
+        final OutputStreamSink<AisPacket> sink = getOutputSink();
+        
 
         // final long start = System.currentTimeMillis();
         final AtomicInteger count = new AtomicInteger();
@@ -123,8 +127,8 @@ public class FileConvert extends AbstractCommandLineTool {
                 }
 
                 final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(Paths.get(
-                        endPath.toString(), path.getFileName().toString() + fileEnding).toFile()), 209715); // 200kb
-                // buffer
+                        endPath.toString(), path.getFileName().toString() + fileEnding).toFile()), 209715); // 2
+
 
 
                 try (AisPacketReader apis = AisPacketReader.createFromFile(path, true)) {
@@ -178,6 +182,22 @@ public class FileConvert extends AbstractCommandLineTool {
         }
 
         threadpoolexecutor.awaitTermination(999, TimeUnit.DAYS);
+    }
+
+    @SuppressWarnings("unchecked")
+    private OutputStreamSink<AisPacket> getOutputSink() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        
+        switch(outputSinkFormat) {
+            case "table":
+                Objects.requireNonNull(columns);
+                return AisPacketOutputSinks.newTableSink(columns, true);
+                
+            default: //reflection
+                return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
+                
+        }
+        
+        
     }
 
     public static void main(String[] args) throws Exception {
