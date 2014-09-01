@@ -71,7 +71,7 @@ public class FileConvert extends AbstractCommandLineTool {
     @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
     
-    @Parameter(names = "-columns", required = false, description = "Optional coulmns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
+    @Parameter(names = "-columns", required = false, description = "Optional columns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
     String columns;
 
     /**
