@@ -58,6 +58,8 @@ public abstract class AisTarget implements Serializable {
         long elapsed = System.currentTimeMillis() - lastReport.getTime();
         return elapsed / 1000 < ttl;
     }
+    
+    public abstract boolean isMessageCompatible(AisMessage msg);
 
     /**
      * Update target given AIS message

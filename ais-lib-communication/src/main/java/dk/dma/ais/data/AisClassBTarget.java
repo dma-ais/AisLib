@@ -33,8 +33,7 @@ public class AisClassBTarget extends AisVesselTarget {
     @Override
     public void update(AisMessage aisMessage) {
         // Throw error if message is from other type of target
-        if (AisClassATarget.isClassAPosOrStatic(aisMessage) || AisBsTarget.isBsReport(aisMessage)
-                || AisAtonTarget.isAtonReport(aisMessage)) {
+        if (isMessageCompatible(aisMessage)) {
             throw new IllegalArgumentException("Trying to update class B target with report of other target type");
         }
         // Ignore everything but class B pos and static reports (could be ASM messages etc)
@@ -60,6 +59,13 @@ public class AisClassBTarget extends AisVesselTarget {
      */
     public static boolean isClassBPosOrStatic(AisMessage aisMessage) {
         return aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24 || aisMessage instanceof AisMessage19;
+    }
+
+    @Override
+    public boolean isMessageCompatible(AisMessage aisMessage) {
+        // TODO Auto-generated method stub
+        return AisClassATarget.isClassAPosOrStatic(aisMessage) || AisBsTarget.isBsReport(aisMessage)
+                || AisAtonTarget.isAtonReport(aisMessage);
     }
 
 }
