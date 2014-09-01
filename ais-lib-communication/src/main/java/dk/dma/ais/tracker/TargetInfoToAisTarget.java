@@ -34,37 +34,32 @@ import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
 
 /**
- * Neccessary Evil for legacy resources and convenience
+ * Necessary Evil for legacy resources and convenience
  * 
  * @author Jens Tuxen
  *
  */
 public class TargetInfoToAisTarget {
 
-    static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
+    private static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
         
         // Min-Heap = Oldest first when creating AisTarget (natural)
         PriorityQueue<AisPacket> messages = new PriorityQueue<>();
         
-        try {
-            Objects.requireNonNull(ti);
-        } catch (NullPointerException e) {
+        if (ti == null) {
             return messages;
         }
 
         for (AisPacket p : ti.getStaticPackets()) {
-            try {
-                messages.add(Objects.requireNonNull(p));
-            } catch (NullPointerException exc) {
-                // pass
+            if (p != null) {
+                messages.add(p);
             }
         }
 
         if (ti.hasPositionInfo()) {
-            try {
-                messages.add(ti.getPositionPacket());
-            } catch (NullPointerException exc) {
-                //pass
+            AisPacket p = ti.getPositionPacket();
+            if (p != null) {
+                messages.add(p);
             }
         }
 
@@ -72,8 +67,9 @@ public class TargetInfoToAisTarget {
     }
 
     public static AisTarget generateAisTarget(TargetInfo ti) {
-
         PriorityQueue<AisPacket> normal = getPacketsInOrder(ti);
+        //why reversed also? A workaround for AisTargets without static information for some reason
+        //TODO: this needs to be replaced with a proper fix 
         PriorityQueue<AisPacket> reversed = new PriorityQueue<AisPacket>(normal.size(), Collections.reverseOrder());
         reversed.addAll(normal);
         AisTarget a = generateAisTarget(normal);
@@ -103,7 +99,7 @@ public class TargetInfoToAisTarget {
      * @param m
      * @return
      */
-    static AisTarget updateWithNewestTakingPrecedent(AisTarget t, AisPacket m) {
+    private static AisTarget updateWithNewestTakingPrecedent(AisTarget t, AisPacket m) {
         try {
             t.update(m.tryGetAisMessage());
         } catch (NullPointerException e) {
