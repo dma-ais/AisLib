@@ -18,9 +18,9 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
-
-import jsr166e.ConcurrentHashMapV8;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,6 @@ import com.google.common.util.concurrent.Service;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketStream;
-import java.util.function.Consumer;
 
 /**
  * A reader group organizes a group of readers.
@@ -48,10 +47,10 @@ public class AisReaderGroup implements Iterable<AisReader> {
     final ReentrantLock lock = new ReentrantLock();
 
     /** All readers configured for this group. */
-    final ConcurrentHashMapV8<String, AisTcpReader> readers = new ConcurrentHashMapV8<>();
+    final ConcurrentHashMap<String, AisTcpReader> readers = new ConcurrentHashMap<>();
 
     /** All current subscriptions. */
-    final ConcurrentHashMapV8<AisReader, AisPacketStream.Subscription> subscriptions = new ConcurrentHashMapV8<>();
+    final ConcurrentHashMap<AisReader, AisPacketStream.Subscription> subscriptions = new ConcurrentHashMap<>();
 
     /** The name of the group. */
     final String name;

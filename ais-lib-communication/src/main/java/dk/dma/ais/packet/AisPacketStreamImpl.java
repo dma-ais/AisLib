@@ -16,19 +16,17 @@ package dk.dma.ais.packet;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-
-import jsr166e.ConcurrentHashMapV8;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * The default implements of {@link AisPacketStream}.
@@ -43,7 +41,7 @@ class AisPacketStreamImpl extends AisPacketStream {
     /** A lock we use to make sure packets are delivered in order. */
     private final Object deliveryLock = new Object();
 
-    final ConcurrentHashMapV8<SubscriptionImpl, SubscriptionImpl> subscriptions;
+    final ConcurrentHashMap<SubscriptionImpl, SubscriptionImpl> subscriptions;
 
     final Predicate<? super AisPacket> predicate;
 
@@ -51,7 +49,7 @@ class AisPacketStreamImpl extends AisPacketStream {
 
     AisPacketStreamImpl() {
         predicate = null;
-        subscriptions = new ConcurrentHashMapV8<>();
+        subscriptions = new ConcurrentHashMap<>();
         root = null;
     }
 

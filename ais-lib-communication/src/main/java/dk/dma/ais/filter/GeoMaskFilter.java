@@ -36,7 +36,7 @@ public class GeoMaskFilter implements IPacketFilter {
     public GeoMaskFilter(List<BoundingBox> suppressedBoundingBoxes) {
         this.suppressedBoundingBoxes = suppressedBoundingBoxes;
 
-        Predicate oredPredicates = null;
+        Predicate<AisPacket> oredPredicates = null;
 
         for (BoundingBox bbox : suppressedBoundingBoxes) {
             if (oredPredicates == null) {
@@ -49,7 +49,6 @@ public class GeoMaskFilter implements IPacketFilter {
         this.blocked = oredPredicates;
     }
 
-    @SuppressWarnings("Unused")
     public List<BoundingBox> getSuppressedBoundingBoxes() {
         return suppressedBoundingBoxes;
     }

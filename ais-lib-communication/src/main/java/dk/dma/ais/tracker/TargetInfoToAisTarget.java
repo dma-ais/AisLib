@@ -16,8 +16,6 @@ package dk.dma.ais.tracker;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;

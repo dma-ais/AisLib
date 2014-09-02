@@ -41,19 +41,18 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         return s;
     }
 
-    @SuppressWarnings("unused")
     public static Predicate<AisPacketSource> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
         return new Predicate<AisPacketSource>() {
             public boolean test(AisPacketSource p) {
                 return compare(p.getSourceBaseStation(), bs, operator);
             }
+
             public String toString() {
                 return "bs = " + bs;
             }
         };
     }
 
-    @SuppressWarnings("unused")
     public static Predicate<AisPacketSource> filterOnSourceBasestation(Integer... ids) {
         final Integer[] copy = ids.clone();
         Arrays.sort(copy);
@@ -62,6 +61,7 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
                 int sourceBs = p.getSourceBaseStation();
                 return Arrays.binarySearch(copy, sourceBs) >= 0;
             }
+
             public String toString() {
                 return "sourceBaseStation = " + skipBrackets(Arrays.toString(copy));
             }
@@ -75,7 +75,7 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
      *            the countries for which packets should be accepted
      * @return the predicate
      */
-    @SuppressWarnings("unused")
+
     public static Predicate<AisPacketSource> filterOnSourceCountry(final Country... countries) {
         final Country[] c = check(countries);
         return new Predicate<AisPacketSource>() {
@@ -83,13 +83,13 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
                 Country country = p.getSourceCountry();
                 return country != null && Arrays.binarySearch(c, country) >= 0;
             }
+
             public String toString() {
                 return "sourceCountry = " + skipBrackets(Arrays.toString(c));
             }
         };
     }
 
-    @SuppressWarnings("unused")
     public static Predicate<AisPacketSource> filterOnSourceId(final String... ids) {
         final String[] s = check(ids);
         return new Predicate<AisPacketSource>() {
@@ -97,13 +97,13 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
                 String sourceId = p.getSourceId();
                 return sourceId != null && Arrays.binarySearch(s, sourceId) >= 0;
             }
+
             public String toString() {
                 return "sourceId = " + skipBrackets(Arrays.toString(s));
             }
         };
     }
 
-    @SuppressWarnings("unused")
     public static Predicate<AisPacketSource> filterOnSourceRegion(final String... regions) {
         final String[] s = check(regions);
         requireNonNull(regions, "regions is null");
@@ -112,13 +112,13 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
                 String region = p.getSourceRegion();
                 return region != null && Arrays.binarySearch(s, region) >= 0;
             }
+
             public String toString() {
                 return "sourceRegion = " + skipBrackets(Arrays.toString(s));
             }
         };
     }
 
-    @SuppressWarnings("unused")
     public static Predicate<AisPacketSource> filterOnSourceType(final SourceType... sourceType) {
         requireNonNull(sourceType, "sourceType is null");
         final ImmutableSet<SourceType> sourceTypes = ImmutableSet.copyOf(sourceType);
@@ -126,6 +126,7 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
             public boolean test(AisPacketSource p) {
                 return sourceTypes.contains(p.getSourceType()); // sourceType == p.getSourceType();
             }
+
             public String toString() {
                 return "sourceType = " + sourceType;
             }
@@ -142,20 +143,20 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
 
     private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
         switch (operator) {
-            case EQUALS:
-                return lhs == rhs;
-            case NOT_EQUALS:
-                return lhs != rhs;
-            case GREATER_THAN:
-                return lhs > rhs;
-            case GREATER_THAN_OR_EQUALS:
-                return lhs >= rhs;
-            case LESS_THAN:
-                return lhs < rhs;
-            case LESS_THAN_OR_EQUALS:
-                return lhs <= rhs;
-            default:
-                throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
+        case EQUALS:
+            return lhs == rhs;
+        case NOT_EQUALS:
+            return lhs != rhs;
+        case GREATER_THAN:
+            return lhs > rhs;
+        case GREATER_THAN_OR_EQUALS:
+            return lhs >= rhs;
+        case LESS_THAN:
+            return lhs < rhs;
+        case LESS_THAN_OR_EQUALS:
+            return lhs <= rhs;
+        default:
+            throw new IllegalArgumentException("CompareToOperator " + operator + " not implemented.");
         }
     }
 }

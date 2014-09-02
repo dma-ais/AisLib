@@ -155,8 +155,6 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
     private static final String HTML_COLOR_SECONDARY_SHIP = "#ff0000";
 
-    private static final String HTML_COLOR_OTHER_SHIP = "#faf014";
-
     private final Set<Long> snapshotTimes = Sets.newTreeSet();
 
     private final Calendar calendar = Calendar.getInstance();

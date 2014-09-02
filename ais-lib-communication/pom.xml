@@ -59,7 +59,7 @@
     <dependency>
       <groupId>dk.dma.commons</groupId>
       <artifactId>dma-commons-util</artifactId>
-      <version>0.1</version>
+      <version>${dependencies.dma.commons.version}</version>
     </dependency>
     <dependency>
       <groupId>dk.dma.enav</groupId>

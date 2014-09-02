@@ -30,15 +30,14 @@ import java.util.Arrays;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class provides factory methods to create Predicate<AisPacket> functions which can be used to filter
- * AisPackets.
+ * This class provides factory methods to create Predicate<AisPacket> functions which can be used to filter AisPackets.
  *
- * As opposed to the AisPacketFilters class, this class is designed to create predicates which "remember" some state
- * of AisPackets that have previously been served. This implies, that it is possible to establish more advanced
- * filtering, than just inspecting the current AisPacket.
+ * As opposed to the AisPacketFilters class, this class is designed to create predicates which "remember" some state of AisPackets
+ * that have previously been served. This implies, that it is possible to establish more advanced filtering, than just inspecting
+ * the current AisPacket.
  *
- * Instead, with this stateful filter, it is possible to generate Predicates which can e.g. filter away AisStaticCommon
- * packages for targets whose position is outside some defined area.
+ * Instead, with this stateful filter, it is possible to generate Predicates which can e.g. filter away AisStaticCommon packages for
+ * targets whose position is outside some defined area.
  *
  * @author Thomas Borg Salling <tbsalling@tbsalling.dk>
  * @since v2.1
@@ -56,20 +55,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an IMO no. different to 'imo'.
+     * 
      * @param operator
      * @param rhsImo
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetImo(final CompareToOperator operator, Integer rhsImo) {
         final int imo = rhsImo;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int lhsImo = getImo(mmsi); // Extract IMO no. - if we know it
                 return lhsImo < 0 ? false : compare(lhsImo, imo, operator);
             }
+
             public String toString() {
                 return "imo = " + imo;
             }
@@ -79,15 +80,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with an IMO outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetImo(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final int imo = getImo(mmsi);    // Extract IMO no. - if we know it
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final int imo = getImo(mmsi); // Extract IMO no. - if we know it
                 return imo < 0 ? false : inRange(min, max, imo);
             }
+
             public String toString() {
                 return "imo in " + min + ".." + max;
             }
@@ -97,17 +99,18 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with an IMO outside the given list.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetImo(Integer[] imos) {
         final int[] list = ArrayUtils.toPrimitive(imos);
         Arrays.sort(list);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final int imo = getImo(mmsi);    // Extract IMO no. - if we know it
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final int imo = getImo(mmsi); // Extract IMO no. - if we know it
                 return imo < 0 ? false : Arrays.binarySearch(list, imo) >= 0;
             }
+
             public String toString() {
                 return "imo in " + skipBrackets(Arrays.toString(list));
             }
@@ -118,20 +121,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an IMO no. different to 'imo'.
+     * 
      * @param operator
      * @param rhsShiptype
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetShiptype(final CompareToOperator operator, Integer rhsShiptype) {
         final int shiptype = rhsShiptype;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);                    // Update state
-                final int mmsi = getMmsi(p);               // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int lhsShiptype = getShiptype(mmsi); // Extract shiptype - if we know it
                 return lhsShiptype < 0 ? false : compare(lhsShiptype, shiptype, operator);
             }
+
             public String toString() {
                 return "shiptype = " + shiptype;
             }
@@ -141,15 +146,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with an shiptype outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetShiptype(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int shiptype = getShiptype(mmsi); // Extract IMO no. - if we know it
                 return shiptype < 0 ? false : inRange(min, max, shiptype);
             }
+
             public String toString() {
                 return "imo in " + min + ".." + max;
             }
@@ -159,17 +165,18 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a ship type outside the given list.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetShiptype(Integer[] shiptypes) {
         final int[] list = ArrayUtils.toPrimitive(shiptypes);
         Arrays.sort(list);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);                 // Update state
-                final int mmsi = getMmsi(p);            // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int shiptype = getShiptype(mmsi); // Extract shiptype no. - if we know it
                 return shiptype < 0 ? false : Arrays.binarySearch(list, shiptype) >= 0;
             }
+
             public String toString() {
                 return "shiptype in " + skipBrackets(Arrays.toString(list));
             }
@@ -180,20 +187,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an navstat different to the rhs parameter.
+     * 
      * @param operator
      * @param rhsNavstat
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetNavigationalStatus(final CompareToOperator operator, Integer rhsNavstat) {
         final int navstat = rhsNavstat;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);                    // Update state
-                final int mmsi = getMmsi(p);               // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int lhsNavstat = getNavstat(mmsi); // Extract navstat - if we know it
                 return lhsNavstat < 0 ? false : compare(lhsNavstat, navstat, operator);
             }
+
             public String toString() {
                 return "navstat = " + navstat;
             }
@@ -203,15 +212,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a navstat outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetNavigationalStatus(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int navstat = getNavstat(mmsi); // Extract IMO no. - if we know it
                 return navstat < 0 ? false : inRange(min, max, navstat);
             }
+
             public String toString() {
                 return "imo in " + min + ".." + max;
             }
@@ -221,17 +231,18 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a navstat outside the given list.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetNavigationalStatus(Integer[] navstats) {
         final int[] list = ArrayUtils.toPrimitive(navstats);
         Arrays.sort(list);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);                 // Update state
-                final int mmsi = getMmsi(p);            // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int navstat = getNavstat(mmsi); // Extract navstat no. - if we know it
                 return navstat < 0 ? false : Arrays.binarySearch(list, navstat) >= 0;
             }
+
             public String toString() {
                 return "navstat in " + skipBrackets(Arrays.toString(list));
             }
@@ -242,20 +253,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a SOG comparing false to 'sog'.
+     * 
      * @param operator
      * @param sog
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetSpeedOverGround(final CompareToOperator operator, Float sog) {
         final float rhsSog = sog;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final float lhsSog = getSog(mmsi); // Extract sog - if we know it
-                return lhsSog != lhsSog /* NaN */ ? false : compare(lhsSog, rhsSog, operator);
+                return lhsSog != lhsSog /* NaN */? false : compare(lhsSog, rhsSog, operator);
             }
+
             public String toString() {
                 return "sog " + operator + " " + rhsSog;
             }
@@ -265,15 +278,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a SOG outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetSpeedOverGround(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final float lhsSog = getSog(mmsi);    // Extract sog - if we know it
-                return lhsSog != lhsSog /* NaN */ ? false : inRange(min, max, lhsSog);
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final float lhsSog = getSog(mmsi); // Extract sog - if we know it
+                return lhsSog != lhsSog /* NaN */? false : inRange(min, max, lhsSog);
             }
+
             public String toString() {
                 return "sog in " + min + ".." + max;
             }
@@ -284,20 +298,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a COG comparing false to 'cog'.
+     * 
      * @param operator
      * @param cog
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetCourseOverGround(final CompareToOperator operator, Float cog) {
         final float rhsCog = cog;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final float lhsCog = getCog(mmsi); // Extract cog - if we know it
-                return lhsCog != lhsCog /* NaN */ ? false : compare(lhsCog, rhsCog, operator);
+                return lhsCog != lhsCog /* NaN */? false : compare(lhsCog, rhsCog, operator);
             }
+
             public String toString() {
                 return "cog " + operator + " " + rhsCog;
             }
@@ -307,15 +323,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a COG outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetCourseOverGround(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final float lhsCog = getCog(mmsi);    // Extract cog - if we know it
-                return lhsCog != lhsCog /* NaN */ ? false : inRange(min, max, lhsCog);
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final float lhsCog = getCog(mmsi); // Extract cog - if we know it
+                return lhsCog != lhsCog /* NaN */? false : inRange(min, max, lhsCog);
             }
+
             public String toString() {
                 return "cog in " + min + ".." + max;
             }
@@ -326,20 +343,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a COG comparing false to 'hdg'.
+     * 
      * @param operator
      * @param hdg
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetTrueHeading(final CompareToOperator operator, Integer hdg) {
         final int rhsHdg = hdg;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final int lhsHdg = getHdg(mmsi); // Extract hdg - if we know it
                 return lhsHdg < 0 ? false : compare(lhsHdg, rhsHdg, operator);
             }
+
             public String toString() {
                 return "hdg " + operator + " " + rhsHdg;
             }
@@ -349,15 +368,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a COG outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetTrueHeading(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final int lhsHdg = getHdg(mmsi);    // Extract cog - if we know it
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final int lhsHdg = getHdg(mmsi); // Extract cog - if we know it
                 return lhsHdg < 0 ? false : inRange(min, max, lhsHdg);
             }
+
             public String toString() {
                 return "hdg in " + min + ".." + max;
             }
@@ -368,20 +388,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a draught comparing false to 'draught'.
+     * 
      * @param operator
      * @param draught
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetDraught(final CompareToOperator operator, Float draught) {
         final float rhsDraught = draught;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final float lhsDraught = getDraught(mmsi); // Extract draught - if we know it
-                return lhsDraught != lhsDraught /* NaN */ ? false : compare(lhsDraught, rhsDraught, operator);
+                return lhsDraught != lhsDraught /* NaN */? false : compare(lhsDraught, rhsDraught, operator);
             }
+
             public String toString() {
                 return "draught " + operator + " " + rhsDraught;
             }
@@ -391,15 +413,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a draught outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetDraught(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final float lhsDraught = getDraught(mmsi);    // Extract cog - if we know it
-                return lhsDraught != lhsDraught /* NaN */ ? false : inRange(min, max, lhsDraught);
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final float lhsDraught = getDraught(mmsi); // Extract cog - if we know it
+                return lhsDraught != lhsDraught /* NaN */? false : inRange(min, max, lhsDraught);
             }
+
             public String toString() {
                 return "draught in " + min + ".." + max;
             }
@@ -410,20 +433,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a latitude comparing false to 'lat'.
+     * 
      * @param operator
      * @param lat
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetLatitude(final CompareToOperator operator, Float lat) {
         final float rhsLat = lat;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final float lhsLat = getLatitude(mmsi); // Extract lat - if we know it
-                return lhsLat != lhsLat /* NaN */ ? false : compare(lhsLat, rhsLat, operator);
+                return lhsLat != lhsLat /* NaN */? false : compare(lhsLat, rhsLat, operator);
             }
+
             public String toString() {
                 return "lat " + operator + " " + rhsLat;
             }
@@ -433,15 +458,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a latitude outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetLatitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final float lhsLat = getLatitude(mmsi);    // Extract  - if we know it
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final float lhsLat = getLatitude(mmsi); // Extract - if we know it
                 return lhsLat != lhsLat /* NaN */? false : inRange(min, max, lhsLat);
             }
+
             public String toString() {
                 return "lat in " + min + ".." + max;
             }
@@ -452,20 +478,22 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a longitude comparing false to 'lon'.
+     * 
      * @param operator
      * @param lon
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetLongitude(final CompareToOperator operator, Float lon) {
         final float rhsLon = lon;
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);            // Update state
-                final int mmsi = getMmsi(p);       // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final float lhsLon = getLongitude(mmsi); // Extract lon - if we know it
                 return lhsLon != lhsLon /* NaN */? false : compare(lhsLon, rhsLon, operator);
             }
+
             public String toString() {
                 return "lon " + operator + " " + rhsLon;
             }
@@ -475,15 +503,16 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Return false if this message is known to be related to a target with a longitude outside the given range.
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetLongitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
-                final float lhsLon = getLongitude(mmsi);    // Extract cog - if we know it
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
+                final float lhsLon = getLongitude(mmsi); // Extract cog - if we know it
                 return lhsLon != lhsLon /* NaN */? false : inRange(min, max, lhsLon);
             }
+
             public String toString() {
                 return "lon in " + min + ".." + max;
             }
@@ -494,17 +523,19 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a name not comparing to rhs parameter.
+     * 
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetName(final CompareToOperator operator, final String rhsName) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final String lhsName = getName(mmsi); // Extract - if we know it
                 return lhsName == null ? false : compare(lhsName, rhsName, operator);
             }
+
             public String toString() {
                 return "name " + operator + " " + rhsName;
             }
@@ -513,21 +544,20 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a name not comparing to rhs parameter.
+     * 
      * @return
      */
-    @SuppressWarnings("unused")
+
     public Predicate<AisPacket> filterOnTargetNameMatch(final String pattern) {
         final String glob = preprocessExpressionString(pattern);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final String lhsName = getName(mmsi); // Extract - if we know it
-                return lhsName == null ? false :matchesGlob(preprocessAisString(lhsName), glob);
+                return lhsName == null ? false : matchesGlob(preprocessAisString(lhsName), glob);
             }
-            public String toSting() {
-                return "name ~ " + glob;
-            }
+
         };
     }
 
@@ -535,17 +565,18 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a callsign not comparing to rhs parameter.
+     * 
      * @return
      */
-    @SuppressWarnings("unused")
     public Predicate<AisPacket> filterOnTargetCallsign(final CompareToOperator operator, final String rhsCallsign) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final String lhsCallsign = getCallsign(mmsi); // Extract - if we know it
                 return lhsCallsign == null ? false : compare(lhsCallsign, rhsCallsign, operator);
             }
+
             public String toString() {
                 return "cs " + operator + " " + rhsCallsign;
             }
@@ -554,18 +585,19 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a callsign not comparing to rhs parameter.
+     * 
      * @return
      */
-    @SuppressWarnings("unused")
     public Predicate<AisPacket> filterOnTargetCallsignMatch(final String pattern) {
         final String glob = preprocessExpressionString(pattern);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final String callsign = getCallsign(mmsi); // Extract - if we know it
-                return callsign == null ? false :matchesGlob(preprocessAisString(callsign), glob);
+                return callsign == null ? false : matchesGlob(preprocessAisString(callsign), glob);
             }
+
             public String toString() {
                 return "cs ~ " + glob;
             }
@@ -575,19 +607,20 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Filter on message to have known position inside given area.
      *
-     * @param area The area that the position must reside inside.
+     * @param area
+     *            The area that the position must reside inside.
      * @return
      */
-    @SuppressWarnings("unused")
     public Predicate<AisPacket> filterOnTargetPositionWithin(final Area area) {
         requireNonNull(area);
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
-                aisPacketStream.add(p);          // Update state
-                final int mmsi = getMmsi(p);     // Get MMSI in question
+                aisPacketStream.add(p); // Update state
+                final int mmsi = getMmsi(p); // Get MMSI in question
                 final AisPosition pos = getPosition(mmsi); // Extract - if we know it
                 return (pos == null || pos.getGeoLocation() == null) ? false : area.contains(pos.getGeoLocation());
             }
+
             public String toString() {
                 return "pos within " + area;
             }
@@ -598,6 +631,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Extract mmsi no. from AisPacket
+     * 
      * @param p
      * @return
      */
@@ -608,6 +642,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract IMO no. based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -625,6 +660,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract speed over ground based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -634,7 +670,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
         if (target != null) {
             AisPacket positionPacket = target.getPositionPacket();
             if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-                sog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getSog()/10.0);
+                sog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getSog() / 10.0);
             }
         }
         return sog;
@@ -642,6 +678,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract course over ground based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -651,7 +688,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
         if (target != null) {
             AisPacket positionPacket = target.getPositionPacket();
             if (positionPacket != null && positionPacket.tryGetAisMessage() instanceof AisPositionMessage) {
-                cog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getCog()/10.0);
+                cog = (float) (((AisPositionMessage) positionPacket.tryGetAisMessage()).getCog() / 10.0);
             }
         }
         return cog;
@@ -659,6 +696,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract true heading based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -676,6 +714,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract draught based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -685,7 +724,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
         if (target != null) {
             AisPacket[] staticPackets = target.getStaticPackets();
             if (staticPackets.length > 0 && staticPackets[0].tryGetAisMessage() instanceof AisMessage5) {
-                draught = (float) (((AisMessage5) staticPackets[0].tryGetAisMessage()).getDraught()/10.0);
+                draught = (float) (((AisMessage5) staticPackets[0].tryGetAisMessage()).getDraught() / 10.0);
             }
         }
         return draught;
@@ -693,6 +732,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract latitude based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -710,6 +750,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract latitude based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -727,6 +768,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract position based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -744,6 +786,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract shiptype based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -761,6 +804,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract shiptype based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -778,6 +822,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract ship name based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */
@@ -795,6 +840,7 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Use target tracker to extract ship's callsign based on mmsi lookup.
+     * 
      * @param mmsi
      * @return
      */

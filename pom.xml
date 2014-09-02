@@ -31,6 +31,7 @@
 
 	<properties>
 		<dependencies.enav.version>0.5-SNAPSHOT</dependencies.enav.version>
+		<dependencies.dma.commons.version>0.3-SNAPSHOT</dependencies.dma.commons.version>
 	</properties>
 
 	<profiles>
