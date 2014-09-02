@@ -29,6 +29,10 @@
 		<module>ais-lib-cli</module>
 	</modules>
 
+	<properties>
+		<dependencies.enav.version>0.5-SNAPSHOT</dependencies.enav.version>
+	</properties>
+
 	<profiles>
 		<profile>
 			<id>doclint-java8-disable</id>

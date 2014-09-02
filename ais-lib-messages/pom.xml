@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>dk.dma.enav</groupId>
 			<artifactId>enav-model</artifactId>
-			<version>0.4</version>
+			<version>${dependencies.enav.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
