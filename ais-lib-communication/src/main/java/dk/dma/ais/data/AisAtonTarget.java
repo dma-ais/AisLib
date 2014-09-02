@@ -27,8 +27,7 @@ public class AisAtonTarget extends AisTarget {
     @Override
     public void update(AisMessage aisMessage) {
         // Throw error if message is from other type of target
-        if (AisClassATarget.isClassAPosOrStatic(aisMessage) || AisClassBTarget.isClassBPosOrStatic(aisMessage)
-                || AisBsTarget.isBsReport(aisMessage)) {
+        if (!isMessageCompatible(aisMessage)) {
             throw new IllegalArgumentException("Trying to update AtoN target with report of other target type");
         }
         // Ignore everything but BS reports
@@ -47,4 +46,11 @@ public class AisAtonTarget extends AisTarget {
     public static boolean isAtonReport(AisMessage aisMessage) {
         return aisMessage instanceof AisMessage21;
     }
+
+    @Override
+    public boolean isMessageCompatible(AisMessage aisMessage) {
+       return !(AisClassATarget.isClassAPosOrStatic(aisMessage) || AisClassBTarget.isClassBPosOrStatic(aisMessage)
+               || AisBsTarget.isBsReport(aisMessage));
+    }
+    
 }
