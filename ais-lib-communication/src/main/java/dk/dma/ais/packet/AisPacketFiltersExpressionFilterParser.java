@@ -75,7 +75,7 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         public Predicate<AisPacket> visitSourceBasestationIn(@NotNull ExpressionFilterParser.SourceBasestationInContext ctx) {
             return createFilterPredicateForRangeOrList(AisPacketFilters.class, null, ctx);
         }
-
+        
         @Override
         public Predicate<AisPacket> visitSourceCountryIn(@NotNull ExpressionFilterParser.SourceCountryInContext ctx) {
             return createFilterPredicateForListOfCountry(AisPacketFilters.class, null, ctx);
@@ -195,6 +195,12 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
         @Override
         public Predicate<AisPacket> visitMessageShiptypeIn(@NotNull ExpressionFilterParser.MessageShiptypeInContext ctx) {
             return createFilterPredicateForListOfShipType(AisPacketFilters.class, null, ctx);
+        }
+
+        
+        @Override
+        public Predicate<AisPacket> visitMessageCountryIn(@NotNull ExpressionFilterParser.MessageCountryInContext ctx) {
+            return createFilterPredicateForListOfCountry(AisPacketFilters.class, null, ctx);
         }
 
         @Override
@@ -319,6 +325,12 @@ class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase 
             setupStatefulFilterPredicateFactory();
             return createFilterPredicateForListOfShipType(statefulFilterPredicateFactory.getClass(), statefulFilterPredicateFactory, ctx);
         }
+        
+        @Override
+        public Predicate<AisPacket> visitTargetCountryIn(@NotNull ExpressionFilterParser.TargetCountryInContext ctx) {
+            return createFilterPredicateForListOfCountry(AisPacketFilters.class, null, ctx);
+        }
+
 
         @Override
         public Predicate<AisPacket> visitTargetNavigationalStatus(@NotNull ExpressionFilterParser.TargetNavigationalStatusContext ctx) {

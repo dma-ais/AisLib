@@ -1,17 +1,4 @@
-/* Copyright (c) 2011 Danish Maritime Authority.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Generated from ExpressionFilter.g4 by ANTLR 4.2
 package dk.dma.internal.ais.generated.parser.expressionfilter;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -116,6 +103,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	T visitTargetLatitudeIn(@NotNull ExpressionFilterParser.TargetLatitudeInContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetCountryIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetCountryIn(@NotNull ExpressionFilterParser.TargetCountryInContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#number}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -163,6 +157,13 @@ public interface ExpressionFilterVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMessageTimeWeekday(@NotNull ExpressionFilterParser.MessageTimeWeekdayContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link ExpressionFilterParser#messageCountryIn}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMessageCountryIn(@NotNull ExpressionFilterParser.MessageCountryInContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link ExpressionFilterParser#targetSpeedOverGround}.

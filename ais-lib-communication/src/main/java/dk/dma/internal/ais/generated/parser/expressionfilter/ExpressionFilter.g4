@@ -34,6 +34,8 @@ filterExpression:
 
     |   MSG_TYPE compareTo string                               # messageShiptype
     |   MSG_TYPE (in|notin) (intRange|intList|stringList)       # messageShiptypeIn
+    
+    |   MSG_COUNTRY (in|notin) stringList                       # messageCountryIn    
 
     |   MSG_NAVSTAT compareTo string                            # messageNavigationalStatus
     |   MSG_NAVSTAT (in|notin) (intRange|intList|stringList)    # messageNavigationalStatusIn
@@ -87,6 +89,8 @@ filterExpression:
 
     |   TGT_TYPE compareTo string                               # targetShiptype
     |   TGT_TYPE (in|notin) (intRange|intList|stringList)       # targetShiptypeIn
+    
+    |   TGT_COUNTRY (in|notin) stringList                       # targetCountryIn
 
     |   TGT_NAVSTAT compareTo string                            # targetNavigationalStatus
     |   TGT_NAVSTAT (in|notin) (intRange|intList|stringList)    # targetNavigationalStatusIn
@@ -169,6 +173,7 @@ MSG_MSGID       : PREFIX_MESSAGE 'id';
 MSG_MMSI        : PREFIX_MESSAGE 'mmsi';
 MSG_IMO         : PREFIX_MESSAGE 'imo';
 MSG_TYPE        : PREFIX_MESSAGE 'type';
+MSG_COUNTRY     : PREFIX_MESSAGE 'country';
 MSG_NAVSTAT     : PREFIX_MESSAGE 'navstat';
 MSG_NAME        : PREFIX_MESSAGE 'name';
 MSG_CALLSIGN    : PREFIX_MESSAGE 'cs';
@@ -188,6 +193,7 @@ MSG_TIME_MINUTE : PREFIX_MESSAGE 'minute';
 
 TGT_IMO         : PREFIX_TARGET 'imo';
 TGT_TYPE        : PREFIX_TARGET 'type';
+TGT_COUNTRY     : PREFIX_TARGET 'country';
 TGT_NAVSTAT     : PREFIX_TARGET 'navstat';
 TGT_NAME        : PREFIX_TARGET 'name';
 TGT_CALLSIGN    : PREFIX_TARGET 'cs';

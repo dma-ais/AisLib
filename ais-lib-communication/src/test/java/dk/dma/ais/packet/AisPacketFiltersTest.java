@@ -36,6 +36,9 @@ import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceCountry;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceId;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceRegion;
 import static dk.dma.ais.packet.AisPacketFilters.filterOnSourceType;
+
+import static dk.dma.ais.packet.AisPacketFilters.filterOnTargetCountry;
+
 import static dk.dma.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -106,7 +109,7 @@ public class AisPacketFiltersTest {
     }
 
     @Test
-    public void testFilterOnCountry() {
+    public void testFilterSourceOnCountry() {
         assertTrue(filterOnSourceCountry(Country.getByCode("DNK")).test(pkgStatic1));
         assertFalse(filterOnSourceCountry(Country.getByCode("NLD")).test(pkgStatic1));
 
@@ -114,8 +117,15 @@ public class AisPacketFiltersTest {
         assertTrue(filterOnSourceCountry(Country.getByCode("NLD")).test(pkgStatic2));
         pkgStatic3.getTags().setSourceCountry(null);
         assertFalse(filterOnSourceCountry(Country.getByCode("DNK")).test(pkgStatic3));
-        assertFalse(filterOnSourceCountry(Country.getByCode("DNK")).test(pkgStatic3));
+     
     }
+    
+    @Test
+    public void testFilterOnTargetCountry() {
+        assertTrue(filterOnTargetCountry(Country.getByCode("DNK")).test(pkgStatic1));
+        assertFalse(filterOnTargetCountry(Country.getByCode("NLD")).test(pkgStatic1));
+    }
+
 
     @Test
     public void testFilterOnSourceRegion() {
@@ -148,6 +158,12 @@ public class AisPacketFiltersTest {
         pkgStatic1.getTags().setSourceType(SourceType.SATELLITE);
         assertFilterExpression(true, pkgStatic1, "s.country = DNK & s.bs =2190047 & s.type = SAT");
         assertFilterExpression(true, pkgStatic1, "s.country = DNK & s.bs =3,4,4,5,5,2190047 & s.type = SAT");
+        
+        assertFilterExpression(true, pkgStatic1, "t.country=DNK & m.country=DNK");
+        assertFilterExpression(true, pkgStatic1, "t.country in DEU | m.country in DNK");
+        
+        
+        
     }
 
     @Test
@@ -188,7 +204,13 @@ public class AisPacketFiltersTest {
 
         assertFilterExpression(false, pkgStatic2, "m.name = 'CONTI SING'"); // with space
         assertFilterExpression(true, pkgStatic2, "m.name = 'CONTI SINGA'"); // with space
+        
+        assertFilterExpression(false, pkgStatic1, "m.country = USA");
+        assertFilterExpression(true, pkgStatic1, "m.country != USA");
+        
+        assertFilterExpression(true, pkgStatic1, "t.country = DNK");
     }
+    
 
     @Test
     public void testParseExpressionFilterGlobs() {
@@ -252,6 +274,9 @@ public class AisPacketFiltersTest {
         assertFilterExpression(true, pkgStatic1, "m.name @ A,DIANA,Z");
         assertFilterExpression(true, pkgStatic1, "m.name = (A,DIANA,Z)");
         assertFilterExpression(true, pkgStatic1, "m.name = A,DIANA,Z");
+        
+        assertFilterExpression(true, pkgStatic1, "m.country in "+Country.getCountryForMmsi(pkgStatic1.tryGetAisMessage().getUserId()).getThreeLetter());
+        assertFilterExpression(false, pkgStatic1, "m.country in USA");
     }
 
     @Test

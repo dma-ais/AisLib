@@ -635,6 +635,8 @@ abstract class ExpressionFilterParserBase {
                 return "filterOnMessageImo";
             case "m.type":
                 return "filterOnMessageShiptype";
+            case "m.country":
+                return "filterOnMessageCountry";                
             case "m.navstat":
                 return "filterOnMessageNavigationalStatus";
             case "m.name":
@@ -679,6 +681,8 @@ abstract class ExpressionFilterParserBase {
                 return "filterOnTargetLatitude";
             case "t.pos":
                 return "filterOnTargetPositionWithin";
+            case "t.country":
+                return "filterOnTargetCountry";
             default:
                 throw new IllegalArgumentException("No mapping to predicate name for field " + fieldToken);
         }

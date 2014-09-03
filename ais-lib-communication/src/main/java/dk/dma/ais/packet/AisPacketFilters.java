@@ -1049,6 +1049,10 @@ public class AisPacketFilters extends AisPacketFiltersBase {
             }
         };
     }
+    
+    public static Predicate<AisPacket> filterOnMessageCountry(final Country... countries) {
+        return filterOnTargetCountry(countries);
+    }
 
     public static Predicate<AisPacket> filterOnTargetCountry(final Country... countries) {
         final Country[] c = AisPacketFilters.check(countries);
