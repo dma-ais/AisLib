@@ -17,7 +17,6 @@ package dk.dma.ais.lib;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -42,7 +41,6 @@ import dk.dma.ais.packet.AisPacketOutputSinks;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.commons.app.AbstractCommandLineTool;
 import dk.dma.commons.util.io.OutputStreamSink;
-import dk.dma.commons.web.rest.StreamingUtil;
 import dk.dma.enav.util.function.EConsumer;
 
 /**
