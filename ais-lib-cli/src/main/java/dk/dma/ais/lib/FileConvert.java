@@ -17,6 +17,7 @@ package dk.dma.ais.lib;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -102,12 +103,8 @@ public class FileConvert extends AbstractCommandLineTool {
 
         final EConsumer<String> consumer = new EConsumer<String>() {
 
-            public void process(OutputStreamSink<AisPacket> sink, BufferedOutputStream bos, AisPacket p) throws IOException {
-                sink.process(bos, p, count.getAndIncrement());
-            }
-
             @Override
-            public void accept(String s) throws IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+            public void accept(String s) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
                 Path path = Paths.get(s);
                 LOG.debug("Started processing file " + path);
 
@@ -130,26 +127,14 @@ public class FileConvert extends AbstractCommandLineTool {
                         endPath.toString(), path.getFileName().toString() + fileEnding).toFile()), 209715); // 2
 
 
-
+                final OutputStreamSink<AisPacket> sink = getOutputSink();
+                sink.closeWhenFooterWritten();
                 try (AisPacketReader apis = AisPacketReader.createFromFile(path, true)) {
-                    final OutputStreamSink<AisPacket> sink = getOutputSink();
-                    while (true) {
-                        AisPacket p = null;
-                        p = apis.readPacket();
-                        if (p == null) {
-                            break;
-                        }
-                        process(sink, bos, p);
+                    apis.stream().subscribeSink(sink, bos);
+                    while (apis.readPacket() != null) {
                     }
-
-                } catch (IOException e) {
-                    // continue, but log error
-                    LOG.error(e.toString());
-                    // throw e;
-
-                } finally {
-                    bos.close();
                 }
+                    
                 // long ms = System.currentTimeMillis() - start;
 
 
