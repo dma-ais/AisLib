@@ -19,6 +19,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -122,18 +123,21 @@ public class FileConvert extends AbstractCommandLineTool {
                     endPath = convertTo;
                 }
 
-                final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(Paths.get(
-                        endPath.toString(), path.getFileName().toString() + fileEnding).toFile()), 209715); // 2
+                final OutputStream fos = new FileOutputStream(Paths.get(
+                        endPath.toString(), path.getFileName().toString() + fileEnding).toFile()); // 2
 
 
                 final OutputStreamSink<AisPacket> sink = getOutputSink();
                 sink.closeWhenFooterWritten();
                 AisPacketReader apis = AisPacketReader.createFromFile(path, false);
-                apis.stream().subscribeSink(sink, bos);
+                apis.stream().subscribeSink(sink, fos);
                 
                 while (apis.readPacket() != null) {
                     //wait
                 }
+                
+                fos.close();
+                apis.close();
                 
                     
                 // long ms = System.currentTimeMillis() - start;
