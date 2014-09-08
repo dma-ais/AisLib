@@ -94,7 +94,7 @@ public class FileConvert extends AbstractCommandLineTool {
     @Override
     protected void run(Injector injector) throws Exception {
         
-        final OutputStreamSink<AisPacket> sink = getOutputSink();
+        
         
 
         // final long start = System.currentTimeMillis();
@@ -102,12 +102,12 @@ public class FileConvert extends AbstractCommandLineTool {
 
         final EConsumer<String> consumer = new EConsumer<String>() {
 
-            public void process(BufferedOutputStream bos, AisPacket p) throws IOException {
+            public void process(OutputStreamSink<AisPacket> sink, BufferedOutputStream bos, AisPacket p) throws IOException {
                 sink.process(bos, p, count.getAndIncrement());
             }
 
             @Override
-            public void accept(String s) throws IOException {
+            public void accept(String s) throws IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
                 Path path = Paths.get(s);
                 LOG.debug("Started processing file " + path);
 
@@ -132,14 +132,14 @@ public class FileConvert extends AbstractCommandLineTool {
 
 
                 try (AisPacketReader apis = AisPacketReader.createFromFile(path, true)) {
-
+                    final OutputStreamSink<AisPacket> sink = getOutputSink();
                     while (true) {
                         AisPacket p = null;
                         p = apis.readPacket();
                         if (p == null) {
                             break;
                         }
-                        process(bos, p);
+                        process(sink, bos, p);
                     }
 
                 } catch (IOException e) {
@@ -193,6 +193,8 @@ public class FileConvert extends AbstractCommandLineTool {
                 return AisPacketOutputSinks.newTableSink(columns, true);
             case "kml":
                 return AisPacketOutputSinks.newKmlSink();
+            case "kmz":
+                return AisPacketOutputSinks.newKmzSink();
                 
             default: //reflection
                 return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
