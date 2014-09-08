@@ -162,7 +162,7 @@ public class FileConvert extends AbstractCommandLineTool {
 
         /*
          * Creates a pool of executors, 4 threads. Each thread will open a file using an aispacket reader, 10000 files
-         * can be submitted to the queue (memory limit) Afterwards, the calling thread will execute the job instead.
+         * can be submitted to the queue, afterwards the calling thread will execute the job instead.
          */
         ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<Runnable>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
@@ -173,7 +173,6 @@ public class FileConvert extends AbstractCommandLineTool {
                     try {
                         consumer.accept(s);
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
 
@@ -181,6 +180,7 @@ public class FileConvert extends AbstractCommandLineTool {
             });
         }
 
+        threadpoolexecutor.shutdown();
         threadpoolexecutor.awaitTermination(999, TimeUnit.DAYS);
     }
 
@@ -191,6 +191,8 @@ public class FileConvert extends AbstractCommandLineTool {
             case "table":
                 Objects.requireNonNull(columns);
                 return AisPacketOutputSinks.newTableSink(columns, true);
+            case "kml":
+                return AisPacketOutputSinks.newKmlSink();
                 
             default: //reflection
                 return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
