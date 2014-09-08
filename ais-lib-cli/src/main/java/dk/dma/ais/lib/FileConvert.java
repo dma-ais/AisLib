@@ -128,16 +128,19 @@ public class FileConvert extends AbstractCommandLineTool {
 
 
                 final OutputStreamSink<AisPacket> sink = getOutputSink();
+                sink.header(fos);
                 sink.closeWhenFooterWritten();
                 AisPacketReader apis = AisPacketReader.createFromFile(path, false);
                 apis.stream().subscribeSink(sink, fos);
                 
                 while (apis.readPacket() != null) {
-                    //wait
+                    count.incrementAndGet();
                 }
+                sink.footer(fos, count.longValue());
                 
-                fos.close();
                 apis.close();
+                fos.close();
+                
                 
                     
                 // long ms = System.currentTimeMillis() - start;
