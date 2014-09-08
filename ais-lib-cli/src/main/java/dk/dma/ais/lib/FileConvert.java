@@ -42,6 +42,7 @@ import dk.dma.ais.packet.AisPacketOutputSinks;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.commons.app.AbstractCommandLineTool;
 import dk.dma.commons.util.io.OutputStreamSink;
+import dk.dma.commons.web.rest.StreamingUtil;
 import dk.dma.enav.util.function.EConsumer;
 
 /**
@@ -129,11 +130,13 @@ public class FileConvert extends AbstractCommandLineTool {
 
                 final OutputStreamSink<AisPacket> sink = getOutputSink();
                 sink.closeWhenFooterWritten();
-                try (AisPacketReader apis = AisPacketReader.createFromFile(path, true)) {
-                    apis.stream().subscribeSink(sink, bos);
-                    while (apis.readPacket() != null) {
-                    }
+                AisPacketReader apis = AisPacketReader.createFromFile(path, false);
+                apis.stream().subscribeSink(sink, bos);
+                
+                while (apis.readPacket() != null) {
+                    //wait
                 }
+                
                     
                 // long ms = System.currentTimeMillis() - start;
 
