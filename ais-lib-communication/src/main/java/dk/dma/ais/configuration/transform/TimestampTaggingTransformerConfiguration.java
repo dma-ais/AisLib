@@ -14,18 +14,19 @@
  */
 package dk.dma.ais.configuration.transform;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import dk.dma.ais.transform.IAisPacketTransformer;
+import dk.dma.ais.transform.TimestampTaggingTransformer;
 
-@XmlSeeAlso({ CropVdmTransformerConfiguration.class, TaggingTransformerConfiguration.class, ReplayTransformConfiguration.class,
-        SourceTypeSatTransformerConfiguration.class, AnonymousTransfomerConfiguration.class, PacketTransformerCollectionConfiguration.class, TimestampTaggingTransformerConfiguration.class  })
-public abstract class TransformerConfiguration {
+@XmlRootElement
+public class TimestampTaggingTransformerConfiguration extends TransformerConfiguration {
 
-    public TransformerConfiguration() {
-
+    @Override
+    @XmlTransient
+    public IAisPacketTransformer getInstance() {
+        return new TimestampTaggingTransformer();
     }
-
-    public abstract IAisPacketTransformer getInstance();
 
 }
