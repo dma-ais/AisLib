@@ -48,16 +48,10 @@ import dk.dma.ais.reader.AisReaderGroup;
  * @author Jens Tuxen
  */
 public class TargetTracker implements Tracker {
-    private static final Predicate<? super Object> PREDICATETRUE = new Predicate<Object>() {
-        @Override
-        public boolean test(Object o) {
-            return true;
-        }
-    };
+    private static final Predicate<? super Object> PREDICATETRUE = e->true;
 
     /** All targets that we are currently monitoring. */
-    final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>(
-            200000);
+    final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>();
 
     public int countNumberOfReports(
             final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
