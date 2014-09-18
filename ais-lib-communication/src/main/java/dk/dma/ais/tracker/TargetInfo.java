@@ -17,6 +17,8 @@ package dk.dma.ais.tracker;
 import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import dk.dma.ais.data.AisTarget;
@@ -188,6 +190,22 @@ public final class TargetInfo implements Serializable {
             return new AisPacket[] { getStaticAisPacket1(), getStaticAisPacket2() };
         }
     }
+    
+    public AisPacket[] getPackets() {
+        if (!hasPositionInfo()) {
+            return getStaticPackets();
+        } 
+        
+        Collection<AisPacket> packets = new ArrayList<AisPacket>();
+        
+        for (AisPacket p: getStaticPackets()) {
+            packets.add(p);
+        }
+        
+        packets.add(getPositionPacket());
+        
+        return packets.toArray(new AisPacket[packets.size()]);
+    }
 
     public AisPacket getStaticAisPacket1() {
         if (staticData1 != null && staticAisPacket1 == null) {
@@ -291,7 +309,7 @@ public final class TargetInfo implements Serializable {
                 }
                 IVesselPositionMessage ivm = (IVesselPositionMessage) message;
                 Position p = message.getValidPosition();
-                int heading = 0;
+                int heading = ivm.getTrueHeading();
                 float cog = ivm.getCog();
                 float sog = ivm.getSog();
                 byte navStatus = message instanceof AisPositionMessage ? (byte) ((AisPositionMessage) message)
