@@ -151,7 +151,7 @@ public class AisPacketOutputSinks {
             }
             
             if (m.getTargetType() != null) {
-                sb.append(m.getTargetType().toString()).append(',');
+                sb.append("targetType:").append(m.getTargetType().toString()).append(',');
             }
             
             
