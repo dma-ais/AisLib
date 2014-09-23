@@ -324,7 +324,7 @@ The expression filter can be used programmatically like this:
 ```java
 import static dk.da.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
 ...
-parseExpressionFilter("scountry = DNK & s.type = LIVE").test(aisPacket);
+parseExpressionFilter("s.country = DNK & s.type = LIVE").test(aisPacket);
 ```
 
 In this example the test method wll return `true` for all packets received from a source in Denmark ('DNK') and
