@@ -15,13 +15,6 @@
 
 package dk.dma.ais.packet;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.function.Predicate;
-
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
@@ -36,6 +29,13 @@ import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Area;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
+
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.function.Predicate;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Kasper Nielsen
@@ -1072,7 +1072,19 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         return new SamplerFilter(minDistanceInMeters, minDurationInMS);
     }
 
+    /**
+     * Replaced by Predicate<AisPacket> parseExpressionFilter(String filter)
+     *
+     * @deprecated
+     * @param filter
+     * @return
+     */
+    @Deprecated
     public static Predicate<AisPacket> parseSourceFilter(String filter) {
+        return AisPacketFiltersExpressionFilterParser.parseExpressionFilter(filter);
+    }
+
+    public static Predicate<AisPacket> parseExpressionFilter(String filter) {
         return AisPacketFiltersExpressionFilterParser.parseExpressionFilter(filter);
     }
 

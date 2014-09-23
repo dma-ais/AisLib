@@ -16,6 +16,7 @@ package dk.dma.ais.filter;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketFilters;
+
 import java.util.function.Predicate;
 
 /**
@@ -27,7 +28,7 @@ public class ExpressionFilter implements IPacketFilter {
     final Predicate<AisPacket> predicate;
     
     public ExpressionFilter(String filter) {
-        this.predicate = AisPacketFilters.parseSourceFilter(filter);
+        this.predicate = AisPacketFilters.parseExpressionFilter(filter);
     }
 
     @Override

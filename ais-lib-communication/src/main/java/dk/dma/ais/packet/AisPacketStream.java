@@ -14,17 +14,17 @@
  */
 package dk.dma.ais.packet;
 
-import static java.util.Objects.requireNonNull;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.commons.util.io.OutputStreamSink;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
-import dk.dma.ais.message.AisMessage;
-import dk.dma.commons.util.io.OutputStreamSink;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A stream of packets.
@@ -58,7 +58,7 @@ public abstract class AisPacketStream {
     public abstract AisPacketStream filter(Predicate<? super AisPacket> predicate);
 
     public AisPacketStream filter(String expression) {
-        return filter(AisPacketFilters.parseSourceFilter(expression));
+        return filter(AisPacketFilters.parseExpressionFilter(expression));
     }
 
     public AisPacketStream filterOnMessageType(int... messageTypes) {
