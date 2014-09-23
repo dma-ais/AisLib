@@ -22,10 +22,10 @@ import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.tracker.TargetInfo;
 import dk.dma.ais.tracker.TargetTracker;
 import dk.dma.enav.model.geometry.Area;
-import java.util.function.Predicate;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
@@ -550,14 +550,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     public Predicate<AisPacket> filterOnTargetNameMatch(final String pattern) {
         final String glob = preprocessExpressionString(pattern);
-        return new Predicate<AisPacket>() {
-            public boolean test(AisPacket p) {
-                aisPacketStream.add(p); // Update state
-                final int mmsi = getMmsi(p); // Get MMSI in question
-                final String lhsName = getName(mmsi); // Extract - if we know it
-                return lhsName == null ? false : matchesGlob(preprocessAisString(lhsName), glob);
-            }
-
+        return p -> {
+            aisPacketStream.add(p); // Update state
+            final int mmsi = getMmsi(p); // Get MMSI in question
+            final String lhsName = getName(mmsi); // Extract - if we know it
+            return lhsName != null && matchesGlob(preprocessAisString(lhsName), glob);
         };
     }
 
