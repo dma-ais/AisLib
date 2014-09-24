@@ -142,15 +142,12 @@ public class TargetTracker implements Tracker {
         requireNonNull(sourcePredicate);
         requireNonNull(targetPredicate);
         final ConcurrentHashMap<Integer, TargetInfo> result = new ConcurrentHashMap<>();
-        targets.forEachValue(10, new java.util.function.Consumer<MmsiTarget>() {
-            @Override
-            public void accept(MmsiTarget t) {
+        targets.forEachValue(10, t-> {            
                 TargetInfo best = t.getNewest(sourcePredicate);
                 if (best != null && targetPredicate.test(best)) {
                     result.put(best.mmsi, best);
                 }
-            }
-        });
+            });
 
         return result;
     }
@@ -161,26 +158,9 @@ public class TargetTracker implements Tracker {
         requireNonNull(sourcePredicate);
         requireNonNull(targetPredicate);
 
-        /*
-         * lambda expressions not supported with source 1.7 return
-         * targets.values().stream().sequential() .map(o ->
-         * o.getNewest(sourcePredicate)) .filter(ti ->
-         * targetPredicate.test((TargetInfo) ti));
-         */
-
         return targets.values().stream().parallel()
-                .map(new Function<MmsiTarget, TargetInfo>() {
-                    @Override
-                    public TargetInfo apply(MmsiTarget t) {
-                        return t.getNewest(sourcePredicate);
-                    }
-                }).parallel()
-                .filter(new java.util.function.Predicate<TargetInfo>() {
-                    @Override
-                    public boolean test(TargetInfo t) {
-                        return t != null && targetPredicate.test(t);
-                    }
-                });
+                .map(t -> t.getNewest(sourcePredicate)).parallel()
+                .filter(ti -> targetPredicate.test(ti));
     }
 
     public Collection<TargetInfo> findTargets8List(
