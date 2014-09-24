@@ -159,8 +159,8 @@ public class TargetTracker implements Tracker {
         requireNonNull(targetPredicate);
 
         return targets.values().stream().parallel()
-                .map(t -> t.getNewest(sourcePredicate)).parallel()
-                .filter(ti -> targetPredicate.test(ti));
+                .map(t -> t.getNewest(sourcePredicate)).parallel().
+                filter(ti -> ti != null).filter(ti -> targetPredicate.test(ti));
     }
 
     public Collection<TargetInfo> findTargets8List(
