@@ -28,9 +28,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import dk.dma.ais.packet.AisPacket;
+
 import java.util.function.Consumer;
 
 public class AisReaderTest {
@@ -63,6 +65,7 @@ public class AisReaderTest {
         assertEquals(1.0, directoryReader.getEstimatedFractionOfPacketsRead(), 1e-10);
     }
 
+    @Ignore
     @Test
     public void udpReaderTest() throws InterruptedException, IOException {
         int portTmp = 49552;
