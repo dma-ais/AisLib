@@ -151,7 +151,7 @@ public class AisPacketOutputSinks {
             }
             
             if (m.getTargetType() != null) {
-                sb.append("\"targetType\":").append(m.getTargetType().toString()).append(',');
+                sb.append("\"targetType\":").append('\"').append(m.getTargetType().toString()).append("\",");
             }
             
             
@@ -159,15 +159,15 @@ public class AisPacketOutputSinks {
             if (m instanceof AisStaticCommon) {
                 AisStaticCommon asm = (AisStaticCommon)m;
                 
-                sb.append("\"name\":").append(AisMessage.trimText(asm.getName())).append(',');
+                sb.append("\"name\":").append('\"').append(AisMessage.trimText(asm.getName())).append("\",");
                 sb.append("\"dimBow\":").append(asm.getDimBow()).append(',');
                 sb.append("\"dimPort\":").append(asm.getDimPort()).append(",");
                 sb.append("\"dimStarboard\":").append(asm.getDimStarboard()).append(",");
                 sb.append("\"dimStern\":").append(asm.getDimStern()).append(",");
                 ShipTypeCargo stc = new ShipTypeCargo(asm.getShipType());
-                sb.append("\"shipType\":").append(stc.getShipType().toString()).append(",");
-                sb.append("\"cargo\":").append(stc.getShipCargo().toString()).append(",");
-                sb.append("\"callsign\":").append(AisMessage.trimText(asm.getCallsign())).append(",");
+                sb.append("\"shipType\":\"").append(stc.getShipType().toString()).append("\",");
+                sb.append("\"cargo\":\"").append(stc.getShipCargo().toString()).append("\",");
+                sb.append("\"callsign\":\"").append(AisMessage.trimText(asm.getCallsign())).append("\",");
                 
             }
             
@@ -190,12 +190,11 @@ public class AisPacketOutputSinks {
     };
         
     /**
-     * A sink that writes static AIS packets as JSON to an output stream. The implementation is a little bit
-     * special. Because we are stateless, ending tags are written when the next package is received. Or the end is
-     * reached.
+     * A sink that writes static AIS packets as JSON to an output stream. 
      */
     public static final OutputStreamSink<AisPacket> JSON_STATIC_LIST = new OutputStreamSink<AisPacket>() {
-
+        long validCount = 0;
+        
         @Override
         public void process(OutputStream stream, AisPacket p, long count) throws IOException {
             
@@ -204,7 +203,7 @@ public class AisPacketOutputSinks {
             if (m instanceof AisStaticCommon) {
                 
                 StringBuilder sb = new StringBuilder();
-                if (count > 1) {
+                if (validCount > 0) {
                     sb.append(",\n");
                 }
              
@@ -217,12 +216,12 @@ public class AisPacketOutputSinks {
                 sb.append(common.getDimStarboard()).append(",");
                 sb.append(common.getDimStern()).append(",");
                 ShipTypeCargo stc = new ShipTypeCargo(common.getShipType());
-                sb.append(stc.getShipType().toString()).append(",");
-                sb.append(stc.getShipCargo().toString()).append(",");
+                sb.append('\"').append(stc.getShipType().toString()).append("\",");
+                sb.append('\"').append(stc.getShipCargo().toString()).append("\",");
                 sb.append("\"").append(AisMessage.trimText(common.getCallsign())).append("\",");
                 sb.append(p.getBestTimestamp()).append(",");                
-                sb.append(common.getTargetType().toString()).append("]");
-
+                sb.append('\"').append(common.getTargetType().toString()).append("\"]");
+                validCount++;
                 writeAscii(sb, stream);
             }
             
@@ -247,11 +246,10 @@ public class AisPacketOutputSinks {
     
     
     /**
-     * A sink that writes an AIS packet as JSON to an output stream. The implementation is a little bit
-     * special. Because we are stateless, ending tags are written when the next package is received. Or the end is
-     * reached.
+     * A sink that writes an AIS POSITION packets as JSON to an output stream.
      */
     public static final OutputStreamSink<AisPacket> JSON_POS_LIST = new OutputStreamSink<AisPacket>() {
+        long validCount = 0;
 
         @Override
         public void process(OutputStream stream, AisPacket p, long count) throws IOException {
@@ -267,18 +265,20 @@ public class AisPacketOutputSinks {
                 }
                 
                 StringBuilder sb = new StringBuilder();
-                if (count > 1) {
+                if (validCount > 0) {
                     sb.append(",\n");
                 }
              
-                sb.append(im.getUserId()).append(": [");
+                sb.append('\"').append(im.getUserId()).append("\": [");
                 sb.append(im.getUserId()).append(",");
                 sb.append(p.getBestTimestamp()).append(",");
                 sb.append(df.format(pos.getLatitude())).append(",");
                 sb.append(df.format(pos.getLongitude())).append(",");                
                 sb.append(im.getSog()).append(",");
                 sb.append(im.getCog()).append(",");
-                sb.append(im.getTrueHeading()).append("]");                
+                sb.append(im.getTrueHeading()).append("]"); 
+                validCount++;
+                
                 writeAscii(sb, stream);
             }
             
