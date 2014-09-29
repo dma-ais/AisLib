@@ -133,25 +133,25 @@ public class AisPacketOutputSinks {
             StringBuilder sb = new StringBuilder();
             
             sb.append("{");
-            sb.append("mmsi:").append(m.getUserId()).append(',');
-            sb.append("msgId:").append(m.getMsgId()).append(',');
+            sb.append("\"mmsi\":").append(m.getUserId()).append(',');
+            sb.append("\"msgId\":").append(m.getMsgId()).append(',');
             
             Position pos = m.getValidPosition();
             if (pos != null) {
                 DecimalFormat df = POSITION_FORMATTER.get();
-                sb.append("lat:").append(df.format(pos.getLatitude())).append(',');
-                sb.append("lon:").append(df.format(pos.getLongitude())).append(',');
+                sb.append("\"lat\":").append(df.format(pos.getLatitude())).append(',');
+                sb.append("\"lon\":").append(df.format(pos.getLongitude())).append(',');
             }
             
             if (m instanceof AisPositionMessage) {
                 AisPositionMessage im = (AisPositionMessage)m; 
-                sb.append("sog:").append(im.getSog()).append(',');
-                sb.append("cog:").append(im.getCog()).append(',');
-                sb.append("trueHeading:").append(im.getTrueHeading()).append("");     
+                sb.append("\"sog\":").append(im.getSog()).append(',');
+                sb.append("\"cog\":").append(im.getCog()).append(',');
+                sb.append("\"trueHeading\":").append(im.getTrueHeading()).append(',');     
             }
             
             if (m.getTargetType() != null) {
-                sb.append("targetType:").append(m.getTargetType().toString()).append(',');
+                sb.append("\"targetType\":").append(m.getTargetType().toString()).append(',');
             }
             
             
@@ -159,19 +159,19 @@ public class AisPacketOutputSinks {
             if (m instanceof AisStaticCommon) {
                 AisStaticCommon asm = (AisStaticCommon)m;
                 
-                sb.append("name:").append(AisMessage.trimText(asm.getName())).append(',');
-                sb.append("dimBow:").append(asm.getDimBow()).append(',');
-                sb.append("dimPort:").append(asm.getDimPort()).append(",");
-                sb.append("dimStarboard:").append(asm.getDimStarboard()).append(",");
-                sb.append("dimStern:").append(asm.getDimStern()).append(",");
+                sb.append("\"name\":").append(AisMessage.trimText(asm.getName())).append(',');
+                sb.append("\"dimBow\":").append(asm.getDimBow()).append(',');
+                sb.append("\"dimPort\":").append(asm.getDimPort()).append(",");
+                sb.append("\"dimStarboard\":").append(asm.getDimStarboard()).append(",");
+                sb.append("\"dimStern\":").append(asm.getDimStern()).append(",");
                 ShipTypeCargo stc = new ShipTypeCargo(asm.getShipType());
-                sb.append("shipType:").append(stc.getShipType().toString()).append(",");
-                sb.append("cargo:").append(stc.getShipCargo().toString()).append(",");
-                sb.append("callsign:").append(AisMessage.trimText(asm.getCallsign())).append(",");
+                sb.append("\"shipType\":").append(stc.getShipType().toString()).append(",");
+                sb.append("\"cargo\":").append(stc.getShipCargo().toString()).append(",");
+                sb.append("\"callsign\":").append(AisMessage.trimText(asm.getCallsign())).append(",");
                 
             }
             
-            sb.append("timestamp:").append(p.getBestTimestamp()).append("}\r\n");
+            sb.append("\"timestamp\":").append(p.getBestTimestamp()).append("}\r\n");
             
             writeAscii(sb, stream);            
         }
@@ -241,7 +241,7 @@ public class AisPacketOutputSinks {
         /** {@inheritDoc} */
         @Override
         public void header(OutputStream stream) throws IOException {
-            stream.write("{\"static\": {\n  \"headers\": [mmsi,name,dimBow,dimPort,dimStarboard,dimStern,shipType,shipCargo,callsign,timestamp,targetType],\n  \"vessels\": {".getBytes(StandardCharsets.US_ASCII));
+            stream.write("{\"static\": {\n  \"headers\": [\"mmsi\",\"name\",\"dimBow\",\"dimPort\",\"dimStarboard\",\"dimStern\",\"shipType\",\"shipCargo\",\"callsign\",\"timestamp\",\"targetType\"],\n  \"vessels\": {".getBytes(StandardCharsets.US_ASCII));
         }
     };
     
@@ -297,7 +297,7 @@ public class AisPacketOutputSinks {
         /** {@inheritDoc} */
         @Override
         public void header(OutputStream stream) throws IOException {
-            stream.write("{\"dynamic\": {\n  \"headers\": [mmsi,timestamp,lat,lon,sog,cog,heading],\n  \"vessels\": {".getBytes(StandardCharsets.US_ASCII));
+            stream.write("{\"dynamic\": {\n  \"headers\": [\"mmsi\",\"timestamp\",\"lat\",\"lon\",\"sog\",\"cog\",\"heading\"],\n  \"vessels\": {".getBytes(StandardCharsets.US_ASCII));
         }
     };
     
