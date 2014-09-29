@@ -57,8 +57,11 @@ import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Ellipse;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.CoordinateConverter;
+
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+
+import dk.dma.enav.util.compass.CompassUtils;
 import dk.dma.enav.util.geometry.Point;
 
 /**
@@ -930,7 +933,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
 
         // Rotate ship. Each ship has its own coordinate system with
         // origin in the ais-position of the ship
-        double thetaDeg = CoordinateConverter.compass2cartesian(heading);
+        double thetaDeg = CompassUtils.compass2cartesian(heading);
         for (int i = 0; i < points.length; i++) {
             points[i] = points[i].rotate(Point.ORIGIN, thetaDeg);
         }
