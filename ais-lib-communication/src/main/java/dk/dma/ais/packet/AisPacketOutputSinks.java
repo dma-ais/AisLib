@@ -190,124 +190,18 @@ public class AisPacketOutputSinks {
             }
         };
     }
+    
+    public static OutputStreamSink<AisPacket> jsonObjectSink(String format) {
+        return new AisPacketOutputSinkJsonObject(format);
+    }
         
-    /**
-     * A sink that writes static AIS packets as JSON to an output stream. 
-     */
-    public static OutputStreamSink<AisPacket> jsonStaticListSink() {
-    
-        return new OutputStreamSink<AisPacket>() {
-            private boolean first = true; 
-            
-            @Override
-            public void process(OutputStream stream, AisPacket p, long count) throws IOException {
-                
-                AisMessage m = p.tryGetAisMessage();
-                
-                if (m instanceof AisStaticCommon) {
-                    
-                    StringBuilder sb = new StringBuilder();
-                    if (!first) {
-                        sb.append(",\n");
-                    }
-                 
-                    AisStaticCommon common = (AisStaticCommon) m;
-                    sb.append("\"").append(common.getUserId()).append("\": [");
-                    sb.append(common.getUserId()).append(",");
-                    sb.append("\"").append(AisMessage.trimText(common.getName())).append("\",");
-                    sb.append(common.getDimBow()).append(",");
-                    sb.append(common.getDimPort()).append(",");
-                    sb.append(common.getDimStarboard()).append(",");
-                    sb.append(common.getDimStern()).append(",");
-                    ShipTypeCargo stc = new ShipTypeCargo(common.getShipType());
-                    sb.append('\"').append(stc.getShipType().toString()).append("\",");
-                    sb.append('\"').append(stc.getShipCargo().toString()).append("\",");
-                    sb.append("\"").append(AisMessage.trimText(common.getCallsign())).append("\",");
-                    sb.append(p.getBestTimestamp()).append(",");                
-                    sb.append('\"').append(common.getTargetType().toString()).append("\"]");
-                    writeAscii(sb, stream);
-                    first = false;
-                }
-                
-                
-            }
-    
-            /** {@inheritDoc} */
-            @Override
-            public void footer(OutputStream stream, long count) throws IOException {
-                if (!first) { // write the closing tag, unless we have never written anything.
-                    writeAscii("  }\n", stream);
-                }
-                writeAscii("}}", stream);
-            }
-    
-            /** {@inheritDoc} */
-            @Override
-            public void header(OutputStream stream) throws IOException {
-                stream.write("{\"static\": {\n  \"headers\": [\"mmsi\",\"name\",\"dimBow\",\"dimPort\",\"dimStarboard\",\"dimStern\",\"shipType\",\"shipCargo\",\"callsign\",\"timestamp\",\"targetType\"],\n  \"vessels\": {".getBytes(StandardCharsets.US_ASCII));
-            }
-        };
+    public static OutputStreamSink<AisPacket> jsonPosListSink() {
+        return new AisPacketOutputSinkJsonObject("mmsi;timestamp;lat;lon;sog;cog",";","dynamic");
     }
     
-    
-    /**
-     * A sink that writes an AIS POSITION packets as JSON to an output stream.
-     */
-    public static OutputStreamSink<AisPacket> jsonPosListSink() {
-        return new OutputStreamSink<AisPacket>() {
-            private boolean first = true; 
-            @Override
-            public void process(OutputStream stream, AisPacket p, long count) throws IOException {
-                AisMessage m = p.tryGetAisMessage();
-                DecimalFormat df = POSITION_FORMATTER.get();
-                
-                if (m instanceof AisPositionMessage) {
-                    AisPositionMessage im = (AisPositionMessage) m;
-                    Position pos = m.getValidPosition();
-                    
-                    if (pos == null) {
-                        return;
-                    }
-                    
-                    StringBuilder sb = new StringBuilder();
-                    if (!first) {
-                        sb.append(",\n");
-                        
-                    }
-                 
-                    sb.append('\"').append(im.getUserId()).append("\": [");
-                    sb.append(im.getUserId()).append(",");
-                    sb.append(p.getBestTimestamp()).append(",");
-                    sb.append(df.format(pos.getLatitude())).append(",");
-                    sb.append(df.format(pos.getLongitude())).append(",");                
-                    sb.append(im.getSog()).append(",");
-                    sb.append(im.getCog()).append(",");
-                    sb.append(im.getTrueHeading()).append("]"); 
-                    writeAscii(sb, stream);
-                    first = false;
-                }
-                
-                
-            }
-    
-            /** {@inheritDoc} */
-            @Override
-            public void footer(OutputStream stream, long count) throws IOException {
-                if (!first) { // write the closing tag, unless we have never written anything.
-                    writeAscii("  }\n", stream);
-                }
-                writeAscii("}}", stream);
-            }
-    
-            /** {@inheritDoc} */
-            @Override
-            public void header(OutputStream stream) throws IOException {
-                stream.write("{\"dynamic\": {\n  \"headers\": [\"mmsi\",\"timestamp\",\"lat\",\"lon\",\"sog\",\"cog\",\"heading\"],\n  \"vessels\": {".getBytes(StandardCharsets.US_ASCII));
-            }
-        };
-    };
-    
-    
+    public static OutputStreamSink<AisPacket> jsonStaticListSink() {
+        return new AisPacketOutputSinkJsonObject("mmsi;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;callsign;timestamp;targetType",";","static");
+    }
 
     /** A sink that writes an AIS packet to an output stream. Printing only the actual sentence . */
     public static final OutputStreamSink<AisPacket> OUTPUT_PREFIXED_SENTENCES = new OutputStreamSink<AisPacket>() {
