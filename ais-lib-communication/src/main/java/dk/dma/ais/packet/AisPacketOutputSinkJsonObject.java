@@ -74,7 +74,7 @@ public class AisPacketOutputSinkJsonObject extends OutputStreamSink<AisPacket> {
             first = false;
             
             
-            sb.append("\"").append(m.getUserId()).append("\":[");
+            sb.append('[');
             
             AisStaticCommon common = null;
             ShipTypeCargo stc = null;
@@ -229,7 +229,7 @@ public class AisPacketOutputSinkJsonObject extends OutputStreamSink<AisPacket> {
         // no "," on last element
         sb.append('\"').append(columns[columns.length-1]).append('\"');
         
-        sb.append("],\n  \"targets\": {");
+        sb.append("],\n  \"targets\": [");
         
         IoUtil.writeAscii(sb, stream);
 
@@ -239,7 +239,7 @@ public class AisPacketOutputSinkJsonObject extends OutputStreamSink<AisPacket> {
     @Override
     public void footer(OutputStream stream, long count) throws IOException {
         if (!first) { // write the closing tag, unless we have never written anything.
-            writeAscii("  }\n", stream);
+            writeAscii("  ]\n", stream);
         }
         writeAscii("}}", stream);
     }
