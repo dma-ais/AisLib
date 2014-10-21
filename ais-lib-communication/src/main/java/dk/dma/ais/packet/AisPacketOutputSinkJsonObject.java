@@ -238,10 +238,7 @@ public class AisPacketOutputSinkJsonObject extends OutputStreamSink<AisPacket> {
     /** {@inheritDoc} */
     @Override
     public void footer(OutputStream stream, long count) throws IOException {
-        if (!first) { // write the closing tag, unless we have never written anything.
-            writeAscii("  ]\n", stream);
-        }
-        writeAscii("}}", stream);
+        writeAscii("]\n}}", stream);
     }
     
     
