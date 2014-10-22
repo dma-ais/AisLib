@@ -97,7 +97,7 @@ public class AisPacketOutputSinkJsonObject extends OutputStreamSink<AisPacket> {
                     sb.append('\"').append(m.getUserId()).append('\"');
                     break;
                 case "lat":
-                    if (im != null) {
+                    if (im != null && pos != null) {
                         sb.append(df.format(pos.getLatitude()));
 
                     } else {
@@ -105,7 +105,7 @@ public class AisPacketOutputSinkJsonObject extends OutputStreamSink<AisPacket> {
                     }
                     break;
                 case "lon":
-                    if (im != null) {
+                    if (im != null && pos != null) {
                         sb.append(df.format(pos.getLongitude()));
                     } else {
                         sb.append("null");
