@@ -81,7 +81,7 @@ public class GatehouseFactory extends ProprietaryFactory {
                 dateParts[6], DateTimeZone.UTC);
 
         Country midCountry = null;
-        if (country.length() > 0) {
+        if (country.length() > 0 && !country.equals("0")) {
             midCountry = Country.getByMid(Integer.parseInt(country));
             if (midCountry == null) {
                 LOG.warn("Unkown MID " + country);
