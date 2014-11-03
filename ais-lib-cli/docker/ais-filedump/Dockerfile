@@ -1,14 +1,9 @@
-FROM kaspernielsen/javabox
+FROM tbsalling/javabox
 
-RUN apt-get install maven -y
 RUN mkdir -p /data
-RUN git clone https://github.com/dma-ais/AisLib /AisLib
-RUN (cd /AisLib; mvn clean install)
-
+RUN wget --progress=bar "https://dma.ci.cloudbees.com/job/AisLib/lastSuccessfulBuild/artifact/*zip*/archive.zip" -O /archive.zip
+RUN unzip /archive.zip -d /
 ADD ./start.sh /start.sh
-
 ENV SOURCES "sourceName=1.2.3.4"
 ENV DIRECTORY /data/
-
-
 CMD ["/bin/bash", "/start.sh"]

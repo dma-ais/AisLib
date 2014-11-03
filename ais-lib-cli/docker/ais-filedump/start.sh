@@ -1,3 +1,2 @@
-cd /AisLib
-JAR=`ls ais-lib-cli/target/ais-lib-cli*.jar`
+JAR=`ls /archive/ais-lib-cli/target/ais-lib-cli*SNAPSHOT.jar`
 java -jar $JAR filedump $SOURCES -directory $DIRECTORY
