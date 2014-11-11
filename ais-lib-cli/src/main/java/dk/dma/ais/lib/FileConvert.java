@@ -38,6 +38,7 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketOutputSinkJsonObject;
 import dk.dma.ais.packet.AisPacketOutputSinks;
 import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.commons.app.AbstractCommandLineTool;
@@ -187,6 +188,15 @@ public class FileConvert extends AbstractCommandLineTool {
                 return AisPacketOutputSinks.newKmlSink();
             case "kmz":
                 return AisPacketOutputSinks.newKmzSink();
+            case "jsonobject":
+                if (columns.equals("")) {
+                    return AisPacketOutputSinks.jsonObjectSink(AisPacketOutputSinkJsonObject.ALLCOLUMNS);
+                } else {
+                    return AisPacketOutputSinks.jsonObjectSink(columns);
+                }
+            case "json":
+                return AisPacketOutputSinks.jsonMessageSink();
+                
                 
             default: //reflection
                 return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
