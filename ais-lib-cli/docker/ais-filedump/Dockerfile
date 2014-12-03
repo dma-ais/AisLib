@@ -5,4 +5,6 @@ RUN wget --progress=bar "https://dma.ci.cloudbees.com/job/AisLib/lastSuccessfulB
 RUN unzip /archive.zip -d /
 ADD ./start.sh /start.sh
 
+ENV DIRECTORY /data
+
 CMD ["/bin/bash", "/start.sh"]
