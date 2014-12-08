@@ -22,7 +22,10 @@ import dk.dma.ais.packet.AisPacket;
  * @author Jens Tuxen
  *
  * Reject packets with timestamp far into the future according to device clock
+ * 
+ * @deprecated please use FutureFilter with argument new FutureFilter(86400000)
  */
+@Deprecated
 public class FarFutureFilter implements IPacketFilter {
     
     /** One day in milliseconds is 24*60*60*1000 */

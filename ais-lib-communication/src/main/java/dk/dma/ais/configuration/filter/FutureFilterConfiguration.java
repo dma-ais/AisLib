@@ -14,16 +14,37 @@
  */
 package dk.dma.ais.configuration.filter;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
+import dk.dma.ais.filter.DownSampleFilter;
+import dk.dma.ais.filter.FutureFilter;
 import dk.dma.ais.filter.IPacketFilter;
 
-@XmlSeeAlso({ PacketFilterCollectionConfiguration.class, DownSampleFilterConfiguration.class,
-        ReplayDownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class, GatehouseSourceFilterConfiguration.class,
-        TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class, LocationFilterConfiguration.class,
-        MessageTypeFilterConfiguration.class, ExpressionFilterConfiguration.class, SanityFilterConfiguration.class, FutureFilterConfiguration.class })
-public abstract class FilterConfiguration {
+@XmlRootElement
+public class FutureFilterConfiguration extends FilterConfiguration {
 
-    public abstract IPacketFilter getInstance();
+    /**
+     * Threshold for what is considered future (in ms)
+     * default 1 minute
+     */
+    private long threshold = 60000;
+
+    public FutureFilterConfiguration() {
+
+    }
+
+    public FutureFilterConfiguration(long threshold) {
+        this.threshold = threshold;
+    }
+
+
+    
+    
+    @Override
+    @XmlTransient
+    public IPacketFilter getInstance() {
+        return new FutureFilter(threshold);
+    }
 
 }
