@@ -74,7 +74,7 @@ public class FileConvert extends AbstractCommandLineTool {
 
     @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
-    
+
     @Parameter(names = "-columns", required = false, description = "Optional columns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
     String columns;
 
@@ -97,9 +97,6 @@ public class FileConvert extends AbstractCommandLineTool {
     /** {@inheritDoc} */
     @Override
     protected void run(Injector injector) throws Exception {
-        
-        
-        
 
         // final long start = System.currentTimeMillis();
         final AtomicInteger count = new AtomicInteger();
@@ -107,10 +104,10 @@ public class FileConvert extends AbstractCommandLineTool {
         final EConsumer<String> consumer = new EConsumer<String>() {
 
             @Override
-            public void accept(String s) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException, InterruptedException {
+            public void accept(String s) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
+                    SecurityException, IOException, InterruptedException {
                 Path path = Paths.get(s);
                 LOG.debug("Started processing file " + path);
-                
 
                 Path endPath;
                 if (keepFileStructure) {
@@ -121,19 +118,18 @@ public class FileConvert extends AbstractCommandLineTool {
                 } else {
                     endPath = Paths.get(convertTo);
                 }
-                
+
                 Path filePath = Paths.get(endPath.toString(), path.getFileName().toString() + fileEnding);
 
-                LOG.debug("Output File: "+filePath.toString());
-                
-                final OutputStream fos = new FileOutputStream(filePath.toString()); // 2
+                LOG.debug("Output File: " + filePath.toString());
 
+                final OutputStream fos = new FileOutputStream(filePath.toString()); // 2
 
                 final OutputStreamSink<AisPacket> sink = getOutputSink();
                 sink.closeWhenFooterWritten();
-                
+
                 AisPacketReader apis = AisPacketReader.createFromFile(path, false);
-                
+
                 apis.writeTo(fos, sink);
                 apis.close();
                 fos.close();
@@ -142,22 +138,19 @@ public class FileConvert extends AbstractCommandLineTool {
         };
 
         /*
-         * Creates a pool of executors, 4 threads. Each thread will open a file using an aispacket reader, 10000 files
-         * can be submitted to the queue, afterwards the calling thread will execute the job instead.
+         * Creates a pool of executors, 4 threads. Each thread will open a file using an aispacket reader, 10000 files can be
+         * submitted to the queue, afterwards the calling thread will execute the job instead.
          */
-        ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+        ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(
+                10000), new ThreadPoolExecutor.CallerRunsPolicy());
         for (final String s : sources) {
-            threadpoolexecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        consumer.accept(s);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
+            threadpoolexecutor.execute(() -> {
+                try {
+                    consumer.accept(s);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
             });
         }
 
@@ -166,32 +159,31 @@ public class FileConvert extends AbstractCommandLineTool {
     }
 
     @SuppressWarnings("unchecked")
-    private OutputStreamSink<AisPacket> getOutputSink() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        
-        switch(outputSinkFormat) {
-            case "table":
-                Objects.requireNonNull(columns);
-                return AisPacketOutputSinks.newTableSink(columns, true);
-            case "kml":
-                return AisPacketOutputSinks.newKmlSink();
-            case "kmz":
-                return AisPacketOutputSinks.newKmzSink();
-            case "jsonobject":
-                if (columns.equals("")) {
-                    return AisPacketOutputSinks.jsonObjectSink(AisPacketOutputSinkJsonObject.ALLCOLUMNS);
-                } else {
-                    return AisPacketOutputSinks.jsonObjectSink(columns);
-                }
-            case "json":
-                return AisPacketOutputSinks.jsonMessageSink();
-                
-                
-            default: //reflection
-                return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
-                
+    private OutputStreamSink<AisPacket> getOutputSink() throws IllegalArgumentException, IllegalAccessException,
+            NoSuchFieldException, SecurityException {
+
+        switch (outputSinkFormat) {
+        case "table":
+            Objects.requireNonNull(columns);
+            return AisPacketOutputSinks.newTableSink(columns, true);
+        case "kml":
+            return AisPacketOutputSinks.newKmlSink();
+        case "kmz":
+            return AisPacketOutputSinks.newKmzSink();
+        case "jsonobject":
+            if (columns.equals("")) {
+                return AisPacketOutputSinks.jsonObjectSink(AisPacketOutputSinkJsonObject.ALLCOLUMNS);
+            } else {
+                return AisPacketOutputSinks.jsonObjectSink(columns);
+            }
+        case "json":
+            return AisPacketOutputSinks.jsonMessageSink();
+
+        default: // reflection
+            return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
+
         }
-        
-        
+
     }
 
     public static void main(String[] args) throws Exception {
