@@ -41,6 +41,8 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketOutputSinkJsonObject;
 import dk.dma.ais.packet.AisPacketOutputSinks;
 import dk.dma.ais.packet.AisPacketReader;
+import dk.dma.ais.packet.AisPacketStream;
+import dk.dma.ais.packet.AisPacketStream.Subscription;
 import dk.dma.commons.app.AbstractCommandLineTool;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.EConsumer;
@@ -61,7 +63,7 @@ public class FileConvert extends AbstractCommandLineTool {
 
     /** Where files should be moved to after having been processed. */
     @Parameter(names = "-path", required = false, description = "base-path to put converted files")
-    Path convertTo = Paths.get("converted/");
+    String convertTo = "converted/";
 
     /** Where files should be moved to after having been processed. */
     @Parameter(names = "-keepStructure", required = false, description = "Whether to keep path structure")
@@ -105,50 +107,36 @@ public class FileConvert extends AbstractCommandLineTool {
         final EConsumer<String> consumer = new EConsumer<String>() {
 
             @Override
-            public void accept(String s) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
+            public void accept(String s) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException, InterruptedException {
                 Path path = Paths.get(s);
                 LOG.debug("Started processing file " + path);
+                
 
                 Path endPath;
                 if (keepFileStructure) {
                     Path relative;
-                    if (path.isAbsolute()) {
-                        relative = path.subpath(1, path.getNameCount() - 1);
-                    } else {
-                        relative = path;
-                    }
-                    endPath = Paths.get(convertTo.toString(), relative.toString());
-
+                    relative = path;
+                    endPath = Paths.get(Paths.get(convertTo).toString(), relative.toString());
                     new File(endPath.toString()).mkdirs();
                 } else {
-                    endPath = convertTo;
+                    endPath = Paths.get(convertTo);
                 }
+                
+                Path filePath = Paths.get(endPath.toString(), path.getFileName().toString() + fileEnding);
 
-                final OutputStream fos = new FileOutputStream(Paths.get(
-                        endPath.toString(), path.getFileName().toString() + fileEnding).toFile()); // 2
+                LOG.debug("Output File: "+filePath.toString());
+                
+                final OutputStream fos = new FileOutputStream(filePath.toString()); // 2
 
 
                 final OutputStreamSink<AisPacket> sink = getOutputSink();
                 sink.closeWhenFooterWritten();
+                
                 AisPacketReader apis = AisPacketReader.createFromFile(path, false);
-                apis.stream().subscribeSink(sink, fos);
                 
-                while (apis.readPacket() != null) {
-                    count.incrementAndGet();
-                }
-                sink.footer(fos, count.longValue());
-                
+                apis.writeTo(fos, sink);
                 apis.close();
                 fos.close();
-                
-                
-                    
-                // long ms = System.currentTimeMillis() - start;
-
-
-                LOG.debug("Finished processing file, " + count + " packets was imported in total. Current Path: "
-                        + path);
-
             }
 
         };
