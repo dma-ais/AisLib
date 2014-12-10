@@ -23,16 +23,19 @@ import java.util.Date;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisTestPackets;
 import dk.dma.ais.reader.AisDirectoryReader;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.AisTcpReader;
+import dk.dma.ais.sentence.SentenceException;
 
 public class FutureFilterTest {
     @Ignore
     @Test
     public void liveStreamTest() throws InterruptedException {
-        AisTcpReader reader1 = AisReaders.createReader("10.33.128.173:25000");
+        AisTcpReader reader1 = AisReaders.createReader("127.0.0.1:8001");
+        
 
         final FutureFilter f = new FutureFilter();
         
@@ -42,15 +45,17 @@ public class FutureFilterTest {
                 System.out.println("Message was rejected");
                 System.out.println("Current Date: "+new Date());
                 System.out.println("Message Date:"+new Date(packet.getBestTimestamp()));
-                
-                
                 System.out.println(packet.getStringMessage());
-                
-                
-               
-                
+            }
+            
+            if (packet != null && !f.rejectedByFilter(packet)) {        
+                long timestamp = packet.getBestTimestamp();
+                long now = new Date().getTime();
+                assertTrue(now+60000 > timestamp);
             }
         });
+        
+        
         reader1.start();
         reader1.join();
 
@@ -72,6 +77,24 @@ public class FutureFilterTest {
         
         directoryReader.start();
         directoryReader.join();
+        
+    }
+    
+    @Ignore
+    @Test
+    public void testDatesInFutureRejected() throws SentenceException {
+        
+        final FutureFilter f = new FutureFilter();
+        
+        //String ais = "$PGHP,1,2014,12,28,18,56,24,510,207,,,1,23*21\r\n!AIVDM,1,1,,A,39t6QiEP001w@7hHf0h2KwvWP000,0*23";
+        String ais = "$PGHP,1,2014,12,28,19,10,22,760,207,,,1,39*2A\r\n!ABVDM,1,1,,B,16vdSv00001ukHBHCo;MOh0R0<0i,0*39";
+
+        AisPacket p = AisPacket.readFromString(ais);
+        
+        System.out.println("Date");
+        System.out.println(new Date(p.getBestTimestamp()));
+        
+        assertTrue(f.rejectedByFilter(p));
         
     }
 
