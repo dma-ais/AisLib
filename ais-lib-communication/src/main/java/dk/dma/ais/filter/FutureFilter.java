@@ -27,7 +27,7 @@ public class FutureFilter implements IPacketFilter {
     private final long threshold;
     
     public FutureFilter() {
-        threshold = 0;
+        threshold = 60000;
     }
     
     public FutureFilter(long threshold) {
