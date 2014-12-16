@@ -17,7 +17,6 @@ package dk.dma.ais.configuration.filter;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.FutureFilter;
 import dk.dma.ais.filter.IPacketFilter;
 

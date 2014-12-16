@@ -22,20 +22,21 @@ import dk.dma.ais.packet.AisPacket;
  *
  * Reject packets with timestamp in the future according to device clock
  */
-public class FutureFilter implements IPacketFilter {
+public class PastFilter implements IPacketFilter {
     private final long threshold;
     
-    public FutureFilter() {
-        threshold = 60000;
+    public PastFilter() {
+        /* defaults to filtering packets older than 24 hours */
+        threshold = 24*60*60*1000; 
     }
     
-    public FutureFilter(long threshold) {
+    public PastFilter(long threshold) {
         this.threshold = threshold;
     }
 
     @Override
     public boolean rejectedByFilter(AisPacket packet) {
-        return packet.getBestTimestamp()+threshold > System.currentTimeMillis();
+        return packet.getBestTimestamp()+threshold < System.currentTimeMillis();
     }
 
 }

@@ -12,30 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package dk.dma.ais.configuration.filter;
 
-package dk.dma.ais.filter;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.filter.IPacketFilter;
+import dk.dma.ais.filter.PastFilter;
 
-/**
- * @author Jens Tuxen
- *
- * Reject packets with timestamp in the future according to device clock
- */
-public class FutureFilter implements IPacketFilter {
-    private final long threshold;
-    
-    public FutureFilter() {
-        threshold = 60000;
+@XmlRootElement
+public class PastFilterConfiguration extends FilterConfiguration {
+
+    /**
+     * Threshold for what is considered future (in ms)
+     * default 1 minute
+     */
+    private long threshold = 24*60*60*1000;
+
+    public PastFilterConfiguration() {
+
     }
-    
-    public FutureFilter(long threshold) {
+
+    public PastFilterConfiguration(long threshold) {
         this.threshold = threshold;
     }
-
+    
     @Override
-    public boolean rejectedByFilter(AisPacket packet) {
-        return packet.getBestTimestamp()+threshold > System.currentTimeMillis();
+    @XmlTransient
+    public IPacketFilter getInstance() {
+        return new PastFilter(threshold);
     }
 
 }
