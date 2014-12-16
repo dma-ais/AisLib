@@ -25,7 +25,7 @@ public class PastFilterConfiguration extends FilterConfiguration {
 
     /**
      * Threshold for what is considered future (in ms)
-     * default 1 minute
+     * default 24 hours
      */
     private long threshold = 24*60*60*1000;
 
