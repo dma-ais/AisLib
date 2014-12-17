@@ -125,7 +125,7 @@ public class FileConvert extends AbstractCommandLineTool {
 
                 final OutputStream fos = new FileOutputStream(filePath.toString()); // 2
 
-                final OutputStreamSink<AisPacket> sink = getOutputSink();
+                final OutputStreamSink<AisPacket> sink = AisPacketOutputSinks.getOutputSink(outputSinkFormat, columns);
                 sink.closeWhenFooterWritten();
 
                 AisPacketReader apis = AisPacketReader.createFromFile(path, false);
@@ -158,33 +158,6 @@ public class FileConvert extends AbstractCommandLineTool {
         threadpoolexecutor.awaitTermination(999, TimeUnit.DAYS);
     }
 
-    @SuppressWarnings("unchecked")
-    private OutputStreamSink<AisPacket> getOutputSink() throws IllegalArgumentException, IllegalAccessException,
-            NoSuchFieldException, SecurityException {
-
-        switch (outputSinkFormat) {
-        case "table":
-            Objects.requireNonNull(columns);
-            return AisPacketOutputSinks.newTableSink(columns, true);
-        case "kml":
-            return AisPacketOutputSinks.newKmlSink();
-        case "kmz":
-            return AisPacketOutputSinks.newKmzSink();
-        case "jsonobject":
-            if (columns.equals("")) {
-                return AisPacketOutputSinks.jsonObjectSink(AisPacketOutputSinkJsonObject.ALLCOLUMNS);
-            } else {
-                return AisPacketOutputSinks.jsonObjectSink(columns);
-            }
-        case "json":
-            return AisPacketOutputSinks.jsonMessageSink();
-
-        default: // reflection
-            return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(outputSinkFormat).get(null);
-
-        }
-
-    }
 
     public static void main(String[] args) throws Exception {
         FileConvert fc = new FileConvert();

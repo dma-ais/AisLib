@@ -37,6 +37,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static dk.dma.commons.util.io.IoUtil.writeAscii;
@@ -314,6 +315,35 @@ public class AisPacketOutputSinks {
 
     public static OutputStreamSink<AisPacket> newKmzSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         return new AisPacketKMZOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
+    }
+    
+
+    @SuppressWarnings("unchecked")
+    public static OutputStreamSink<AisPacket> getOutputSink(String...params) throws IllegalArgumentException, IllegalAccessException,
+            NoSuchFieldException, SecurityException {
+
+        switch (params[0]) {
+        case "table":
+            Objects.requireNonNull(params[1]);
+            return AisPacketOutputSinks.newTableSink(params[1], true);
+        case "kml":
+            return AisPacketOutputSinks.newKmlSink();
+        case "kmz":
+            return AisPacketOutputSinks.newKmzSink();
+        case "jsonobject":
+            if (params[1].equals("")) {
+                return AisPacketOutputSinks.jsonObjectSink(AisPacketOutputSinkJsonObject.ALLCOLUMNS);
+            } else {
+                return AisPacketOutputSinks.jsonObjectSink(params[1]);
+            }
+        case "json":
+            return AisPacketOutputSinks.jsonMessageSink();
+
+        default: // reflection
+            return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(params[0]).get(null);
+
+        }
+
     }
 
 }
