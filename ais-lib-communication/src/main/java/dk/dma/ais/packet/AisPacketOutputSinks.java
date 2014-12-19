@@ -322,7 +322,11 @@ public class AisPacketOutputSinks {
     public static OutputStreamSink<AisPacket> getOutputSink(String...params) throws IllegalArgumentException, IllegalAccessException,
             NoSuchFieldException, SecurityException {
 
-        switch (params[0]) {
+        switch (params[0].toLowerCase()) {
+        case "raw":
+            Objects.requireNonNull(params[1]);
+            return AisPacketOutputSinks.OUTPUT_TO_TEXT;
+        
         case "table":
             Objects.requireNonNull(params[1]);
             return AisPacketOutputSinks.newTableSink(params[1], true);
