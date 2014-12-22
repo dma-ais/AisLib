@@ -324,9 +324,7 @@ public class AisPacketOutputSinks {
 
         switch (params[0].toLowerCase()) {
         case "raw":
-            Objects.requireNonNull(params[1]);
             return AisPacketOutputSinks.OUTPUT_TO_TEXT;
-        
         case "table":
             Objects.requireNonNull(params[1]);
             return AisPacketOutputSinks.newTableSink(params[1], true);
