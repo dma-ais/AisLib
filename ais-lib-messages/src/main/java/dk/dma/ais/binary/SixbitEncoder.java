@@ -108,7 +108,9 @@ public class SixbitEncoder {
                 padBits = stop - binArray.getLength() + 1;
                 stop = binArray.getLength() - 1;
             }
-            int value = BinArray.intToSixbit((int) binArray.getVal(start, stop));
+            int data = (int) binArray.getVal(start, stop);
+            data = data << padBits;
+            int value = BinArray.intToSixbit(data);
             buf.append((char) value);
             start = stop + 1;
         }
