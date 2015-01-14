@@ -327,6 +327,9 @@ public class AisPacketOutputSinks {
             return AisPacketOutputSinks.OUTPUT_TO_TEXT;
         case "table":
             Objects.requireNonNull(params[1]);
+            if (params[2] != null) {
+                AisPacketOutputSinks.newTableSink(params[1], true,params[2]);
+            }
             return AisPacketOutputSinks.newTableSink(params[1], true);
         case "kml":
             return AisPacketOutputSinks.newKmlSink();
