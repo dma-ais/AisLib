@@ -14,15 +14,14 @@
  */
 package dk.dma.ais.proprietary;
 
-import java.util.List;
-
+import dk.dma.ais.sentence.SentenceLine;
+import dk.dma.enav.model.Country;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.ais.sentence.SentenceLine;
-import dk.dma.enav.model.Country;
+import java.util.List;
 
 /**
  * 
@@ -41,7 +40,7 @@ public class GatehouseFactory extends ProprietaryFactory {
     public IProprietaryTag getTag(SentenceLine sl) {
         // Check checksum
         if (!sl.isChecksumMatch()) {
-            LOG.error("Error in Gatehouse proprietary tag wrong checksum: " + sl.getChecksum());
+            LOG.error("Error in Gatehouse proprietary tag: \"" + sl.getLine() + "\": Wrong checksum field: " + sl.getChecksumField() + ": Should be: " + sl.getChecksum());
             return null;
         }
         

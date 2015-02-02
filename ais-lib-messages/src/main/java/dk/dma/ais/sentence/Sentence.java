@@ -14,17 +14,16 @@
  */
 package dk.dma.ais.sentence;
 
+import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.proprietary.IProprietarySourceTag;
+import dk.dma.ais.proprietary.IProprietaryTag;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-
-import dk.dma.ais.binary.SixbitException;
-import dk.dma.ais.proprietary.IProprietarySourceTag;
-import dk.dma.ais.proprietary.IProprietaryTag;
 
 /**
  * Abstract base class for representing IEC sentences
@@ -82,7 +81,7 @@ public abstract class Sentence {
 
         // Check checksum
         if (!sl.isChecksumMatch()) {
-            throw new SentenceException("Invalid checksum: " + sl.getChecksumField() + " should have been: "
+            throw new SentenceException("Invalid checksum for line: " + sl.getLine() + ": " + sl.getChecksumField() + " should have been: "
                     + sl.getChecksumString());
         }
 
