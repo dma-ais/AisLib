@@ -33,6 +33,8 @@ import dk.dma.enav.model.geometry.PositionTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
@@ -1159,4 +1161,67 @@ public class AisPacketFilters extends AisPacketFiltersBase {
             return true;
         }
     }
+
+
+    /**
+     * Similar to the {@code SamplingFilter} except that it applies the sampling per MMSI target
+     * @param minDistance the minimum distance between two packets per target
+     * @param minDuration the minimum time in ms between two packets per target
+     * @return the target sampling filter predicate
+     */
+    public static Predicate<AisPacket> targetSamplingFilter(final Integer minDistance, final Long minDuration) {
+        return new Predicate<AisPacket>() {
+
+            Map<Integer, Position> latestPositions = new ConcurrentHashMap<>();
+            Map<Integer, Long> latestTimestamps = new ConcurrentHashMap<>();
+            final Integer minDistanceInMeters = minDistance;
+            final Long minDurationInMS = minDuration;
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public boolean test(AisPacket p) {
+                // Get hold of the packet MMSI
+                AisMessage aisMessage = p.tryGetAisMessage();
+                if (aisMessage == null) {
+                    return false;
+                }
+                int mmsi = aisMessage.getUserId();
+
+                int type = aisMessage.getMsgId();
+
+                // Include all relevant static data reports
+                if (type == 5 || type == 24) {
+                    return true;
+                }
+
+                // Check that we only include relevant position reports
+                if (type != 1 && type != 2 && type != 3 && type != 18) {
+                    return false;
+                }
+
+                // Get hold of the position time
+                PositionTime pos = p.tryGetPositionTime();
+                if (pos == null) {
+                    return false;
+                }
+                Position latestPosition = latestPositions.get(mmsi);
+                Long latestTimestamp = latestTimestamps.get(mmsi);
+
+                // Check if the current position/time incurs an update
+                boolean updateDistance = this.minDistanceInMeters != null && (latestPosition == null || latestPosition.rhumbLineDistanceTo(pos) >= (double) this.minDistanceInMeters);
+                boolean updateDuration = this.minDurationInMS != null && (latestTimestamp == null || pos.getTime() - latestTimestamp >= this.minDurationInMS);
+                if (!updateDistance && !updateDuration) {
+                    return false;
+                } else {
+                    latestPositions.put(mmsi, pos);
+                    latestTimestamps.put(mmsi, pos.getTime());
+                    return true;
+                }
+
+            }
+        };
+    }
+
 }
