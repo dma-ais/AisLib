@@ -88,9 +88,11 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
 
     void restoreBackupFiles() throws IOException, ClassNotFoundException {
         List<Path> paths = new ArrayList<>();
-        for (Path path : Files.newDirectoryStream(backupFolder)) {
-            if (path.getFileName().toString().endsWith("-00")) {
-                paths.add(path);
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(backupFolder)) {
+            for (Path path : stream) {
+                if (path.getFileName().toString().endsWith("-00")) {
+                    paths.add(path);
+                }
             }
         }
         Path latestFull = IoUtil.findLatestModified(paths);
