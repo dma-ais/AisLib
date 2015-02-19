@@ -15,6 +15,8 @@
 
 package dk.dma.ais.packet;
 
+import dk.dma.ais.filter.ReplayDownSampleFilter;
+import dk.dma.ais.filter.ReplayDuplicateFilter;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
@@ -1224,4 +1226,22 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Removes duplicates within the given time window
+     * @param windowSize the sampling rate in ms
+     * @return the target sampling filter predicate
+     */
+    public static Predicate<AisPacket> duplicateFilter(final long windowSize) {
+        return new Predicate<AisPacket>() {
+            ReplayDuplicateFilter filter = new ReplayDuplicateFilter(windowSize);
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public boolean test(AisPacket p) {
+                return !filter.rejectedByFilter(p);
+            }
+        };
+    }
 }
