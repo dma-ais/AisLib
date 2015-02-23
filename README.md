@@ -1,8 +1,6 @@
 AisLib
 ======
 
-*Previously DaMSA/AisLib*
-
 ## Introduction ##
 
 DMA AisLib is a Java library for handling AIS messages. This include
