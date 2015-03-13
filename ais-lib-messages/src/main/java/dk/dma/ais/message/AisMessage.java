@@ -14,14 +14,6 @@
  */
 package dk.dma.ais.message;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Set;
-
 import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
@@ -29,6 +21,14 @@ import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Abstract base class for all AIS messages
@@ -255,8 +255,7 @@ public abstract class AisMessage implements Serializable {
             message = new AisMessage10(vdm);
             break;
         case 11:
-            // TODO implement real message class
-            message = new AisUnsupportedMessageType(vdm);
+            message = new AisMessage11(vdm);
             break;
         case 12:
             message = new AisMessage12(vdm);

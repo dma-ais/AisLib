@@ -23,13 +23,14 @@ import dk.dma.ais.sentence.Vdm;
  * Base station report as defined by ITU-R M.1371-4
  * 
  */
-public class AisMessage4 extends UTCDateResponseMessage {
+public class AisMessage11 extends UTCDateResponseMessage {
 
-    public AisMessage4() {
-        super(4);
+    public AisMessage11() {
+        super(11);
     }
 
-    public AisMessage4(Vdm vdm) throws AisMessageException, SixbitException {
+    public AisMessage11(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
     }
+
 }
