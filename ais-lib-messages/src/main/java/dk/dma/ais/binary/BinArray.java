@@ -180,7 +180,7 @@ public class BinArray {
      */
     public long getVal(int from, int to) throws SixbitException {
         if (to >= length) {
-            throw new SixbitException("Not enough bits");
+            throw new SixbitException(length + " is not enough bits. At least " + to + " expected.");
         }
         long val = 0;
         long powMask = 1;

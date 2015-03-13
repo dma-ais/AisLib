@@ -64,7 +64,7 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() != 168) {
-            throw new AisMessageException("Message 4 wrong length " + binArray.getLength());
+            throw new AisMessageException("Message 4 wrong length " + binArray.getLength() + " (should be 168)");
         }
 
         super.parse(binArray);
