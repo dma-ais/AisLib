@@ -182,17 +182,22 @@ public class TargetTracker implements Tracker {
      * Subscribes to all packets via {@link AisReaderGroup#stream()} from the
      * specified group.
      * 
-     * @param g
+     * @param stream
      *            the group
      * @return the subscription
      */
     @Override
     public Subscription readFromStream(AisPacketStream stream) {
-        return stream.subscribe(new Consumer<AisPacket>() {
-            public void accept(AisPacket p) {
-                update(p);
-            }
-        });
+        return stream.subscribe(aisPacketConsumer());
+    }
+
+    /**
+     * Returns a consumer for AIS packets.
+     *
+     * @return a consumer for AIS packets.
+     */
+    public Consumer<AisPacket> aisPacketConsumer() {
+        return this::update;
     }
 
     public TargetInfo getNewest(int mmsi) {
