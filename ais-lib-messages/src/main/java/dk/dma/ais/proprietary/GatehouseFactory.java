@@ -14,17 +14,19 @@
  */
 package dk.dma.ais.proprietary;
 
-import dk.dma.ais.sentence.SentenceLine;
-import dk.dma.enav.model.Country;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import dk.dma.ais.sentence.SentenceLine;
+import dk.dma.enav.model.Country;
 
 /**
- * 
+ *
  * @author Kasper Nielsen
  */
 public class GatehouseFactory extends ProprietaryFactory {
@@ -43,20 +45,20 @@ public class GatehouseFactory extends ProprietaryFactory {
             LOG.error("Error in Gatehouse proprietary tag: \"" + sl.getLine() + "\": Wrong checksum field: " + sl.getChecksumField() + ": Should be: " + sl.getChecksum());
             return null;
         }
-        
+
         List<String> fields = sl.getFields();
-        
+
         if (fields == null || fields.size() < 2) {
             LOG.error("Error in Gatehouse proprietary tag: no fields in line: " + sl.getLine());
             return null;
         }
-        
+
         // Only handle source tag
         Integer type = Integer.parseInt(fields.get(1));
         if (type == null || type.intValue() != 1) {
             return null;
         }
-        
+
         if (fields.size() < 14) {
             LOG.error("Error in Gatehouse proprietary tag: wrong number of fields " + fields.size() + " in line: " + sl.getLine());
             return null;
@@ -76,8 +78,9 @@ public class GatehouseFactory extends ProprietaryFactory {
         for (int i = 2; i < 9; i++) {
             dateParts[i - 2] = Integer.parseInt(fields.get(i));
         }
-        DateTime datetime = new DateTime(dateParts[0], dateParts[1], dateParts[2], dateParts[3], dateParts[4], dateParts[5],
-                dateParts[6], DateTimeZone.UTC);
+        ZonedDateTime zdt = ZonedDateTime.of(dateParts[0], dateParts[1], dateParts[2], dateParts[3], dateParts[4], dateParts[5],
+                dateParts[6] * 1000 * 1000, ZoneId.of("UTC"));
+        Date d = new Date(zdt.toInstant().toEpochMilli());
 
         Country midCountry = null;
         if (country.length() > 0 && !country.equals("0")) {
@@ -87,7 +90,7 @@ public class GatehouseFactory extends ProprietaryFactory {
             }
         }
 
-        return new GatehouseSourceTag(baseMmsi, midCountry, region, datetime.toDate(), sl.getLine());
+        return new GatehouseSourceTag(baseMmsi, midCountry, region, d, sl.getLine());
     }
 
 }

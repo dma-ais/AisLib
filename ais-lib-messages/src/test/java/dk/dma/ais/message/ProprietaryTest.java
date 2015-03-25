@@ -14,10 +14,11 @@
  */
 package dk.dma.ais.message;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,7 +33,7 @@ public class ProprietaryTest {
     public void pTest() {
         Assert.assertNotNull(ProprietaryFactory.parseTag(new SentenceLine("$PGHP,1,2010,6,11,11,46,11,874,276,0,,1,55*2C")));
     }
-    
+
     @Test
     public void nonSourceTagTest() {
         Assert.assertNull(ProprietaryFactory.parseTag(new SentenceLine("$PGHP,27,1*3B")));
@@ -46,14 +47,14 @@ public class ProprietaryTest {
         IProprietarySourceTag sourceTag = (IProprietarySourceTag) tag;
         Date timestamp = sourceTag.getTimestamp();
         Assert.assertNotNull(timestamp);
-        DateTime dt = new DateTime(timestamp, DateTimeZone.UTC);
+        ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp.getTime()), ZoneId.of("UTC"));
         Assert.assertEquals(dt.getYear(), 2010);
-        Assert.assertEquals(dt.getMonthOfYear(), 6);
+        Assert.assertEquals(dt.getMonthValue(), 6);
         Assert.assertEquals(dt.getDayOfMonth(), 11);
-        Assert.assertEquals(dt.getHourOfDay(), 11);
-        Assert.assertEquals(dt.getMinuteOfHour(), 46);
-        Assert.assertEquals(dt.getSecondOfMinute(), 11);
-        Assert.assertEquals(dt.getMillisOfSecond(), 874);
+        Assert.assertEquals(dt.getHour(), 11);
+        Assert.assertEquals(dt.getMinute(), 46);
+        Assert.assertEquals(dt.getSecond(), 11);
+        Assert.assertEquals(dt.getNano(), 874 * 1000 * 1000);
     }
 
     @Test
@@ -67,14 +68,14 @@ public class ProprietaryTest {
 
         Date timestamp = sourceTag.getTimestamp();
         Assert.assertNotNull(timestamp);
-        DateTime dt = new DateTime(timestamp, DateTimeZone.UTC);
+        ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp.getTime()), ZoneId.of("UTC"));
         Assert.assertEquals(dt.getYear(), 2013);
-        Assert.assertEquals(dt.getMonthOfYear(), 8);
+        Assert.assertEquals(dt.getMonthValue(), 8);
         Assert.assertEquals(dt.getDayOfMonth(), 23);
-        Assert.assertEquals(dt.getHourOfDay(), 8);
-        Assert.assertEquals(dt.getMinuteOfHour(), 34);
-        Assert.assertEquals(dt.getSecondOfMinute(), 27);
-        Assert.assertEquals(dt.getMillisOfSecond(), 56);
+        Assert.assertEquals(dt.getHour(), 8);
+        Assert.assertEquals(dt.getMinute(), 34);
+        Assert.assertEquals(dt.getSecond(), 27);
+        Assert.assertEquals(dt.getNano(), 56 * 1000 * 1000);
 
         Assert.assertEquals(sourceTag.getBaseMmsi().intValue(), 2190066);
         Assert.assertEquals(sourceTag.getRegion(), "");
