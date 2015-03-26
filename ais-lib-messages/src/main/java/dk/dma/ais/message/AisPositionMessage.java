@@ -22,15 +22,15 @@ import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS position message
- * 
+ *
  * An AIS position message is defined by ITU-R M.1371-4 in annex 8 - AIS messages section 3.1
- * 
+ *
  * This is a generalization for message types 1-3 and possibly more in the future.
- * 
+ *
  * Type 1: Scheduled position report (Class A shipborne mobile equipment) Type 2: Assigned scheduled position report
  * (Class A shipborne mobile equipment) Type 3: Special position report, response to interrogation;(Class A shipborne
  * mobile equipment)
- * 
+ *
  */
 public abstract class AisPositionMessage extends AisMessage implements IVesselPositionMessage {
 
@@ -53,10 +53,10 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
      * up to 708 degrees per min or higher Values between 0 and 708 degrees per min coded by ROTais = 4.733
      * SQRT(ROTsensor) degrees per min where ROTsensor is the Rate of Turn as input by an external Rate of Turn
      * Indicator (TI). ROTais is rounded to the nearest integer value.
-     * 
+     *
      * +127 = turning right at more than 5 degrees per 30 s (No TI available) -127 = turning left at more than 5 degrees
      * per 30 s (No TI available) -128 (80 hex) indicates no turn information available (default).
-     * 
+     *
      * ROT data should not be derived from COG information.
      */
     protected int rot; // 8 bits :
@@ -100,14 +100,14 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     /**
      * Special manoeuvre indicator: 0 = not available = default 1 = not engaged in special manoeuvre 2 = engaged in
      * special manoeuvre (i.e.: regional passing arrangement on Inland Waterway)
-     * 
+     *
      * NOTE: This field is added in ITU-R M1371-4
      */
     protected int specialManIndicator; // 2 bits
 
     /**
      * Not used. Should be set to zero. Reserved for future use.
-     * 
+     *
      * NOTE: In ITU-R M1371-4 this field is 3 bits compared to 1 previously
      */
     protected int spare; // 3 bits
@@ -121,7 +121,7 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     /**
      * SOTDMA/ITDMA sync state: sync state is part of the defined communication state (19) bits. The sync state is the
      * first 2 bits of the 19 bits in the communication state of the message.
-     * 
+     *
      * 0 UTC direct (see 3.1.1.1) 1 UTC indirect (see 3.1.1.2) 2 Station is synchronized to a base station (base direct)
      * 3 Station is synchronized to another station based on the highest number of received stations or to another
      * mobile station, which is directly synchronized to a base station
@@ -165,7 +165,7 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see dk.frv.ais.message.AisMessage#encode()
      */
     @Override
@@ -230,12 +230,12 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     public int getRot() {
         return rot;
     }
-    
+
     public Float getSensorRot() {
         if (rot == 128) {
             return null;
         }
-        int signedRot = (int)(byte)rot;
+        int signedRot = (byte)rot;
         float sensorRot = (float)Math.pow(signedRot / 4.733, 2);
         if (signedRot < 0) {
             sensorRot *= -1;

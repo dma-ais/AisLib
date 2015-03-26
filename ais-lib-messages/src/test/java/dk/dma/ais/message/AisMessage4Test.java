@@ -1,12 +1,13 @@
 package dk.dma.ais.message;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class AisMessage4Test {
 
@@ -14,18 +15,18 @@ public class AisMessage4Test {
     public void test() throws AisMessageException, SixbitException, SentenceException {
         Vdm vdm = new Vdm();
         vdm.parse(
-            "!AIVDM,1,1,,A,401uEPQuK0P230Cl=6MEqEi000S:00,4*61"
-        );
+                "!AIVDM,1,1,,A,401uEPQuK0P230Cl=6MEqEi000S:00,4*61"
+                );
 
-        AisMessage message = AisMessage.getInstance(vdm);
+        AisMessage.getInstance(vdm);
     }
 
     @Test
     public void test2() throws AisMessageException, SixbitException, SentenceException {
         Vdm vdm = new Vdm();
         vdm.parse(
-            "!AIVDM,1,1,,A,402R3WiuH@jaaPtgjhOgcA7000S:,0*7D"
-        );
+                "!AIVDM,1,1,,A,402R3WiuH@jaaPtgjhOgcA7000S:,0*7D"
+                );
 
         AisMessage message = AisMessage.getInstance(vdm);
         assertTrue(message instanceof AisMessage4);

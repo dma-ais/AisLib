@@ -19,11 +19,14 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 4
- * 
+ *
  * Base station report as defined by ITU-R M.1371-4
- * 
+ *
  */
 public class AisMessage4 extends UTCDateResponseMessage {
+
+    /** serialVersionUID. */
+    private static final long serialVersionUID = 1L;
 
     public AisMessage4() {
         super(4);
