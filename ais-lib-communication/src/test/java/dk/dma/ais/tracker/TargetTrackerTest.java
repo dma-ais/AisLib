@@ -47,7 +47,7 @@ public class TargetTrackerTest {
         aisReader = AisReaders.createDirectoryReader(testdata.toString(), "*.txt", true);
         
         targetTracker = new TargetTracker();
-        targetTracker.readFromStream(aisReader.stream());
+        targetTracker.subscribeToStream(aisReader.stream());
         
         aisReader.registerHandler(new Consumer<AisMessage>() {
             
@@ -79,7 +79,7 @@ public class TargetTrackerTest {
     @Test
     public void testExists() throws IOException, InterruptedException {
         for (AisTarget t: aisVesselTargets.values()) {
-            Objects.requireNonNull(targetTracker.getNewest(Objects.requireNonNull(t.getMmsi())));
+            Objects.requireNonNull(targetTracker.getLatestTarget(Objects.requireNonNull(t.getMmsi())));
         }
     }
     
@@ -99,7 +99,7 @@ public class TargetTrackerTest {
                         
                         names.add(n);
                         
-                        assert ((AisVesselTarget)targetTracker.getNewest(t.getMmsi()).getAisTarget()).getVesselStatic().getName() != null;
+                        assert ((AisVesselTarget)targetTracker.getLatestTarget(t.getMmsi()).getAisTarget()).getVesselStatic().getName() != null;
                         
                         
                     }

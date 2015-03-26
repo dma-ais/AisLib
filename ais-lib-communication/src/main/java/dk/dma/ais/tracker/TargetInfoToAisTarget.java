@@ -37,13 +37,13 @@ import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
  * @author Jens Tuxen
  *
  */
-public class TargetInfoToAisTarget {
+class TargetInfoToAisTarget {
 
     private static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
-        
+
         // Min-Heap = Oldest first when creating AisTarget (natural)
         PriorityQueue<AisPacket> messages = new PriorityQueue<>();
-        
+
         if (ti == null) {
             return messages;
         }
@@ -64,10 +64,10 @@ public class TargetInfoToAisTarget {
         return messages;
     }
 
-    public static AisTarget generateAisTarget(TargetInfo ti) {
+    static AisTarget generateAisTarget(TargetInfo ti) {
         PriorityQueue<AisPacket> normal = getPacketsInOrder(ti);
-        //why reversed also? A workaround for AisTargets without static information for some reason
-        //TODO: this needs to be replaced with a proper fix 
+        // why reversed also? A workaround for AisTargets without static information for some reason
+        // TODO: this needs to be replaced with a proper fix
         PriorityQueue<AisPacket> reversed = new PriorityQueue<AisPacket>(normal.size(), Collections.reverseOrder());
         reversed.addAll(normal);
         AisTarget a = generateAisTarget(normal);
@@ -76,23 +76,22 @@ public class TargetInfoToAisTarget {
     }
 
     /**
-     * Update aisTarget with messages (note that if the packets are of different
-     * class type,
+     * Update aisTarget with messages (note that if the packets are of different class type,
      * 
      * @param aisTarget
      * @param messages
      * @return
      */
-    static AisTarget updateAisTarget(AisTarget aisTarget,
-            PriorityQueue<AisPacket> messages) {
+    static AisTarget updateAisTarget(AisTarget aisTarget, PriorityQueue<AisPacket> messages) {
         while (!messages.isEmpty()) {
             aisTarget = updateWithNewestTakingPrecedent(aisTarget, messages.poll());
         }
         return aisTarget;
     }
-    
+
     /**
      * Newest AisTarget takes precedent when sources have conflicting Class A/B packets.
+     * 
      * @param t
      * @param m
      * @return
@@ -106,39 +105,36 @@ public class TargetInfoToAisTarget {
             // happens when we try to update ClassA with ClassB and visa
             // versa
             // the youngest (newest report) takes president
-            
+
             AisTarget tmp = AisTarget.createTarget(m.tryGetAisMessage());
-            
+
             if (tmp != null && tmp.getLastReport() != null) {
                 if (t != null && t.getLastReport() != null) {
                     return (tmp.getLastReport().after(t.getLastReport())) ? tmp : t;
                 }
                 return tmp;
             }
-            
+
         }
         return t;
-        
+
     }
 
     static AisTarget generateAisTarget(PriorityQueue<AisPacket> messages) {
         AisTarget aisTarget = null;
 
         while (aisTarget == null && !messages.isEmpty()) {
-            aisTarget = AisTarget.createTarget(messages.poll()
-                    .tryGetAisMessage());
+            aisTarget = AisTarget.createTarget(messages.poll().tryGetAisMessage());
         }
 
         return updateAisTarget(aisTarget, messages);
     }
 
-    public static void main(String[] args) throws IOException,
-            InterruptedException {
-        AisReader reader = AisReaders.createDirectoryReader("src/test",
-                "s*.txt", true);
+    public static void main(String[] args) throws IOException, InterruptedException {
+        AisReader reader = AisReaders.createDirectoryReader("src/test", "s*.txt", true);
 
         TargetTracker tt = new TargetTracker();
-        tt.readFromStream(reader.stream());
+        tt.subscribeToStream(reader.stream());
 
         reader.start();
         reader.join();
@@ -147,35 +143,28 @@ public class TargetInfoToAisTarget {
 
             @Override
             public void accept(MmsiTarget t) {
-                System.out.println("TARGET "+t.mmsi);
-                TargetInfo ti = t
-                        .getNewest(new Predicate<AisPacketSource>() {
-
-                            @Override
-                            public boolean test(AisPacketSource t) {
-                                return t != null;
-                            }
-                        });
+                System.out.println("TARGET " + t.mmsi);
+                TargetInfo ti = t.getLatest(ttt -> ttt != null);
                 AisTarget k = generateAisTarget(ti);
                 if (k != null && k instanceof AisVesselTarget) {
-                    AisVesselStatic avs = ((AisVesselTarget)k).getVesselStatic();
+                    AisVesselStatic avs = ((AisVesselTarget) k).getVesselStatic();
                     if (avs != null) {
                         System.out.println(avs.getName());
                     }
-                    
+
                 }
-                
+
                 for (AisPacket l : getPacketsInOrder(ti)) {
-                    
+
                     System.out.println(l.getBestTimestamp());
                     AisMessage m = l.tryGetAisMessage();
-                    
+
                     if (m instanceof AisMessage5) {
-                        System.out.println("MY NAME IS "+((AisMessage5)m).getName());
+                        System.out.println("MY NAME IS " + ((AisMessage5) m).getName());
                     }
 
                 }
-                System.out.println("TARGET END "+t.mmsi);
+                System.out.println("TARGET END " + t.mmsi);
 
             }
         });

@@ -49,8 +49,8 @@ public final class TargetInfo implements Serializable {
 
     /** The target type of the info, is never null. */
     final AisTargetType targetType;
-
-    /** The latest positionPacket that was received. */
+    
+    /** The latest position and time stamp that was received Packet that was received. */
     final long positionTimestamp;
     final byte[] positionPacket;
     final Position position;
@@ -61,11 +61,11 @@ public final class TargetInfo implements Serializable {
     final float sog;
     
     //Do not want serialization of mutable complex object
-    transient AisTarget aisTarget;
+    transient volatile AisTarget aisTarget;
     //further caching
-    transient AisPacket positionAisPacket;
-    transient AisPacket staticAisPacket1;
-    transient AisPacket staticAisPacket2;
+    transient volatile AisPacket positionAisPacket;
+    transient volatile AisPacket staticAisPacket1;
+    transient volatile AisPacket staticAisPacket2;
     
 
     // The latest static info
@@ -74,9 +74,19 @@ public final class TargetInfo implements Serializable {
     final byte[] staticData2;
     final int staticShipType;
 
-    private TargetInfo(int mmsi, AisTargetType targetType, long positionTimestamp, Position p, int heading, float cog,
+    final AisPacketSource packetSource;
+    /**
+     * @return the packetSource
+     */
+    public AisPacketSource getPacketSource() {
+        return packetSource;
+    }
+
+    private TargetInfo(AisPacketSource packetSource, int mmsi, AisTargetType targetType, long positionTimestamp, Position p, int heading, float cog,
             float sog, byte navStatus, byte[] positionPacket, long staticTimestamp, byte[] staticData1,
             byte[] staticData2, int staticShipType) {
+        this.packetSource=packetSource;
+                
         this.mmsi = mmsi;
         this.targetType = requireNonNull(targetType);
 
@@ -104,10 +114,18 @@ public final class TargetInfo implements Serializable {
         //this.aisTarget = getAisTarget();
     }
     
+    /**
+     * Returns the MMSI of the target.
+     * @return the MMSI of the target
+     */
     public int getMmsi() {
         return mmsi;
     }
 
+    /**
+     * Returns the target type of the target.
+     * @return
+     */
     public AisTargetType getTargetType() {
         return targetType;
     }
@@ -145,8 +163,8 @@ public final class TargetInfo implements Serializable {
     }
 
     public AisTarget getAisTarget() {
-        return aisTarget == null ? TargetInfoToAisTarget.generateAisTarget(this) : aisTarget ;
-        //return TargetInfoToAisTarget.generateAisTarget(this);
+        AisTarget t = aisTarget;
+        return t == null ?aisTarget = TargetInfoToAisTarget.generateAisTarget(this) : t;
     }
 
     /**
@@ -165,7 +183,12 @@ public final class TargetInfo implements Serializable {
      * @return the latest received position packet
      */
     public AisPacket getPositionPacket() {
-        return positionPacket == null ? null : (positionAisPacket == null ? AisPacket.fromByteArray(positionPacket) : positionAisPacket);
+        byte[] positionPacket = this.positionPacket;
+        if (positionPacket != null) {
+            AisPacket positionAisPacket = this.positionAisPacket;
+            return positionAisPacket == null ? positionAisPacket = AisPacket.fromByteArray(positionPacket): positionAisPacket;
+        }
+        return null;
     }
 
     /**
@@ -196,7 +219,7 @@ public final class TargetInfo implements Serializable {
             return getStaticPackets();
         } 
         
-        Collection<AisPacket> packets = new ArrayList<AisPacket>();
+        Collection<AisPacket> packets = new ArrayList<>();
         
         for (AisPacket p: getStaticPackets()) {
             packets.add(p);
@@ -208,17 +231,21 @@ public final class TargetInfo implements Serializable {
     }
 
     public AisPacket getStaticAisPacket1() {
-        if (staticData1 != null && staticAisPacket1 == null) {
-            return AisPacket.fromByteArray(staticData1);
+        byte[] staticData1 = this.staticData1;
+        if (staticData1 != null) {
+            AisPacket staticAisPacket1 = this.staticAisPacket1;
+            return staticAisPacket1 == null ? staticAisPacket1 = AisPacket.fromByteArray(staticData1): staticAisPacket1;
         }
-        return staticAisPacket1; 
+        return null;
     }
     
     public AisPacket getStaticAisPacket2() {
-        if (staticData2 != null && staticAisPacket2 == null) {
-            return AisPacket.fromByteArray(staticData2);
+        byte[] staticData2 = this.staticData2;
+        if (staticData2 != null) {
+            AisPacket staticAisPacket2 = this.staticAisPacket2;
+            return staticAisPacket2 == null ? staticAisPacket2 = AisPacket.fromByteArray(staticData2): staticAisPacket2;
         }
-        return staticAisPacket2; 
+        return null;
     }    
 
     /**
@@ -257,7 +284,8 @@ public final class TargetInfo implements Serializable {
      * @return the new target
      */
     private TargetInfo mergeWithStaticFrom(TargetInfo other) {
-        return new TargetInfo(mmsi, targetType, positionTimestamp, position, heading, cog, sog, navStatus,
+        //assert packetSource == other.packetSource
+        return new TargetInfo(packetSource, mmsi, targetType, positionTimestamp, position, heading, cog, sog, navStatus,
                 positionPacket, other.staticTimestamp, other.staticData1, other.staticData2, other.staticShipType);
     }
 
@@ -290,7 +318,7 @@ public final class TargetInfo implements Serializable {
                 return existing;
             }
 
-            return new TargetInfo(mmsi, targetType, timestamp, message.getValidPosition(), -1, -1, -1, (byte) -1,
+            return new TargetInfo(source, mmsi, targetType, timestamp, message.getValidPosition(), -1, -1, -1, (byte) -1,
                     packet.toByteArray(), -1, null, null, -1);
         }
         TargetInfo result = updateTargetWithPosition(existing, packet, message, mmsi, targetType, timestamp, source);
@@ -316,10 +344,10 @@ public final class TargetInfo implements Serializable {
                         .getNavStatus() : (byte) -1;
 
                 if (existing == null) {
-                    return new TargetInfo(mmsi, targetType, timestamp, p, heading, cog, sog, navStatus,
+                    return new TargetInfo(source, mmsi, targetType, timestamp, p, heading, cog, sog, navStatus,
                             packet.toByteArray(), -1, null, null, -1);
                 } else {
-                    return new TargetInfo(mmsi, targetType, timestamp, p, heading, cog, sog, navStatus,
+                    return new TargetInfo(source, mmsi, targetType, timestamp, p, heading, cog, sog, navStatus,
                             packet.toByteArray(), existing.staticTimestamp, existing.staticData1, existing.staticData2,
                             existing.staticShipType);
                 }
@@ -362,18 +390,16 @@ public final class TargetInfo implements Serializable {
                 }
 
                 if (existing == null) {
-                    return new TargetInfo(mmsi, targetType, -1, null, -1, -1, -1, (byte) -1, null, timestamp, static0,
+                    return new TargetInfo(source, mmsi, targetType, -1, null, -1, -1, -1, (byte) -1, null, timestamp, static0,
                             static1, c.getShipType());
                 } else {
-                    return new TargetInfo(mmsi, existing.targetType, existing.positionTimestamp, existing.position,
+                    return new TargetInfo(source, mmsi, existing.targetType, existing.positionTimestamp, existing.position,
                             existing.heading, existing.cog, existing.sog, existing.navStatus, existing.positionPacket,
                             timestamp, static0, static1, c.getShipType());
                 }
             }
         }
         return existing;
-        
-        
     }
 
 }

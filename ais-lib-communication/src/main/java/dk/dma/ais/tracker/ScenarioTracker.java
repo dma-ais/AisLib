@@ -54,9 +54,8 @@ import java.util.TreeMap;
  * @author Thomas Borg Salling
  */
 @NotThreadSafe
-public class ScenarioTracker implements Tracker {
+public class ScenarioTracker {
 
-    @Override
     public Subscription readFromStream(AisPacketStream stream) {
         return stream.subscribe(new Consumer<AisPacket>() {
             public void accept(AisPacket p) {

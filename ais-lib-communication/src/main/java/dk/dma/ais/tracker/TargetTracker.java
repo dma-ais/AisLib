@@ -16,8 +16,12 @@ package dk.dma.ais.tracker;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,12 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,54 +49,22 @@ import dk.dma.ais.reader.AisReaderGroup;
  * @author Kasper Nielsen
  * @author Jens Tuxen
  */
-public class TargetTracker implements Tracker {
-    private static final Predicate<? super Object> PREDICATETRUE = e->true;
+public class TargetTracker {
 
     /** All targets that we are currently monitoring. */
     final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>();
 
-    public int countNumberOfReports(
-            final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+    public int countNumberOfReports(BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
         requireNonNull(predicate);
-        final LongAdder la = new LongAdder();
-        targets.forEachValue(10, new java.util.function.Consumer<MmsiTarget>() {
-
-            @Override
-            public void accept(MmsiTarget t) {
-                for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
-                    if (predicate.test(e.getKey(), e.getValue())) {
-                        la.increment();
-                    }
+        LongAdder la = new LongAdder();
+        targets.values().stream().forEach(t -> {
+            for (TargetInfo i : t.values()) {
+                if (predicate.test(i.getPacketSource(), i)) {
+                    la.increment();
                 }
             }
         });
         return la.intValue();
-    }
-
-    /**
-     * Find all targets (including duplicates from other sources) which matches
-     * bipredicate
-     * 
-     * @param predicate
-     * @return
-     */
-    public Collection<TargetInfo> findTargetsIncludingDuplicates(
-            final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
-        requireNonNull(predicate);
-
-        final ConcurrentLinkedDeque<TargetInfo> tis = new ConcurrentLinkedDeque<TargetInfo>();
-
-        targets.forEachValue(10, new java.util.function.Consumer<MmsiTarget>() {
-            @Override
-            public void accept(MmsiTarget t) {
-                for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
-                    if (predicate.test(e.getKey(), e.getValue())) {
-                        tis.add(e.getValue());
-                    }
-                }
-            }
-        });
-        return tis;
     }
 
     /**
@@ -104,27 +74,15 @@ public class TargetTracker implements Tracker {
      *            a predicate that can be used on the source
      * @return the number of tracked targets
      */
-    public int countNumberOfTargets(
-            final Predicate<? super AisPacketSource> sourcePredicate,
-            final Predicate<? super TargetInfo> targetPredicate) {
-        requireNonNull(sourcePredicate);
-        requireNonNull(targetPredicate);
-        final LongAdder la = new LongAdder();
-        targets.forEachValue(10, new java.util.function.Consumer<MmsiTarget>() {
-            @Override
-            public void accept(MmsiTarget t) {
-                TargetInfo best = t.getNewest(sourcePredicate);
-                if (best != null && targetPredicate.test(best)) {
-                    la.increment();
-                    return;
-                }
-            }
-        });
-        return la.intValue();
+    public int countNumberOfTargets(Predicate<? super AisPacketSource> sourcePredicate,
+            Predicate<? super TargetInfo> targetPredicate) {
+        return (int) findTargetStream(sourcePredicate, targetPredicate).count();
     }
 
-    public int size() {
-        return targets.size();
+    public List<TargetInfo> findTargetList(Predicate<? super AisPacketSource> sourcePredicate,
+            Predicate<? super TargetInfo> targetPredicate) {
+        return new ArrayList<>(findTargetStream(sourcePredicate, targetPredicate).collect(
+                Collectors.toCollection(() -> new ConcurrentLinkedQueue<>())));
     }
 
     /**
@@ -136,141 +94,108 @@ public class TargetTracker implements Tracker {
      *            the predicate on targets
      * @return a map of matching targets
      */
-    public Map<Integer, TargetInfo> findTargets(
-            final Predicate<? super AisPacketSource> sourcePredicate,
-            final Predicate<? super TargetInfo> targetPredicate) {
-        requireNonNull(sourcePredicate);
-        requireNonNull(targetPredicate);
-        final ConcurrentHashMap<Integer, TargetInfo> result = new ConcurrentHashMap<>();
-        targets.forEachValue(10, t-> {            
-                TargetInfo best = t.getNewest(sourcePredicate);
-                if (best != null && targetPredicate.test(best)) {
-                    result.put(best.mmsi, best);
-                }
-            });
-
-        return result;
-    }
-
-    public Stream<TargetInfo> findTargets8(
-            final Predicate<? super AisPacketSource> sourcePredicate,
-            final Predicate<? super TargetInfo> targetPredicate) {
-        requireNonNull(sourcePredicate);
-        requireNonNull(targetPredicate);
-
-        return targets.values().stream().parallel()
-                .map(t -> t.getNewest(sourcePredicate)).parallel().
-                filter(ti -> ti != null).filter(ti -> targetPredicate.test(ti));
-    }
-
-    public Collection<TargetInfo> findTargets8List(
-            final Predicate<? super AisPacketSource> sourcePredicate,
-            final Predicate<? super TargetInfo> targetPredicate) {
-
-        return findTargets8(sourcePredicate,targetPredicate).collect(Collectors.toCollection(new Supplier<ConcurrentLinkedQueue<TargetInfo>>() {
-
-            @Override
-            public ConcurrentLinkedQueue<TargetInfo> get() {
-                // TODO Auto-generated method stub
-                return new ConcurrentLinkedQueue<TargetInfo>();
-            }
-        }));
-
+    public Map<Integer, TargetInfo> findTargets(Predicate<? super AisPacketSource> sourcePredicate,
+            Predicate<? super TargetInfo> targetPredicate) {
+        return findTargetStream(sourcePredicate, targetPredicate).collect(
+                Collectors.toConcurrentMap(e -> e.getMmsi(), e -> e));
     }
 
     /**
-     * Subscribes to all packets via {@link AisReaderGroup#stream()} from the
-     * specified group.
+     * Find all targets (including duplicates from other sources) which matches bipredicate
+     * 
+     * @param predicate
+     * @return
+     */
+    public Collection<TargetInfo> findTargetsIncludingDuplicates(
+            BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+        requireNonNull(predicate);
+
+        final ConcurrentLinkedDeque<TargetInfo> tis = new ConcurrentLinkedDeque<>();
+
+        targets.forEachValue(10, t -> {
+            for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
+                if (predicate.test(e.getKey(), e.getValue())) {
+                    tis.add(e.getValue());
+                }
+            }
+        });
+        return tis;
+    }
+
+    public Stream<TargetInfo> findTargetStream(Predicate<? super AisPacketSource> sourcePredicate,
+            Predicate<? super TargetInfo> targetPredicate) {
+        return latest(sourcePredicate).filter(requireNonNull(targetPredicate));
+    }
+
+    public TargetInfo getLatestTarget(int mmsi) {
+        return getLatestTarget(mmsi, e -> true);
+    }
+
+    public TargetInfo getLatestTarget(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
+        MmsiTarget target = targets.get(mmsi);
+        return target == null ? null : target.getLatest(sourcePredicate);
+    }
+
+    public int getNumberOfTargets() {
+        return targets.size();
+    }
+
+    public Set<AisPacketSource> getSourcesForMMSI(int mmsi) {
+        MmsiTarget t = targets.get(mmsi);
+        return t == null ? Collections.emptySet() : new HashSet<>(t.keySet());
+    }
+
+    private Stream<TargetInfo> latest(Predicate<? super AisPacketSource> sourcePredicate) {
+        requireNonNull(sourcePredicate);
+        return targets.values().parallelStream().map(t -> t.getLatest(sourcePredicate)).filter(e -> e != null);
+    }
+
+    /**
+     * Subscribes to all packets via {@link AisPacketStream#subscribe(Consumer)} from the specified stream.
      * 
      * @param stream
      *            the group
      * @return the subscription
      */
-    @Override
-    public Subscription readFromStream(AisPacketStream stream) {
-        return stream.subscribe(aisPacketConsumer());
+    public Subscription subscribeToStream(AisPacketStream stream) {
+        return stream.subscribe(c -> update(c));
     }
 
     /**
-     * Returns a consumer for AIS packets.
-     *
-     * @return a consumer for AIS packets.
-     */
-    public Consumer<AisPacket> aisPacketConsumer() {
-        return this::update;
-    }
-
-    public TargetInfo getNewest(int mmsi) {
-        return getNewest(mmsi, PREDICATETRUE);
-    }
-
-    public Entry<AisPacketSource, TargetInfo> getNewestEntry(int mmsi) {
-        return getNewestEntry(mmsi, PREDICATETRUE);
-    }
-
-    public Set<AisPacketSource> getAisPacketSources(int mmsi) {
-        return targets.get(mmsi).keySet();
-    }
-
-    public TargetInfo getNewest(int mmsi,
-            Predicate<? super AisPacketSource> sourcePredicate) {
-        MmsiTarget target = targets.get(mmsi);
-        return target == null ? null : target.getNewest(sourcePredicate);
-    }
-
-    public Entry<AisPacketSource, TargetInfo> getNewestEntry(int mmsi,
-            Predicate<? super AisPacketSource> sourcePredicate) {
-        MmsiTarget target = targets.get(mmsi);
-        return target == null ? null : target.getNewestEntry(sourcePredicate);
-    }
-
-    /**
-     * Removes all targets that are accepted by the specified predicate. Is
-     * typically used to remove targets based on time stamps.
+     * Removes all targets that are accepted by the specified predicate. Is typically used to remove targets based on
+     * time stamps.
      * 
      * @param predicate
      *            the predicate that selects which items to remove
      */
-    public void removeAll(
-            final BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+    public void removeAll(BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
         requireNonNull(predicate);
-        targets.forEachValue(10, new java.util.function.Consumer<MmsiTarget>() {
-            @Override
-            public void accept(MmsiTarget t) {
-                for (Map.Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
-                    if (predicate.test(e.getKey(), e.getValue())) {
-                        t.remove(e.getKey(), e.getValue());
-                    }
+        targets.values().stream().forEach(t -> {
+            for (TargetInfo i : t.values()) {
+                if (predicate.test(i.getPacketSource(), i)) {
+                    t.remove(i.getPacketSource(), i);
                 }
-                // if there are no more targets just remove it
-                // tryUpdate contains functionality to make sure we do not have
-                // any consistency issues.
-                if (t.isEmpty()) {
-                    targets.remove(t.mmsi, t);
-                }
+            }
+            if (t.isEmpty()) {
+                targets.remove(t.mmsi, t);
             }
         });
     }
 
     /**
-     * A little helper method that makes sure we do not get lost updates when
-     * updating a target. While the MMSI target is being cleaned.
+     * A little helper method that makes sure we do not get lost updates when updating a target. While the MMSI target
+     * is being cleaned.
      * 
      * @param mmsi
      *            the MMSI number
      * @param c
      *            a consumer that can use the MMSI target
      */
-    private void tryUpdate(final int mmsi, Consumer<MmsiTarget> c) {
+    private void tryUpdate(int mmsi, Consumer<MmsiTarget> c) {
         for (;;) {
             // Lets first get the target. Or create a new target if it does not
             // currently exist
-            MmsiTarget t = targets.computeIfAbsent(mmsi,
-                    new Function<Integer, MmsiTarget>() {
-                        public MmsiTarget apply(Integer ignore) {
-                            return new MmsiTarget(mmsi);
-                        }
-                    });
+            MmsiTarget t = targets.computeIfAbsent(mmsi, i -> new MmsiTarget(mmsi));
             c.accept(t);
 
             // We can get some very rare races with the cleanup method. So we
@@ -288,33 +213,23 @@ public class TargetTracker implements Tracker {
      * @param packet
      *            the packet to update the trigger with
      */
-    void update(final AisPacket packet) {
+    void update(AisPacket packet) {
         AisMessage message = packet.tryGetAisMessage();
-        final Date date = packet.getTimestamp();
+        Date date = packet.getTimestamp();
+
         // We only want to handle messages containing targets data
         // #1-#3, #4, #5, #18, #21, #24 and a valid timestamp
         if (message != null && date != null) {
             // find the target type
-            final AisTargetType targetType = message.getTargetType();
+            AisTargetType targetType = message.getTargetType();
             // only update if there is a target type
             if (targetType != null) {
-                tryUpdate(message.getUserId(), new Consumer<MmsiTarget>() {
-                    public void accept(final MmsiTarget t) {
-                        // lazy compute the new target info
-                        t.compute(
+                tryUpdate(
+                        message.getUserId(),
+                        t -> t.compute(
                                 AisPacketSource.create(packet),
-                                new BiFunction<AisPacketSource, TargetInfo, TargetInfo>() {
-                                    public TargetInfo apply(
-                                            AisPacketSource source,
-                                            TargetInfo existing) {
-                                        return TargetInfo.updateTarget(
-                                                existing, packet, targetType,
-                                                date.getTime(), source,
-                                                t.msg24Part0);
-                                    }
-                                });
-                    }
-                });
+                                (source, existing) -> TargetInfo.updateTarget(existing, packet, targetType,
+                                        date.getTime(), source, t.msg24Part0)));
             }
         }
     }
@@ -322,29 +237,19 @@ public class TargetTracker implements Tracker {
     /**
      * Used by the backup routine to restore data.
      * 
-     * @param sb
+     * @param packetSource
      *            the source
-     * @param ti
+     * @param targetInfo
      *            the target info
      */
-    void update(final AisPacketSource sb, final TargetInfo ti) {
-        tryUpdate(ti.mmsi, new Consumer<MmsiTarget>() {
-            public void accept(MmsiTarget t) {
-                t.merge(sb, ti,
-                        new BiFunction<TargetInfo, TargetInfo, TargetInfo>() {
-                            public TargetInfo apply(TargetInfo existing,
-                                    TargetInfo newOne) {
-                                return existing == null ? newOne : existing
-                                        .merge(newOne);
-                            }
-                        });
-            }
+    void update(AisPacketSource packetSource, TargetInfo targetInfo) {
+        tryUpdate(targetInfo.mmsi, t -> {
+            t.merge(packetSource, targetInfo, (ex, newOne) -> ex == null ? newOne : ex.merge(newOne));
         });
     }
 
     /**
-     * A single ship containing multiple reports for different combinations of
-     * sources.
+     * A single ship containing multiple reports for different combinations of sources.
      */
     @SuppressWarnings("serial")
     static class MmsiTarget extends ConcurrentHashMap<AisPacketSource, TargetInfo> {
@@ -354,10 +259,6 @@ public class TargetTracker implements Tracker {
 
         /** A cache of AIS messages 24 part 0. */
         final ConcurrentHashMap<AisPacketSource, byte[]> msg24Part0 = new ConcurrentHashMap<>();
-
-        //switch to implements and then
-        //final Cache<AisPacketSource, TargetInfo> cache = CacheBuilder
-        //        .newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build();
 
         MmsiTarget(int mmsi) {
             this.mmsi = mmsi;
@@ -370,7 +271,7 @@ public class TargetTracker implements Tracker {
          *            a predicate for filtering on the sources
          * @return the newest position and static data
          */
-        TargetInfo getNewest(Predicate<? super AisPacketSource> predicate) {
+        TargetInfo getLatest(Predicate<? super AisPacketSource> predicate) {
             TargetInfo best = null;
             for (Entry<AisPacketSource, TargetInfo> i : this.entrySet()) {
                 if (predicate.test(i.getKey())) {
@@ -379,119 +280,10 @@ public class TargetTracker implements Tracker {
                     // from one or the other.
                     // and merges it with the newest position information from
                     // one or the other (if needed).
-                    best = best == null ? i.getValue() : best.merge(i
-                            .getValue());
+                    best = best == null ? i.getValue() : best.merge(i.getValue());
                 }
             }
             return best;
         }
-
-        Entry<AisPacketSource, TargetInfo> getNewestEntry(
-                Predicate<? super AisPacketSource> predicate) {
-            TargetInfo best = null;
-            Entry<AisPacketSource, TargetInfo> bestEntry = null;
-            for (Entry<AisPacketSource, TargetInfo> i : entrySet()) {
-                if (predicate.test(i.getKey())) {
-                    best = best == null ? i.getValue() : best.merge(i
-                            .getValue());
-                }
-
-                if (i.getValue().equals(best)) {
-                    bestEntry = i;
-                }
-
-            }
-
-            return bestEntry;
-        }
-
-        //Switch to implements and use a guava cache for automatic AisPacketSource eviction
-        /*
-        @Override
-        public int size() {
-            return cache.asMap().size();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return cache.asMap().isEmpty();
-        }
-
-        @Override
-        public boolean containsKey(Object key) {
-            return cache.asMap().containsKey(key);
-        }
-
-        @Override
-        public boolean containsValue(Object value) {
-            return cache.asMap().containsValue(value);
-        }
-
-        @Override
-        public TargetInfo get(Object key) {
-            return cache.asMap().get(key);
-        }
-
-        @Override
-        public TargetInfo put(AisPacketSource key, TargetInfo value) {
-            return cache.asMap().put(key, value);
-        }
-
-        @Override
-        public TargetInfo remove(Object key) {
-            return cache.asMap().remove(key);
-        }
-
-        @Override
-        public void putAll(
-                Map<? extends AisPacketSource, ? extends TargetInfo> m) {
-            cache.asMap().putAll(m);
-
-        }
-
-        @Override
-        public void clear() {
-            cache.asMap().clear();
-        }
-
-        @Override
-        public Set<AisPacketSource> keySet() {
-            return cache.asMap().keySet();
-        }
-
-        @Override
-        public Collection<TargetInfo> values() {
-            return cache.asMap().values();
-        }
-
-        @Override
-        public Set<java.util.Map.Entry<AisPacketSource, TargetInfo>> entrySet() {
-            return cache.asMap().entrySet();
-        }
-
-        @Override
-        public TargetInfo putIfAbsent(AisPacketSource key, TargetInfo value) {
-            // TODO Auto-generated method stub
-            return cache.asMap().putIfAbsent(key, value);
-        }
-
-        @Override
-        public boolean remove(Object key, Object value) {
-            return cache.asMap().remove(key, value);
-        }
-
-        @Override
-        public boolean replace(AisPacketSource key, TargetInfo oldValue,
-                TargetInfo newValue) {
-            return cache.asMap().replace(key, oldValue, newValue);
-        }
-
-        @Override
-        public TargetInfo replace(AisPacketSource key, TargetInfo value) {
-            return cache.asMap().replace(key, value);
-        }
-        */
-
     }
-
 }
