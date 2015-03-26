@@ -14,10 +14,9 @@
  */
 package dk.dma.ais.message;
 
-
 /**
  * An AIS target type
- * 
+ *
  * @author Kasper Nielsen
  */
 public enum AisTargetType {
