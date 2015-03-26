@@ -19,13 +19,11 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import dk.dma.ais.message.AisMessage;
@@ -38,7 +36,8 @@ import dk.dma.ais.packet.AisPacketStream.Subscription;
 /**
  * A simple tracker that keeps track of targets.
  * <p>
- * There are no automatically cleanup instead users must regularly cleanup targets by calling {@link #removeAll(Predicate)}
+ * There are no automatically cleanup instead users must regularly cleanup targets by calling
+ * {@link #removeAll(Predicate)}
  * 
  * @author Kasper Nielsen
  * @author Jens Tuxen
@@ -233,9 +232,8 @@ public class TargetTracker {
      *            the target info
      */
     void update(AisPacketSource packetSource, TargetInfo targetInfo) {
-        tryUpdate(targetInfo.mmsi, t -> {
-            t.merge(packetSource, targetInfo, (ex, newOne) -> ex == null ? newOne : ex.merge(newOne));
-        });
+        tryUpdate(targetInfo.mmsi,
+                t -> t.merge(packetSource, targetInfo, (ex, newOne) -> ex == null ? newOne : ex.merge(newOne)));
     }
 
     /**
@@ -329,17 +327,17 @@ public class TargetTracker {
 // return tis;
 // }
 //
-///**
-//* Find all targets that matches the specified predicates.
-//* 
-//* @param sourcePredicate
-//*            the predicate on sources
-//* @param targetPredicate
-//*            the predicate on targets
-//* @return a map of matching targets
-//*/
-//public Map<Integer, TargetInfo> find(Predicate<? super AisPacketSource> sourcePredicate,
-//      Predicate<? super TargetInfo> targetPredicate) {
-//  return stream(sourcePredicate).filter(targetPredicate).collect(
-//          Collectors.toConcurrentMap(e -> e.getMmsi(), e -> e));
-//}
+// /**
+// * Find all targets that matches the specified predicates.
+// *
+// * @param sourcePredicate
+// * the predicate on sources
+// * @param targetPredicate
+// * the predicate on targets
+// * @return a map of matching targets
+// */
+// public Map<Integer, TargetInfo> find(Predicate<? super AisPacketSource> sourcePredicate,
+// Predicate<? super TargetInfo> targetPredicate) {
+// return stream(sourcePredicate).filter(targetPredicate).collect(
+// Collectors.toConcurrentMap(e -> e.getMmsi(), e -> e));
+// }
