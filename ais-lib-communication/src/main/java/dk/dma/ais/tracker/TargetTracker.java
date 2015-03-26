@@ -16,22 +16,14 @@ package dk.dma.ais.tracker;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,9 +34,11 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
 import dk.dma.ais.packet.AisPacketStream;
 import dk.dma.ais.packet.AisPacketStream.Subscription;
-import dk.dma.ais.reader.AisReaderGroup;
 
 /**
+ * A simple tracker that keeps track of targets.
+ * <p>
+ * There are no automatically cleanup instead users must regularly cleanup targets by calling {@link #removeAll(Predicate)}
  * 
  * @author Kasper Nielsen
  * @author Jens Tuxen
@@ -54,13 +48,19 @@ public class TargetTracker {
     /** All targets that we are currently monitoring. */
     final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>();
 
-    public int countNumberOfReports(BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
-        requireNonNull(predicate);
+    /**
+     * Returns the number of targets that is being tracked. This is usually a lot faster than invoking
+     * <tt>stream(predicate).count()</tt>
+     * 
+     * @return the number of targets that is being tracked
+     */
+    public int count(Predicate<? super AisPacketSource> predicate) {
         LongAdder la = new LongAdder();
         targets.values().stream().forEach(t -> {
             for (TargetInfo i : t.values()) {
-                if (predicate.test(i.getPacketSource(), i)) {
+                if (predicate.test(i.getPacketSource())) {
                     la.increment();
+                    return;
                 }
             }
         });
@@ -68,97 +68,44 @@ public class TargetTracker {
     }
 
     /**
-     * Returns the number of tracked targets.
+     * Returns the total number of reports for all targets. Each target might have multiple reports.
      * 
-     * @param sourcePredicate
-     *            a predicate that can be used on the source
-     * @return the number of tracked targets
+     * @return the total number of reports for all targets
      */
-    public int countNumberOfTargets(Predicate<? super AisPacketSource> sourcePredicate,
-            Predicate<? super TargetInfo> targetPredicate) {
-        return (int) findTargetStream(sourcePredicate, targetPredicate).count();
-    }
-
-    public List<TargetInfo> findTargetList(Predicate<? super AisPacketSource> sourcePredicate,
-            Predicate<? super TargetInfo> targetPredicate) {
-        return new ArrayList<>(findTargetStream(sourcePredicate, targetPredicate).collect(
-                Collectors.toCollection(() -> new ConcurrentLinkedQueue<>())));
-    }
-
-    /**
-     * Find all targets that matches the specified predicates.
-     * 
-     * @param sourcePredicate
-     *            the predicate on sources
-     * @param targetPredicate
-     *            the predicate on targets
-     * @return a map of matching targets
-     */
-    public Map<Integer, TargetInfo> findTargets(Predicate<? super AisPacketSource> sourcePredicate,
-            Predicate<? super TargetInfo> targetPredicate) {
-        return findTargetStream(sourcePredicate, targetPredicate).collect(
-                Collectors.toConcurrentMap(e -> e.getMmsi(), e -> e));
-    }
-
-    /**
-     * Find all targets (including duplicates from other sources) which matches bipredicate
-     * 
-     * @param predicate
-     * @return
-     */
-    public Collection<TargetInfo> findTargetsIncludingDuplicates(
-            BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
-        requireNonNull(predicate);
-
-        final ConcurrentLinkedDeque<TargetInfo> tis = new ConcurrentLinkedDeque<>();
-
-        targets.forEachValue(10, t -> {
-            for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
-                if (predicate.test(e.getKey(), e.getValue())) {
-                    tis.add(e.getValue());
-                }
-            }
+    public int countNumberOfReports() {
+        LongAdder la = new LongAdder();
+        targets.values().forEach(t -> {
+            la.add(t.size());
         });
-        return tis;
+        return la.intValue();
     }
 
-    public Stream<TargetInfo> findTargetStream(Predicate<? super AisPacketSource> sourcePredicate,
-            Predicate<? super TargetInfo> targetPredicate) {
-        return latest(sourcePredicate).filter(requireNonNull(targetPredicate));
+    /**
+     * Returns the latest target info for the specified MMSI number.
+     * 
+     * @param mmsi
+     *            the MMSI number
+     * @return the latest target info for the specified MMSI number
+     */
+    public TargetInfo get(int mmsi) {
+        return get(mmsi, e -> true);
     }
 
-    public TargetInfo getLatestTarget(int mmsi) {
-        return getLatestTarget(mmsi, e -> true);
-    }
-
-    public TargetInfo getLatestTarget(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
+    public TargetInfo get(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
         MmsiTarget target = targets.get(mmsi);
         return target == null ? null : target.getLatest(sourcePredicate);
     }
 
-    public int getNumberOfTargets() {
-        return targets.size();
-    }
-
-    public Set<AisPacketSource> getSourcesForMMSI(int mmsi) {
+    /**
+     * Returns a set of all packet sources for a given MMSI number.
+     * 
+     * @param mmsi
+     *            the MMSI number
+     * @return a set of all packet sources for a given MMSI number
+     */
+    public Set<AisPacketSource> getPacketSourcesForMMSI(int mmsi) {
         MmsiTarget t = targets.get(mmsi);
         return t == null ? Collections.emptySet() : new HashSet<>(t.keySet());
-    }
-
-    private Stream<TargetInfo> latest(Predicate<? super AisPacketSource> sourcePredicate) {
-        requireNonNull(sourcePredicate);
-        return targets.values().parallelStream().map(t -> t.getLatest(sourcePredicate)).filter(e -> e != null);
-    }
-
-    /**
-     * Subscribes to all packets via {@link AisPacketStream#subscribe(Consumer)} from the specified stream.
-     * 
-     * @param stream
-     *            the group
-     * @return the subscription
-     */
-    public Subscription subscribeToStream(AisPacketStream stream) {
-        return stream.subscribe(c -> update(c));
     }
 
     /**
@@ -168,18 +115,61 @@ public class TargetTracker {
      * @param predicate
      *            the predicate that selects which items to remove
      */
-    public void removeAll(BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+    public void removeAll(Predicate<? super TargetInfo> predicate) {
         requireNonNull(predicate);
         targets.values().stream().forEach(t -> {
             for (TargetInfo i : t.values()) {
-                if (predicate.test(i.getPacketSource(), i)) {
+                if (predicate.test(i)) {
                     t.remove(i.getPacketSource(), i);
                 }
             }
-            if (t.isEmpty()) {
-                targets.remove(t.mmsi, t);
-            }
-        });
+            // race with update mechanism is handled in #tryUpdate
+                if (t.isEmpty()) {
+                    targets.remove(t.mmsi, t);
+                }
+            });
+    }
+
+    /**
+     * Returns the number of targets that is being tracked.
+     * 
+     * @return the number of targets that is being tracked
+     * @see #count(Predicate)
+     */
+    public int size() {
+        return targets.size();
+    }
+
+    /**
+     * Creates a parallel stream of all targets.
+     * 
+     * @return a stream of targets
+     */
+    public Stream<TargetInfo> stream() {
+        return stream(e -> true);
+    }
+
+    /**
+     * Creates a parallel stream of targets with the specified source predicate.
+     * 
+     * @param predicate
+     *            the predicate on AIS packet source
+     * @return a stream of targets
+     */
+    public Stream<TargetInfo> stream(Predicate<? super AisPacketSource> predicate) {
+        requireNonNull(predicate, "predicate is null");
+        return targets.values().parallelStream().map(t -> t.getLatest(predicate)).filter(e -> e != null);
+    }
+
+    /**
+     * Subscribes to all packets via {@link AisPacketStream#subscribe(Consumer)} from the specified stream.
+     * 
+     * @param stream
+     *            the group
+     * @return the subscription
+     */
+    public Subscription subscribeToPacketStream(AisPacketStream stream) {
+        return stream.subscribe(c -> update(c));
     }
 
     /**
@@ -272,18 +262,84 @@ public class TargetTracker {
          * @return the newest position and static data
          */
         TargetInfo getLatest(Predicate<? super AisPacketSource> predicate) {
-            TargetInfo best = null;
-            for (Entry<AisPacketSource, TargetInfo> i : this.entrySet()) {
-                if (predicate.test(i.getKey())) {
-                    // if more than one target matches the predicate
-                    // we merge two at a. Taking the newest static information
-                    // from one or the other.
-                    // and merges it with the newest position information from
-                    // one or the other (if needed).
-                    best = best == null ? i.getValue() : best.merge(i.getValue());
+            // This method is fairly optimized to avoid creating excessive objects.
+            TargetInfo bestStatic = null;
+            TargetInfo bestPosition = null;
+            for (TargetInfo i : values()) {
+                if (predicate.test(i.getPacketSource())) {
+                    if (i.hasStaticInfo()
+                            && (bestStatic == null || i.getStaticTimestamp() > bestStatic.getStaticTimestamp())) {
+                        bestStatic = i;
+                    }
+                    if (i.hasPositionInfo()
+                            && (bestPosition == null || i.getPositionTimestamp() > bestPosition.getPositionTimestamp())) {
+                        bestPosition = i;
+                    }
                 }
             }
-            return best;
+            if (bestStatic == null || bestStatic == bestPosition) {
+                return bestPosition;
+            } else if (bestPosition == null) {
+                return bestStatic;
+            } else { // we need to merge two different targets
+                return bestPosition.mergeWithStaticFrom(bestStatic);
+            }
         }
     }
 }
+
+// public int countNumberOfReports(BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+// requireNonNull(predicate);
+// LongAdder la = new LongAdder();
+// targets.values().stream().forEach(t -> {
+// for (TargetInfo i : t.values()) {
+// if (predicate.test(i.getPacketSource(), i)) {
+// la.increment();
+// }
+// }
+// });
+// return la.intValue();
+// }
+//
+// public List<TargetInfo> findTargetsAsList(Predicate<? super AisPacketSource> sourcePredicate,
+// Predicate<? super TargetInfo> targetPredicate) {
+// return new ArrayList<>(stream(sourcePredicate).filter(targetPredicate).collect(
+// Collectors.toCollection(() -> new ConcurrentLinkedQueue<>())));
+// }
+
+// /**
+// * Find all targets (including duplicates from other sources) which matches bipredicate
+// *
+// * @param predicate
+// * @return
+// */
+// public Collection<TargetInfo> findTargetsIncludingDuplicates(
+// BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+// requireNonNull(predicate);
+//
+// final ConcurrentLinkedDeque<TargetInfo> tis = new ConcurrentLinkedDeque<>();
+//
+// targets.forEachValue(10, t -> {
+// for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
+// if (predicate.test(e.getKey(), e.getValue())) {
+// tis.add(e.getValue());
+// }
+// }
+// });
+// return tis;
+// }
+//
+///**
+//* Find all targets that matches the specified predicates.
+//* 
+//* @param sourcePredicate
+//*            the predicate on sources
+//* @param targetPredicate
+//*            the predicate on targets
+//* @return a map of matching targets
+//*/
+//public Map<Integer, TargetInfo> find(Predicate<? super AisPacketSource> sourcePredicate,
+//      Predicate<? super TargetInfo> targetPredicate) {
+//  return stream(sourcePredicate).filter(targetPredicate).collect(
+//          Collectors.toConcurrentMap(e -> e.getMmsi(), e -> e));
+//}

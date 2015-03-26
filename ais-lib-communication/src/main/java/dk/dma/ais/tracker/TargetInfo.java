@@ -283,7 +283,7 @@ public final class TargetInfo implements Serializable {
      * @param other
      * @return the new target
      */
-    private TargetInfo mergeWithStaticFrom(TargetInfo other) {
+    TargetInfo mergeWithStaticFrom(TargetInfo other) {
         //assert packetSource == other.packetSource
         return new TargetInfo(packetSource, mmsi, targetType, positionTimestamp, position, heading, cog, sog, navStatus,
                 positionPacket, other.staticTimestamp, other.staticData1, other.staticData2, other.staticShipType);

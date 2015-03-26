@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselStatic;
@@ -26,7 +25,6 @@ import dk.dma.ais.data.AisVesselTarget;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketSource;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
@@ -39,7 +37,7 @@ import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
  */
 class TargetInfoToAisTarget {
 
-    private static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
+    static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
 
         // Min-Heap = Oldest first when creating AisTarget (natural)
         PriorityQueue<AisPacket> messages = new PriorityQueue<>();
@@ -68,7 +66,7 @@ class TargetInfoToAisTarget {
         PriorityQueue<AisPacket> normal = getPacketsInOrder(ti);
         // why reversed also? A workaround for AisTargets without static information for some reason
         // TODO: this needs to be replaced with a proper fix
-        PriorityQueue<AisPacket> reversed = new PriorityQueue<AisPacket>(normal.size(), Collections.reverseOrder());
+        PriorityQueue<AisPacket> reversed = new PriorityQueue<>(normal.size(), Collections.reverseOrder());
         reversed.addAll(normal);
         AisTarget a = generateAisTarget(normal);
         updateAisTarget(a, reversed);
@@ -134,7 +132,7 @@ class TargetInfoToAisTarget {
         AisReader reader = AisReaders.createDirectoryReader("src/test", "s*.txt", true);
 
         TargetTracker tt = new TargetTracker();
-        tt.subscribeToStream(reader.stream());
+        tt.subscribeToPacketStream(reader.stream());
 
         reader.start();
         reader.join();
