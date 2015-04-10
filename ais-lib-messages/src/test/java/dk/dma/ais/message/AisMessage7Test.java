@@ -17,4 +17,14 @@ public class AisMessage7Test {
         AisMessage.getInstance(vdm);
     }
 
+    @Test(expected = SixbitException.class)
+    public void test2() throws AisMessageException, SixbitException, SentenceException {
+        Vdm vdm = new Vdm();
+        vdm.parse(
+            "!AIVDM,1,1,,A,7000W50rgMN2BK@:h00,2*4E\n"
+        );
+
+        AisMessage.getInstance(vdm);
+    }
+
 }
