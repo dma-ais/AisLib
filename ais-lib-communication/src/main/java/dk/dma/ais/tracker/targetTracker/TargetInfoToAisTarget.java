@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dk.dma.ais.tracker;
+package dk.dma.ais.tracker.targetTracker;
 
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselStatic;
@@ -22,7 +22,7 @@ import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
-import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
+import dk.dma.ais.tracker.targetTracker.TargetTracker.MmsiTarget;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -34,7 +34,6 @@ import java.util.function.Consumer;
  * 
  * @author Jens Tuxen
  *
- * @deprecated Use {@link dk.dma.ais.tracker.targetTracker.TargetInfoToAisTarget} instead.
  */
 class TargetInfoToAisTarget {
 
@@ -76,7 +75,7 @@ class TargetInfoToAisTarget {
 
     /**
      * Update aisTarget with messages (note that if the packets are of different class type,
-     * 
+     *
      * @param aisTarget
      * @param messages
      * @return
@@ -90,7 +89,7 @@ class TargetInfoToAisTarget {
 
     /**
      * Newest AisTarget takes precedent when sources have conflicting Class A/B packets.
-     * 
+     *
      * @param t
      * @param m
      * @return
@@ -132,7 +131,7 @@ class TargetInfoToAisTarget {
     public static void main(String[] args) throws IOException, InterruptedException {
         AisReader reader = AisReaders.createDirectoryReader("src/test", "s*.txt", true);
 
-        TargetTracker tt = new TargetTracker();
+        dk.dma.ais.tracker.targetTracker.TargetTracker tt = new TargetTracker();
         tt.subscribeToPacketStream(reader.stream());
 
         reader.start();

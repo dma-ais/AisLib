@@ -14,30 +14,8 @@
  */
 package dk.dma.ais.packet;
 
-import static dk.dma.enav.safety.SafetyZones.safetyZone;
-import static java.lang.Math.min;
-import static org.apache.commons.lang.StringUtils.isBlank;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.function.Predicate;
-
-import net.jcip.annotations.NotThreadSafe;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
 import de.micromata.opengis.kml.v_2_2_0.Camera;
@@ -51,18 +29,35 @@ import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Style;
 import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
-import dk.dma.ais.tracker.ScenarioTracker;
+import dk.dma.ais.tracker.scenarioTracker.ScenarioTracker;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Ellipse;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.CoordinateConverter;
-
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
-
 import dk.dma.enav.util.compass.CompassUtils;
 import dk.dma.enav.util.geometry.Point;
+import net.jcip.annotations.NotThreadSafe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static dk.dma.enav.safety.SafetyZones.safetyZone;
+import static java.lang.Math.min;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * This class receives AisPacket and use them to build a scenario

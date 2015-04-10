@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dk.dma.ais.tracker;
+package dk.dma.ais.tracker.targetTracker;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
 import dk.dma.ais.packet.AisPacketSource;
-import dk.dma.ais.tracker.TargetTracker.MmsiTarget;
+import dk.dma.ais.tracker.targetTracker.TargetTracker.MmsiTarget;
 import dk.dma.commons.util.io.IoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +49,6 @@ import static java.util.Objects.requireNonNull;
  * Takes care of backing up and restoring in case of a crash.
  * 
  * @author Kasper Nielsen
- *
- * @deprecated Use {@link dk.dma.ais.tracker.targetTracker.TargetTrackerFileBackupService} instead.
  */
 public class TargetTrackerFileBackupService extends AbstractScheduledService {
 
@@ -67,21 +65,21 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
             .toUpperCase();
 
     /** The tracker that we are make backups and restoring from. */
-    private final TargetTracker tracker;
+    private final dk.dma.ais.tracker.targetTracker.TargetTracker tracker;
 
     /** A list of those targets that have been backed up. */
-    private final Set<TargetInfo> backedUpTargets = Collections
-            .newSetFromMap(new IdentityHashMap<TargetInfo, Boolean>());
+    private final Set<dk.dma.ais.tracker.targetTracker.TargetInfo> backedUpTargets = Collections
+            .newSetFromMap(new IdentityHashMap<dk.dma.ais.tracker.targetTracker.TargetInfo, Boolean>());
 
     /**
      * Creates a new backup service.
-     * 
+     *
      * @param tracker
      *            the target tracker that we are make backups and restoring from
      * @param backupFolder
      *            the folder to backup and restore from
      */
-    public TargetTrackerFileBackupService(TargetTracker tracker, Path backupFolder) {
+    public TargetTrackerFileBackupService(dk.dma.ais.tracker.targetTracker.TargetTracker tracker, Path backupFolder) {
         this.tracker = requireNonNull(tracker);
         this.backupFolder = requireNonNull(backupFolder);
     }
@@ -116,11 +114,11 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
                         GZIPInputStream gos = new GZIPInputStream(bos);
                         ObjectInputStream oos = new ObjectInputStream(gos)) {
                     AisPacketSource sb = (AisPacketSource) oos.readObject();
-                    TargetInfo ti = (TargetInfo) oos.readObject();
+                    dk.dma.ais.tracker.targetTracker.TargetInfo ti = (dk.dma.ais.tracker.targetTracker.TargetInfo) oos.readObject();
                     while (sb != null && ti != null) {
                         tracker.update(sb, ti);
                         sb = (AisPacketSource) oos.readObject();
-                        ti = (TargetInfo) oos.readObject();
+                        ti = (dk.dma.ais.tracker.targetTracker.TargetInfo) oos.readObject();
                     }
                 }
             }
@@ -168,7 +166,7 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
                 GZIPOutputStream gos = new GZIPOutputStream(bos);
                 ObjectOutputStream oos = new ObjectOutputStream(gos)) {
             for (MmsiTarget t : tracker.targets.values()) {
-                for (Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
+                for (Entry<AisPacketSource, dk.dma.ais.tracker.targetTracker.TargetInfo> e : t.entrySet()) {
                     // Serialize it, if it is a full backup or if the backup flag has not yet been set
                     if (backedUpTargets.add(e.getValue())) {
                         oos.writeObject(e.getKey());

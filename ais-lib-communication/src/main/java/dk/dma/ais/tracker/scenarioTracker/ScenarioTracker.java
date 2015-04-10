@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dk.dma.ais.tracker;
+package dk.dma.ais.tracker.scenarioTracker;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -32,7 +32,6 @@ import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
-import java.util.function.Consumer;
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.lang.StringUtils;
@@ -46,6 +45,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 /**
  * This class can process a finite stream of AisPackets, and build a scenario

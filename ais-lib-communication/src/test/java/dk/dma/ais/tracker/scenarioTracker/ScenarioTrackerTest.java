@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package dk.dma.ais.tracker;
+package dk.dma.ais.tracker.scenarioTracker;
 
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketReader;

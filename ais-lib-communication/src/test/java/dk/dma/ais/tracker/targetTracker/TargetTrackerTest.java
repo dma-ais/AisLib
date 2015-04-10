@@ -13,7 +13,15 @@
  * limitations under the License.
  */
 
-package dk.dma.ais.tracker;
+package dk.dma.ais.tracker.targetTracker;
+
+import dk.dma.ais.data.AisTarget;
+import dk.dma.ais.data.AisVesselTarget;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisReaders;
+import dk.dma.ais.tracker.TargetTracker;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,19 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import dk.dma.ais.data.AisTarget;
-import dk.dma.ais.data.AisVesselTarget;
-import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisReaders;
-
 public class TargetTrackerTest {
 
     AisReader aisReader;
 
-    TargetTracker targetTracker;
+    dk.dma.ais.tracker.TargetTracker targetTracker;
 
     Map<Integer, AisTarget> aisVesselTargets;
 

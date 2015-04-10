@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dk.dma.ais.tracker;
+package dk.dma.ais.tracker.targetTracker;
 
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.message.AisMessage;
@@ -36,10 +36,8 @@ import static java.util.Objects.requireNonNull;
 /**
  * Immutable information about a target. Whenever we receive a new message from the target. We create a new TargetInfo
  * instance via {@link #updateTarget(TargetInfo, AisPacket, AisTargetType, long, AisPacketSource, Map)}.
- *
+ * 
  * @author Kasper Nielsen
- *
- * @deprecated Use {@link dk.dma.ais.tracker.targetTracker.TargetInfo} instead.
  */
 public final class TargetInfo implements Serializable {
     
