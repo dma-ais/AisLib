@@ -125,7 +125,7 @@ public abstract class AisMessage implements Serializable {
      * @return
      */
     public IProprietarySourceTag getSourceTag() {
-        LinkedList<IProprietaryTag> tags = vdm.getTags();
+        LinkedList<IProprietaryTag> tags = vdm == null ? null : vdm.getTags();
         if (tags == null) {
             return null;
         }
