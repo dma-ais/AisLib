@@ -30,6 +30,9 @@ import java.util.Collection;
  * AisPackets are received from the same vessel later on.
  *
  * The AisPackets are assumed to arrive in timely order; i.e. by ever-increasing values of timestamp.
+ *
+ * TODO: All tracker implementations in this package should implement a refactored version of this interface.
+ *
  */
 public interface Tracker {
 
