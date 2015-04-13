@@ -53,7 +53,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class EventEmittingTrackerTest {
+public class EventEmittingTrackerImplTest {
 
     final static int MMSI = 12345678;
 
@@ -111,7 +111,7 @@ public class EventEmittingTrackerTest {
         final int expectedNumberOfCellChangeEvents = messageQueue.size() - 1 /* minus the static msg */;
 
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -162,7 +162,7 @@ public class EventEmittingTrackerTest {
         final int expectedNumberOfCellChangeEvents = messageQueue.size() - 1 /* minus the static msg */;
 
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid, 1, MMSI, 3);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid, 1, MMSI, 3);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -272,7 +272,7 @@ public class EventEmittingTrackerTest {
         final Grid grid = Grid.createSize(200);
 
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -634,7 +634,7 @@ public class EventEmittingTrackerTest {
         }
 
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -668,7 +668,7 @@ public class EventEmittingTrackerTest {
     @Test
     public void testTimeEventsFired() {
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -677,7 +677,7 @@ public class EventEmittingTrackerTest {
 
         // Play events through tracker
         long firstTimestamp = System.currentTimeMillis();
-        int timeStep = EventEmittingTracker.TIME_EVENT_PERIOD_MILLIS / 2 - 1;
+        int timeStep = EventEmittingTrackerImpl.TIME_EVENT_PERIOD_MILLIS / 2 - 1;
 
         assertEquals(0, testSubscriber.getNumberOfTimeEventsReceived());
         tracker.update(firstTimestamp, new AisMessage24());
@@ -707,7 +707,7 @@ public class EventEmittingTrackerTest {
         }
 
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         for (AisPacket packet : packets) {
             tracker.update(packet);
@@ -726,16 +726,16 @@ public class EventEmittingTrackerTest {
         long t2 = t1 + 50*1000;
         PositionTime pt2 = PositionTime.create(60, 15, t2);
 
-        Map<Long,Position> interpolatedPositions = EventEmittingTracker.calculateInterpolatedPositions(pt1, pt2);
+        Map<Long,Position> interpolatedPositions = EventEmittingTrackerImpl.calculateInterpolatedPositions(pt1, pt2);
 
         assertEquals(4, interpolatedPositions.size());
         Set<Long> interpolationTimestamps = interpolatedPositions.keySet();
 
         // Assert timestamps
-        assertEquals((Long) (t1 + (long) EventEmittingTracker.INTERPOLATION_TIME_STEP_MILLIS), interpolationTimestamps.toArray()[0]);
-        assertEquals((Long) (t1 + (long) EventEmittingTracker.INTERPOLATION_TIME_STEP_MILLIS * 2), interpolationTimestamps.toArray()[1]);
-        assertEquals((Long) (t1 + (long) EventEmittingTracker.INTERPOLATION_TIME_STEP_MILLIS*3), interpolationTimestamps.toArray()[2]);
-        assertEquals((Long) (t1 + (long) EventEmittingTracker.INTERPOLATION_TIME_STEP_MILLIS * 4), interpolationTimestamps.toArray()[3]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS), interpolationTimestamps.toArray()[0]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS * 2), interpolationTimestamps.toArray()[1]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS*3), interpolationTimestamps.toArray()[2]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS * 4), interpolationTimestamps.toArray()[3]);
 
         // Assert positions
         assertEquals(Position.create(56, 11), interpolatedPositions.get(interpolationTimestamps.toArray()[0]));
@@ -750,7 +750,7 @@ public class EventEmittingTrackerTest {
      */
     @Test
     public void testTrackIsNotInterpolated() {
-        testInterpolation(EventEmittingTracker.TRACK_INTERPOLATION_REQUIRED_SECS - 1, 2 /* initial + second */ );
+        testInterpolation(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS - 1, 2 /* initial + second */ );
     }
 
     /**
@@ -758,7 +758,7 @@ public class EventEmittingTrackerTest {
      */
     @Test
     public void testTrackIsInterpolated() {
-        testInterpolation(EventEmittingTracker.TRACK_INTERPOLATION_REQUIRED_SECS + 1, 5 /* initial + second + 3 interpolated */);
+        testInterpolation(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS + 1, 5 /* initial + second + 3 interpolated */);
     }
 
     @Test
@@ -768,7 +768,7 @@ public class EventEmittingTrackerTest {
             packets[i] = AisPacket.from(NMEA_TEST_STRINGS[i]);
         }
 
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -824,11 +824,11 @@ public class EventEmittingTrackerTest {
         final int n1 = 0;
         final int n2 = 6;
 
-        assertTrue(packets[n2].getBestTimestamp() - packets[n1].getBestTimestamp() > EventEmittingTracker.TRACK_INTERPOLATION_REQUIRED_SECS * 1000);
+        assertTrue(packets[n2].getBestTimestamp() - packets[n1].getBestTimestamp() > EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS * 1000);
 
         // Create or mock dependencies
         final Grid grid = Grid.createSize(200);
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -866,7 +866,7 @@ public class EventEmittingTrackerTest {
     @Test
     public void testTrackIsInterpolatedEvenThoughStaticMessageIsBetweenToPositionUpdates() {
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -879,8 +879,8 @@ public class EventEmittingTrackerTest {
 
         long currentTimeMillis = System.currentTimeMillis();
         Date t1 = new Date(currentTimeMillis);
-        Date t2 = new Date(currentTimeMillis + (EventEmittingTracker.TRACK_INTERPOLATION_REQUIRED_SECS-1)*1*1000);
-        Date t3 = new Date(currentTimeMillis + (EventEmittingTracker.TRACK_INTERPOLATION_REQUIRED_SECS-1)*2*1000);
+        Date t2 = new Date(currentTimeMillis + (EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS-1)*1*1000);
+        Date t3 = new Date(currentTimeMillis + (EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS-1)*2*1000);
 
         AisMessage messageSeq1 = createAisMessage3(MMSI, p1);
         AisMessage messageSeq2 = createAisMessage5(MMSI);
@@ -891,32 +891,32 @@ public class EventEmittingTrackerTest {
         tracker.update(t3.getTime(), messageSeq3);
 
         // Assert result
-        int expectedNumberOfPositionChangeEvents = 2 /* p1, p3 */+ /* interpolated */(int) ((t3.getTime() - t1.getTime())/ EventEmittingTracker.INTERPOLATION_TIME_STEP_MILLIS);
+        int expectedNumberOfPositionChangeEvents = 2 /* p1, p3 */+ /* interpolated */(int) ((t3.getTime() - t1.getTime())/ EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS);
         assertEquals(expectedNumberOfPositionChangeEvents, testSubscriber.getNumberOfPositionChangedEventsReceived());
         assertEquals(Position.create(56, 11), testSubscriber.getCurrentPosition());
     }
 
     @Test
     public void testTrackIsStale() {
-        assertFalse(EventEmittingTracker.isTrackStale(0, 0, EventEmittingTracker.TRACK_STALE_SECS*1000 - 1));
-        assertFalse(EventEmittingTracker.isTrackStale(0, 0, EventEmittingTracker.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(0, 0, EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(0, 0, EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
 
         long now = new Date(System.currentTimeMillis()).getTime();
 
-        assertFalse(EventEmittingTracker.isTrackStale(now, now, now + EventEmittingTracker.TRACK_STALE_SECS*1000 - 1));
-        assertTrue(EventEmittingTracker.isTrackStale(now, now, now + EventEmittingTracker.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(now, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
+        assertTrue(EventEmittingTrackerImpl.isTrackStale(now, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
 
-        assertFalse(EventEmittingTracker.isTrackStale(1, now, now + EventEmittingTracker.TRACK_STALE_SECS*1000 - 1));
-        assertTrue(EventEmittingTracker.isTrackStale(1, now, now + EventEmittingTracker.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(1, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
+        assertTrue(EventEmittingTrackerImpl.isTrackStale(1, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
 
-        assertFalse(EventEmittingTracker.isTrackStale(now, 1, now + EventEmittingTracker.TRACK_STALE_SECS*1000 - 1));
-        assertTrue(EventEmittingTracker.isTrackStale(now, 1, now + EventEmittingTracker.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(now, 1, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
+        assertTrue(EventEmittingTrackerImpl.isTrackStale(now, 1, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
     }
 
     @Test
     public void testCanProcessStaleTracks() {
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Prepare test data
         Position startingPosition = Position.create((55.33714285714286 + 55.33624454148472)/2, (11.039401122894573 + 11.040299438552713)/2);
@@ -924,7 +924,7 @@ public class EventEmittingTrackerTest {
         AisMessage3 positionMessage = createAisMessage3(MMSI, aisPosition);
 
         Date t1 = new Date(System.currentTimeMillis());
-        Date t2 = new Date(t1.getTime() + EventEmittingTracker.TRACK_STALE_SECS*1000 + 60000);
+        Date t2 = new Date(t1.getTime() + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 60000);
 
         // Execute test where track goes stale
         tracker.update(t1.getTime(), positionMessage);
@@ -935,7 +935,7 @@ public class EventEmittingTrackerTest {
 
     private void testInterpolation(int secsBetweenMessages, int expectedNumberOfPositionChangeEvents) {
         // Create object under test
-        final EventEmittingTracker tracker = new EventEmittingTracker(grid);
+        final EventEmittingTrackerImpl tracker = new EventEmittingTrackerImpl(grid);
 
         // Prepare test data
         Position startingPosition = Position.create((55.33714285714286 + 55.33624454148472)/2, (11.039401122894573 + 11.040299438552713)/2);
