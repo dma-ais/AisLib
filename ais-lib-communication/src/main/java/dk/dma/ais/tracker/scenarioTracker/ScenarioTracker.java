@@ -115,6 +115,12 @@ public class ScenarioTracker implements Tracker {
         return targets.get(mmsi);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public int size() {
+        return targets.size();
+    }
+
     /**
      * Return all targets involved in this scenario and with a known location (ie. located inside of the bounding box).
      * @return

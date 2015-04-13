@@ -142,7 +142,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
      */
     @Override
     public void update(AisPacket packet) {
-        performUpdate(packet.getBestTimestamp(), packet.tryGetAisMessage(), track -> track.update(packet) );
+        performUpdate(packet.getBestTimestamp(), packet.tryGetAisMessage(), track -> track.update(packet));
     }
 
     @Override
@@ -370,10 +370,9 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         return trackCollection;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public int getNumberOfTracks() {
+    /** {@inheritDoc} */
+    @Override
+    public int size() {
         int n;
 
         tracksLock.lock();
@@ -384,6 +383,14 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         }
 
         return n;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated Use #size() instead
+     */
+    public int getNumberOfTracks() {
+        return size();
     }
 
     /**

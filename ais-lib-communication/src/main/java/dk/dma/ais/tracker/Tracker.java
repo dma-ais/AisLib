@@ -66,4 +66,11 @@ public interface Tracker {
      */
     Target get(int mmsi);
 
+    /**
+     * Returns the number of targets that is being tracked.
+     *
+     * @return the number of targets that is being tracked
+     */
+    int size();
+
 }
