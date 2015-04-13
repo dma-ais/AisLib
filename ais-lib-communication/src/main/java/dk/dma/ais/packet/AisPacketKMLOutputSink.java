@@ -495,7 +495,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         for (ScenarioTracker.Target target : targets) {
             ScenarioTracker.Target.PositionReport estimatedPosition = target.getPositionReportAt(t, 10);
             if (estimatedPosition != null && bbox.contains(estimatedPosition.getPositionTime())) {
-                createKmlShipShapePlacemark(situationFolder, target.getMmsi(), target.getName(), null, null,
+                createKmlShipShapePlacemark(situationFolder, String.valueOf(target.getMmsi()), target.getName(), null, null,
                         estimatedPosition.getLatitude(), estimatedPosition.getLongitude(), estimatedPosition.getCog(),
                         estimatedPosition.getSog(), estimatedPosition.getHeading(), target.getToBow(),
                         target.getToStern(), target.getToPort(), target.getToStarboard(),
@@ -540,7 +540,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                 for (long t = t1; t <= t2; t += dt) {
                     ScenarioTracker.Target.PositionReport positionReport = target.getPositionReportAt(new Date(t),
                             KML_POSITION_TIMESPAN_SECS);
-                    createKmlShipShapePlacemark(targetShipShapeFolder, target.getMmsi(), target.getName(), t
+                    createKmlShipShapePlacemark(targetShipShapeFolder, String.valueOf(target.getMmsi()), target.getName(), t
                             - (dt - 100), t, positionReport.getLatitude(), positionReport.getLongitude(),
                             positionReport.getCog(), positionReport.getSog(), positionReport.getHeading(),
                             target.getToBow(), target.getToStern(), target.getToPort(), target.getToStarboard(), false,
@@ -566,7 +566,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                     final long timespan = min(nextPositionReport != null ? nextPositionReport.getTimestamp()
                             - positionReport.getTimestamp() - 1 : maxTimespan, maxTimespan);
 
-                    createKmlShipShapePlacemark(targetShipShapeFolder, target.getMmsi(), target.getName(),
+                    createKmlShipShapePlacemark(targetShipShapeFolder, String.valueOf(target.getMmsi()), target.getName(),
                             positionReport.getTimestamp(), positionReport.getTimestamp() + timespan,
                             positionReport.getLatitude(), positionReport.getLongitude(), positionReport.getCog(),
                             positionReport.getSog(), positionReport.getHeading(), target.getToBow(),
@@ -741,7 +741,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
                         folder = otherTracksFolder;
                     }
 
-                    Placemark placemark = folder.createAndAddPlacemark().withId(target.getMmsi())
+                    Placemark placemark = folder.createAndAddPlacemark().withId(String.valueOf(target.getMmsi()))
                             .withName(target.getName());
 
                     Style style = placemark.createAndAddStyle().withId("_" + target.getName() + "TrackStyle");

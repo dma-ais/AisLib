@@ -24,6 +24,7 @@ import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
+import dk.dma.ais.tracker.Target;
 import dk.dma.ais.tracker.Tracker;
 import dk.dma.ais.tracker.eventEmittingTracker.events.CellChangedEvent;
 import dk.dma.ais.tracker.eventEmittingTracker.events.PositionChangedEvent;
@@ -143,6 +144,18 @@ public class EventEmittingTracker implements Tracker {
     @Override
     public void update(AisPacket packet) {
         performUpdate(packet.getBestTimestamp(), packet.tryGetAisMessage(), track -> track.update(packet) );
+    }
+
+    @Override
+    public Target get(int mmsi) {
+        Track track;
+        tracksLock.lock();
+        try {
+            track = tracks.get(mmsi);
+        } finally {
+            tracksLock.unlock();
+        }
+        return track;
     }
 
     void update(long timeOfCurrentUpdate, AisMessage aisMessage) {
@@ -340,7 +353,6 @@ public class EventEmittingTracker implements Tracker {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void registerSubscriber(Object subscriber) {
         eventBus.register(subscriber);
     }
@@ -348,7 +360,6 @@ public class EventEmittingTracker implements Tracker {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Collection<Track> getTracks() {
         tracksLock.lock();
         Collection<Track> trackCollection = null;
@@ -363,7 +374,6 @@ public class EventEmittingTracker implements Tracker {
     /**
      * {@inheritDoc}
      */
-    @Override
     public int getNumberOfTracks() {
         int n;
 

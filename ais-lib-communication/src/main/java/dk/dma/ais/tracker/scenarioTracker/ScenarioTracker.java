@@ -25,9 +25,7 @@ import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketReader;
-import dk.dma.ais.packet.AisPacketStream;
-import dk.dma.ais.packet.AisPacketStream.Subscription;
+import dk.dma.ais.tracker.Tracker;
 import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
@@ -37,7 +35,6 @@ import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,7 +42,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 
 /**
  * This class can process a finite stream of AisPackets, and build a scenario
@@ -54,24 +50,7 @@ import java.util.function.Consumer;
  * @author Thomas Borg Salling
  */
 @NotThreadSafe
-public class ScenarioTracker {
-
-    public Subscription readFromStream(AisPacketStream stream) {
-        return stream.subscribe(new Consumer<AisPacket>() {
-            public void accept(AisPacket p) {
-                update(p);
-            }
-        });
-    }
-
-    public void readFromPacketReader(AisPacketReader packetReader) throws IOException {
-        packetReader.forEachRemaining(new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket p) {
-                update(p);
-            }
-        });
-    }
+public class ScenarioTracker implements Tracker {
 
     /**
      * Get the Date of the first update in this scenario.
@@ -131,6 +110,11 @@ public class ScenarioTracker {
         return ImmutableSet.copyOf(targets.values());
     }
 
+    @Override
+    public dk.dma.ais.tracker.Target get(int mmsi) {
+        return targets.get(mmsi);
+    }
+
     /**
      * Return all targets involved in this scenario and with a known location (ie. located inside of the bounding box).
      * @return
@@ -151,7 +135,7 @@ public class ScenarioTracker {
             int mmsi = message.getUserId();
             Target target;
             if (! targets.containsKey(mmsi)) {
-                target = new Target();
+                target = new Target(mmsi);
                 targets.put(mmsi, target);
             } else {
                 target = targets.get(mmsi);
@@ -192,17 +176,14 @@ public class ScenarioTracker {
     }
 
     @NotThreadSafe
-    public final class Target implements Cloneable {
+    public final class Target extends dk.dma.ais.tracker.Target implements Cloneable {
 
-        public Target() {
+        public Target(int mmsi) {
+            super(mmsi);
         }
 
         public String getName() {
-            return StringUtils.isBlank(name) ? getMmsi() : name;
-        }
-
-        public String getMmsi() {
-            return String.valueOf(mmsi);
+            return StringUtils.isBlank(name) ? String.valueOf(getMmsi()) : name;
         }
 
         public int getImo() {
@@ -312,7 +293,7 @@ public class ScenarioTracker {
 
         private void update(AisPacket p) {
             AisMessage message = p.tryGetAisMessage();
-            checkOrSetMmsi(message);
+            checkMmsi(message);
             if (message instanceof AisPositionMessage) {
                 AisPositionMessage positionMessage = (AisPositionMessage) message;
                 if (positionMessage.isPositionValid()) {
@@ -338,19 +319,15 @@ public class ScenarioTracker {
             }
         }
 
-        private void checkOrSetMmsi(AisMessage message) {
+        private void checkMmsi(AisMessage message) {
             final int msgMmsi = message.getUserId();
-            if (mmsi < 0) {
-                mmsi = msgMmsi;
-            } else {
-                if (mmsi != msgMmsi) {
-                    throw new IllegalArgumentException("Message from mmsi " + msgMmsi + " cannot update target with mmsi " + mmsi);
-                }
+            if (getMmsi() != msgMmsi) {
+                throw new IllegalArgumentException("Message from mmsi " + msgMmsi + " cannot update target with mmsi " + getMmsi());
             }
         }
 
         private String name, destination;
-        private int mmsi=-1, imo=-1, toBow=-1, toStern=-1, toPort=-1, toStarboard=-1;
+        private int imo=-1, toBow=-1, toStern=-1, toPort=-1, toStarboard=-1;
         private ShipTypeCargo shipTypeCargo;
 
         private final Set<Object> tags = new HashSet<>();

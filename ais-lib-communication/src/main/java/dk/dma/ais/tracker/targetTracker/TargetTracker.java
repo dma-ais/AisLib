@@ -18,8 +18,7 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
-import dk.dma.ais.packet.AisPacketStream;
-import dk.dma.ais.packet.AisPacketStream.Subscription;
+import dk.dma.ais.tracker.Tracker;
 
 import java.util.Collections;
 import java.util.Date;
@@ -42,7 +41,7 @@ import static java.util.Objects.requireNonNull;
  * @author Kasper Nielsen
  * @author Jens Tuxen
  */
-public class TargetTracker {
+public class TargetTracker implements Tracker {
 
     /** All targets that we are currently monitoring. */
     final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>();
@@ -161,17 +160,6 @@ public class TargetTracker {
     }
 
     /**
-     * Subscribes to all packets via {@link AisPacketStream#subscribe(Consumer)} from the specified stream.
-     *
-     * @param stream
-     *            the group
-     * @return the subscription
-     */
-    public Subscription subscribeToPacketStream(AisPacketStream stream) {
-        return stream.subscribe(c -> update(c));
-    }
-
-    /**
      * A little helper method that makes sure we do not get lost updates when updating a target. While the MMSI target
      * is being cleaned.
      *
@@ -202,7 +190,7 @@ public class TargetTracker {
      * @param packet
      *            the packet to update the trigger with
      */
-    void update(AisPacket packet) {
+    public void update(AisPacket packet) {
         AisMessage message = packet.tryGetAisMessage();
         Date date = packet.getTimestamp();
 
@@ -232,7 +220,7 @@ public class TargetTracker {
      *            the target info
      */
     void update(AisPacketSource packetSource, dk.dma.ais.tracker.targetTracker.TargetInfo targetInfo) {
-        tryUpdate(targetInfo.mmsi,
+        tryUpdate(targetInfo.getMmsi(),
                 t -> t.merge(packetSource, targetInfo, (ex, newOne) -> ex == null ? newOne : ex.merge(newOne)));
     }
 

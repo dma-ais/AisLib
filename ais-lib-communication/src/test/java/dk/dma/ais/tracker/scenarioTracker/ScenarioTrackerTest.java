@@ -47,7 +47,7 @@ public class ScenarioTrackerTest {
 
     @Test
     public void testScenarioBegin() throws IOException {
-        scenarioTracker.readFromPacketReader(packetReader);
+        scenarioTracker.subscribeToPacketReader(packetReader);
         Date scenarioBegin = scenarioTracker.scenarioBegin();
         System.out.println("Scenario begin: " + scenarioBegin.toString());
         assertEquals(1363598349499L, scenarioBegin.getTime());
@@ -55,7 +55,7 @@ public class ScenarioTrackerTest {
 
     @Test
     public void testScenarioEnd() throws IOException {
-        scenarioTracker.readFromPacketReader(packetReader);
+        scenarioTracker.subscribeToPacketReader(packetReader);
         Date scenarioEnd = scenarioTracker.scenarioEnd();
         System.out.println("Scenario end: " + scenarioEnd.toString());
         assertEquals(1363598370922L, scenarioEnd.getTime());
@@ -63,14 +63,14 @@ public class ScenarioTrackerTest {
 
     @Test
     public void testGetTargets() throws IOException {
-        scenarioTracker.readFromPacketReader(packetReader);
+        scenarioTracker.subscribeToPacketReader(packetReader);
         Set<ScenarioTracker.Target> scenario = scenarioTracker.getTargets();
         assertEquals(34, scenario.size());
     }
 
     @Test
     public void testDimensions() throws IOException {
-        scenarioTracker.readFromPacketReader(packetReader);
+        scenarioTracker.subscribeToPacketReader(packetReader);
         Set<ScenarioTracker.Target> scenario = scenarioTracker.getTargets();
         ScenarioTracker.Target[] targets = scenario.toArray(new ScenarioTracker.Target[0]);
         assertEquals(72, targets[30].getToBow());
@@ -81,7 +81,7 @@ public class ScenarioTrackerTest {
 
     @Test
     public void testGetName() throws IOException {
-        scenarioTracker.readFromPacketReader(packetReader);
+        scenarioTracker.subscribeToPacketReader(packetReader);
         Set<ScenarioTracker.Target> scenario = scenarioTracker.getTargets();
         ScenarioTracker.Target[] targets = scenario.toArray(new ScenarioTracker.Target[0]);
         assertEquals("2190048", targets[0].getName());

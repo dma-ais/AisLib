@@ -23,10 +23,10 @@ import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketSource;
+import dk.dma.ais.tracker.Target;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Position;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -39,13 +39,10 @@ import static java.util.Objects.requireNonNull;
  * 
  * @author Kasper Nielsen
  */
-public final class TargetInfo implements Serializable {
+public final class TargetInfo extends Target {
     
     /** serialVersionUID. */
     private static final long serialVersionUID = 2L;
-
-    /** The MMSI number of the target. */
-    final int mmsi;
 
     /** The target type of the info, is never null. */
     final AisTargetType targetType;
@@ -66,7 +63,6 @@ public final class TargetInfo implements Serializable {
     transient volatile AisPacket positionAisPacket;
     transient volatile AisPacket staticAisPacket1;
     transient volatile AisPacket staticAisPacket2;
-    
 
     // The latest static info
     final long staticTimestamp;
@@ -85,9 +81,10 @@ public final class TargetInfo implements Serializable {
     private TargetInfo(AisPacketSource packetSource, int mmsi, AisTargetType targetType, long positionTimestamp, Position p, int heading, float cog,
             float sog, byte navStatus, byte[] positionPacket, long staticTimestamp, byte[] staticData1,
             byte[] staticData2, int staticShipType) {
+        super(mmsi);
+
         this.packetSource=packetSource;
                 
-        this.mmsi = mmsi;
         this.targetType = requireNonNull(targetType);
 
         // Position data
@@ -112,14 +109,6 @@ public final class TargetInfo implements Serializable {
         
         // Caching for getAisTarget()
         //this.aisTarget = getAisTarget();
-    }
-    
-    /**
-     * Returns the MMSI of the target.
-     * @return the MMSI of the target
-     */
-    public int getMmsi() {
-        return mmsi;
     }
 
     /**
@@ -173,7 +162,7 @@ public final class TargetInfo implements Serializable {
      * @return the country of the vessel based on its MMSI number
      */
     public Country getCountry() {
-        return Country.getCountryForMmsi(mmsi);
+        return Country.getCountryForMmsi(getMmsi());
     }
 
     /**
@@ -285,7 +274,7 @@ public final class TargetInfo implements Serializable {
      */
     TargetInfo mergeWithStaticFrom(TargetInfo other) {
         //assert packetSource == other.packetSource
-        return new TargetInfo(packetSource, mmsi, targetType, positionTimestamp, position, heading, cog, sog, navStatus,
+        return new TargetInfo(packetSource, getMmsi(), targetType, positionTimestamp, position, heading, cog, sog, navStatus,
                 positionPacket, other.staticTimestamp, other.staticData1, other.staticData2, other.staticShipType);
     }
 

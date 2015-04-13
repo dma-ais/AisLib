@@ -14,6 +14,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -271,7 +272,7 @@ public class TrackTest {
 
         Track clone = track.clone();
 
-        assertTrue(clone != track);
+        assertNotSame(clone, track);
         assertEquals(clone.toString(), track.toString());
         assertEquals(clone.getTrackingReports().size(), track.getTrackingReports().size());
         assertEquals(clone.getNewestTrackingReport(), track.getNewestTrackingReport());

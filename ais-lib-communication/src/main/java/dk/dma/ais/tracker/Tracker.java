@@ -17,49 +17,53 @@
 package dk.dma.ais.tracker;
 
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.tracker.eventEmittingTracker.Track;
+import dk.dma.ais.packet.AisPacketReader;
+import dk.dma.ais.packet.AisPacketStream;
 
-import java.util.Collection;
+import java.io.IOException;
 
 /**
  * A tracking service receives AisPackets and based on these it maintains a collection of all known tracks,
  * including their position, speed, course, etc.
  *
- * If a certain track has not received any updates for a while
- * it enters status 'stale' and will receive no further updates. Instead a new track is created if more
- * AisPackets are received from the same vessel later on.
- *
  * The AisPackets are assumed to arrive in timely order; i.e. by ever-increasing values of timestamp.
  *
- * TODO: All tracker implementations in this package should implement a refactored version of this interface.
- *
+ * TODO: Identify further methods which can be shared between tracker implementations.
  */
 public interface Tracker {
 
     /**
-     * Update the tracker with a new AisPacket.
+     * Start to track targets based on AisPackets received from an AisPacketStream.
+     *
+     * @param stream the AisPacketStream to track.
+     * @return the Subscription.
+     */
+    default AisPacketStream.Subscription subscribeToPacketStream(AisPacketStream stream) {
+        return stream.subscribe(p -> update(p));
+    }
+
+    /**
+     * Start to track targets based on AisPackets received from an AisPacketReader.
+     *
+     * @param packetReader the AisPacketReader to receive packets from.
+     */
+    default void subscribeToPacketReader(AisPacketReader packetReader) throws IOException {
+        packetReader.forEachRemaining(p -> update(p));
+    }
+
+    /**
+     * Update the tracker with a single AisPacket.
      * @param aisPacket the AIS packet.
      */
     void update(AisPacket aisPacket);
 
     /**
-     * Count and return the number of tracks current ACTIVE or STALE in the tracker.
-     * @return the no. of tracks.
-     */
-    int getNumberOfTracks();
-
-    /**
-     *  Register a subscriber to receive Events from the tracker.
-     *  The mechanism is based on Google's EventBus.
+     * Returns the latest target info for the specified MMSI number.
      *
-     *  @see <a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/eventbus/EventBus.html">Google EventBus</a>
+     * @param mmsi
+     *            the MMSI number
+     * @return the latest target info for the specified MMSI number
      */
-    void registerSubscriber(Object subscriber);
+    Target get(int mmsi);
 
-    /**
-     * Get a collection of tracks from the tracker. The tracks in the set are still "live" and may be change state asynchronously by tracker threads.
-     *
-     * @return The set of of Tracks contained in the track at the time of the call.
-     */
-    Collection<Track> getTracks();
 }
