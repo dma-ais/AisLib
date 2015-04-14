@@ -160,6 +160,39 @@ public class TargetTracker implements Tracker {
     }
 
     /**
+     * Creates a sequential stream of all targets.
+     *
+     * @return a stream of targets
+     */
+    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> streamSequential() {
+        return streamSequential(src -> true);
+    }
+
+    /**
+     * Creates a sequential stream of targets with the specified source predicate.
+     *
+     * @param sourcePredicate
+     *            the predicate on AIS packet source
+     * @return a stream of targets
+     */
+    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate) {
+        requireNonNull(sourcePredicate, "sourcePredicate is null");
+        return streamSequential(sourcePredicate, target -> true);
+    }
+
+    /**
+     * Creates a sequential stream of targets with the specified source predicate and matching the given targetPredicate.
+     * @param sourcePredicate
+     * @param targetPredicate
+     * @return a stream of targets
+     */
+    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate, Predicate<? super TargetInfo> targetPredicate) {
+        requireNonNull(targetPredicate, "targetPredicate is null");
+        requireNonNull(sourcePredicate, "sourcePredicate is null");
+        return targets.values().stream().map(t -> t.getLatest(sourcePredicate)).filter(e -> e != null).filter(targetPredicate);
+    }
+
+    /**
      * A little helper method that makes sure we do not get lost updates when updating a target. While the MMSI target
      * is being cleaned.
      *

@@ -17,9 +17,10 @@ package dk.dma.ais.tracker.targetTracker;
 
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselTarget;
+import dk.dma.ais.packet.AisPacketSource;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
-import dk.dma.ais.tracker.TargetTracker;
+import dk.dma.enav.model.Country;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,12 +32,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 public class TargetTrackerTest {
 
     AisReader aisReader;
 
-    dk.dma.ais.tracker.TargetTracker targetTracker;
+    TargetTracker targetTracker;
 
     Map<Integer, AisTarget> aisVesselTargets;
 
@@ -92,15 +98,58 @@ public class TargetTrackerTest {
                         assert ((AisVesselTarget) targetTracker.get(t.getMmsi()).getAisTarget()).getVesselStatic()
                                 .getName() != null;
 
-
                     }
                 }
 
             }
         }
-
-
     }
 
+    @Test
+    public void testGetPacketSourcesForMMSI() {
+        Set<AisPacketSource> packetSourcesForMMSI = targetTracker.getPacketSourcesForMMSI(219008474);
+
+        assertEquals(2, packetSourcesForMMSI.size());
+        Object[] aisPacketSource = packetSourcesForMMSI.stream().toArray();
+
+        assertNotEquals(((AisPacketSource) aisPacketSource[0]).getSourceBaseStation(), ((AisPacketSource) aisPacketSource[1]).getSourceBaseStation());
+
+        assertEquals(2190074, ((AisPacketSource) aisPacketSource[0]).getSourceBaseStation());
+        assertEquals(Country.getByCode("DNK"), ((AisPacketSource) aisPacketSource[0]).getSourceCountry());
+        assertNull(((AisPacketSource) aisPacketSource[0]).getSourceId());
+        assertEquals("", ((AisPacketSource) aisPacketSource[0]).getSourceRegion());
+        assertNull(((AisPacketSource) aisPacketSource[0]).getSourceType());
+
+        assertEquals(2190072, ((AisPacketSource) aisPacketSource[1]).getSourceBaseStation());
+        assertEquals(Country.getByCode("DNK"), ((AisPacketSource) aisPacketSource[1]).getSourceCountry());
+        assertNull(((AisPacketSource) aisPacketSource[1]).getSourceId());
+        assertEquals("", ((AisPacketSource) aisPacketSource[1]).getSourceRegion());
+        assertNull(((AisPacketSource) aisPacketSource[1]).getSourceType());
+    }
+
+    @Test
+    public void testStream() {
+        assertEquals(1788, targetTracker.stream().count()); // TODO How can this be different from targetTracker.size() ?
+        assertEquals(1844, targetTracker.size());
+        assertEquals(993310001, targetTracker.stream().mapToInt(t -> t.getMmsi()).max().orElse(-1));
+        assertEquals(0, targetTracker.stream().mapToInt(t -> t.getMmsi()).min().orElse(-1));
+    }
+
+    @Test
+    public void testStreamSequentialByDualPredicates() {
+        assertEquals(1788, targetTracker.streamSequential(t -> true, src -> true).count());   // TODO How can this be different from targetTracker.size() ?
+
+        // There are 7 vessels reported from Greenland
+        assertEquals(7, targetTracker.streamSequential(
+            src -> src.getSourceCountry() == Country.getByCode("GRL"),
+            t -> true
+        ).count());
+
+        // Only 1 of these vessels has static info
+        assertEquals(1, targetTracker.streamSequential(
+            src -> src.getSourceCountry() == Country.getByCode("GRL"),
+            t -> t.hasStaticInfo()
+        ).count());
+    }
 
 }
