@@ -19,8 +19,8 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
 import dk.dma.ais.message.AisPositionMessage;
-import dk.dma.ais.tracker.TargetInfo;
-import dk.dma.ais.tracker.TargetTracker;
+import dk.dma.ais.tracker.targetTracker.TargetInfo;
+import dk.dma.ais.tracker.targetTracker.TargetTracker;
 import dk.dma.enav.model.geometry.Area;
 import org.apache.commons.lang.ArrayUtils;
 
