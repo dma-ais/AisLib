@@ -16,6 +16,7 @@ package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage21;
+import dk.dma.ais.message.AisTargetType;
 
 /**
  * Class to represent AIS AtoN target
@@ -35,6 +36,11 @@ public class AisAtonTarget extends AisTarget {
             return;
         }
         super.update(aisMessage);
+    }
+
+    @Override
+    public AisTargetType getTargetType() {
+        return AisTargetType.ATON;
     }
 
     /**

@@ -16,6 +16,7 @@ package dk.dma.ais.data;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage4;
+import dk.dma.ais.message.AisTargetType;
 
 /**
  * Class to represent an AIS base station target
@@ -35,6 +36,11 @@ public class AisBsTarget extends AisTarget {
             return;
         }
         super.update(aisMessage);
+    }
+
+    @Override
+    public AisTargetType getTargetType() {
+        return AisTargetType.BS;
     }
 
     /**

@@ -14,9 +14,11 @@
  */
 package dk.dma.ais.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPositionMessage;
+import dk.dma.ais.message.AisTargetType;
 
 /**
  * Class to represent a class A vessel target
@@ -42,12 +44,19 @@ public class AisClassATarget extends AisVesselTarget {
         super.update(aisMessage);
     }
 
+    @JsonIgnore
     public AisClassAPosition getClassAPosition() {
         return (AisClassAPosition) this.vesselPosition;
     }
 
+    @JsonIgnore
     public AisClassAStatic getClassAStatic() {
         return (AisClassAStatic) this.vesselStatic;
+    }
+
+    @Override
+    public AisTargetType getTargetType() {
+        return AisTargetType.A;
     }
 
     /**

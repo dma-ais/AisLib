@@ -14,9 +14,6 @@
  */
 package dk.dma.ais.data;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage18;
 import dk.dma.ais.message.AisMessage19;
@@ -26,8 +23,12 @@ import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.AisStaticCommon;
+import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.enav.model.Country;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Abstract class representing any AIS target
@@ -110,6 +111,8 @@ public abstract class AisTarget implements Serializable {
     public void setCreated(Date created) {
         this.created = created;
     }
+
+    public abstract AisTargetType getTargetType();
 
     /**
      * Create new AIS target instance based on AIS message
