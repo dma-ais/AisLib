@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -139,16 +140,37 @@ public class TargetTrackerTest {
     public void testStreamSequentialByDualPredicates() {
         assertEquals(1788, targetTracker.streamSequential(t -> true, src -> true).count());   // TODO How can this be different from targetTracker.size() ?
 
+        Stream<TargetInfo> targetStream = targetTracker.streamSequential(
+                src -> src.getSourceCountry() == Country.getByCode("GRL"),
+                t -> true
+        );
+        System.out.println("Tracking:");
+        targetStream.forEach(
+                t -> {
+                    System.out.print("   " + t.getAisTarget().getMmsi() + " ");
+                    if (t.getAisTarget().getCountry() != null)
+                        System.out.print(t.getAisTarget().getCountry().getThreeLetter() + " ");
+                    System.out.print(t.getAisTarget().getTargetType() + " ");
+                    if (t.getAisTarget() instanceof AisVesselTarget && t.hasStaticInfo()) {
+                        System.out.print("CS:" + ((AisVesselTarget) t.getAisTarget()).getVesselStatic().getCallsign() + " NAME:" + ((AisVesselTarget) t.getAisTarget()).getVesselStatic().getName() + "");
+                    } else {
+                        System.out.print("<no static>");
+                    }
+                    System.out.println();
+                }
+        );
+
         // There are 7 vessels reported from Greenland
         assertEquals(7, targetTracker.streamSequential(
-            src -> src.getSourceCountry() == Country.getByCode("GRL"),
-            t -> true
+                src -> src.getSourceCountry() == Country.getByCode("GRL"),
+                t -> true
         ).count());
 
-        // Only 1 of these vessels has static info
+        // 1 of these vessels has static info and can be filtered by name
         assertEquals(1, targetTracker.streamSequential(
-            src -> src.getSourceCountry() == Country.getByCode("GRL"),
-            t -> t.hasStaticInfo()
+                src -> src.getSourceCountry() == Country.getByCode("GRL"),
+                targetInfo ->
+                        targetInfo.getAisTarget() instanceof AisVesselTarget && (((AisVesselTarget) targetInfo.getAisTarget()).getVesselStatic() != null) ? ((AisVesselTarget) targetInfo.getAisTarget()).getVesselStatic().getName().equals("INUKSUK 1") : false
         ).count());
     }
 
