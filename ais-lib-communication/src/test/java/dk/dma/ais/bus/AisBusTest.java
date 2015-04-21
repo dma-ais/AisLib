@@ -14,14 +14,6 @@
  */
 package dk.dma.ais.bus;
 
-import java.io.FileNotFoundException;
-import java.util.List;
-
-import javax.xml.bind.JAXBException;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpServerConf;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
@@ -50,6 +42,13 @@ import dk.dma.ais.configuration.transform.SourceTypeSatTransformerConfiguration;
 import dk.dma.ais.configuration.transform.TaggingTransformerConfiguration;
 import dk.dma.ais.filter.PacketFilterCollection;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
+import java.util.List;
 
 public class AisBusTest {
 
@@ -195,6 +194,7 @@ public class AisBusTest {
         // Assert.assertEquals(consumerConf.getConsumerPullMaxElements(), 1);
     }
 
+    @Ignore // TODO This test is possibly machine-dependent. Needs closer analysis and then to be reenabled.
     @Test
     public void aisBusTest() throws JAXBException, FileNotFoundException {
         AisBus aisBus = AisBusFactory.get("src/main/resources/aisbus-test.xml");
@@ -225,7 +225,6 @@ public class AisBusTest {
         System.out.println("Done stopping AisBus");
 
         Assert.assertEquals(threadCount, Thread.activeCount());
-
     }
 
     // @Test
