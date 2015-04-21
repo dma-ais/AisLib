@@ -29,7 +29,7 @@ public abstract class Target implements Serializable {
      * Returns the MMSI of the Track.
      * @return the MMSI of the Track
      */
-    public final int getMmsi() {
+    public int getMmsi() {
         return mmsi;
     }
 

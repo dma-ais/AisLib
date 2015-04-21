@@ -39,7 +39,7 @@ import static java.util.Objects.requireNonNull;
  * 
  * @author Kasper Nielsen
  */
-public final class TargetInfo extends Target {
+public class TargetInfo extends Target {
     
     /** serialVersionUID. */
     private static final long serialVersionUID = 2L;
