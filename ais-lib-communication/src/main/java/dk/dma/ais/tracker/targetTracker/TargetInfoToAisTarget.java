@@ -62,7 +62,7 @@ public class TargetInfoToAisTarget {
         return messages;
     }
 
-    static AisTarget generateAisTarget(TargetInfo ti) {
+    public static AisTarget generateAisTarget(TargetInfo ti) {
         PriorityQueue<AisPacket> normal = getPacketsInOrder(ti);
         // why reversed also? A workaround for AisTargets without static information for some reason
         // TODO: this needs to be replaced with a proper fix
