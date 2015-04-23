@@ -35,7 +35,7 @@ import java.util.function.Consumer;
  * @author Jens Tuxen
  *
  */
-class TargetInfoToAisTarget {
+public class TargetInfoToAisTarget {
 
     static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
 
