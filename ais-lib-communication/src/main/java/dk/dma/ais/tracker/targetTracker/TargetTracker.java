@@ -23,9 +23,11 @@ import dk.dma.ais.tracker.Tracker;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -122,10 +124,34 @@ public class TargetTracker implements Tracker {
                 }
             }
             // race with update mechanism is handled in #tryUpdate
-                if (t.isEmpty()) {
-                    targets.remove(t.mmsi, t);
+            if (t.isEmpty()) {
+                targets.remove(t.mmsi, t);
+            }
+        });
+    }
+
+    /**
+     * Removes all targets that are accepted by the specified predicate. Is
+     * typically used to remove targets based on time stamps.
+     *
+     * @param predicate
+     *            the predicate that selects which items to remove
+     */
+    public void removeAll(BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
+        requireNonNull(predicate);
+        targets.forEachValue(10, t -> {
+            for (Map.Entry<AisPacketSource, TargetInfo> e : t.entrySet()) {
+                if (predicate.test(e.getKey(), e.getValue())) {
+                    t.remove(e.getKey(), e.getValue());
                 }
-            });
+            }
+            // if there are no more targets just remove it
+            // tryUpdate contains functionality to make sure we do not have
+            // any consistency issues.
+            if (t.isEmpty()) {
+                targets.remove(t.mmsi, t);
+            }
+        });
     }
 
     /**
