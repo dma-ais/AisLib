@@ -57,7 +57,7 @@ public class TargetTracker implements Tracker {
     public int count(Predicate<? super AisPacketSource> predicate) {
         LongAdder la = new LongAdder();
         targets.values().stream().forEach(t -> {
-            for (dk.dma.ais.tracker.targetTracker.TargetInfo i : t.values()) {
+            for (TargetInfo i : t.values()) {
                 if (predicate.test(i.getPacketSource())) {
                     la.increment();
                     return;
@@ -87,11 +87,11 @@ public class TargetTracker implements Tracker {
      *            the MMSI number
      * @return the latest target info for the specified MMSI number
      */
-    public dk.dma.ais.tracker.targetTracker.TargetInfo get(int mmsi) {
+    public TargetInfo get(int mmsi) {
         return get(mmsi, e -> true);
     }
 
-    public dk.dma.ais.tracker.targetTracker.TargetInfo get(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
+    public TargetInfo get(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
         MmsiTarget target = targets.get(mmsi);
         return target == null ? null : target.getLatest(sourcePredicate);
     }
@@ -115,10 +115,10 @@ public class TargetTracker implements Tracker {
      * @param predicate
      *            the predicate that selects which items to remove
      */
-    public void removeAll(Predicate<? super dk.dma.ais.tracker.targetTracker.TargetInfo> predicate) {
+    public void removeAll(Predicate<? super TargetInfo> predicate) {
         requireNonNull(predicate);
         targets.values().stream().forEach(t -> {
-            for (dk.dma.ais.tracker.targetTracker.TargetInfo i : t.values()) {
+            for (TargetInfo i : t.values()) {
                 if (predicate.test(i)) {
                     t.remove(i.getPacketSource(), i);
                 }
@@ -169,20 +169,30 @@ public class TargetTracker implements Tracker {
      *
      * @return a stream of targets
      */
-    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> stream() {
-        return stream(e -> true);
+    public Stream<TargetInfo> stream() {
+        return stream(s->true, t->true);
     }
 
     /**
      * Creates a parallel stream of targets with the specified source predicate.
      *
-     * @param predicate
-     *            the predicate on AIS packet source
+     * @param sourcePredicate the predicate on AIS packet source
      * @return a stream of targets
      */
-    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> stream(Predicate<? super AisPacketSource> predicate) {
-        requireNonNull(predicate, "predicate is null");
-        return targets.values().parallelStream().map(t -> t.getLatest(predicate)).filter(e -> e != null);
+    public Stream<TargetInfo> stream(Predicate<? super AisPacketSource> sourcePredicate) {
+        return stream(sourcePredicate, t->true);
+    }
+
+    /**
+     * Creates a sequential stream of targets with the specified source predicate and matching the given targetPredicate.
+     * @param sourcePredicate
+     * @param targetPredicate
+     * @return a stream of targets
+     */
+    public Stream<TargetInfo> stream(Predicate<? super AisPacketSource> sourcePredicate, Predicate<? super TargetInfo> targetPredicate) {
+        requireNonNull(targetPredicate, "targetPredicate is null");
+        requireNonNull(sourcePredicate, "sourcePredicate is null");
+        return targets.values().parallelStream().map(t -> t.getLatest(sourcePredicate)).filter(e -> e != null).filter(targetPredicate);
     }
 
     /**
@@ -190,7 +200,7 @@ public class TargetTracker implements Tracker {
      *
      * @return a stream of targets
      */
-    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> streamSequential() {
+    public Stream<TargetInfo> streamSequential() {
         return streamSequential(src -> true);
     }
 
@@ -201,7 +211,7 @@ public class TargetTracker implements Tracker {
      *            the predicate on AIS packet source
      * @return a stream of targets
      */
-    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate) {
+    public Stream<TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate) {
         requireNonNull(sourcePredicate, "sourcePredicate is null");
         return streamSequential(sourcePredicate, target -> true);
     }
@@ -212,7 +222,7 @@ public class TargetTracker implements Tracker {
      * @param targetPredicate
      * @return a stream of targets
      */
-    public Stream<dk.dma.ais.tracker.targetTracker.TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate, Predicate<? super TargetInfo> targetPredicate) {
+    public Stream<TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate, Predicate<? super TargetInfo> targetPredicate) {
         requireNonNull(targetPredicate, "targetPredicate is null");
         requireNonNull(sourcePredicate, "sourcePredicate is null");
         return targets.values().stream().map(t -> t.getLatest(sourcePredicate)).filter(e -> e != null).filter(targetPredicate);
@@ -264,7 +274,7 @@ public class TargetTracker implements Tracker {
                         message.getUserId(),
                         t -> t.compute(
                                 AisPacketSource.create(packet),
-                                (source, existing) -> dk.dma.ais.tracker.targetTracker.TargetInfo.updateTarget(existing, packet, targetType,
+                                (source, existing) -> TargetInfo.updateTarget(existing, packet, targetType,
                                         date.getTime(), source, t.msg24Part0)));
             }
         }
@@ -278,7 +288,7 @@ public class TargetTracker implements Tracker {
      * @param targetInfo
      *            the target info
      */
-    void update(AisPacketSource packetSource, dk.dma.ais.tracker.targetTracker.TargetInfo targetInfo) {
+    void update(AisPacketSource packetSource, TargetInfo targetInfo) {
         tryUpdate(targetInfo.getMmsi(),
                 t -> t.merge(packetSource, targetInfo, (ex, newOne) -> ex == null ? newOne : ex.merge(newOne)));
     }
@@ -287,7 +297,7 @@ public class TargetTracker implements Tracker {
      * A single ship containing multiple reports for different combinations of sources.
      */
     @SuppressWarnings("serial")
-    static class MmsiTarget extends ConcurrentHashMap<AisPacketSource, dk.dma.ais.tracker.targetTracker.TargetInfo> {
+    static class MmsiTarget extends ConcurrentHashMap<AisPacketSource, TargetInfo> {
 
         /** The MMSI number */
         final int mmsi;
@@ -306,10 +316,10 @@ public class TargetTracker implements Tracker {
          *            a predicate for filtering on the sources
          * @return the newest position and static data
          */
-        dk.dma.ais.tracker.targetTracker.TargetInfo getLatest(Predicate<? super AisPacketSource> predicate) {
+        TargetInfo getLatest(Predicate<? super AisPacketSource> predicate) {
             // This method is fairly optimized to avoid creating excessive objects.
-            dk.dma.ais.tracker.targetTracker.TargetInfo bestStatic = null;
-            dk.dma.ais.tracker.targetTracker.TargetInfo bestPosition = null;
+            TargetInfo bestStatic = null;
+            TargetInfo bestPosition = null;
             for (TargetInfo i : values()) {
                 if (predicate.test(i.getPacketSource())) {
                     if (i.hasStaticInfo()
