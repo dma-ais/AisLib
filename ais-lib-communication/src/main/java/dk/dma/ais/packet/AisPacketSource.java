@@ -14,11 +14,11 @@
  */
 package dk.dma.ais.packet;
 
-import java.io.Serializable;
-
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.Country;
+
+import java.io.Serializable;
 import java.util.function.Predicate;
 
 /**
@@ -33,8 +33,8 @@ public class AisPacketSource implements Serializable {
     /** We cache the hash. */
     private transient int hash;
 
-    /** Source base station MMSI (comment block key: 'sb'), negative if no base station */
-    private final int sourceBaseStation;
+    /** Source base station MMSI (comment block key: 'sb'), null if no base station */
+    private final Integer sourceBaseStation;
 
     /** Source country in ISO 3166 three letter code (comment block key: 'sc') */
     private final Country sourceCountry;
@@ -48,8 +48,11 @@ public class AisPacketSource implements Serializable {
     /** Source type (comment block key: 'st', value: SAT | LIVE) */
     private final SourceType sourceType;
 
-    AisPacketSource(String sourceId, int sourceBaseStation, Country sourceCountry, SourceType sourceType,
+    AisPacketSource(String sourceId, Integer sourceBaseStation, Country sourceCountry, SourceType sourceType,
             String sourceRegion) {
+        if (sourceBaseStation != null && sourceBaseStation.intValue() < 0) {
+            throw new IllegalArgumentException("Illegal basestation MMSI: " + sourceBaseStation);
+        }
         this.sourceBaseStation = sourceBaseStation;
         this.sourceCountry = sourceCountry;
         this.sourceId = sourceId == null ? null : sourceId.intern();
@@ -62,7 +65,7 @@ public class AisPacketSource implements Serializable {
     int calcHash() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + sourceBaseStation;
+        result = prime * result + (sourceBaseStation == null ? 0 : sourceBaseStation.hashCode());
         result = prime * result + (sourceCountry == null ? 0 : sourceCountry.hashCode());
         result = prime * result + (sourceId == null ? 0 : sourceId.hashCode());
         result = prime * result + (sourceRegion == null ? 0 : sourceRegion.hashCode());
@@ -83,7 +86,11 @@ public class AisPacketSource implements Serializable {
             return false;
         }
         AisPacketSource other = (AisPacketSource) obj;
-        if (sourceBaseStation != other.sourceBaseStation) {
+        if (sourceBaseStation == null) {
+            if (other.sourceBaseStation != null) {
+                return false;
+            }
+        } else if (!sourceBaseStation.equals(other.sourceBaseStation)) {
             return false;
         }
         if (sourceCountry == null) {
@@ -114,7 +121,7 @@ public class AisPacketSource implements Serializable {
     }
 
     /** Returns the base station source. */
-    public int getSourceBaseStation() {
+    public Integer getSourceBaseStation() {
         return sourceBaseStation;
     }
 
@@ -171,8 +178,7 @@ public class AisPacketSource implements Serializable {
         IProprietarySourceTag sourceTag = packet.getVdm().getSourceTag();
         String region = sourceTag == null ? null : sourceTag.getRegion();
 
-        return new AisPacketSource(sourceId, sourceBaseStation == null ? Integer.MIN_VALUE : sourceBaseStation,
-                sourceCountry, sourceType, region);
+        return new AisPacketSource(sourceId, sourceBaseStation, sourceCountry, sourceType, region);
     }
 
     public static Predicate<AisPacketSource> createPredicate(String expression) {

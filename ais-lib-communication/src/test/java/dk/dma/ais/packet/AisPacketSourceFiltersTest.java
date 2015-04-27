@@ -25,10 +25,14 @@ import static org.junit.Assert.assertEquals;
 public class AisPacketSourceFiltersTest {
 
     AisPacketSource src1;
+    AisPacketSource src2_noBS;
+    AisPacketSource src3_noCountry;
 
     @Before
     public void setup() {
         src1 = new AisPacketSource("AISD", 12345, Country.getByCode("DNK"), SourceType.TERRESTRIAL, "0");
+        src2_noBS = new AisPacketSource("AISD", null, Country.getByCode("DNK"), SourceType.TERRESTRIAL, "0");
+        src3_noCountry = new AisPacketSource("AISD", 12345, null, SourceType.TERRESTRIAL, "0");
     }
 
     @Test
@@ -53,6 +57,8 @@ public class AisPacketSourceFiltersTest {
         assertFilterExpression(true, src1, "s.bs = 12345, 67890, 56437");
         assertFilterExpression(true, src1, "s.bs = 67890, 12345, 56437");
         assertFilterExpression(false, src1, "s.bs = 67890, 56437");
+
+        assertFilterExpression(false, src2_noBS, "s.bs = 12345");
     }
 
     @Test
@@ -63,6 +69,8 @@ public class AisPacketSourceFiltersTest {
 
         assertFilterExpression(true, src1, "s.country != CZE");
         assertFilterExpression(true, src1, "s.country != CZE, NLD");
+
+        assertFilterExpression(false, src3_noCountry, "s.country = DNK");
     }
 
     @Test

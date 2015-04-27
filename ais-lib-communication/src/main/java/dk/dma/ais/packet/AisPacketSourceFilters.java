@@ -17,9 +17,9 @@ package dk.dma.ais.packet;
 import com.google.common.collect.ImmutableSet;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
-import java.util.function.Predicate;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
@@ -44,7 +44,7 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
     public static Predicate<AisPacketSource> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
         return new Predicate<AisPacketSource>() {
             public boolean test(AisPacketSource p) {
-                return compare(p.getSourceBaseStation(), bs, operator);
+                return p.getSourceBaseStation() != null && compare(p.getSourceBaseStation(), bs, operator);
             }
 
             public String toString() {
@@ -141,7 +141,7 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
     }
 
-    private static boolean compare(int lhs, int rhs, CompareToOperator operator) {
+    private final static boolean compare(int lhs, int rhs, CompareToOperator operator) {
         switch (operator) {
         case EQUALS:
             return lhs == rhs;

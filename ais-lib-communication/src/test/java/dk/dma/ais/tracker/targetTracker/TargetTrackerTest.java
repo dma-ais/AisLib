@@ -115,13 +115,13 @@ public class TargetTrackerTest {
 
         assertNotEquals(((AisPacketSource) aisPacketSource[0]).getSourceBaseStation(), ((AisPacketSource) aisPacketSource[1]).getSourceBaseStation());
 
-        assertEquals(2190074, ((AisPacketSource) aisPacketSource[0]).getSourceBaseStation());
+        assertEquals(2190074, ((AisPacketSource) aisPacketSource[0]).getSourceBaseStation().intValue());
         assertEquals(Country.getByCode("DNK"), ((AisPacketSource) aisPacketSource[0]).getSourceCountry());
         assertNull(((AisPacketSource) aisPacketSource[0]).getSourceId());
         assertEquals("", ((AisPacketSource) aisPacketSource[0]).getSourceRegion());
         assertNull(((AisPacketSource) aisPacketSource[0]).getSourceType());
 
-        assertEquals(2190072, ((AisPacketSource) aisPacketSource[1]).getSourceBaseStation());
+        assertEquals(2190072, ((AisPacketSource) aisPacketSource[1]).getSourceBaseStation().intValue());
         assertEquals(Country.getByCode("DNK"), ((AisPacketSource) aisPacketSource[1]).getSourceCountry());
         assertNull(((AisPacketSource) aisPacketSource[1]).getSourceId());
         assertEquals("", ((AisPacketSource) aisPacketSource[1]).getSourceRegion());
