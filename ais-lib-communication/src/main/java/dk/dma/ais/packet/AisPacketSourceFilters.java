@@ -58,8 +58,8 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         Arrays.sort(copy);
         return new Predicate<AisPacketSource>() {
             public boolean test(AisPacketSource p) {
-                int sourceBs = p.getSourceBaseStation();
-                return Arrays.binarySearch(copy, sourceBs) >= 0;
+                Integer sourceBs = p.getSourceBaseStation();
+                return sourceBs != null && Arrays.binarySearch(copy, sourceBs) >= 0;
             }
 
             public String toString() {
