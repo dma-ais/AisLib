@@ -14,7 +14,15 @@
  */
 package dk.dma.ais.packet;
 
-import static java.util.Objects.requireNonNull;
+import com.google.common.collect.AbstractIterator;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.sentence.Abk;
+import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.SentenceLine;
+import dk.dma.commons.util.io.CountingInputStream;
+import dk.dma.commons.util.io.OutputStreamSink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -30,21 +38,11 @@ import java.util.Iterator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.AbstractIterator;
-
-import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.sentence.Abk;
-import dk.dma.ais.sentence.SentenceException;
-import dk.dma.ais.sentence.SentenceLine;
-import dk.dma.commons.util.io.CountingInputStream;
-import dk.dma.commons.util.io.OutputStreamSink;
-import java.util.function.Consumer;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Class for reading AIS packet streams.
@@ -173,13 +171,15 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
             if (throwExceptions) {
                 throw new IOException(se);
             }
-            LOG.info("Sentence error: " + se.getMessage() + " line: " + line);
+            LOG.error("Sentence error: " + line + " (possible related proptag: " + se.getPossibleProprietaryTag() + ")");
+            LOG.debug("Sentence trace: " + se.getMessage());
             return null;
         } catch (Exception e) {
             if (throwExceptions) {
                 throw new IOException(e);
             }
-            LOG.error("Sentence line error: " + e.getMessage() + " line: " + line);
+            LOG.error("Sentence line error: " + line);
+            LOG.debug("Sentence line error: " + e.getMessage());
             return null;
         }
     }

@@ -14,9 +14,11 @@
  */
 package dk.dma.ais.sentence;
 
-import java.util.Deque;
-
+import dk.dma.ais.proprietary.ProprietaryFactory;
 import org.apache.commons.lang.StringUtils;
+
+import java.util.Deque;
+import java.util.Optional;
 
 /**
  * Exception class for exceptions related to sentences
@@ -25,18 +27,36 @@ public class SentenceException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    private final Deque<String> sentenceTrace;
+
     public SentenceException() {
+        sentenceTrace = null;
     }
 
     public SentenceException(String msg) {
         super(msg);
+        sentenceTrace = null;
     } 
 
     public SentenceException(String msg, Deque<String> sentenceTrace) {
-        this(msg + "\nSentence trace:\n---\n" + StringUtils.join(sentenceTrace, "\n") + "\n---\n");
+        super(msg + "\nSentence trace:\n---\n" + StringUtils.join(sentenceTrace, "\n") + "\n---\n");
+        this.sentenceTrace = sentenceTrace;
     }
 
     public SentenceException(SentenceException e, Deque<String> sentenceTrace) {
         this(e.getMessage(), sentenceTrace);
     }
+
+    public String getPossibleProprietaryTag() {
+        String possibleProprietaryTag = null;
+
+        if (sentenceTrace != null) {
+            Optional<String> stringOptional = sentenceTrace.stream().filter(line -> ProprietaryFactory.isProprietaryTag(line)).reduce((p, c) -> c);
+            if (stringOptional != null && stringOptional.isPresent()) {
+                possibleProprietaryTag = stringOptional.get();
+            }
+        }
+        return possibleProprietaryTag;
+    }
+
 }

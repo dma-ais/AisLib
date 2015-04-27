@@ -14,22 +14,20 @@
  */
 package dk.dma.ais.packet;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.LinkedList;
-
-import net.jcip.annotations.NotThreadSafe;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.proprietary.ProprietaryFactory;
 import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
+import net.jcip.annotations.NotThreadSafe;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Class to parse lines in a stream containing VDM sentences. The class will deliver packets containing complete VDM and
@@ -148,7 +146,7 @@ public class AisPacketParser {
             newVdm();
             // Do a single retry with the current line. The faulty sentence may be the last, not this one.
             if (!retry) {
-                LOG.info("Discarding current sentence group. New start: " + e.getMessage());
+                LOG.debug("Discarding current sentence group. New start: " + e.getMessage());
                 return readLine(line, true);
             }
             throw new SentenceException(e, sentenceTrace);
