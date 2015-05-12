@@ -66,7 +66,7 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     private Lock csvLock = new ReentrantLock();
 
     public AisPacketCSVOutputSink() {
-        this("timestamp_pretty;timestamp;targetType;mmsi;msgid;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;callsign", ";");
+        this("timestamp_pretty;timestamp;targetType;mmsi;msgid;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;destination;eta;imo;callsign", ";");
     }
 
     public AisPacketCSVOutputSink(String format) {
@@ -99,6 +99,11 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                 Position pos = m.getValidPosition();
                 if (m instanceof IPositionMessage) {
                     im = (IPositionMessage) m;
+                }
+
+                AisMessage5 m5 = null;
+                if (m instanceof AisMessage5) {
+                    m5 = (AisMessage5) m;
                 }
 
                 IVesselPositionMessage vpm = null;
@@ -166,8 +171,8 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                                 fields.add("null");
                             }
                         case "draught":
-                            if (m instanceof AisMessage5) {
-                                fields.add(((AisMessage5) m).getDraught());
+                            if (m5 != null) {
+                                fields.add(m5.getDraught());
                             } else {
                                 fields.add("null");
                             }
@@ -231,6 +236,27 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                         case "callsign":
                             if (common != null) {
                                 fields.add(AisMessage.trimText(common.getCallsign()));
+                            } else {
+                                fields.add("null");
+                            }
+                            break;
+                        case "imo":
+                            if (m5 != null) {
+                                fields.add(m5.getImo());
+                            } else {
+                                fields.add("null");
+                            }
+                            break;
+                        case "destination":
+                            if (m5 != null) {
+                                fields.add(AisMessage.trimText(m5.getDest()));
+                            } else {
+                                fields.add("null");
+                            }
+                            break;
+                        case "eta":
+                            if (m5 != null) {
+                                fields.add(m5.getEta());
                             } else {
                                 fields.add("null");
                             }
