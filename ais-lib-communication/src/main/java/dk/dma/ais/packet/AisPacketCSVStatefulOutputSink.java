@@ -33,6 +33,8 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.function.Function;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 /**
  * Transform AisPackets into stateful csv objects with only specific columns
  *
@@ -93,16 +95,24 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
             AisTarget aisTarget = targetInfo.getAisTarget();
             if (aisTarget instanceof AisVesselTarget) {
                 AisVesselPosition vesselPosition = ((AisVesselTarget) aisTarget).getVesselPosition();
-                return vesselPosition == null ? "null" : getter.apply(vesselPosition);
+                if (vesselPosition != null) {
+                    Object value = getter.apply(vesselPosition);
+                    if (value != null) {
+                        if (value instanceof Double) {
+                            value = ((Double) value).floatValue();
+                        }
+                        return value;
+                    }
+                }
             }
         }
-        return "null";
+        return NULL_INDICATOR;
     }
 
     private Object extractFromPosition(AisMessage m, Function<Position, Object> getter) {
         return extractFromDynamics(m, dynamics -> {
             Position position = dynamics.getPos();
-            return position == null ? "null" : getter.apply(position);
+            return position == null ? NULL_INDICATOR : getter.apply(position);
         });
     }
 
@@ -114,7 +124,7 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
                 return getter.apply(((AisVesselTarget) aisTarget).getVesselStatic());
             }
         }
-        return "null";
+        return NULL_INDICATOR;
     }
 
     private Object extractFromDimensions(AisMessage m, Function<AisTargetDimensions, Object> getter) {
@@ -123,7 +133,7 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
             if (dimensions != null) {
                 return getter.apply(dimensions);
             } else {
-                return "null";
+                return NULL_INDICATOR;
             }
         });
     }
@@ -137,10 +147,6 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
     private Function<AisMessage, Object> cachedCog = m -> extractFromDynamics(m, dynamics -> dynamics.getCog());
 
     private Function<AisMessage, Object> cachedTrueHeading = m -> extractFromDynamics(m, dynamics -> dynamics.getHeading());
-
-    private Function<AisMessage, Object> cachedDraught = m -> extractFromStatic(m, s -> s instanceof AisClassAStatic ? ((AisClassAStatic) s).getDraught() : "null");
-
-    private Function<AisMessage, Object> cachedName = m -> extractFromStatic(m, s -> s.getName());
 
     private Function<AisMessage, Object> cachedDimBow = m -> extractFromDimensions(m, d -> d.getDimBow());
 
@@ -156,9 +162,41 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
 
     private Function<AisMessage, Object> cachedCallsign = m -> extractFromStatic(m, s -> s.getCallsign());
 
-    private Function<AisMessage, Object> cachedImo = m -> extractFromStatic(m, s -> s instanceof AisClassAStatic ? ((AisClassAStatic) s).getImoNo() : "null");
+    private Function<AisMessage, Object> cachedName = m -> extractFromStatic(m, s -> {
+        String name = s.getName();
+        name = name != null ? name.trim() : null;
+        return isBlank(name) ? NULL_INDICATOR : name;
+    });
 
-    private Function<AisMessage, Object> cachedDestination = m -> extractFromStatic(m, s -> s instanceof AisClassAStatic ? ((AisClassAStatic) s).getDestination() : "null");
+    private Function<AisMessage, Object> cachedDraught = m -> extractFromStatic(m, s -> {
+        if (s instanceof AisClassAStatic) {
+            Double draught = ((AisClassAStatic) s).getDraught();
+            if (draught != null) {
+                return draught;
+            }
+        }
+        return NULL_INDICATOR;
+    });
+
+    private Function<AisMessage, Object> cachedImo = m -> extractFromStatic(m, s -> {
+        if (s instanceof AisClassAStatic) {
+            Integer imo = ((AisClassAStatic) s).getImoNo();
+            if (imo != null && imo > 0) {
+                return imo;
+            }
+        }
+        return NULL_INDICATOR;
+    });
+
+    private Function<AisMessage, Object> cachedDestination = m -> extractFromStatic(m, s -> {
+        if (s instanceof AisClassAStatic) {
+            String destination = ((AisClassAStatic) s).getDestination();
+            if (!isBlank(destination)) {
+                return destination;
+            }
+        }
+        return NULL_INDICATOR;
+    });
 
     private Function<AisMessage, Object> cachedEta = m -> extractFromStatic(m, s -> {
         if (s instanceof AisClassAStatic) {
@@ -167,7 +205,7 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
                 return formatEta(eta);
             }
         }
-        return "null";
+        return NULL_INDICATOR;
     });
 
 }

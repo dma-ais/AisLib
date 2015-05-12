@@ -20,6 +20,7 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPosition;
 import dk.dma.ais.message.AisStaticCommon;
+import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.message.IDimensionMessage;
 import dk.dma.ais.message.INameMessage;
 import dk.dma.ais.message.IPositionMessage;
@@ -35,7 +36,6 @@ import javax.annotation.concurrent.GuardedBy;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * Transform AisPackets into csv objects with only specific columns
@@ -60,13 +62,13 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     /** The column we are writing. */
     private final String[] columns;
 
-    private  DecimalFormat df = new DecimalFormat("###.00000");
-
     @GuardedBy("csvLock")
     private CSVPrinter csv;
 
     private Lock csvLock = new ReentrantLock();
 
+    protected static final String NULL_INDICATOR = "null";
+    
     public AisPacketCSVOutputSink() {
         this("timestamp_pretty;timestamp;targetType;mmsi;msgid;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;destination;eta;imo;callsign", ";");
     }
@@ -161,7 +163,7 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                             addEta(fields, m);
                             break;
                         default:
-                            fields.add("null");
+                            fields.add(NULL_INDICATOR);
                     }
                 }
 
@@ -209,7 +211,8 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     private void addTargetType(List fields, AisMessage m) {
-        fields.add(m.getTargetType());
+        AisTargetType targetType = m.getTargetType();
+        fields.add(targetType != null ? targetType.toString() : nullValueForTargetType.apply(m));
     }
 
     private void addSog(List fields, AisMessage m) {
@@ -246,7 +249,12 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     private void addName(List fields, AisMessage m) {
         if (m instanceof INameMessage) {
-            fields.add(AisMessage.trimText(((INameMessage) m).getName()));
+            String name = AisMessage.trimText(((INameMessage) m).getName());
+            if (!isBlank(name)) {
+                fields.add(name);
+            } else {
+                fields.add(nullValueForName.apply(m));
+            }
         } else {
             fields.add(nullValueForName.apply(m));
         }
@@ -312,7 +320,12 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     private void addImo(List fields, AisMessage m) {
         if (m instanceof AisMessage5) {
-            fields.add(((AisMessage5) m).getImo());
+            long imo = ((AisMessage5) m).getImo();
+            if (imo > 0) {
+                fields.add(imo);
+            } else {
+                fields.add(nullValueForImo.apply(m));
+            }
         } else {
             fields.add(nullValueForImo.apply(m));
         }
@@ -320,7 +333,12 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     private void addDestination(List fields, AisMessage m) {
         if (m instanceof AisMessage5) {
-            fields.add(AisMessage.trimText(((AisMessage5) m).getDest()));
+            String destination = AisMessage.trimText(((AisMessage5) m).getDest());
+            if (!isBlank(destination)) {
+                fields.add(destination);
+            } else {
+                fields.add(nullValueForDestination.apply(m));
+            }
         } else {
             fields.add(nullValueForDestination.apply(m));
         }
@@ -444,22 +462,23 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     // ---
 
-    private Function<AisMessage,Object> nullValueForLatitude = m -> "null";
-    private Function<AisMessage,Object> nullValueForLongitude = m -> "null";
-    private Function<AisMessage,Object> nullValueForSog = m -> "null";
-    private Function<AisMessage,Object> nullValueForCog = m -> "null";
-    private Function<AisMessage,Object> nullValueForTrueHeading = m -> "null";
-    private Function<AisMessage,Object> nullValueForDraught = m -> "null";
-    private Function<AisMessage,Object> nullValueForName = m -> "null";
-    private Function<AisMessage,Object> nullValueForDimBow = m -> "null";
-    private Function<AisMessage,Object> nullValueForDimPort = m -> "null";
-    private Function<AisMessage,Object> nullValueForDimStarboard = m -> "null";
-    private Function<AisMessage,Object> nullValueForDimStern = m -> "null";
-    private Function<AisMessage,Object> nullValueForShipType = m -> "null";
-    private Function<AisMessage,Object> nullValueForShipCargo = m -> "null";
-    private Function<AisMessage,Object> nullValueForCallsign = m -> "null";
-    private Function<AisMessage,Object> nullValueForImo = m -> "null";
-    private Function<AisMessage,Object> nullValueForDestination = m -> "null";
-    private Function<AisMessage,Object> nullValueForEta = m -> "null";
+    private Function<AisMessage,Object> nullValueForTargetType = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForLatitude = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForLongitude = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForSog = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForCog = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForTrueHeading = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForDraught = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForName = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForDimBow = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForDimPort = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForDimStarboard = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForDimStern = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForShipType = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForShipCargo = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForCallsign = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForImo = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForDestination = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForEta = m -> NULL_INDICATOR;
 
 }
