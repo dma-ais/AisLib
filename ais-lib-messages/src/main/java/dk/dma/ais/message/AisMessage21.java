@@ -26,7 +26,7 @@ import dk.dma.enav.model.geometry.Position;
  * Aids-to-navigation report (AtoN) as defined by ITU-R M.1371-4
  * 
  */
-public class AisMessage21 extends AisMessage implements IPositionMessage {
+public class AisMessage21 extends AisMessage implements IPositionMessage, IDimensionMessage, INameMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;

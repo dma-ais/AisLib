@@ -19,7 +19,7 @@ import dk.dma.ais.sentence.Vdm;
 /**
  * Abstract base class for static AIS messages 5 and 24
  */
-public abstract class AisStaticCommon extends AisMessage {
+public abstract class AisStaticCommon extends AisMessage implements IDimensionMessage, INameMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;

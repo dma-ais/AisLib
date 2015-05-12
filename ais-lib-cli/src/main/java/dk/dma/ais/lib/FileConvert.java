@@ -15,7 +15,17 @@
 
 package dk.dma.ais.lib;
 
-import java.io.BufferedOutputStream;
+import com.beust.jcommander.Parameter;
+import com.google.inject.Injector;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketOutputSinks;
+import dk.dma.ais.packet.AisPacketReader;
+import dk.dma.commons.app.AbstractCommandLineTool;
+import dk.dma.commons.util.io.OutputStreamSink;
+import dk.dma.enav.util.function.EConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,27 +35,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.beust.jcommander.Parameter;
-import com.google.inject.Injector;
-
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketOutputSinkJsonObject;
-import dk.dma.ais.packet.AisPacketOutputSinks;
-import dk.dma.ais.packet.AisPacketReader;
-import dk.dma.ais.packet.AisPacketStream;
-import dk.dma.ais.packet.AisPacketStream.Subscription;
-import dk.dma.commons.app.AbstractCommandLineTool;
-import dk.dma.commons.util.io.OutputStreamSink;
-import dk.dma.enav.util.function.EConsumer;
 
 /**
  * Converts a set of files into another sink format
@@ -72,7 +65,7 @@ public class FileConvert extends AbstractCommandLineTool {
     @Parameter(names = "-fileEnding", required = false, description = "File ending")
     String fileEnding = ".txt";
 
-    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table]")
+    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table, csv]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
 
     @Parameter(names = "-columns", required = false, description = "Optional columns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")

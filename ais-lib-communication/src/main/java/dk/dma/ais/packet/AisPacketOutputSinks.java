@@ -17,28 +17,26 @@ package dk.dma.ais.packet;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.AisStaticCommon;
-import dk.dma.ais.message.AisTargetType;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.model.geometry.Position;
 
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static dk.dma.commons.util.io.IoUtil.writeAscii;
 
@@ -285,6 +283,10 @@ public class AisPacketOutputSinks {
         return new AisPacketOutputSinkTable(columns, writeHeader, seperator);
     }
 
+    public static OutputStreamSink<AisPacket> newCsvSink() {
+        return new AisPacketCSVOutputSink();
+    }
+
     public static OutputStreamSink<AisPacket> newKmlSink() {
         return new AisPacketKMLOutputSink();
     }
@@ -343,6 +345,8 @@ public class AisPacketOutputSinks {
             }
         case "json":
             return AisPacketOutputSinks.jsonMessageSink();
+        case "csv":
+            return AisPacketOutputSinks.newCsvSink();
 
         default: // reflection
             return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(params[0]).get(null);
