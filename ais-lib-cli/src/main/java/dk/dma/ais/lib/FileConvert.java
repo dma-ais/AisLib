@@ -23,6 +23,8 @@ import dk.dma.ais.packet.AisPacketReader;
 import dk.dma.commons.app.AbstractCommandLineTool;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.EConsumer;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Converts a set of files into another sink format
  *
  * @author Jens Tuxen
+ * @author Thomas Borg Salling
  *
  */
 public class FileConvert extends AbstractCommandLineTool {
@@ -63,13 +66,16 @@ public class FileConvert extends AbstractCommandLineTool {
     boolean keepFileStructure = true;
 
     @Parameter(names = "-fileEnding", required = false, description = "File ending")
-    String fileEnding = ".txt";
+    String fileEnding;
 
     @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table, csv, csv_stateful]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
 
     @Parameter(names = "-columns", required = false, description = "Optional columns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
     String columns;
+
+    public FileConvert() {
+    }
 
     /**
      * getOutputSinks
@@ -90,6 +96,7 @@ public class FileConvert extends AbstractCommandLineTool {
     /** {@inheritDoc} */
     @Override
     protected void run(Injector injector) throws Exception {
+        configureFileEnding();
 
         // final long start = System.currentTimeMillis();
         final AtomicInteger count = new AtomicInteger();
@@ -112,7 +119,10 @@ public class FileConvert extends AbstractCommandLineTool {
                     endPath = Paths.get(convertTo);
                 }
 
-                Path filePath = Paths.get(endPath.toString(), path.getFileName().toString() + fileEnding);
+                String filename = path.getFileName().toString();
+                if (! filename.endsWith(fileEnding))
+                    filename = FilenameUtils.removeExtension(filename) + fileEnding;
+                Path filePath = Paths.get(endPath.toString(), filename);
 
                 LOG.debug("Output File: " + filePath.toString());
 
@@ -127,7 +137,6 @@ public class FileConvert extends AbstractCommandLineTool {
                 apis.close();
                 fos.close();
             }
-
         };
 
         /*
@@ -151,6 +160,15 @@ public class FileConvert extends AbstractCommandLineTool {
         threadpoolexecutor.awaitTermination(999, TimeUnit.DAYS);
     }
 
+    private void configureFileEnding() {
+        if (StringUtils.isBlank(fileEnding)) {
+            if (outputSinkFormat.startsWith("csv")) {
+                fileEnding = ".csv";
+            } else {
+                fileEnding = ".txt";
+            }
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         FileConvert fc = new FileConvert();
