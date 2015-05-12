@@ -18,6 +18,7 @@ package dk.dma.ais.packet;
 import com.google.common.collect.Lists;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage5;
+import dk.dma.ais.message.AisPosition;
 import dk.dma.ais.message.AisStaticCommon;
 import dk.dma.ais.message.IDimensionMessage;
 import dk.dma.ais.message.INameMessage;
@@ -25,7 +26,6 @@ import dk.dma.ais.message.IPositionMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.commons.util.io.OutputStreamSink;
-import dk.dma.enav.model.geometry.Position;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
@@ -51,14 +51,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AisPacketParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AisPacketCSVOutputSink.class);
     { LOG.info("AisPacketCSVOutputSink created."); }
 
     /** The column we are writing. */
     private final String[] columns;
 
     private  DecimalFormat df = new DecimalFormat("###.00000");
-
 
     @GuardedBy("csvLock")
     private CSVPrinter csv;
@@ -88,188 +87,263 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
             AisMessage m = packet.tryGetAisMessage();
             if (m != null) {
-                AisStaticCommon common = null;
-                ShipTypeCargo stc = null;
-                if (m instanceof AisStaticCommon) {
-                    common = (AisStaticCommon) m;
-                    stc = new ShipTypeCargo(common.getShipType());
-                }
-
-                IPositionMessage im = null;
-                Position pos = m.getValidPosition();
-                if (m instanceof IPositionMessage) {
-                    im = (IPositionMessage) m;
-                }
-
-                AisMessage5 m5 = null;
-                if (m instanceof AisMessage5) {
-                    m5 = (AisMessage5) m;
-                }
-
-                IVesselPositionMessage vpm = null;
-                if (m instanceof IVesselPositionMessage) {
-                    vpm = (IVesselPositionMessage) m;
-                }
-
-                IDimensionMessage dm = null;
-                if (m instanceof IDimensionMessage) {
-                    dm = (IDimensionMessage) m;
-                }
-
-                INameMessage nm = null;
-                if (m instanceof INameMessage) {
-                    nm = (INameMessage) m;
-                }
-
                 List fields = Lists.newArrayList();
 
                 for (String column : columns) {
                     switch (column) {
-                        case "msgid":
-                            fields.add(m.getMsgId());
-                            break;
-                        case "mmsi":
-                            fields.add(m.getUserId());
-                            break;
-                        case "lat":
-                            if (im != null && pos != null) {
-                                fields.add((float) pos.getLatitude());
-                            } else {
-                                fields.add("null");
-                            }
-                            break;
-                        case "lon":
-                            if (im != null && pos != null) {
-                                fields.add((float) pos.getLongitude());
-                            } else {
-                                fields.add("null");
-                            }
-                            break;
-                        case "targetType":
-                            fields.add(m.getTargetType());
-                            break;
-                        case "sog":
-                            if (vpm != null) {
-                                fields.add(vpm.getSog());
-                            } else {
-                                fields.add("null");
-                            }
-                            break;
-                        case "cog":
-                            if (vpm != null) {
-                                fields.add(vpm.getCog());
-
-                            } else {
-                                fields.add("null");
-                            }
-                            break;
-                        case "trueHeading":
-                            if (vpm != null) {
-                                fields.add(vpm.getTrueHeading());
-                                break;
-                            } else {
-                                fields.add("null");
-                            }
-                        case "draught":
-                            if (m5 != null) {
-                                fields.add(m5.getDraught());
-                            } else {
-                                fields.add("null");
-                            }
-                            break;
                         case "timestamp":
                             fields.add(packet.getBestTimestamp());
                             break;
                         case "timestamp_pretty":
                             fields.add(DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(packet.getBestTimestamp()), ZoneId.of("UTC"))));
                             break;
+                        case "msgid":
+                            addMsgId(fields, m);
+                            break;
+                        case "mmsi":
+                            addMmsi(fields, m);
+                            break;
+                        case "lat":
+                            addLatitude(fields, m);
+                            break;
+                        case "lon":
+                            addLongitude(fields, m);
+                            break;
+                        case "targetType":
+                            addTargetType(fields, m);
+                            break;
+                        case "sog":
+                            addSog(fields, m);
+                            break;
+                        case "cog":
+                            addCog(fields, m);
+                            break;
+                        case "trueHeading":
+                            addTrueHeading(fields, m);
+                            break;
+                        case "draught":
+                            addDraught(fields, m);
+                            break;
                         case "name":
-                            if (nm != null) {
-                                fields.add(AisMessage.trimText(nm.getName()));
-                            } else {
-                                fields.add("null");
-                            }
+                            addName(fields, m);
                             break;
                         case "dimBow":
-                            if (dm != null) {
-                                fields.add(dm.getDimBow());
-                            } else {
-                                fields.add("null");
-                            }
+                            addDimBow(fields, m);
                             break;
                         case "dimPort":
-                            if (dm != null) {
-                                fields.add(dm.getDimPort());
-                            } else {
-                                fields.add("null");
-                            }
+                            addDimPort(fields, m);
                             break;
                         case "dimStarboard":
-                            if (dm != null) {
-                                fields.add(dm.getDimStarboard());
-                            } else {
-                                fields.add("null");
-                            }
+                            addDimStarboard(fields, m);
                             break;
                         case "dimStern":
-                            if (dm != null) {
-                                fields.add(dm.getDimStern());
-
-                            } else {
-                                fields.add("null");
-                            }
+                            addDimStern(fields, m);
                             break;
                         case "shipType":
-                            if (stc != null) {
-                                fields.add(stc.getShipType().toString());
-                            } else {
-                                fields.add("null");
-                            }
+                            addShipType(fields, m);
                             break;
                         case "shipCargo":
-                            if (stc != null) {
-                                fields.add(stc.getShipCargo().toString());
-                            } else {
-                                fields.add("null");
-                            }
+                            addShipCargo(fields, m);
                             break;
                         case "callsign":
-                            if (common != null) {
-                                fields.add(AisMessage.trimText(common.getCallsign()));
-                            } else {
-                                fields.add("null");
-                            }
+                            addCallsign(fields, m);
                             break;
                         case "imo":
-                            if (m5 != null) {
-                                fields.add(m5.getImo());
-                            } else {
-                                fields.add("null");
-                            }
+                            addImo(fields, m);
                             break;
                         case "destination":
-                            if (m5 != null) {
-                                fields.add(AisMessage.trimText(m5.getDest()));
-                            } else {
-                                fields.add("null");
-                            }
+                            addDestination(fields, m);
                             break;
                         case "eta":
-                            if (m5 != null) {
-                                fields.add(m5.getEta());
-                            } else {
-                                fields.add("null");
-                            }
+                            addEta(fields, m);
                             break;
                         default:
                             fields.add("null");
                     }
                 }
+
                 csv.printRecord(fields);
             }
         } finally {
             csvLock.unlock();
         }
+    }
+
+    // ---
+
+    protected void addMmsi(List fields, AisMessage m) {
+        fields.add(m.getUserId());
+    }
+
+    protected void addMsgId(List fields, AisMessage m) {
+        fields.add(m.getMsgId());
+    }
+
+    protected void addLatitude(List fields, AisMessage m) {
+        if (m instanceof IPositionMessage) {
+            AisPosition pos = ((IPositionMessage) m).getPos();
+            if (pos != null) {
+                fields.add((float) pos.getLatitude());
+            } else {
+                fields.add("null");
+            }
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addLongitude(List fields, AisMessage m) {
+        if (m instanceof IPositionMessage) {
+            AisPosition pos = ((IPositionMessage) m).getPos();
+            if (pos != null) {
+                fields.add((float) pos.getLongitude());
+            } else {
+                fields.add("null");
+            }
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addTargetType(List fields, AisMessage m) {
+        fields.add(m.getTargetType());
+    }
+
+    protected void addSog(List fields, AisMessage m) {
+        if (m instanceof IVesselPositionMessage) {
+            fields.add(((IVesselPositionMessage) m).getSog()/10f);
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addCog(List fields, AisMessage m) {
+        if (m instanceof IVesselPositionMessage) {
+            fields.add(((IVesselPositionMessage) m).getCog()/10f);
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addTrueHeading(List fields, AisMessage m) {
+        if (m instanceof IVesselPositionMessage) {
+            fields.add(((IVesselPositionMessage) m).getTrueHeading());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addDraught(List fields, AisMessage m) {
+        if (m instanceof AisMessage5) {
+            fields.add(((AisMessage5) m).getDraught()/10f);
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addName(List fields, AisMessage m) {
+        if (m instanceof INameMessage) {
+            fields.add(AisMessage.trimText(((INameMessage) m).getName()));
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addDimBow(List fields, AisMessage m) {
+        if (m instanceof IDimensionMessage) {
+            fields.add(((IDimensionMessage) m).getDimBow());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addDimPort(List fields, AisMessage m) {
+        if (m instanceof IDimensionMessage) {
+            fields.add(((IDimensionMessage) m).getDimPort());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addDimStarboard(List fields, AisMessage m) {
+        if (m instanceof IDimensionMessage) {
+            fields.add(((IDimensionMessage) m).getDimStarboard());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addDimStern(List fields, AisMessage m) {
+        if (m instanceof IDimensionMessage) {
+            fields.add(((IDimensionMessage) m).getDimStern());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addShipType(List fields, AisMessage m) {
+        if (m instanceof AisStaticCommon) {
+            ShipTypeCargo stc = new ShipTypeCargo(((AisStaticCommon) m).getShipType());
+            fields.add(stc.getShipType().toString());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addShipCargo(List fields, AisMessage m) {
+        if (m instanceof AisStaticCommon) {
+            ShipTypeCargo stc = new ShipTypeCargo(((AisStaticCommon) m).getShipType());
+            fields.add(stc.getShipCargo().toString());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addCallsign(List fields, AisMessage m) {
+        if (m instanceof AisStaticCommon) {
+            fields.add(AisMessage.trimText(((AisStaticCommon) m).getCallsign()));
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addImo(List fields, AisMessage m) {
+        if (m instanceof AisMessage5) {
+            fields.add(((AisMessage5) m).getImo());
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addDestination(List fields, AisMessage m) {
+        if (m instanceof AisMessage5) {
+            fields.add(AisMessage.trimText(((AisMessage5) m).getDest()));
+        } else {
+            fields.add("null");
+        }
+    }
+
+    protected void addEta(List fields, AisMessage m) {
+        if (m instanceof AisMessage5) {
+            long eta = ((AisMessage5) m).getEta();
+            int minute = (int) (eta & 63);
+            int hour = (int) ((eta >> 6) & 31);
+            int day = (int) ((eta >> 11) & 31);
+            int month = (int) ((eta >> 16) & 15);
+
+            fields.add(String.format("%02d/%02d %02d:%02d UTC", day, month, hour, minute));
+        } else {
+            fields.add("null");
+        }
+
+        /*
+        Estimated time of arrival; MMDDHHMM UTC
+        Bits 19-16: month; 1-12; 0 = not available = default
+        Bits 15-11: day; 1-31; 0 = not available = default
+        Bits 10-6: hour; 0-23; 24 = not available = default
+        Bits 5-0: minute; 0-59; 60 = not available = default
+        For SAR aircraft, the use of this field may be decided by the responsible administration
+        */
     }
 
     /** {@inheritDoc} */
