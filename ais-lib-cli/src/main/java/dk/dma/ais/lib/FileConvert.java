@@ -65,7 +65,7 @@ public class FileConvert extends AbstractCommandLineTool {
     @Parameter(names = "-fileEnding", required = false, description = "File ending")
     String fileEnding = ".txt";
 
-    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table, csv]")
+    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table, csv, csv_stateful]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
 
     @Parameter(names = "-columns", required = false, description = "Optional columns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
@@ -134,7 +134,7 @@ public class FileConvert extends AbstractCommandLineTool {
          * Creates a pool of executors, 4 threads. Each thread will open a file using an aispacket reader, 10000 files can be
          * submitted to the queue, afterwards the calling thread will execute the job instead.
          */
-        ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(
+        ThreadPoolExecutor threadpoolexecutor = new ThreadPoolExecutor(4, 4, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<>(
                 10000), new ThreadPoolExecutor.CallerRunsPolicy());
         for (final String s : sources) {
             threadpoolexecutor.execute(() -> {

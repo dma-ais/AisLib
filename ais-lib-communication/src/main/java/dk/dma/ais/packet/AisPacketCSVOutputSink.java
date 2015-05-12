@@ -37,16 +37,19 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.DecimalFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 /**
- * Transform AisPackets into json objects with only specific columns
- * @author Jens Tuxen
+ * Transform AisPackets into csv objects with only specific columns
+ * @author Thomas Borg Salling
  *
  */
 public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
@@ -69,7 +72,7 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     public AisPacketCSVOutputSink(String format) {
-        this(format,";");
+        this(format, ";");
     }
 
     public AisPacketCSVOutputSink(String format, String separator) {
@@ -171,179 +174,164 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     // ---
 
-    protected void addMmsi(List fields, AisMessage m) {
+    private void addMmsi(List fields, AisMessage m) {
         fields.add(m.getUserId());
     }
 
-    protected void addMsgId(List fields, AisMessage m) {
+    private void addMsgId(List fields, AisMessage m) {
         fields.add(m.getMsgId());
     }
 
-    protected void addLatitude(List fields, AisMessage m) {
+    private void addLatitude(List fields, AisMessage m) {
         if (m instanceof IPositionMessage) {
             AisPosition pos = ((IPositionMessage) m).getPos();
             if (pos != null) {
-                fields.add((float) pos.getLatitude());
+                fields.add((float) pos.getLatitudeDouble());
             } else {
-                fields.add("null");
+                fields.add(nullValueForLatitude.apply(m));
             }
         } else {
-            fields.add("null");
+            fields.add(nullValueForLatitude.apply(m));
         }
     }
 
-    protected void addLongitude(List fields, AisMessage m) {
+    private void addLongitude(List fields, AisMessage m) {
         if (m instanceof IPositionMessage) {
             AisPosition pos = ((IPositionMessage) m).getPos();
             if (pos != null) {
-                fields.add((float) pos.getLongitude());
+                fields.add((float) pos.getLongitudeDouble());
             } else {
-                fields.add("null");
+                fields.add(nullValueForLongitude.apply(m));
             }
         } else {
-            fields.add("null");
+            fields.add(nullValueForLongitude.apply(m));
         }
     }
 
-    protected void addTargetType(List fields, AisMessage m) {
+    private void addTargetType(List fields, AisMessage m) {
         fields.add(m.getTargetType());
     }
 
-    protected void addSog(List fields, AisMessage m) {
+    private void addSog(List fields, AisMessage m) {
         if (m instanceof IVesselPositionMessage) {
             fields.add(((IVesselPositionMessage) m).getSog()/10f);
         } else {
-            fields.add("null");
+            fields.add(nullValueForSog.apply(m));
         }
     }
 
-    protected void addCog(List fields, AisMessage m) {
+    private void addCog(List fields, AisMessage m) {
         if (m instanceof IVesselPositionMessage) {
             fields.add(((IVesselPositionMessage) m).getCog()/10f);
         } else {
-            fields.add("null");
+            fields.add(nullValueForCog.apply(m));
         }
     }
 
-    protected void addTrueHeading(List fields, AisMessage m) {
+    private void addTrueHeading(List fields, AisMessage m) {
         if (m instanceof IVesselPositionMessage) {
             fields.add(((IVesselPositionMessage) m).getTrueHeading());
         } else {
-            fields.add("null");
+            fields.add(nullValueForTrueHeading.apply(m));
         }
     }
 
-    protected void addDraught(List fields, AisMessage m) {
+    private void addDraught(List fields, AisMessage m) {
         if (m instanceof AisMessage5) {
             fields.add(((AisMessage5) m).getDraught()/10f);
         } else {
-            fields.add("null");
+            fields.add(nullValueForDraught.apply(m));
         }
     }
 
-    protected void addName(List fields, AisMessage m) {
+    private void addName(List fields, AisMessage m) {
         if (m instanceof INameMessage) {
             fields.add(AisMessage.trimText(((INameMessage) m).getName()));
         } else {
-            fields.add("null");
+            fields.add(nullValueForName.apply(m));
         }
     }
 
-    protected void addDimBow(List fields, AisMessage m) {
+    private void addDimBow(List fields, AisMessage m) {
         if (m instanceof IDimensionMessage) {
             fields.add(((IDimensionMessage) m).getDimBow());
         } else {
-            fields.add("null");
+            fields.add(nullValueForDimBow.apply(m));
         }
     }
 
-    protected void addDimPort(List fields, AisMessage m) {
+    private void addDimPort(List fields, AisMessage m) {
         if (m instanceof IDimensionMessage) {
             fields.add(((IDimensionMessage) m).getDimPort());
         } else {
-            fields.add("null");
+            fields.add(nullValueForDimPort.apply(m));
         }
     }
 
-    protected void addDimStarboard(List fields, AisMessage m) {
+    private void addDimStarboard(List fields, AisMessage m) {
         if (m instanceof IDimensionMessage) {
             fields.add(((IDimensionMessage) m).getDimStarboard());
         } else {
-            fields.add("null");
+            fields.add(nullValueForDimStarboard.apply(m));
         }
     }
 
-    protected void addDimStern(List fields, AisMessage m) {
+    private void addDimStern(List fields, AisMessage m) {
         if (m instanceof IDimensionMessage) {
             fields.add(((IDimensionMessage) m).getDimStern());
         } else {
-            fields.add("null");
+            fields.add(nullValueForDimStern.apply(m));
         }
     }
 
-    protected void addShipType(List fields, AisMessage m) {
+    private void addShipType(List fields, AisMessage m) {
         if (m instanceof AisStaticCommon) {
             ShipTypeCargo stc = new ShipTypeCargo(((AisStaticCommon) m).getShipType());
             fields.add(stc.getShipType().toString());
         } else {
-            fields.add("null");
+            fields.add(nullValueForShipType.apply(m));
         }
     }
 
-    protected void addShipCargo(List fields, AisMessage m) {
+    private void addShipCargo(List fields, AisMessage m) {
         if (m instanceof AisStaticCommon) {
             ShipTypeCargo stc = new ShipTypeCargo(((AisStaticCommon) m).getShipType());
             fields.add(stc.getShipCargo().toString());
         } else {
-            fields.add("null");
+            fields.add(nullValueForShipCargo.apply(m));
         }
     }
 
-    protected void addCallsign(List fields, AisMessage m) {
+    private void addCallsign(List fields, AisMessage m) {
         if (m instanceof AisStaticCommon) {
             fields.add(AisMessage.trimText(((AisStaticCommon) m).getCallsign()));
         } else {
-            fields.add("null");
+            fields.add(nullValueForCallsign.apply(m));
         }
     }
 
-    protected void addImo(List fields, AisMessage m) {
+    private void addImo(List fields, AisMessage m) {
         if (m instanceof AisMessage5) {
             fields.add(((AisMessage5) m).getImo());
         } else {
-            fields.add("null");
+            fields.add(nullValueForImo.apply(m));
         }
     }
 
-    protected void addDestination(List fields, AisMessage m) {
+    private void addDestination(List fields, AisMessage m) {
         if (m instanceof AisMessage5) {
             fields.add(AisMessage.trimText(((AisMessage5) m).getDest()));
         } else {
-            fields.add("null");
+            fields.add(nullValueForDestination.apply(m));
         }
     }
 
-    protected void addEta(List fields, AisMessage m) {
+    private void addEta(List fields, AisMessage m) {
         if (m instanceof AisMessage5) {
-            long eta = ((AisMessage5) m).getEta();
-            int minute = (int) (eta & 63);
-            int hour = (int) ((eta >> 6) & 31);
-            int day = (int) ((eta >> 11) & 31);
-            int month = (int) ((eta >> 16) & 15);
-
-            fields.add(String.format("%02d/%02d %02d:%02d UTC", day, month, hour, minute));
+            fields.add(formatEta(((AisMessage5) m).getEta()));
         } else {
-            fields.add("null");
+            fields.add(nullValueForEta.apply(m));
         }
-
-        /*
-        Estimated time of arrival; MMDDHHMM UTC
-        Bits 19-16: month; 1-12; 0 = not available = default
-        Bits 15-11: day; 1-31; 0 = not available = default
-        Bits 10-6: hour; 0-23; 24 = not available = default
-        Bits 5-0: minute; 0-59; 60 = not available = default
-        For SAR aircraft, the use of this field may be decided by the responsible administration
-        */
     }
 
     /** {@inheritDoc} */
@@ -355,5 +343,123 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
             csv = null;
         }
     }
+
+    // ---
+
+    protected String formatEta(long eta) {
+        /*
+        Estimated time of arrival; MMDDHHMM UTC
+        Bits 19-16: month; 1-12; 0 = not available = default
+        Bits 15-11: day; 1-31; 0 = not available = default
+        Bits 10-6: hour; 0-23; 24 = not available = default
+        Bits 5-0: minute; 0-59; 60 = not available = default
+        For SAR aircraft, the use of this field may be decided by the responsible administration
+        */
+
+        int minute = (int) (eta & 63);
+        int hour = (int) ((eta >> 6) & 31);
+        int day = (int) ((eta >> 11) & 31);
+        int month = (int) ((eta >> 16) & 15);
+        return formatEta(day, month, hour, minute);
+    }
+
+    protected String formatEta(Date eta) {
+        LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(eta.getTime()), ZoneId.systemDefault());
+        return formatEta(time.getDayOfMonth(), time.getMonthValue(), time.getHour(), time.getMinute());
+    }
+
+    protected String formatEta(int day, int month, int hour, int minute) {
+        return String.format("%02d/%02d %02d:%02d UTC", day, month, hour, minute);
+    }
+
+    // ---
+
+    protected void setNullValueForLatitude(Function<AisMessage, Object> nullValueForLatitude) {
+        this.nullValueForLatitude = nullValueForLatitude;
+    }
+
+    protected void setNullValueForLongitude(Function<AisMessage, Object> nullValueForLongitude) {
+        this.nullValueForLongitude = nullValueForLongitude;
+    }
+
+    protected void setNullValueForSog(Function<AisMessage, Object> nullValueForSog) {
+        this.nullValueForSog = nullValueForSog;
+    }
+
+    protected void setNullValueForCog(Function<AisMessage, Object> nullValueForCog) {
+        this.nullValueForCog = nullValueForCog;
+    }
+
+    protected void setNullValueForTrueHeading(Function<AisMessage, Object> nullValueForTrueHeading) {
+        this.nullValueForTrueHeading = nullValueForTrueHeading;
+    }
+
+    protected void setNullValueForDraught(Function<AisMessage, Object> nullValueForDraught) {
+        this.nullValueForDraught = nullValueForDraught;
+    }
+
+    protected void setNullValueForName(Function<AisMessage, Object> nullValueForName) {
+        this.nullValueForName = nullValueForName;
+    }
+
+    protected void setNullValueForDimBow(Function<AisMessage, Object> nullValueForDimBow) {
+        this.nullValueForDimBow = nullValueForDimBow;
+    }
+
+    protected void setNullValueForDimPort(Function<AisMessage, Object> nullValueForDimPort) {
+        this.nullValueForDimPort = nullValueForDimPort;
+    }
+
+    protected void setNullValueForDimStarboard(Function<AisMessage, Object> nullValueForDimStarboard) {
+        this.nullValueForDimStarboard = nullValueForDimStarboard;
+    }
+
+    protected void setNullValueForDimStern(Function<AisMessage, Object> nullValueForDimStern) {
+        this.nullValueForDimStern = nullValueForDimStern;
+    }
+
+    protected void setNullValueForShipType(Function<AisMessage, Object> nullValueForShipType) {
+        this.nullValueForShipType = nullValueForShipType;
+    }
+
+    protected void setNullValueForShipCargo(Function<AisMessage, Object> nullValueForShipCargo) {
+        this.nullValueForShipCargo = nullValueForShipCargo;
+    }
+
+    protected void setNullValueForCallsign(Function<AisMessage, Object> nullValueForCallsign) {
+        this.nullValueForCallsign = nullValueForCallsign;
+    }
+
+    protected void setNullValueForImo(Function<AisMessage, Object> nullValueForImo) {
+        this.nullValueForImo = nullValueForImo;
+    }
+
+    protected void setNullValueForDestination(Function<AisMessage, Object> nullValueForDestination) {
+        this.nullValueForDestination = nullValueForDestination;
+    }
+
+    protected void setNullValueForEta(Function<AisMessage, Object> nullValueForEta) {
+        this.nullValueForEta = nullValueForEta;
+    }
+
+    // ---
+
+    private Function<AisMessage,Object> nullValueForLatitude = m -> "null";
+    private Function<AisMessage,Object> nullValueForLongitude = m -> "null";
+    private Function<AisMessage,Object> nullValueForSog = m -> "null";
+    private Function<AisMessage,Object> nullValueForCog = m -> "null";
+    private Function<AisMessage,Object> nullValueForTrueHeading = m -> "null";
+    private Function<AisMessage,Object> nullValueForDraught = m -> "null";
+    private Function<AisMessage,Object> nullValueForName = m -> "null";
+    private Function<AisMessage,Object> nullValueForDimBow = m -> "null";
+    private Function<AisMessage,Object> nullValueForDimPort = m -> "null";
+    private Function<AisMessage,Object> nullValueForDimStarboard = m -> "null";
+    private Function<AisMessage,Object> nullValueForDimStern = m -> "null";
+    private Function<AisMessage,Object> nullValueForShipType = m -> "null";
+    private Function<AisMessage,Object> nullValueForShipCargo = m -> "null";
+    private Function<AisMessage,Object> nullValueForCallsign = m -> "null";
+    private Function<AisMessage,Object> nullValueForImo = m -> "null";
+    private Function<AisMessage,Object> nullValueForDestination = m -> "null";
+    private Function<AisMessage,Object> nullValueForEta = m -> "null";
 
 }

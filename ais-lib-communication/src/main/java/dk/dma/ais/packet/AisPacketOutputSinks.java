@@ -287,6 +287,10 @@ public class AisPacketOutputSinks {
         return new AisPacketCSVOutputSink();
     }
 
+    public static OutputStreamSink<AisPacket> newCsvStatefulSink() {
+        return new AisPacketCSVStatefulOutputSink();
+    }
+
     public static OutputStreamSink<AisPacket> newKmlSink() {
         return new AisPacketKMLOutputSink();
     }
@@ -345,8 +349,11 @@ public class AisPacketOutputSinks {
             }
         case "json":
             return AisPacketOutputSinks.jsonMessageSink();
+
         case "csv":
             return AisPacketOutputSinks.newCsvSink();
+        case "csv_stateful":
+            return AisPacketOutputSinks.newCsvStatefulSink();
 
         default: // reflection
             return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(params[0]).get(null);
