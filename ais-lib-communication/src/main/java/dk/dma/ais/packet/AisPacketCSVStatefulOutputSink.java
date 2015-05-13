@@ -52,7 +52,7 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
     private TargetTracker tracker = new TargetTracker();
 
     public AisPacketCSVStatefulOutputSink() {
-        this("timestamp_pretty;timestamp;targetType;mmsi;msgid;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;destination;eta;imo;callsign", ";");
+        this("timestamp_pretty;timestamp;targetType;mmsi;msgid;posacc;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipTypeCargoTypeCode;shipType;shipCargo;destination;eta;imo;callsign", ";");
     }
 
     public AisPacketCSVStatefulOutputSink(String format) {
@@ -61,6 +61,7 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
 
     public AisPacketCSVStatefulOutputSink(String format, String separator) {
         super(format, separator);
+        setNullValueForPositionAccuracy(cachedPositionAccuracy);
         setNullValueForLatitude(cachedLatitude);
         setNullValueForLongitude(cachedLongitude);
         setNullValueForSog(cachedSog);
@@ -72,6 +73,7 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
         setNullValueForDimPort(cachedDimPort);
         setNullValueForDimStarboard(cachedDimStarboard);
         setNullValueForDimStern(cachedDimStern);
+        setNullValueForShipTypeCargoTypeCode(cachedShipTypeCargoTypeCode);
         setNullValueForShipType(cachedShipType);
         setNullValueForShipCargo(cachedShipCargo);
         setNullValueForCallsign(cachedCallsign);
@@ -138,6 +140,8 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
         });
     }
 
+    private Function<AisMessage, Object> cachedPositionAccuracy = m -> extractFromDynamics(m, dynamics -> dynamics.getPosAcc());
+
     private Function<AisMessage, Object> cachedLatitude = m -> extractFromPosition(m, position -> position.getLatitude());
 
     private Function<AisMessage, Object> cachedLongitude = m -> extractFromPosition(m, position -> position.getLatitude());
@@ -155,6 +159,8 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
     private Function<AisMessage, Object> cachedDimStarboard = m -> extractFromDimensions(m, d -> d.getDimStarboard());
 
     private Function<AisMessage, Object> cachedDimStern = m -> extractFromDimensions(m, d -> d.getDimStern());
+
+    private Function<AisMessage, Object> cachedShipTypeCargoTypeCode = m -> extractFromStatic(m, s -> s.getShipTypeCargo().getCode());
 
     private Function<AisMessage, Object> cachedShipType = m -> extractFromStatic(m, s -> s.getShipTypeCargo().getShipType().toString());
 

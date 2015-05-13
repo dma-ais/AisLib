@@ -27,46 +27,52 @@ public class ShipTypeCargo implements Serializable {
         UNDEFINED, A, B, C, D
     }
 
-    private ShipType shipType;
-    private CargoType cargoType;
+    private final ShipType shipType;
+    private final CargoType cargoType;
+
+    /** The original coded value as per ITU 1371.5 table 53 */
+    private final int code;
 
     public ShipTypeCargo(int intShipType) {
-        shipType = ShipType.UNDEFINED;
-        cargoType = CargoType.UNDEFINED;
+        this.code = intShipType;
+
+        ShipType shipTypeTmp = ShipType.UNDEFINED;
+        CargoType cargoTypeTmp = CargoType.UNDEFINED;
+
         int firstDigit = intShipType / 10;
         int secondDigit = intShipType % 10;
 
         if (firstDigit == 3) {
             switch (secondDigit) {
             case 0:
-                shipType = ShipType.FISHING;
+                shipTypeTmp = ShipType.FISHING;
                 break;
             case 1:
-                shipType = ShipType.TOWING;
+                shipTypeTmp = ShipType.TOWING;
                 break;
             case 2:
-                shipType = ShipType.TOWING_LONG_WIDE;
+                shipTypeTmp = ShipType.TOWING_LONG_WIDE;
                 break;
             case 3:
-                shipType = ShipType.DREDGING;
+                shipTypeTmp = ShipType.DREDGING;
                 break;
             case 4:
-                shipType = ShipType.DIVING;
+                shipTypeTmp = ShipType.DIVING;
                 break;
             case 5:
-                shipType = ShipType.MILITARY;
+                shipTypeTmp = ShipType.MILITARY;
                 break;
             case 6:
-                shipType = ShipType.SAILING;
+                shipTypeTmp = ShipType.SAILING;
                 break;
             case 7:
-                shipType = ShipType.PLEASURE;
+                shipTypeTmp = ShipType.PLEASURE;
                 break;
             case 8:
-                shipType = ShipType.UNKNOWN;
+                shipTypeTmp = ShipType.UNKNOWN;
                 break; // reserved for future use
             case 9:
-                shipType = ShipType.UNKNOWN;
+                shipTypeTmp = ShipType.UNKNOWN;
                 break; // reserved for future use
             }
         }
@@ -74,75 +80,77 @@ public class ShipTypeCargo implements Serializable {
         if (firstDigit == 5) {
             switch (secondDigit) {
             case 0:
-                shipType = ShipType.PILOT;
+                shipTypeTmp = ShipType.PILOT;
                 break;
             case 1:
-                shipType = ShipType.SAR;
+                shipTypeTmp = ShipType.SAR;
                 break;
             case 2:
-                shipType = ShipType.TUG;
+                shipTypeTmp = ShipType.TUG;
                 break;
             case 3:
-                shipType = ShipType.PORT_TENDER;
+                shipTypeTmp = ShipType.PORT_TENDER;
                 break;
             case 4:
-                shipType = ShipType.ANTI_POLLUTION;
+                shipTypeTmp = ShipType.ANTI_POLLUTION;
                 break;
             case 5:
-                shipType = ShipType.LAW_ENFORCEMENT;
+                shipTypeTmp = ShipType.LAW_ENFORCEMENT;
                 break;
             case 6:
-                shipType = ShipType.UNKNOWN;
+                shipTypeTmp = ShipType.UNKNOWN;
                 break; // Spare  for assignments to local vessels
             case 7:
-                shipType = ShipType.UNKNOWN;
+                shipTypeTmp = ShipType.UNKNOWN;
                 break; // Spare  for assignments to local vessels
             case 8:
-                shipType = ShipType.MEDICAL;
+                shipTypeTmp = ShipType.MEDICAL;
                 break;
             case 9:
-                shipType = ShipType.SHIPS_ACCORDING_TO_RR;
+                shipTypeTmp = ShipType.SHIPS_ACCORDING_TO_RR;
                 break;
             }
         }
         if (firstDigit == 2 || firstDigit == 4 || firstDigit > 5) {
             switch (firstDigit) {
             case 2:
-                shipType = ShipType.WIG;
+                shipTypeTmp = ShipType.WIG;
                 break;
             case 4:
-                shipType = ShipType.HSC;
+                shipTypeTmp = ShipType.HSC;
                 break;
             case 6:
-                shipType = ShipType.PASSENGER;
+                shipTypeTmp = ShipType.PASSENGER;
                 break;
             case 7:
-                shipType = ShipType.CARGO;
+                shipTypeTmp = ShipType.CARGO;
                 break;
             case 8:
-                shipType = ShipType.TANKER;
+                shipTypeTmp = ShipType.TANKER;
                 break;
             case 9:
-                shipType = ShipType.UNKNOWN;
+                shipTypeTmp = ShipType.UNKNOWN;
                 break;
             }
 
             switch (secondDigit) {
             case 1:
-                cargoType = CargoType.A;
+                cargoTypeTmp = CargoType.A;
                 break;
             case 2:
-                cargoType = CargoType.B;
+                cargoTypeTmp = CargoType.B;
                 break;
             case 3:
-                cargoType = CargoType.C;
+                cargoTypeTmp = CargoType.C;
                 break;
             case 4:
-                cargoType = CargoType.D;
+                cargoTypeTmp = CargoType.D;
                 break;
             }
         }
 
+        this.shipType = shipTypeTmp;
+        this.cargoType= cargoTypeTmp;
     }
 
     public ShipType getShipType() {
@@ -151,6 +159,10 @@ public class ShipTypeCargo implements Serializable {
 
     public CargoType getShipCargo() {
         return this.cargoType;
+    }
+
+    public int getCode() {
+        return code;
     }
 
     public String prettyType() {
@@ -202,7 +214,6 @@ public class ShipTypeCargo implements Serializable {
         ShipTypeCargo shipTypeCargo = this;
 
         return shipTypeCargo.prettyType() + " cargo of " + shipTypeCargo.prettyCargo();
-
     }
 
 }

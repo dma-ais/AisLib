@@ -70,7 +70,7 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     protected static final String NULL_INDICATOR = "null";
     
     public AisPacketCSVOutputSink() {
-        this("timestamp_pretty;timestamp;targetType;mmsi;msgid;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;destination;eta;imo;callsign", ";");
+        this("timestamp_pretty;timestamp;targetType;mmsi;msgid;posacc;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipTypeCargoTypeCode;shipType;shipCargo;destination;eta;imo;callsign", ";");
     }
 
     public AisPacketCSVOutputSink(String format) {
@@ -101,13 +101,16 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                             fields.add(packet.getBestTimestamp());
                             break;
                         case "timestamp_pretty":
-                            fields.add(DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(packet.getBestTimestamp()), ZoneId.of("UTC"))));
+                            fields.add(DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm:ss").format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(packet.getBestTimestamp()), ZoneId.of("UTC"))));
                             break;
                         case "msgid":
                             addMsgId(fields, m);
                             break;
                         case "mmsi":
                             addMmsi(fields, m);
+                            break;
+                        case "posacc":
+                            addPositionAccuracy(fields, m);
                             break;
                         case "lat":
                             addLatitude(fields, m);
@@ -145,6 +148,9 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                         case "dimStern":
                             addDimStern(fields, m);
                             break;
+                        case "shipTypeCargoTypeCode":
+                            addShipTypeCargoTypeCode(fields, m);
+                            break;
                         case "shipType":
                             addShipType(fields, m);
                             break;
@@ -164,6 +170,7 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                             addEta(fields, m);
                             break;
                         default:
+                            LOG.warn("Unknown column: " + column);
                             fields.add(NULL_INDICATOR);
                     }
                 }
@@ -183,6 +190,14 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     private void addMsgId(List fields, AisMessage m) {
         fields.add(m.getMsgId());
+    }
+
+    private void addPositionAccuracy(List fields, AisMessage m) {
+        if (m instanceof IPositionMessage) {
+            fields.add(((IPositionMessage) m).getPosAcc());
+        } else {
+            fields.add(nullValueForPositionAccuracy.apply(m));
+        }
     }
 
     private void addLatitude(List fields, AisMessage m) {
@@ -293,6 +308,14 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
         }
     }
 
+    private void addShipTypeCargoTypeCode(List fields, AisMessage m) {
+        if (m instanceof AisStaticCommon) {
+            fields.add(((AisStaticCommon) m).getShipType());
+        } else {
+            fields.add(nullValueForShipTypeCargoTypeCode.apply(m));
+        }
+    }
+
     private void addShipType(List fields, AisMessage m) {
         if (m instanceof AisStaticCommon) {
             ShipTypeCargo stc = new ShipTypeCargo(((AisStaticCommon) m).getShipType());
@@ -393,6 +416,10 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     // ---
 
+    protected void setNullValueForPositionAccuracy(Function<AisMessage, Object> nullValueForPositionAccuracy) {
+        this.nullValueForPositionAccuracy = nullValueForPositionAccuracy;
+    }
+
     protected void setNullValueForLatitude(Function<AisMessage, Object> nullValueForLatitude) {
         this.nullValueForLatitude = nullValueForLatitude;
     }
@@ -437,6 +464,9 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
         this.nullValueForDimStern = nullValueForDimStern;
     }
 
+    protected void setNullValueForShipTypeCargoTypeCode(Function<AisMessage, Object> nullValueForShipTypeCargoTypeCode) {
+        this.nullValueForShipTypeCargoTypeCode = nullValueForShipTypeCargoTypeCode;
+    }
     protected void setNullValueForShipType(Function<AisMessage, Object> nullValueForShipType) {
         this.nullValueForShipType = nullValueForShipType;
     }
@@ -464,6 +494,7 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     // ---
 
     private Function<AisMessage,Object> nullValueForTargetType = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForPositionAccuracy = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForLatitude = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForLongitude = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForSog = m -> NULL_INDICATOR;
@@ -475,6 +506,7 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     private Function<AisMessage,Object> nullValueForDimPort = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForDimStarboard = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForDimStern = m -> NULL_INDICATOR;
+    private Function<AisMessage,Object> nullValueForShipTypeCargoTypeCode = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForShipType = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForShipCargo = m -> NULL_INDICATOR;
     private Function<AisMessage,Object> nullValueForCallsign = m -> NULL_INDICATOR;
