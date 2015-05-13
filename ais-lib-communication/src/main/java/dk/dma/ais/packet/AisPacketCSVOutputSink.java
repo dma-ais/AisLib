@@ -78,7 +78,8 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     public AisPacketCSVOutputSink(String format, String separator) {
-       columns = format.split(separator);
+        LOG.info("Exporting CSV columns: " + format);
+        columns = format.split(separator);
     }
 
     @Override
