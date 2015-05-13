@@ -359,9 +359,9 @@ public class AisPacketOutputSinks {
             return AisPacketOutputSinks.jsonMessageSink();
 
         case "csv":
-            return params.length > 1 ? AisPacketOutputSinks.newCsvSink(params[1]) : AisPacketOutputSinks.newCsvSink();
+            return params.length > 1 && params[1] != null ? AisPacketOutputSinks.newCsvSink(params[1]) : AisPacketOutputSinks.newCsvSink();
         case "csv_stateful":
-            return params.length > 1 ? AisPacketOutputSinks.newCsvStatefulSink(params[1]) : AisPacketOutputSinks.newCsvStatefulSink();
+            return params.length > 1 && params[1] != null ? AisPacketOutputSinks.newCsvStatefulSink(params[1]) : AisPacketOutputSinks.newCsvStatefulSink();
 
         default: // reflection
             return (OutputStreamSink<AisPacket>) AisPacketOutputSinks.class.getField(params[0]).get(null);
