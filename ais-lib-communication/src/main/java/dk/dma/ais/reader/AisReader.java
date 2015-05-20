@@ -14,19 +14,6 @@
  */
 package dk.dma.ais.reader;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
@@ -44,7 +31,19 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 import dk.dma.commons.management.ManagedAttribute;
 import dk.dma.commons.management.ManagedResource;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Abstract base for classes reading from an AIS source. Also handles ABK and a number of proprietary sentences.

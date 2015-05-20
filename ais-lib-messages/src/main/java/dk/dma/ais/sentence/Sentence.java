@@ -17,7 +17,7 @@ package dk.dma.ais.sentence;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;

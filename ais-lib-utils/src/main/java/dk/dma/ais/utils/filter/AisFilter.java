@@ -14,27 +14,8 @@
  */
 package dk.dma.ais.utils.filter;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
-import java.util.zip.GZIPOutputStream;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.filter.ExpressionFilter;
 import dk.dma.ais.filter.IPacketFilter;
@@ -58,6 +39,23 @@ import dk.dma.enav.model.geometry.BoundingBox;
 import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Command line tool to do various AIS reading, filtering and writing

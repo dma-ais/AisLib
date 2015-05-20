@@ -32,7 +32,7 @@ import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
 import net.jcip.annotations.Immutable;
 import net.jcip.annotations.NotThreadSafe;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.util.Date;

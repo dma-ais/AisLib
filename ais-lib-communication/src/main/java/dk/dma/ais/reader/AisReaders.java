@@ -14,8 +14,12 @@
  */
 package dk.dma.ais.reader;
 
-import static java.util.Objects.requireNonNull;
+import com.google.common.net.HostAndPort;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.management.JMException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,13 +32,7 @@ import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.google.common.net.HostAndPort;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Factory and utility methods for {@link AisReader}, {@link AisTcpReader}, {@link AisUdpReader}, 

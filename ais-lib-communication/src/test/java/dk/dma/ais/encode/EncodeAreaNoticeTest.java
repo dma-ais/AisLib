@@ -14,12 +14,6 @@
  */
 package dk.dma.ais.encode;
 
-import java.util.ArrayList;
-
-import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage8;
@@ -31,6 +25,11 @@ import dk.dma.ais.message.binary.SubArea;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
 
 /**
  * Class for testing the encoding of area notice ASM

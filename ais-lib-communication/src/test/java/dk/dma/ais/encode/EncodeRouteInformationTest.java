@@ -14,13 +14,6 @@
  */
 package dk.dma.ais.encode;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage6;
@@ -34,6 +27,12 @@ import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EncodeRouteInformationTest {
 

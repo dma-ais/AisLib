@@ -14,18 +14,16 @@
  */
 package dk.dma.ais.transform;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import net.jcip.annotations.ThreadSafe;
-
-import org.apache.commons.lang.StringUtils;
-
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.sentence.Sentence;
 import dk.dma.ais.sentence.SentenceException;
+import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Transformer that changes VDM/VDO to either VDM or VDO based on a given MMSI. If talker is given the talker is also

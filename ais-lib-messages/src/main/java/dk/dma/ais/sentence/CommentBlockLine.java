@@ -14,12 +14,12 @@
  */
 package dk.dma.ais.sentence;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Class representing a single comment block line The parsing is somewhat relaxed

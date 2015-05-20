@@ -15,7 +15,7 @@
 package dk.dma.ais.sentence;
 
 import dk.dma.ais.proprietary.ProprietaryFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Deque;
 import java.util.Optional;

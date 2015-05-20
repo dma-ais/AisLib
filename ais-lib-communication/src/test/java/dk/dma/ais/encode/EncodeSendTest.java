@@ -14,14 +14,13 @@
  */
 package dk.dma.ais.encode;
 
-import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage12;
 import dk.dma.ais.reader.SendException;
 import dk.dma.ais.reader.SendRequest;
 import dk.dma.ais.sentence.Abm;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
 
 public class EncodeSendTest {
 

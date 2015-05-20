@@ -14,9 +14,8 @@
  */
 package dk.dma.ais.packet;
 
-import org.apache.commons.lang.StringUtils;
-
 import dk.dma.ais.sentence.SentenceException;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 

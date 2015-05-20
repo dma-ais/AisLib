@@ -14,15 +14,13 @@
  */
 package dk.dma.ais.transform;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import net.jcip.annotations.ThreadSafe;
-
-import org.apache.commons.lang.StringUtils;
-
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.sentence.Vdm;
+import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Transformer that strips everything from the packet except the raw VDM sentences

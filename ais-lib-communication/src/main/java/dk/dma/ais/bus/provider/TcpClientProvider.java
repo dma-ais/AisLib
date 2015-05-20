@@ -14,24 +14,22 @@
  */
 package dk.dma.ais.bus.provider;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-
-import net.jcip.annotations.ThreadSafe;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.bus.tcp.IClientStoppedListener;
 import dk.dma.ais.bus.tcp.TcpClient;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpReadClient;
 import dk.dma.ais.packet.AisPacket;
+import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**

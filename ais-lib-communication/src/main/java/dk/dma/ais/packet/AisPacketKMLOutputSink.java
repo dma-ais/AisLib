@@ -57,7 +57,7 @@ import java.util.function.Supplier;
 
 import static dk.dma.enav.safety.SafetyZones.safetyZone;
 import static java.lang.Math.min;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class receives AisPacket and use them to build a scenario

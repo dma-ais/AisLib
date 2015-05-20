@@ -14,6 +14,23 @@
  */
 package dk.dma.ais.transform;
 
+import dk.dma.ais.binary.SixbitException;
+import dk.dma.ais.message.AisBinaryMessage;
+import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.message.AisMessage5;
+import dk.dma.ais.message.AisStaticCommon;
+import dk.dma.ais.message.binary.AisApplicationMessage;
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.proprietary.IProprietaryTag;
+import dk.dma.ais.sentence.CommentBlock;
+import dk.dma.ais.sentence.Vdm;
+import dk.dma.enav.model.Country;
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,25 +45,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import dk.dma.ais.binary.SixbitException;
-import dk.dma.ais.message.AisBinaryMessage;
-import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.message.AisMessage5;
-import dk.dma.ais.message.AisStaticCommon;
-import dk.dma.ais.message.binary.AisApplicationMessage;
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.proprietary.IProprietaryTag;
-import dk.dma.ais.sentence.CommentBlock;
-import dk.dma.ais.sentence.Vdm;
-import dk.dma.enav.model.Country;
 
 /**
  * Transformer that anonymizes ais packets

@@ -24,7 +24,7 @@ import dk.dma.commons.app.AbstractCommandLineTool;
 import dk.dma.commons.util.io.OutputStreamSink;
 import dk.dma.enav.util.function.EConsumer;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

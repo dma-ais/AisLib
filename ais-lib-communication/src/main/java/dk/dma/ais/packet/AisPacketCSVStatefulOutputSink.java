@@ -33,7 +33,7 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.function.Function;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Transform AisPackets into stateful csv objects with only specific columns

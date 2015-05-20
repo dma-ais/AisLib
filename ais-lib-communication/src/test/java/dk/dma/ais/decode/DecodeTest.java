@@ -14,24 +14,6 @@
  */
 package dk.dma.ais.decode;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Locale;
-
-import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage6;
@@ -49,6 +31,23 @@ import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Position;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class DecodeTest {

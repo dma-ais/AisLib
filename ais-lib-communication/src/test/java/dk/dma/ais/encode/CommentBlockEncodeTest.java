@@ -14,17 +14,16 @@
  */
 package dk.dma.ais.encode;
 
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.sentence.CommentBlock;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-
-import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.sentence.CommentBlock;
 
 public class CommentBlockEncodeTest {
 

@@ -14,21 +14,19 @@
  */
 package dk.dma.ais.transform;
 
+import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketTags;
+import dk.dma.ais.sentence.CommentBlock;
+import dk.dma.ais.sentence.Vdm;
+import net.jcip.annotations.Immutable;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-
-import net.jcip.annotations.Immutable;
-
-import org.apache.commons.lang.StringUtils;
-
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTags;
-import dk.dma.ais.sentence.CommentBlock;
-import dk.dma.ais.sentence.Vdm;
 
 /**
  * Transformer that given a tagging instance and a policy transforms the tagging of an AisPacket

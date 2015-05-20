@@ -14,16 +14,15 @@
  */
 package dk.dma.ais.sentence;
 
+import net.jcip.annotations.NotThreadSafe;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import net.jcip.annotations.NotThreadSafe;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Class to hold a comment block

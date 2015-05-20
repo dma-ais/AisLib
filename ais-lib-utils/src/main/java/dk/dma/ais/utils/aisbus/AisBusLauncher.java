@@ -14,16 +14,8 @@
  */
 package dk.dma.ais.utils.aisbus;
 
-import java.io.FileNotFoundException;
-import java.lang.Thread.UncaughtExceptionHandler;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
-
 import dk.dma.ais.bus.AisBus;
 import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.AisBusConsumer;
@@ -33,6 +25,12 @@ import dk.dma.ais.bus.consumer.TcpServerConsumer;
 import dk.dma.ais.bus.provider.TcpServerProvider;
 import dk.dma.ais.bus.tcp.TcpClient;
 import dk.dma.commons.app.AbstractDaemon;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.FileNotFoundException;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
  * AisBus launcher application

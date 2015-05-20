@@ -14,19 +14,6 @@
  */
 package dk.dma.ais.encode;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-
-import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage1;
@@ -42,6 +29,18 @@ import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 public class EncodeTest {
 
