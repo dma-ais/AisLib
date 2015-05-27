@@ -56,7 +56,7 @@ Reading from files or TCP/UDP connections is very simple with AisLib. In the exa
 are read from a file.
 
 ```java
-AisReader reader = AisReader.createReaderFromInputStream(new FileInputStream("sentences.txt"));
+AisReader reader = AisReaders.createReaderFromInputStream(new FileInputStream("sentences.txt"));
 reader.registerHandler(new Consumer<AisMessage>() {
 	@Override
 	public void accept(AisMessage aisMessage) {
