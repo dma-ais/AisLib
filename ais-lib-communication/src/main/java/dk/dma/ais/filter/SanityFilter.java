@@ -95,7 +95,7 @@ public class SanityFilter extends MessageFilterBase {
 
         // Sanity check on speed (not sane if above 30 knots and no static report)
         if (vesselPosMessage != null) {
-            if (noStatic && (vesselPosMessage.getSog() > 300 && vesselPosMessage.getSog() < 1023)) {
+            if (noStatic && (vesselPosMessage.getSog() > 800 && vesselPosMessage.getSog() < 1023)) {
                 // System.out.println("High speed for vessel with no static report: " + (vesselPosMessage.getSog() / 10) + " mmsi: "
                 // + message.getUserId());
                 return true;
