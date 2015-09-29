@@ -127,16 +127,20 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
 
     /** {@inheritDoc} */
     @Override
-    protected void runOneIteration() throws Exception {
+    protected void startUp() throws Exception{
+        LOG.info("{} startUp", TargetTrackerFileBackupService.class);
         // If this is the first run, we check if there are any files to restore
-        if (f == null) {
-            try {
-                restoreBackupFiles();
-            } catch (Exception e) {
-                LOG.error("Cannot restore from backup", e);
-            }
-            f = new BackupFile();
+        try {
+            restoreBackupFiles();
+        } catch (Exception e) {
+            LOG.error("Cannot restore from backup", e);
         }
+        f = new BackupFile();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void runOneIteration() throws Exception {
         Path p = f.toPath(backupFolder, prefix);
         try {
             if (f.isFull()) {
