@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>dk.dma.ais.lib</groupId>
 		<artifactId>ais-parent</artifactId>
-		<version>2.2-SNAPSHOT</version>
+		<version>2.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>dk.dma.commons</groupId>
 			<artifactId>dma-commons-util</artifactId>
-			<version>0.3-SNAPSHOT</version>
+			<version>${dependencies.dma.commons.version}</version>
 		</dependency>
 	</dependencies>
 
