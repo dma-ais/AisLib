@@ -182,10 +182,14 @@ public class AisMessage5 extends AisStaticCommon {
         }
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getTimeZone("GMT+0000"));
+        
+		cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MINUTE, min);
         cal.set(Calendar.HOUR_OF_DAY, hour);
         cal.set(Calendar.DAY_OF_MONTH, day);
         cal.set(Calendar.MONTH, mon - 1);
+        
         return cal.getTime();
     }
 
