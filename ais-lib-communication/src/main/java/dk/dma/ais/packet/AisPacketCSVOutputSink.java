@@ -98,10 +98,10 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
                 for (String column : columns) {
                     switch (column) {
                         case "timestamp":
-                            fields.add(packet.getBestTimestamp());
+                            addTimestamp(fields, packet);
                             break;
                         case "timestamp_pretty":
-                            fields.add(DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm:ss").format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(packet.getBestTimestamp()), ZoneId.of("UTC"))));
+                            addTimestampPretty(fields, packet);
                             break;
                         case "msgid":
                             addMsgId(fields, m);
@@ -183,6 +183,22 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
     }
 
     // ---
+
+    private void addTimestamp(List fields, AisPacket packet) {
+        final long timestamp = packet.getBestTimestamp();
+        if (timestamp >= 0)
+            fields.add(timestamp);
+        else
+            fields.add("null");
+    }
+
+    private void addTimestampPretty(List fields, AisPacket packet) {
+        final long timestamp = packet.getBestTimestamp();
+        if (timestamp >= 0)
+            fields.add(DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm:ss").format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("UTC"))));
+        else
+            fields.add("null");
+    }
 
     private void addMmsi(List fields, AisMessage m) {
         fields.add(m.getUserId());
