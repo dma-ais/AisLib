@@ -16,13 +16,15 @@ package dk.dma.ais.message;
 
 import dk.dma.enav.model.geometry.Position;
 
+import java.io.Serializable;
+
 /**
  * AIS position class
  * 
  * Convert raw unsigned AIS position to signed 1/10000 degree position and provide helper methods for other formats
  * 
  */
-public class AisPosition {
+public class AisPosition implements Serializable{
 
     private int bitCorrection;
     private long rawLatitude;
