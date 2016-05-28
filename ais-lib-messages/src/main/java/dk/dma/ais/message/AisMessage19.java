@@ -77,54 +77,6 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
     private int spare2; // 4 bits
 
     /**
-     * Ship name: Maximum 20 characters 6 bit ASCII, as defined in Table 44
-     * 
-     * @@@@@@@@@@@@@@@@@@@@ = not available = default. For SAR aircraft, it should be set to "SAR AIRCRAFT NNNNNNN"
-     *                      where NNNNNNN equals the aircraft registration number
-     */
-    private String name; // 20x6 (120) bits
-
-    /**
-     * Type of ship and cargo type: 0 = not available or no ship = default 1-99 = as defined in 3.3.2 100-199 =
-     * reserved, for regional use 200-255 = reserved, for future use Not applicable to SAR aircraft
-     */
-    private int shipType; // 8 bits
-
-    /**
-     * GPS Ant. Distance from bow (A): Reference point for reported position. Also indicates the dimension of ship (m)
-     * (see Fig. 42 and 3.3.3)
-     * 
-     * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be 0
-     */
-    private int dimBow; // 9 bits
-
-    /**
-     * GPS Ant. Distance from stern (B) Reference point for reported position. Also indicates the dimension of ship (m)
-     * (see Fig. 42 and 3.3.3)
-     * 
-     * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be
-     * representing the length of the ship
-     */
-    private int dimStern; // 9 bits
-
-    /**
-     * GPS Ant. Distance from port (C) Reference point for reported position. Also indicates the dimension of ship (m)
-     * (see Fig. 42 and 3.3.3)
-     * 
-     * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be 0
-     */
-    private int dimPort; // 6 bits
-
-    /**
-     * GPS Ant. Distance from starboard (D): Reference point for reported position. Also indicates the dimension of ship
-     * (m) (see Fig. 42 and 3.3.3)
-     * 
-     * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be
-     * representing the with of the ship
-     */
-    private int dimStarboard; // 6 bits
-
-    /**
      * Type of electronic position fixing device: 0 = undefined (default) 1 = GPS 2 = GLONASS 3 = combined GPS/GLONASS 4
      * = Loran-C 5 = Chayka 6 = integrated navigation system 7 = surveyed 8 = Galileo, 9-14 = not used 15 = internal
      * GNSS
@@ -334,54 +286,6 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
 
     public void setSpare2(int spare2) {
         this.spare2 = spare2;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getShipType() {
-        return shipType;
-    }
-
-    public void setShipType(int shipType) {
-        this.shipType = shipType;
-    }
-
-    public int getDimBow() {
-        return dimBow;
-    }
-
-    public void setDimBow(int dimBow) {
-        this.dimBow = dimBow;
-    }
-
-    public int getDimStern() {
-        return dimStern;
-    }
-
-    public void setDimStern(int dimStern) {
-        this.dimStern = dimStern;
-    }
-
-    public int getDimPort() {
-        return dimPort;
-    }
-
-    public void setDimPort(int dimPort) {
-        this.dimPort = dimPort;
-    }
-
-    public int getDimStarboard() {
-        return dimStarboard;
-    }
-
-    public void setDimStarboard(int dimStarboard) {
-        this.dimStarboard = dimStarboard;
     }
 
     public int getPosType() {
