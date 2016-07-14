@@ -93,6 +93,9 @@ public abstract class AisApplicationMessage {
         if (binaryMessage.getDac() == 1 && binaryMessage.getFi() == 28) {
             return new AddressedRouteInformation(binaryMessage.getData());
         }
+		if (binaryMessage.getDac() == 1 && binaryMessage.getFi() == 31) {
+            return new MetHyd31(binaryMessage.getData());
+        }
         if (binaryMessage.getDac() == 0 && binaryMessage.getFi() == 32) {
             return new RouteSuggestionReply(binaryMessage.getData());
         }
