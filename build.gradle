@@ -1,0 +1,67 @@
+allprojects {
+    task wrapper(type: Wrapper) {
+        gradleVersion = '2.14'
+    }
+}
+
+subprojects {
+    /*
+     * Not applying the bintray plugin. Couldn't get it working properly when declared
+     * in subprojects, and when declared at root level of this script, it caused an httpcomponents
+     * classpath issue with ml-gradle in the core project. So for now, each project has to
+     * duplicate bintray publishing configuration.
+     */
+
+    apply plugin: "java"
+    apply plugin: "eclipse"
+    apply plugin: "idea"
+
+    repositories {
+        jcenter()
+        mavenLocal()
+    }
+
+    dependencies {
+        compile "org.slf4j:slf4j-api:1.7.21"
+        compile "net.jcip:jcip-annotations:1.0"
+        compile "org.apache.commons:commons-lang3:3.4"
+        compile "dk.dma:enav-model:DEV"
+        compile "dk.dma:dma-commons-management:DEV"
+        compile "dk.dma:dma-commons-util:DEV"
+        testCompile "junit:junit:4+"
+    }
+
+    sourceSets.test.resources.srcDir 'src/test/java'
+}
+
+project(':ais-lib-communication') {
+
+    dependencies {
+        compile project(':ais-lib-messages')
+        compile "com.google.guava:guava:14.0"
+        compile "org.antlr:antlr4-runtime:4.2"
+        compile "joda-time:joda-time:2.2"
+        compile "de.micromata.jak:JavaAPIforKml:2.2.0"
+        compile "org.apache.commons:commons-csv:1.1"
+        compile "javax.xml.bind:jaxb-api:2.2.7"
+        compile 'com.google.code.findbugs:jsr305:3.0.1'
+        testCompile 'net.maritimecloud:mc-core:0.3'
+    }
+}
+
+project(':ais-lib-utils') {
+    dependencies {
+        compile project (':ais-lib-communication')
+        compile "dk.dma:dma-commons-app:DEV"
+        compile "com.beust:jcommander:1.30"
+    }
+}
+
+project(':ais-lib-cli') {
+    dependencies {
+        compile project (':ais-lib-communication')
+        compile project (':ais-lib-utils')
+        compile "dk.dma:dma-commons-app:DEV"
+        compile "commons-io:commons-io:2.4"
+    }
+}

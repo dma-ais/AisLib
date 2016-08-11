@@ -9,4 +9,8 @@ ais-lib-communication/aisbus.xml
 .idea
 *.iml
 .DS_Store
-
+.gradle/
+ais-lib-cli/build/
+ais-lib-communication/build/
+ais-lib-messages/build/
+ais-lib-utils/build/
