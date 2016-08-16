@@ -320,7 +320,7 @@ The expression filter can be used programmatically like this:
 
 ##### Filtering on packets source #####
 ```java
-import static dk.da.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
+import static dk.dma.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
 ...
 parseExpressionFilter("s.country = DNK & s.type = LIVE").test(aisPacket);
 ```
@@ -333,7 +333,7 @@ Filtering on source attributes is indicated by the 's' in front of the field ('c
 
 ##### Filtering on message contents #####
 ```java
-import static dk.dm.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
+import static dk.dma.ais.packet.AisPacketFiltersExpressionFilterParser.parseExpressionFilter;
 ...
 parseExpressionFilter("m.pos witin circle(37.9121, -122.4229, 2000)").test(aisPacket);
 ```
