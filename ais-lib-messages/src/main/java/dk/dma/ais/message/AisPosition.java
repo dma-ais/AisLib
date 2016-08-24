@@ -16,6 +16,7 @@ package dk.dma.ais.message;
 
 import dk.dma.enav.model.geometry.Position;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
@@ -24,6 +25,7 @@ import java.io.Serializable;
  * Convert raw unsigned AIS position to signed 1/10000 degree position and provide helper methods for other formats
  * 
  */
+@XmlRootElement
 public class AisPosition implements Serializable{
 
     private int bitCorrection;

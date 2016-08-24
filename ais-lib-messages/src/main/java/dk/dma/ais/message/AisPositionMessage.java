@@ -20,6 +20,8 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * AIS position message
  *
@@ -32,6 +34,7 @@ import dk.dma.enav.model.geometry.Position;
  * mobile equipment)
  *
  */
+@XmlRootElement
 public abstract class AisPositionMessage extends AisMessage implements IVesselPositionMessage {
 
     /** serialVersionUID. */

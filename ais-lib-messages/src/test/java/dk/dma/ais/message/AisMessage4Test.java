@@ -8,6 +8,15 @@ import org.junit.Test;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
+import org.w3c.dom.Document;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
 
 public class AisMessage4Test {
 
@@ -43,5 +52,26 @@ public class AisMessage4Test {
         assertEquals(41, msg4.getUtcSecond());
         assertEquals(1, msg4.getUtcMonth());
         assertEquals(2006, msg4.getUtcYear());
+    }
+    
+    @Test
+    public void marshallAisMesage4ToXmlTest() throws AisMessageException, SixbitException, SentenceException, JAXBException, ParserConfigurationException, TransformerException {
+        Vdm vdm = new Vdm();
+        vdm.parse(
+                //"!AIVDM,1,1,,A,402R3WiuH@jaaPtgjhOgcA7000S:,0*7D"
+                "!AIVDM,2,2,6,A,53mgj802=cUo=ThH0008E8LDr1HTdTpL0000001D0aJ996;l0=SCkQlm0A0000000000000,0*34"
+        );
+        
+        AisMessage message = AisMessage.getInstance(vdm);
+        assertTrue(message instanceof AisMessage4);
+        AisMessage4 msg4 = (AisMessage4) message;
+        JAXBContext jc = JAXBContext.newInstance(AisMessage4.class);
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.newDocument();
+        Marshaller m = jc.createMarshaller();
+        System.out.println("marshal");
+        m.marshal( msg4, System.out );
     }
 }
