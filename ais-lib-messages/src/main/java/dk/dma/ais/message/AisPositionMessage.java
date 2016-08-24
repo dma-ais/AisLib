@@ -36,7 +36,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public abstract class AisPositionMessage extends AisMessage implements IVesselPositionMessage {
-
+    public AisPositionMessage() {
+        super();
+    }
+    
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
