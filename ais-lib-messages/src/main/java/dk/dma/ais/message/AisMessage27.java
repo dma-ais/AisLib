@@ -19,12 +19,15 @@ import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * AIS message 27
  *
  * Long-range broadcast position report implemented according to ITU-R M.1371-4
  *
  */
+@XmlRootElement
 public class AisMessage27 extends AisMessage implements IPositionMessage {
 
     /** serialVersionUID. */
