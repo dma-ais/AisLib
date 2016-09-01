@@ -39,7 +39,7 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     public AisPositionMessage() {
         super();
     }
-    
+
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
@@ -158,6 +158,10 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         this.pos = new AisPosition();
         this.pos.setRawLongitude(binArray.getVal(28));
         this.pos.setRawLatitude(binArray.getVal(27));
+        String temp = Float.toString((float) pos.getRawLatitude()/10000/60);
+        temp += " ";
+        temp += Float.toString((float) pos.getRawLongitude()/10000/60);
+        this.pos.setPoint(temp);
 
         this.cog = (int) binArray.getVal(12);
         this.trueHeading = (int) binArray.getVal(9);
