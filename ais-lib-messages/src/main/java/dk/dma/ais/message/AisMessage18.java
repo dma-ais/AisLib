@@ -20,12 +20,15 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * AIS message 18
- * 
+ *
  * CLASS B position report implemented according to ITU-R M.1371-4
- * 
+ *
  */
+@XmlRootElement
 public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
 
     /** serialVersionUID. */
@@ -148,6 +151,10 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
         this.pos = new AisPosition();
         this.pos.setRawLongitude(sixbit.getVal(28));
         this.pos.setRawLatitude(sixbit.getVal(27));
+        String temp = Float.toString((float) pos.getRawLatitude()/10000/60);
+        temp += " ";
+        temp += Float.toString((float) pos.getRawLongitude()/10000/60);
+        this.pos.setPoint(temp);
 
         this.cog = (int) sixbit.getVal(12);
         this.trueHeading = (int) sixbit.getVal(9);

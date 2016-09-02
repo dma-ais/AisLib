@@ -17,12 +17,15 @@ package dk.dma.ais.message;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * AIS message 4
  *
  * Base station report as defined by ITU-R M.1371-4
  *
  */
+@XmlRootElement
 public class AisMessage4 extends UTCDateResponseMessage {
 
     /** serialVersionUID. */

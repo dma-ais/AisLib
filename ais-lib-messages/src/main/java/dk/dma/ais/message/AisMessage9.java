@@ -19,12 +19,15 @@ import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This message should be used as a standard position report for aircraft involved
  * in SAR operations instead of Messages 1, 2 or 3. Stations other than
  * aircraft involved in SAR operations should not use transmit this message. The
  * default reporting interval for this message should be 10 seconds.
  */
+@XmlRootElement
 public class AisMessage9 extends AisMessage implements IPositionMessage {
 
     /** serialVersionUID. */
@@ -33,7 +36,7 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
     /**
      * Altitude (derived from GNSS) expressed in metres (0 4 094 metres)
      * 4 095 = not available, 4 094 = 4 094 metres or higher.
-     * 
+     *
      * Altitude is in meters. The special value 4095 indicates altitude is
      * not available; 4094 indicates 4094 meters or higher.
      */
@@ -42,7 +45,7 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
     /**
      * Speed over ground in knot steps (0-1022 knots)
      * 1023 = not available, 1022 = 1022 knots or higher.
-     * 
+     *
      * Speed over ground is in knots, NOT deciknots as in the common navigation
      * block; planes go faster. The special value 1023 indicates speed not
      * available, 1022 indicates 1022 knots or higher.
@@ -92,7 +95,7 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
 
     /**
      * Not used. Should be set to zero. Reserved for future use.
-     * 
+     *
      * NOTE: In ITU-R M1371-4 this field is 3 bits compared to 1 previously
      */
     private int spare; // 3 bits
@@ -121,7 +124,7 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
      * SOTDMA/ITDMA sync state: sync state is part of the defined communication
      * state (19) bits. The sync state is the first 2 bits of the 19 bits in the
      * communication state of the message.
-     * 
+     *
      * 0 UTC direct (see  3.1.1.1) 1 UTC indirect (see  3.1.1.2) 2 Station is
      * synchronized to a base station (base direct) 3 Station is synchronized to
      * another station based on the highest number of received stations or to

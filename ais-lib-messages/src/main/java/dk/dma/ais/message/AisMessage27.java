@@ -19,12 +19,15 @@ import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * AIS message 27
  *
  * Long-range broadcast position report implemented according to ITU-R M.1371-4
  *
  */
+@XmlRootElement
 public class AisMessage27 extends AisMessage implements IPositionMessage {
 
     /** serialVersionUID. */
@@ -92,6 +95,10 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
         this.pos = new AisPosition();
         this.pos.setRawLongitude(binArray.getVal(18));
         this.pos.setRawLatitude(binArray.getVal(17));
+        String temp = Float.toString((float) pos.getRawLatitude()/10000/60);
+        temp += " ";
+        temp += Float.toString((float) pos.getRawLongitude()/10000/60);
+        this.pos.setPoint(temp);
         this.pos.set1817();
         this.sog = (int) binArray.getVal(6);
         this.cog = (int) binArray.getVal(9);

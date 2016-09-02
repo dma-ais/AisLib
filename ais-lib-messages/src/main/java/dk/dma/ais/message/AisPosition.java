@@ -16,14 +16,16 @@ package dk.dma.ais.message;
 
 import dk.dma.enav.model.geometry.Position;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * AIS position class
- * 
+ *
  * Convert raw unsigned AIS position to signed 1/10000 degree position and provide helper methods for other formats
- * 
+ *
  */
+@XmlRootElement
 public class AisPosition implements Serializable{
 
     private int bitCorrection;
@@ -31,29 +33,60 @@ public class AisPosition implements Serializable{
 
     private long rawLongitude;
     private double resolution = 10000.0;
+//    private AisPoint point;
+    private String point;
 
-    public AisPosition() {}
+    public AisPosition() {
+      // this.point = new AisPoint(100, 100, 10000.0);
+    }
 
     /**
      * Constructor given raw latitude and raw longitude as received in AIS message
-     * 
+     *
      * @param rawLatitude
      * @param rawLongitude
      */
     public AisPosition(long rawLatitude, long rawLongitude) {
         this.rawLatitude = rawLatitude;
         this.rawLongitude = rawLongitude;
+        //this.point = new AisPoint(100, 100, 10000.0);
+        //setPoint();
+
+
+        // this.point += String.valueOf(rawLatitude);
+        // this.point += " ";
+        // this.point += String.valueOf(rawLongitude);
     }
 
     /**
      * Constructor given a GeoLocation
-     * 
+     *
      * @param location
      */
     public AisPosition(Position location) {
         setLatitude(Math.round(location.getLatitude() * resolution * 60.0));
         setLongitude(Math.round(location.getLongitude() * resolution * 60.0));
+//        setPoint();
+        // this.point = new String();
+        //
+        // this.point += String.valueOf(location.getLatitude());
+        // this.point += " ";
+        // this.point += String.valueOf(location.getLongitude());
+
     }
+
+
+    public void setPoint(String val) {
+//      this.point = new AisPoint(rawLatitude,rawLongitude,resolution);
+    this.point = val;
+
+    }
+
+    public String getPoint() {
+//      return point.getPoint();
+return point;
+    }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -66,7 +99,7 @@ public class AisPosition implements Serializable{
 
     /**
      * Get position as {@link Position} object
-     * 
+     *
      * @return
      */
     public Position getGeoLocation() {
@@ -80,7 +113,7 @@ public class AisPosition implements Serializable{
 
     /**
      * Get signed latitude
-     * 
+     *
      * @return
      */
     public long getLatitude() {
@@ -104,7 +137,7 @@ public class AisPosition implements Serializable{
 
     /**
      * Get signed longitude
-     * 
+     *
      * @return
      */
     public long getLongitude() {
@@ -180,7 +213,7 @@ public class AisPosition implements Serializable{
 
     /**
      * Set the raw latitude as received from AIS
-     * 
+     *
      * @param rawLatitude
      */
     public void setRawLatitude(long rawLatitude) {
@@ -189,7 +222,7 @@ public class AisPosition implements Serializable{
 
     /**
      * Set the raw longitude as received from AIS
-     * 
+     *
      * @param rawLongitude
      */
     public void setRawLongitude(long rawLongitude) {
