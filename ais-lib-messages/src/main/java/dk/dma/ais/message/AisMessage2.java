@@ -17,17 +17,14 @@ package dk.dma.ais.message;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * AIS message 2
- *
+ * 
  * Assigned scheduled position report
- *
+ * 
  * This class handles the content of an AIS class A transponders general position report as defined by ITU-R M.1371-4.
- *
+ * 
  */
-@XmlRootElement
 public class AisMessage2 extends AisMessage1 {
 
     /** serialVersionUID. */

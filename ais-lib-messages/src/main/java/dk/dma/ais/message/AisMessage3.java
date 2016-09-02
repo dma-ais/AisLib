@@ -19,19 +19,16 @@ import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * AIS message 3
- *
+ * 
  * Special position report, response to interrogation;(Class A shipborne mobile equipment)
- *
+ * 
  * This class handles the content of an AIS class A transponders general position report as defined by ITU-R M.1371-4.
- *
+ * 
  * Generally the position report is handled in the super class but there are some ITDMA specific purposes of this class.
- *
+ * 
  */
-@XmlRootElement
 public class AisMessage3 extends AisPositionMessage {
 
     /** serialVersionUID. */

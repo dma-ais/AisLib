@@ -22,8 +22,6 @@ import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +33,6 @@ import java.util.Set;
 /**
  * Abstract base class for all AIS messages
  */
-@XmlRootElement
 public abstract class AisMessage implements Serializable {
 
     /** serialVersionUID. */
@@ -49,16 +46,12 @@ public abstract class AisMessage implements Serializable {
     protected int repeat; // 2 bit: How many times message has been repeated
     protected int userId; // 30 bit: MMSI number
     protected transient Vdm vdm; // The VDM encapsulating the AIS message
-    
-    public AisMessage() {
-    }
-    
+
     /**
      * Constructor given message id
      * 
      * @param msgId
      */
-     
     public AisMessage(int msgId) {
         this.msgId = msgId;
         this.repeat = 0;
@@ -131,7 +124,6 @@ public abstract class AisMessage implements Serializable {
      * 
      * @return
      */
-    @XmlTransient
     public IProprietarySourceTag getSourceTag() {
         LinkedList<IProprietaryTag> tags = vdm == null ? null : vdm.getTags();
         if (tags == null) {
@@ -152,7 +144,6 @@ public abstract class AisMessage implements Serializable {
      * 
      * @return
      */
-    @XmlTransient
     public LinkedList<IProprietaryTag> getTags() {
         return vdm.getTags();
     }
@@ -160,7 +151,7 @@ public abstract class AisMessage implements Serializable {
     /**
      * Add tag (to front)
      * 
-     * @param tag
+     * @param sourceTag
      */
     public void setTag(IProprietaryTag tag) {
         LinkedList<IProprietaryTag> tags = vdm.getTags();
@@ -169,7 +160,7 @@ public abstract class AisMessage implements Serializable {
         }
         tags.addFirst(tag);
     }
-    
+
     public void setTags(LinkedList<IProprietaryTag> tags) {
         vdm.setTags(tags);
     }

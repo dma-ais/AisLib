@@ -19,8 +19,6 @@ import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * AIS message 1
  * 
@@ -56,7 +54,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  * which the station currently is receiving (between 0 and 16383).
  * 
  */
-@XmlRootElement
 public class AisMessage1 extends AisPositionMessage {
 
     /** serialVersionUID. */

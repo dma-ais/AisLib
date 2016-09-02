@@ -20,18 +20,16 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 /**
  * AIS message 4
- *
+ * 
  * Base station report as defined by ITU-R M.1371-4
- *
+ * 
  */
-@XmlRootElement
 public abstract class UTCDateResponseMessage extends AisMessage implements IPositionMessage {
 
     /** serialVersionUID. */
@@ -40,7 +38,6 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
     private int utcYear; // 14 bits : UTC Year
     private int utcMonth; // 4 bits : UTC Month
     private int utcDay; // 5 bits : UTC Day
-
     private int utcHour; // 5 bits : UTC Hour
     private int utcMinute; // 6 bits : UTC Minute
     private int utcSecond; // 6 bits : UTC Second
@@ -54,9 +51,6 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
     private int syncState; // 2 bits : SOTDMA sync state
     private int slotTimeout; // 3 bits : SOTDMA Slot Timeout
     private int subMessage; // 14 bits : SOTDMA sub-message
-
-    public UTCDateResponseMessage() {
-    }
 
     protected UTCDateResponseMessage(int msgId) {
         super(msgId);
@@ -86,10 +80,6 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
         this.pos = new AisPosition();
         this.pos.setRawLongitude(binArray.getVal(28));
         this.pos.setRawLatitude(binArray.getVal(27));
-        String temp = Float.toString((float) pos.getRawLatitude()/10000/60);
-        temp += " ";
-        temp += Float.toString((float) pos.getRawLongitude()/10000/60);
-        this.pos.setPoint(temp);
 
         this.posType = (int) binArray.getVal(4);
         this.transmissionControl = (int) binArray.getVal(1);

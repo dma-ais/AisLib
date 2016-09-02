@@ -36,7 +36,7 @@ import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
 import dk.dma.enav.model.geometry.grid.Cell;
 import dk.dma.enav.model.geometry.grid.Grid;
-import net.maritimecloud.util.units.SpeedUnit;
+import net.maritimecloud.util.SpeedUnit;
 import net.maritimecloud.util.geometry.PositionReader;
 import net.maritimecloud.util.geometry.PositionReaderSimulator;
 import org.junit.Test;

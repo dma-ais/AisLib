@@ -58,10 +58,6 @@ public class SentenceLineTest {
         Assert.assertFalse(sl.isChecksumMatch());
         Assert.assertEquals(sl.getPrefix(), "");
         Assert.assertEquals(sl.getFields().size(), 7);
-        
-        sl = new SentenceLine("\\s:rORBCOMM999,q:u,c:1457740802*38\\!AIVDM,1,1,,A,405flgAv0n0001wV11e62q700400,0*20");
-        System.out.println("s1: " + sl.toString());
-        Assert.assertTrue(sl.getPrefix().equals("\\s:rORBCOMM999,q:u,c:1457740802*38\\"));
     }
 
    
