@@ -1,4 +1,0 @@
-include "ais-lib-cli"
-include "ais-lib-communication"
-include "ais-lib-messages"
-include "ais-lib-utils"
