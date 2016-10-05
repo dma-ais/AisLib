@@ -105,6 +105,9 @@ public abstract class AisApplicationMessage {
         if (binaryMessage.getDac() == RouteSuggestion.DAC && binaryMessage.getFi() == RouteSuggestion.FI) {
             return new RouteSuggestion(binaryMessage.getData());
         }
+	if (binaryMessage.getDac() == 200 && binaryMessage.getFi() == 10) {
+            return new InlandVoyage(binaryMessage.getData());
+        }	
 
         return new UnknownAsm(binaryMessage);
     }
