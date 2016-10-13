@@ -27,16 +27,39 @@ import dk.dma.ais.binary.SixbitException;
  */
 public class InlandVoyage extends AisApplicationMessage{
 
+    /** Unique European vessel identification number. */
     private String vesselId;  // 48 bits
+    
+    /** Length of ship 1-8000 in 0.1m. 0 = default. */
     private int lengthOfShip;  // 13 bits
+    
+    /** Beam of ship 1-1000 in 0.1m. 0 = default. */
     private int beamOfShip; // 10 bits
+    
+    /** Numeric ERI Classification. */
     private int combinationType; // 14 bits
+    
+    /** Number of blue cones 0-3. 4 = B-Flag, 5 = unknown. */
     private int hazardousCargo; // 3 bits
+    
+    /** Draught of ship 1-2000 in 0.01m. 0 = unknown. */
     private int draught; // 11 bits
+    
+    /** 
+     * Status of load on ship. 
+     * 1 = loaded, 2 = unloaded, 0 = not available/default. 3 should not be used. 
+     */
     private int loadedOrUnloaded; // 2 bits
+    
+    /** 1 = high, 0 = low/GNSS/ default. */
     private int qualityOfSpeedData; // 1 bit
+    
+    /** 1 = high, 0 = low/GNSS/ default. */
     private int qualityOfCourseData; // 1 bit
+    
+    /** 1 = high, 0 = low/GNSS/ default. */
     private int qualityOfHeadingData; // 1 bit
+    
     private int spare; // 8 bit
 
     public InlandVoyage(BinArray binArray) throws SixbitException {
@@ -52,6 +75,9 @@ public class InlandVoyage extends AisApplicationMessage{
             vesselIdBuilder.append((char) value);
         }
         this.vesselId = vesselIdBuilder.toString();
+        // remove all non numeric characters
+        this.vesselId = this.vesselId.replaceAll("[^\\d.]", "");
+        
         this.lengthOfShip = (int) binArray.getVal(13);
         this.beamOfShip = (int) binArray.getVal(10);
         this.combinationType = (int) binArray.getVal(14);
