@@ -16,7 +16,7 @@
 
 package dk.dma.ais.tracker.eventEmittingTracker.events;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import dk.dma.ais.tracker.eventEmittingTracker.Track;
 
 /**
@@ -36,7 +36,7 @@ public class CellChangedEvent extends TrackEvent {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("mmsi", getTrack().getMmsi())
                 .add("oldCellId", oldCellId)
                 .add("newCellId", getTrack().getProperty(Track.CELL_ID))

@@ -16,7 +16,7 @@
 
 package dk.dma.ais.tracker.eventEmittingTracker.events;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import dk.dma.ais.tracker.eventEmittingTracker.Track;
 
 /**
@@ -36,7 +36,7 @@ public abstract class TrackEvent extends TrackerEvent {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("track", track)
                 .toString();
     }

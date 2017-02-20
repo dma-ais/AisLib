@@ -16,7 +16,7 @@
 
 package dk.dma.ais.tracker.eventEmittingTracker.events;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import dk.dma.ais.tracker.eventEmittingTracker.Track;
 import dk.dma.enav.model.geometry.Position;
 
@@ -37,7 +37,7 @@ public class PositionChangedEvent extends TrackEvent {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("mmsi", getTrack().getMmsi())
                 .add("oldPosition", oldPosition)
                 .add("newPosition", getTrack().getNewestTrackingReport().getPosition())
