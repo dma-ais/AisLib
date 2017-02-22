@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class FilterSettings {
 
@@ -90,6 +91,8 @@ public class FilterSettings {
 
     public void parseStartAndEnd(String start, String end) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         if (start != null) {
             try {
                 startDate = dateFormat.parse(start);

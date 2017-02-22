@@ -92,10 +92,10 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
     @Parameter(names = "-dump", description = "Dump message content (default false)")
     boolean dumpParsed;
 
-    @Parameter(names = "-start", description = "Start time in format yyyy-MM-dd-HH:mm (Local time)")
+    @Parameter(names = "-start", description = "Start time in format yyyy-MM-dd-HH:mm (UTC time)")
     String starttimeStr;
 
-    @Parameter(names = "-end", description = "End time in format yyyy-MM-dd-HH:mm (Local time)")
+    @Parameter(names = "-end", description = "End time in format yyyy-MM-dd-HH:mm (UTC time)")
     String endtimeStr;
 
     @Parameter(names = "-timeout", description = "TCP read timeout in seconds, default none")
