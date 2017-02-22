@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Converts a set of files into another sink format
@@ -63,12 +62,12 @@ public class FileConvert extends AbstractCommandLineTool {
 
     /** Where files should be moved to after having been processed. */
     @Parameter(names = "-keepStructure", required = false, description = "Whether to keep path structure")
-    boolean keepFileStructure = true;
+    boolean keepFileStructure;
 
     @Parameter(names = "-fileEnding", required = false, description = "File ending")
     String fileEnding;
 
-    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table, csv, csv_stateful]")
+    @Parameter(names = "-outputFormat", required = false, description = "Output formats: [OUTPUT_TO_TEXT, OUTPUT_PREFIXED_SENTENCES, OUTPUT_TO_HTML, table, csv, csv_stateful, json, jsonobject, kml, kmz]")
     String outputSinkFormat = "OUTPUT_PREFIXED_SENTENCES";
 
     @Parameter(names = "-columns", required = false, description = "Optional columns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
@@ -98,9 +97,6 @@ public class FileConvert extends AbstractCommandLineTool {
     protected void run(Injector injector) throws Exception {
         configureFileEnding();
 
-        // final long start = System.currentTimeMillis();
-        final AtomicInteger count = new AtomicInteger();
-
         final EConsumer<String> consumer = new EConsumer<String>() {
 
             @Override
@@ -116,7 +112,7 @@ public class FileConvert extends AbstractCommandLineTool {
                     endPath = Paths.get(Paths.get(convertTo).toString(), relative.toString());
                     new File(endPath.toString()).mkdirs();
                 } else {
-                    endPath = Paths.get(convertTo);
+                    endPath = Paths.get("");
                 }
 
                 String filename = path.getFileName().toString();
@@ -164,6 +160,12 @@ public class FileConvert extends AbstractCommandLineTool {
         if (StringUtils.isBlank(fileEnding)) {
             if (outputSinkFormat.startsWith("csv")) {
                 fileEnding = ".csv";
+            } else if (outputSinkFormat.startsWith("kmz")) {
+                    fileEnding = ".kmz";
+            } else if (outputSinkFormat.startsWith("json")) {
+                    fileEnding = ".json";
+            } else if (outputSinkFormat.startsWith("kml")) {
+                fileEnding = ".kml";
             } else {
                 fileEnding = ".txt";
             }
