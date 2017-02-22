@@ -38,9 +38,12 @@ import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Calendar;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -101,7 +104,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
     /**
      * The last hour-of-the-day when a timestamp message was log to the LOG.
      */
-    private int markLastHourLogged;
+    private int markLastHourLogged = -1;
 
     /**
      * The time since Epoch when the most recent TimeEvent was posted to the EventBus.
@@ -418,13 +421,12 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
      */
     private void mark(long timestampMillis) {
         if ((markTrigger & 0xffff) == 0) {
-            Date timestamp = new Date(timestampMillis);
-            Calendar markCalendar = Calendar.getInstance();
-            markCalendar.setTime(timestamp);
-            int t = markCalendar.get(Calendar.HOUR_OF_DAY);
+            Instant instant = Instant.ofEpochMilli(timestampMillis);
+            LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+            int t = dateTime.get(ChronoField.HOUR_OF_DAY);
             if (t != markLastHourLogged) {
                 markLastHourLogged = t;
-                LOG.info("Now processing stream at time " + timestamp);
+                LOG.info("Now processing stream at time " + dateTime.format(DateTimeFormatter.ISO_DATE_TIME));
             }
         }
         markTrigger++;
