@@ -403,14 +403,14 @@ public class AisFilter extends AbstractCommandLineTool implements Consumer<AisPa
 
         DateFormat df = new SimpleDateFormat("HH:mm:ss");
         df.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-        System.out.println("\n");
-        System.out.println("Elapsed  : " + df.format(new Date(elapsed)));
-        System.out.println("Messages : " + msgCount);
-        System.out.println("Msg/min  : " + String.format(Locale.US, "%.2f", msgPerMin));
-        System.out.println("Msg/sec  : " + String.format(Locale.US, "%.2f", msgPerMin / 60.0));
-        System.out.println("KBytes   : " + kbytes);
-        System.out.println("KB/s     : " + String.format(Locale.US, "%.2f", kbytes / elapsedSecs));
-        System.out.println("Kbps     : " + String.format(Locale.US, "%.2f", kbytes * 8.0 / elapsedSecs));
+        System.err.println("\n");
+        System.err.println("Elapsed  : " + df.format(new Date(elapsed)));
+        System.err.println("Messages : " + msgCount);
+        System.err.println("Msg/min  : " + String.format(Locale.US, "%.2f", msgPerMin));
+        System.err.println("Msg/sec  : " + String.format(Locale.US, "%.2f", msgPerMin / 60.0));
+        System.err.println("KBytes   : " + kbytes);
+        System.err.println("KB/s     : " + String.format(Locale.US, "%.2f", kbytes / elapsedSecs));
+        System.err.println("Kbps     : " + String.format(Locale.US, "%.2f", kbytes * 8.0 / elapsedSecs));
     }
 
     @Override
