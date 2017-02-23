@@ -28,6 +28,7 @@ import dk.dma.enav.model.geometry.Position;
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -116,10 +117,10 @@ public final class Track extends Target implements Cloneable {
     private Integer shipDimensionStarboard;
 
     @GuardedBy("trackLock")
-    private LocalDateTime timeOfLastUpdate = LocalDateTime.MIN;
+    private LocalDateTime timeOfLastUpdate = LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
 
     @GuardedBy("trackLock")
-    private LocalDateTime timeOfLastPositionReport = LocalDateTime.MIN;
+    private LocalDateTime timeOfLastPositionReport = LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
 
     /**
      * Create a new track with the given MMSI no.

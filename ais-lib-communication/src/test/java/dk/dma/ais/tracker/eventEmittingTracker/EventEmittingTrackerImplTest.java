@@ -41,7 +41,10 @@ import net.maritimecloud.util.geometry.PositionReader;
 import net.maritimecloud.util.geometry.PositionReaderSimulator;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -746,6 +749,23 @@ public class EventEmittingTrackerImplTest {
         assertEquals(Position.create(58, 13), interpolatedPositions.get(interpolationTimestamps.toArray()[2]));
         assertEquals(Position.create(59, 14), interpolatedPositions.get(interpolationTimestamps.toArray()[3]));
         // assertEquals(p2, interpolatedPositions.get(interpolationTimestamps.toArray()[4]));
+    }
+
+    @Test
+    public void testIsInterpolationRequired() {
+        LocalDateTime now = LocalDateTime.of(2017, 2, 23, 10, 41);
+
+        LocalDateTime NULL = null;
+        LocalDateTime MIN = LocalDateTime.MIN;
+        LocalDateTime EPOCH = LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
+
+        assertEquals(false, EventEmittingTrackerImpl.isInterpolationRequired(NULL, now));
+        assertEquals(false, EventEmittingTrackerImpl.isInterpolationRequired(MIN, now));
+        assertEquals(false, EventEmittingTrackerImpl.isInterpolationRequired(EPOCH, now));
+
+        assertEquals(true, EventEmittingTrackerImpl.isInterpolationRequired(EPOCH.plus(1, ChronoUnit.DAYS), now));
+        assertEquals(true, EventEmittingTrackerImpl.isInterpolationRequired(now.minus(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_AFTER).minus(1, SECONDS), now));
+        assertEquals(false, EventEmittingTrackerImpl.isInterpolationRequired(now.minus(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_AFTER).plus(1, SECONDS), now));
     }
 
     /**

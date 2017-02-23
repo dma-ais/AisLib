@@ -64,7 +64,7 @@ public class TrackTest {
         assertNull(track.getShipDimensionStarboard());
         assertNull(track.getVesselLength());
         assertNull(track.getVesselBeam());
-        assertEquals(LocalDateTime.MIN, track.getTimeOfLastUpdate());
+        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC), track.getTimeOfLastUpdate());
 
         track.update(msg5);
 
@@ -105,14 +105,14 @@ public class TrackTest {
     public void testGetTimeOfLastUpdate() throws Exception {
         // Avoid NPEs elsewhere in code
         assertNotNull(track.getTimeOfLastUpdate());  // Avoid NPEs elsewhere in code
-        assertEquals(LocalDateTime.MIN, track.getTimeOfLastUpdate());
+        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC), track.getTimeOfLastUpdate());
     }
 
     @Test
     public void testGetTimeOfLastPositionReport() throws Exception {
         //assertEquals(null, track.getTimeOfLastPositionReport());
         assertNotNull(track.getTimeOfLastPositionReport());  // Avoid NPEs elsewhere in code
-        assertEquals(LocalDateTime.MIN, track.getTimeOfLastPositionReport());
+        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC), track.getTimeOfLastPositionReport());
 
         track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000000000L), Position.create(56, 12), 45.0f, 10.1f, 10.1f);
         assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000000000L), track.getTimeOfLastPositionReport());

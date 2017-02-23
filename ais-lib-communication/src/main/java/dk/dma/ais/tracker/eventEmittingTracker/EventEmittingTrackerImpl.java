@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -323,8 +324,10 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         return trackStale;
     }
 
+    private final static LocalDateTime EPOCH_UTC = LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
+
     static boolean isInterpolationRequired(LocalDateTime lastPositionUpdate, LocalDateTime currentPositionUpdate) {
-        return lastPositionUpdate != null && lastPositionUpdate != LocalDateTime.MIN && lastPositionUpdate.until(currentPositionUpdate, SECONDS) >= TRACK_INTERPOLATION_REQUIRED_AFTER.getSeconds();
+        return lastPositionUpdate != null && !lastPositionUpdate.equals(LocalDateTime.MIN) && !lastPositionUpdate.equals(EPOCH_UTC) && lastPositionUpdate.until(currentPositionUpdate, SECONDS) >= TRACK_INTERPOLATION_REQUIRED_AFTER.getSeconds();
     }
 
     private void removeTrack(int mmsi) {
