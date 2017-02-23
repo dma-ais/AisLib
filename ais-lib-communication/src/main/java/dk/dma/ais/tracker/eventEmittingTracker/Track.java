@@ -116,10 +116,10 @@ public final class Track extends Target implements Cloneable {
     private Integer shipDimensionStarboard;
 
     @GuardedBy("trackLock")
-    private LocalDateTime timeOfLastUpdate = null;
+    private LocalDateTime timeOfLastUpdate = LocalDateTime.MIN;
 
     @GuardedBy("trackLock")
-    private LocalDateTime timeOfLastPositionReport = null;
+    private LocalDateTime timeOfLastPositionReport = LocalDateTime.MIN;
 
     /**
      * Create a new track with the given MMSI no.

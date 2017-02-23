@@ -53,6 +53,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import static dk.dma.commons.util.DateTimeUtil.LOCALDATETIME_UTC_TO_MILLIS;
 import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -267,7 +268,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         IVesselPositionMessage posMessage = (IVesselPositionMessage) message;
 
         Position p1 = track.getPosition();
-        long t1 = track.getNewestTrackingReport().getTimestamp().toInstant(ZoneOffset.UTC).toEpochMilli();
+        long t1 = LOCALDATETIME_UTC_TO_MILLIS.apply(track.getNewestTrackingReport().getTimestamp());
         Position p2 = posMessage.getPos().getGeoLocation();
         long t2 = timestamp.toInstant(ZoneOffset.UTC).toEpochMilli();
 
@@ -323,8 +324,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
     }
 
     static boolean isInterpolationRequired(LocalDateTime lastPositionUpdate, LocalDateTime currentPositionUpdate) {
-        return lastPositionUpdate != null && lastPositionUpdate.until(currentPositionUpdate, SECONDS) >= TRACK_INTERPOLATION_REQUIRED_AFTER.getSeconds();
-
+        return lastPositionUpdate != null && lastPositionUpdate != LocalDateTime.MIN && lastPositionUpdate.until(currentPositionUpdate, SECONDS) >= TRACK_INTERPOLATION_REQUIRED_AFTER.getSeconds();
     }
 
     private void removeTrack(int mmsi) {
