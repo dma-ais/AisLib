@@ -41,6 +41,7 @@ import net.maritimecloud.util.geometry.PositionReader;
 import net.maritimecloud.util.geometry.PositionReaderSimulator;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +49,11 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import static dk.dma.ais.tracker.eventEmittingTracker.EventEmittingTrackerImpl.TRACK_STALE_AFTER;
+import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
+import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -136,17 +142,16 @@ public class EventEmittingTrackerImplTest {
         int nextExpectedCellId = 0;
 
         // Play scenario through tracker
-        long firstTimestamp = System.currentTimeMillis();
-        int timeStep = 0;
+        LocalDateTime messageTimestamp = LocalDateTime.now();
 
         // Run test scenario and assert results
         assertEquals(0, tracker.getNumberOfTracks());
 
         while (!messageQueue.isEmpty()) {
             AisMessage message = messageQueue.remove();
-            Date messageTimestamp = new Date(firstTimestamp + (timeStep++ * 10000)); // 10 secs between msgs
+            messageTimestamp = messageTimestamp.plus(10, SECONDS); // 10 secs between msgs
             System.out.println(messageTimestamp + ": " + message);
-            tracker.update(messageTimestamp.getTime(), message);
+            tracker.update(messageTimestamp, message);
             if (message instanceof IPositionMessage) {
                 assertEquals(expectedSequenceOfCells[nextExpectedCellId++], testSubscriber.getCurrentCellId());
             }
@@ -170,7 +175,7 @@ public class EventEmittingTrackerImplTest {
         tracker.registerSubscriber(testSubscriber);
 
         // Play scenario through tracker
-        long firstTimestamp = System.currentTimeMillis();
+        LocalDateTime firstTimestamp = LocalDateTime.now();
         int timeStep = 0;
 
         // Run test scenario and assert results
@@ -178,10 +183,10 @@ public class EventEmittingTrackerImplTest {
 
         while (!messageQueue.isEmpty()) {
             AisMessage message = messageQueue.remove();
-            Date messageTimestamp = new Date(firstTimestamp + (timeStep++ * 10000)); // 10 secs between msgs
+            LocalDateTime messageTimestamp = firstTimestamp.plus(timeStep++ * 10, SECONDS); // 10 secs between msgs
             System.out.println(messageTimestamp + ": " + message);
 
-            tracker.update(messageTimestamp.getTime(), message);
+            tracker.update(messageTimestamp, message);
 
             assertEquals(0, tracker.getNumberOfTracks());
             assertFalse(testSubscriber.isPositionChangedEventFired());
@@ -266,7 +271,7 @@ public class EventEmittingTrackerImplTest {
         net.maritimecloud.util.geometry.Position northOfGreatBeltBridge = net.maritimecloud.util.geometry.Position.create(55.37667465016155, 11.03926947805367); // Cell ?
         PositionReader reader = simulator.forRoute(southOfGreatBeltBridge, northOfGreatBeltBridge);
 
-        Date timestamp = new Date(5000L);
+        LocalDateTime timestamp = MILLIS_TO_LOCALDATETIME_UTC.apply(5000L);
 
         // Create or mock dependencies
         final Grid grid = Grid.createSize(200);
@@ -297,7 +302,7 @@ public class EventEmittingTrackerImplTest {
             aisMessage5.setDimStarboard(3);
             aisMessage5.setDimStern(12);
             aisMessage5.setShipType(5);
-            tracker.update(timestamp.getTime(), aisMessage5);
+            tracker.update(timestamp, aisMessage5);
         }
 
         // Prepare position message
@@ -574,18 +579,15 @@ public class EventEmittingTrackerImplTest {
             System.out.println("i: " + i);
 
             net.maritimecloud.util.geometry.PositionTime currentPosition = reader.getCurrentPosition();
-            long oldTimestamp = timestamp.getTime();
-            long newTimestamp = currentPosition.getTime();
-            assertEquals(oldTimestamp + 5000, newTimestamp);
 
-            timestamp = new Date(newTimestamp);
+            timestamp = timestamp.plus(5, SECONDS);
             position = dk.dma.enav.model.geometry.Position.create(currentPosition.getLatitude(), currentPosition.getLongitude());
 
             AisPosition aisPosition = new AisPosition(position);
             aisMessage3.setPos(aisPosition);
 
             testSubscriber.resetFiredStatus();
-            tracker.update(newTimestamp, aisMessage3);
+            tracker.update(timestamp, aisMessage3);
             System.out.println("---");
 
             assertTrue(testSubscriber.isPositionChangedEventFired());
@@ -642,7 +644,7 @@ public class EventEmittingTrackerImplTest {
         tracker.registerSubscriber(testSubscriber);
 
         // Play scenario through tracker
-        long firstTimestamp = System.currentTimeMillis();
+        LocalDateTime firstTimestamp = LocalDateTime.now();
         int timeStep = 0;
 
         // Run test scenario and assert results
@@ -650,9 +652,10 @@ public class EventEmittingTrackerImplTest {
 
         while (!messageQueue.isEmpty()) {
             AisMessage message = messageQueue.remove();
-            Date messageTimestamp = new Date(firstTimestamp + (timeStep++ * 10000)); // 10 secs between msgs
+            LocalDateTime messageTimestamp = firstTimestamp.plus(timeStep++ * 10, SECONDS); // 10 secs between msgs
+
             System.out.println(messageTimestamp + ": " + message);
-            tracker.update(messageTimestamp.getTime(), message);
+            tracker.update(messageTimestamp, message);
             if (message instanceof IPositionMessage) {
                 assertEquals(startingCell.getCellId(), testSubscriber.getCurrentCellId());
             }
@@ -676,23 +679,23 @@ public class EventEmittingTrackerImplTest {
         tracker.registerSubscriber(testSubscriber);
 
         // Play events through tracker
-        long firstTimestamp = System.currentTimeMillis();
+        LocalDateTime firstTimestamp = LocalDateTime.now();
         int timeStep = EventEmittingTrackerImpl.TIME_EVENT_PERIOD_MILLIS / 2 - 1;
 
         assertEquals(0, testSubscriber.getNumberOfTimeEventsReceived());
         tracker.update(firstTimestamp, new AisMessage24());
         assertEquals(1, testSubscriber.getNumberOfTimeEventsReceived());
-        tracker.update(firstTimestamp + 1 * timeStep, new AisMessage24());
+        tracker.update(firstTimestamp.plus(1 * timeStep, MILLIS), new AisMessage24());
         assertEquals(1, testSubscriber.getNumberOfTimeEventsReceived());
-        tracker.update(firstTimestamp + 2 * timeStep, new AisMessage24());
+        tracker.update(firstTimestamp.plus(2 * timeStep, MILLIS), new AisMessage24());
         assertEquals(1, testSubscriber.getNumberOfTimeEventsReceived());
-        tracker.update(firstTimestamp + 3 * timeStep, new AisMessage24());
+        tracker.update(firstTimestamp.plus(3 * timeStep, MILLIS), new AisMessage24());
         assertEquals(2, testSubscriber.getNumberOfTimeEventsReceived());
-        tracker.update(firstTimestamp + 4 * timeStep, new AisMessage24());
+        tracker.update(firstTimestamp.plus(4 * timeStep, MILLIS), new AisMessage24());
         assertEquals(2, testSubscriber.getNumberOfTimeEventsReceived());
-        tracker.update(firstTimestamp + 5 * timeStep, new AisMessage24());
+        tracker.update(firstTimestamp.plus(5 * timeStep, MILLIS), new AisMessage24());
         assertEquals(2, testSubscriber.getNumberOfTimeEventsReceived());
-        tracker.update(firstTimestamp + 6 * timeStep, new AisMessage24());
+        tracker.update(firstTimestamp.plus(6 * timeStep, MILLIS), new AisMessage24());
         assertEquals(3, testSubscriber.getNumberOfTimeEventsReceived());
     }
 
@@ -712,7 +715,7 @@ public class EventEmittingTrackerImplTest {
         for (AisPacket packet : packets) {
             tracker.update(packet);
             Track track = tracker.tracks.get(219000606);
-            assertEquals(packet.getBestTimestamp(), track.getTimeOfLastUpdate());
+            assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(packet.getBestTimestamp()), track.getTimeOfLastUpdate());
         }
     }
 
@@ -732,10 +735,10 @@ public class EventEmittingTrackerImplTest {
         Set<Long> interpolationTimestamps = interpolatedPositions.keySet();
 
         // Assert timestamps
-        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS), interpolationTimestamps.toArray()[0]);
-        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS * 2), interpolationTimestamps.toArray()[1]);
-        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS*3), interpolationTimestamps.toArray()[2]);
-        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS * 4), interpolationTimestamps.toArray()[3]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP.toMillis()), interpolationTimestamps.toArray()[0]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP.toMillis()* 2), interpolationTimestamps.toArray()[1]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP.toMillis()*3), interpolationTimestamps.toArray()[2]);
+        assertEquals((Long) (t1 + (long) EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP.toMillis()* 4), interpolationTimestamps.toArray()[3]);
 
         // Assert positions
         assertEquals(Position.create(56, 11), interpolatedPositions.get(interpolationTimestamps.toArray()[0]));
@@ -750,7 +753,7 @@ public class EventEmittingTrackerImplTest {
      */
     @Test
     public void testTrackIsNotInterpolated() {
-        testInterpolation(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS - 1, 2 /* initial + second */ );
+        testInterpolation((int) EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_AFTER.minus(1, SECONDS).getSeconds(), 2 /* initial + second */ );
     }
 
     /**
@@ -758,7 +761,7 @@ public class EventEmittingTrackerImplTest {
      */
     @Test
     public void testTrackIsInterpolated() {
-        testInterpolation(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS + 1, 5 /* initial + second + 3 interpolated */);
+        testInterpolation((int) EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_AFTER.plus(1, SECONDS).getSeconds(), 5 /* initial + second + 3 interpolated */);
     }
 
     @Test
@@ -791,7 +794,7 @@ public class EventEmittingTrackerImplTest {
         TrackingReport newestTrackingReport = track.getNewestTrackingReport();
         assertTrue(newestTrackingReport instanceof AisTrackingReport);
         AisTrackingReport aisTrackingReport = (AisTrackingReport) newestTrackingReport;
-        assertEquals(1397136678678L, aisTrackingReport.getTimestamp());
+        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply((1397136678678L)), aisTrackingReport.getTimestamp());
         assertEquals(Position.create(55.039028333333334, 10.016861666666667), aisTrackingReport.getPosition());
         assertEquals(10.8, aisTrackingReport.getSpeedOverGround(), 1e-6);
         assertEquals(201.0, aisTrackingReport.getCourseOverGround(), 1e-6);
@@ -824,7 +827,7 @@ public class EventEmittingTrackerImplTest {
         final int n1 = 0;
         final int n2 = 6;
 
-        assertTrue(packets[n2].getBestTimestamp() - packets[n1].getBestTimestamp() > EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS * 1000);
+        assertTrue(packets[n2].getBestTimestamp() - packets[n1].getBestTimestamp() > EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_AFTER.toMillis());
 
         // Create or mock dependencies
         final Grid grid = Grid.createSize(200);
@@ -878,39 +881,41 @@ public class EventEmittingTrackerImplTest {
         AisPosition p3 = new AisPosition(Position.create(56, 11));
 
         long currentTimeMillis = System.currentTimeMillis();
-        Date t1 = new Date(currentTimeMillis);
-        Date t2 = new Date(currentTimeMillis + (EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS-1)*1*1000);
-        Date t3 = new Date(currentTimeMillis + (EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_SECS-1)*2*1000);
+        LocalDateTime t1 = MILLIS_TO_LOCALDATETIME_UTC.apply(currentTimeMillis);
+        LocalDateTime t2 = MILLIS_TO_LOCALDATETIME_UTC.apply(currentTimeMillis).plus(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_AFTER.minus(1, SECONDS).multipliedBy(1));
+        LocalDateTime t3 = MILLIS_TO_LOCALDATETIME_UTC.apply(currentTimeMillis).plus(EventEmittingTrackerImpl.TRACK_INTERPOLATION_REQUIRED_AFTER.minus(1, SECONDS).multipliedBy(2));
 
         AisMessage messageSeq1 = createAisMessage3(MMSI, p1);
         AisMessage messageSeq2 = createAisMessage5(MMSI);
         AisMessage messageSeq3 = createAisMessage3(MMSI, p3);
 
-        tracker.update(t1.getTime(), messageSeq1);
-        tracker.update(t2.getTime(), messageSeq2);
-        tracker.update(t3.getTime(), messageSeq3);
+        tracker.update(t1, messageSeq1);
+        tracker.update(t2, messageSeq2);
+        tracker.update(t3, messageSeq3);
 
         // Assert result
-        int expectedNumberOfPositionChangeEvents = 2 /* p1, p3 */+ /* interpolated */(int) ((t3.getTime() - t1.getTime())/ EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP_MILLIS);
+        int expectedNumberOfPositionChangeEvents = (int) (2 /* p1, p3 */ + /* interpolated */ t1.until(t3, MILLIS) / EventEmittingTrackerImpl.INTERPOLATION_TIME_STEP.toMillis());
         assertEquals(expectedNumberOfPositionChangeEvents, testSubscriber.getNumberOfPositionChangedEventsReceived());
         assertEquals(Position.create(56, 11), testSubscriber.getCurrentPosition());
     }
 
     @Test
     public void testTrackIsStale() {
-        assertFalse(EventEmittingTrackerImpl.isTrackStale(0, 0, EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
-        assertFalse(EventEmittingTrackerImpl.isTrackStale(0, 0, EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(LocalDateTime.MIN, LocalDateTime.MIN, MILLIS_TO_LOCALDATETIME_UTC.apply(TRACK_STALE_AFTER.toMillis() - 1)));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(LocalDateTime.MIN, LocalDateTime.MIN, MILLIS_TO_LOCALDATETIME_UTC.apply(TRACK_STALE_AFTER.toMillis() + 1)));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(null, null, MILLIS_TO_LOCALDATETIME_UTC.apply(TRACK_STALE_AFTER.toMillis() - 1)));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(null, null, MILLIS_TO_LOCALDATETIME_UTC.apply(TRACK_STALE_AFTER.toMillis() + 1)));
 
-        long now = new Date(System.currentTimeMillis()).getTime();
+        LocalDateTime now = LocalDateTime.now();
 
-        assertFalse(EventEmittingTrackerImpl.isTrackStale(now, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
-        assertTrue(EventEmittingTrackerImpl.isTrackStale(now, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(now, now, now.plus(TRACK_STALE_AFTER).minus(1, MILLIS)));
+        assertTrue(EventEmittingTrackerImpl.isTrackStale(now, now, now.plus(TRACK_STALE_AFTER).plus(1, MILLIS)));
 
-        assertFalse(EventEmittingTrackerImpl.isTrackStale(1, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
-        assertTrue(EventEmittingTrackerImpl.isTrackStale(1, now, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(LocalDateTime.MIN, now, now.plus(TRACK_STALE_AFTER).minus(1, MILLIS)));
+        assertTrue(EventEmittingTrackerImpl.isTrackStale(LocalDateTime.MIN, now, now.plus(TRACK_STALE_AFTER).plus(1, MILLIS)));
 
-        assertFalse(EventEmittingTrackerImpl.isTrackStale(now, 1, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 - 1));
-        assertTrue(EventEmittingTrackerImpl.isTrackStale(now, 1, now + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 1));
+        assertFalse(EventEmittingTrackerImpl.isTrackStale(now, LocalDateTime.MIN, now.plus(TRACK_STALE_AFTER).minus(1, MILLIS)));
+        assertTrue(EventEmittingTrackerImpl.isTrackStale(now, LocalDateTime.MIN, now.plus(TRACK_STALE_AFTER).plus(1, MILLIS)));
     }
 
     @Test
@@ -923,12 +928,12 @@ public class EventEmittingTrackerImplTest {
         dk.dma.ais.message.AisPosition aisPosition = new AisPosition(startingPosition);
         AisMessage3 positionMessage = createAisMessage3(MMSI, aisPosition);
 
-        Date t1 = new Date(System.currentTimeMillis());
-        Date t2 = new Date(t1.getTime() + EventEmittingTrackerImpl.TRACK_STALE_SECS*1000 + 60000);
+        LocalDateTime t1 = LocalDateTime.now();
+        LocalDateTime t2 = t1.plus(TRACK_STALE_AFTER).plus(1, MINUTES);
 
         // Execute test where track goes stale
-        tracker.update(t1.getTime(), positionMessage);
-        tracker.update(t2.getTime(), positionMessage);
+        tracker.update(t1, positionMessage);
+        tracker.update(t2, positionMessage);
 
         // No exceptions are expected
     }
@@ -946,11 +951,11 @@ public class EventEmittingTrackerImplTest {
         dk.dma.ais.message.AisPosition aisSecondPosition = new AisPosition(secondPosition);
         AisMessage3 secondPositionMessage = createAisMessage3(MMSI, aisSecondPosition);
 
-        Date firstTimestamp = new Date(System.currentTimeMillis());
-        Date secondTimestamp = new Date(System.currentTimeMillis() + secsBetweenMessages*1000);
+        LocalDateTime firstTimestamp = LocalDateTime.now();
+        LocalDateTime secondTimestamp = firstTimestamp.plus(secsBetweenMessages, SECONDS);
 
-        System.out.println("Starting at " + firstTimestamp.getTime() + " in " + startingPosition);
-        System.out.println("Ending at " + secondTimestamp.getTime() + " in " + secondPosition);
+        System.out.println("Starting at " + firstTimestamp + " in " + startingPosition);
+        System.out.println("Ending at " + secondTimestamp + " in " + secondPosition);
 
         // Wire up test subscriber
         // (discussion: https://code.google.com/p/guava-libraries/issues/detail?id=875)
@@ -958,8 +963,8 @@ public class EventEmittingTrackerImplTest {
         tracker.registerSubscriber(testSubscriber);
 
         // Execute test
-        tracker.update(firstTimestamp.getTime(), firstPositionMessage);
-        tracker.update(secondTimestamp.getTime(), secondPositionMessage);
+        tracker.update(firstTimestamp, firstPositionMessage);
+        tracker.update(secondTimestamp, secondPositionMessage);
 
         // Assert result
         assertEquals(expectedNumberOfPositionChangeEvents, testSubscriber.getNumberOfPositionChangedEventsReceived());
@@ -1047,9 +1052,9 @@ public class EventEmittingTrackerImplTest {
 
         private void assertTrackTimestamps(Track track) {
             // TIMESTAMP_ANY_UPDATE is never allowed to fall behind TIMESTAMP_POSITION_UPDATE
-            long anyUpdate = track.getTimeOfLastUpdate();
-            long posUpdate = track.getNewestTrackingReport().getTimestamp();
-            assertTrue(anyUpdate >= posUpdate);
+            LocalDateTime anyUpdate = track.getTimeOfLastUpdate();
+            LocalDateTime posUpdate = track.getNewestTrackingReport().getTimestamp();
+            assertTrue(!anyUpdate.isBefore(posUpdate));
         }
 
         private long getTimestampFromTrack(Track track, String timestampType) {

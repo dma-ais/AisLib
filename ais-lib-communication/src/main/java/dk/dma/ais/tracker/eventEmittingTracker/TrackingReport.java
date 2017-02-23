@@ -19,6 +19,7 @@ package dk.dma.ais.tracker.eventEmittingTracker;
 import dk.dma.enav.model.geometry.Position;
 import net.jcip.annotations.NotThreadSafe;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public abstract class TrackingReport implements Cloneable {
 
     // ---
 
-    public abstract long getTimestamp();
+    public abstract LocalDateTime getTimestamp();
     public abstract Position getPosition();
     public abstract float getCourseOverGround();
     public abstract float getSpeedOverGround();

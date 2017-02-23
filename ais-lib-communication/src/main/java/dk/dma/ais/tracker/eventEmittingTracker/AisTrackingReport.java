@@ -22,6 +22,10 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.enav.model.geometry.Position;
 import net.jcip.annotations.Immutable;
 
+import java.time.LocalDateTime;
+
+import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
+
 /**
  * A tracking report based on AisPacket (AIS data)
  */
@@ -44,8 +48,8 @@ public final class AisTrackingReport extends TrackingReport {
     }
 
     @Override
-    public long getTimestamp() {
-        return packet.getBestTimestamp();
+    public LocalDateTime getTimestamp() {
+        return MILLIS_TO_LOCALDATETIME_UTC.apply(packet.getBestTimestamp());
     }
 
     @Override

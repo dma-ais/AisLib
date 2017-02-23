@@ -18,25 +18,28 @@ package dk.dma.ais.tracker.eventEmittingTracker.events;
 
 import com.google.common.base.MoreObjects;
 
+import java.time.Duration;
+import java.time.Instant;
+
 /**
  * TimeEvent is a special type of TrackerEvent which is emitted at periodic intervals in the AIS data stream.
  * The exact period can be configured in the Tracker.
  */
 public class TimeEvent extends TrackerEvent {
 
-    private final long timestamp;
-    private final int millisSinceLastMark;
+    private final Instant timestamp;
+    private final Duration millisSinceLastMark;
 
-    public TimeEvent(long timestamp, int millisSinceLastMark) {
+    public TimeEvent(Instant timestamp, Duration timeSinceLastMark) {
         this.timestamp = timestamp;
-        this.millisSinceLastMark = millisSinceLastMark;
+        this.millisSinceLastMark = timeSinceLastMark;
     }
 
-    public final long getTimestamp() {
+    public final Instant getTimestamp() {
         return timestamp;
     }
 
-    public int getMillisSinceLastMark() {
+    public Duration getMillisSinceLastMark() {
         return millisSinceLastMark;
     }
 

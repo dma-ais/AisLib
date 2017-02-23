@@ -28,6 +28,9 @@ import dk.dma.enav.model.geometry.Position;
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,9 +42,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparingLong;
+import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
+import static java.util.Comparator.comparing;
 
 /**
  * The Track class contains the consolidated information known about a given target - likely as the result
@@ -64,7 +67,7 @@ public final class Track extends Target implements Cloneable {
 
     private Lock trackLock = new ReentrantLock();
 
-    private static final Comparator<TrackingReport> byTimestamp = comparingLong(TrackingReport::getTimestamp);
+    private static final Comparator<TrackingReport> byTimestamp = comparing(TrackingReport::getTimestamp);
     private static final Supplier<TreeSet<TrackingReport>> treeSetSupplier = () -> new TreeSet<>(byTimestamp);
     private boolean positionReportPurgeEnable = true;
 
@@ -113,10 +116,10 @@ public final class Track extends Target implements Cloneable {
     private Integer shipDimensionStarboard;
 
     @GuardedBy("trackLock")
-    private long timeOfLastUpdate = 0L;
+    private LocalDateTime timeOfLastUpdate = null;
 
     @GuardedBy("trackLock")
-    private long timeOfLastPositionReport = 0L;
+    private LocalDateTime timeOfLastPositionReport = null;
 
     /**
      * Create a new track with the given MMSI no.
@@ -190,20 +193,20 @@ public final class Track extends Target implements Cloneable {
         result = 31*result + (shipDimensionStern != null ? shipDimensionStern.hashCode() : 0);
         result = 31*result + (shipDimensionPort != null ? shipDimensionPort.hashCode() : 0);
         result = 31*result + (shipDimensionStarboard != null ? shipDimensionStarboard.hashCode() : 0);
-        result = 31*result + (int) (timeOfLastUpdate ^ (timeOfLastUpdate >>> 32));
-        result = 31*result + (int) (timeOfLastPositionReport ^ (timeOfLastPositionReport >>> 32));
+        result = 31*result + (timeOfLastUpdate != null ? timeOfLastUpdate.hashCode() : 0);
+        result = 31*result + (timeOfLastPositionReport != null ? timeOfLastPositionReport.hashCode() : 0);
         return result;
     }
 
     /*
-     * Update this track with a new AisPacket. The MMSI no. inside the packet must match this Track's MMSI no.
-     * and in order to maintain low insertion-cost only packets newer than the previously received are accepted.
-     *
-     * This update will be treated as an update received from a real AIS source and the packet will be stored for
-     * a period of time to support replay.
-     *
-     * @param p
-     */
+         * Update this track with a new AisPacket. The MMSI no. inside the packet must match this Track's MMSI no.
+         * and in order to maintain low insertion-cost only packets newer than the previously received are accepted.
+         *
+         * This update will be treated as an update received from a real AIS source and the packet will be stored for
+         * a period of time to support replay.
+         *
+         * @param p
+         */
     public void update(AisPacket p) {
         checkAisPacket(p);
         AisMessage msg = p.tryGetAisMessage();
@@ -223,7 +226,20 @@ public final class Track extends Target implements Cloneable {
      *
      * @param m
      */
+    @Deprecated
     public void update(long timestamp, AisMessage m) {
+        update(MILLIS_TO_LOCALDATETIME_UTC.apply(timestamp), m);
+    }
+
+    /**
+     * Update this track with a new AisPacket. The MMSI no. inside the packet must match this Track's MMSI no.
+     * and in order to maintain low insertion-cost only packets newer than the previously received are accepted.
+     *
+     * This update is treated as an interpolated (artifical, non-real) update.
+     *
+     * @param m
+     */
+    public void update(LocalDateTime timestamp, AisMessage m) {
         if (m instanceof IVesselPositionMessage) {
             IVesselPositionMessage pm = (IVesselPositionMessage) m;
             update(timestamp, pm.getValidPosition(), (float) (pm.getCog() / 10.0), (float) (pm.getSog() / 10.0), pm.getTrueHeading());
@@ -234,7 +250,16 @@ public final class Track extends Target implements Cloneable {
      * Update this track with interpolated or predicted information (as opposed to information
      * received from an AIS receiver or basestation).
      */
+    @Deprecated
     public void update(long timestamp, Position position, float cog, float sog, float hdg) {
+        update(MILLIS_TO_LOCALDATETIME_UTC.apply(timestamp), position, cog, sog, hdg);
+    }
+
+    /**
+     * Update this track with interpolated or predicted information (as opposed to information
+     * received from an AIS receiver or basestation).
+     */
+    public void update(LocalDateTime timestamp, Position position, float cog, float sog, float hdg) {
         InterpolatedTrackingReport trackingReport = new InterpolatedTrackingReport(timestamp, position, cog, sog, hdg);
         addTrackingReport(trackingReport);
     }
@@ -278,27 +303,27 @@ public final class Track extends Target implements Cloneable {
     }
 
     /** Get the timestamp of the last update of any type. */
-    public long getTimeOfLastUpdate() {
+    public LocalDateTime getTimeOfLastUpdate() {
         return threadSafeGetStaticData(() -> timeOfLastUpdate);
     }
 
     /** Get the timestamp of the last position report. */
-    public long getTimeOfLastPositionReport() {
+    public LocalDateTime getTimeOfLastPositionReport() {
         return threadSafeGetStaticData(() -> timeOfLastPositionReport);
     }
 
     /** Get time timestamp of the last non-predicted position report */
-    public long getTimeOfLastAisTrackingReport() {
+    public LocalDateTime getTimeOfLastAisTrackingReport() {
         try {
             trackLock.lock();
             return trackingReports
                 .stream()
                 .filter(tr -> tr instanceof AisTrackingReport)
-                .max(Comparator.comparing(tr -> tr.getTimestamp()))
+                .max(comparing(tr -> tr.getTimestamp()))
                 .get()
                 .getTimestamp();
         } catch(NoSuchElementException e) {
-            return -1;
+            return null;
         } finally {
             trackLock.unlock();
         }
@@ -324,7 +349,7 @@ public final class Track extends Target implements Cloneable {
             trackLock.lock();
 
             lastStaticReport = p;
-            timeOfLastUpdate = p.getBestTimestamp();
+            timeOfLastUpdate = MILLIS_TO_LOCALDATETIME_UTC.apply(p.getBestTimestamp());
             callsign = msg.getCallsign();
             shipType = msg.getShipType();
             shipName = msg.getName();
@@ -382,14 +407,14 @@ public final class Track extends Target implements Cloneable {
     }
 
     /** Get the the position report at time t. */
-    public TrackingReport getTrackingReportAt(long t) {
+    public TrackingReport getTrackingReportAt(LocalDateTime t) {
         TrackingReport trackingReportAtT = null;
         try {
             trackLock.lock();
             Iterator<TrackingReport> iterator = trackingReports.iterator();
             while(iterator.hasNext()) {
                 trackingReportAtT = iterator.next();
-                if (trackingReportAtT.getTimestamp() == t) {
+                if (trackingReportAtT.getTimestamp().equals(t)) {
                     break;
                 }
                 trackingReportAtT = null;
@@ -427,20 +452,14 @@ public final class Track extends Target implements Cloneable {
         if (positionReportPurgeEnable) {
             TrackingReport newestTrackingReport = getNewestTrackingReport();
             if (newestTrackingReport != null) {
-                long now = newestTrackingReport.getTimestamp();
-                long oldestKept = now - maxAgeMinutes * 60 * 1000;
+                final LocalDateTime now = newestTrackingReport.getTimestamp();
+                final LocalDateTime oldestKept = now.minus(maxAgeMinutes, ChronoUnit.MINUTES);
 
-                TrackingReport oldestTrackingReport = getOldestTrackingReport();
-                if (oldestTrackingReport != null && oldestTrackingReport.getTimestamp() < oldestKept) {
-                    try {
-                        trackLock.lock();
-                        trackingReports = trackingReports
-                                .stream()
-                                .filter(p -> p.getTimestamp() >= oldestKept)
-                                .collect(Collectors.toCollection(treeSetSupplier));
-                    } finally {
-                        trackLock.unlock();
-                    }
+                trackLock.lock();
+                try {
+                    trackingReports.removeIf(tr -> tr.getTimestamp().isBefore(oldestKept));
+                } finally {
+                    trackLock.unlock();
                 }
             }
         }
@@ -450,10 +469,10 @@ public final class Track extends Target implements Cloneable {
      * Predict this track's position forward to time atTime.
      * @param atTime timestamp in milliseconds since the Epoch
      */
-    public void predict(long atTime) {
-        long now = getTimeOfLastPositionReport();
+    public void predict(LocalDateTime atTime) {
+        LocalDateTime now = getTimeOfLastPositionReport();
 
-        if (atTime > now) {
+        if (atTime.isAfter(now)) {
             TrackingReport trackingReport = getNewestTrackingReport();
             if (trackingReport != null) {
                 Position currentPosition = trackingReport.getPosition();
@@ -461,8 +480,7 @@ public final class Track extends Target implements Cloneable {
                 float sog = trackingReport.getSpeedOverGround();
                 float hdg = trackingReport.getTrueHeading();
 
-                long deltaMillis = atTime - now;
-                float deltaSeconds = deltaMillis / 1000;
+                float deltaSeconds = atTime.toEpochSecond(ZoneOffset.UTC) - now.toEpochSecond(ZoneOffset.UTC);
                 float deltaMinutes = deltaSeconds / 60;
                 float deltaHours = deltaMinutes / 60;
                 float distanceNauticalMiles = sog * deltaHours;

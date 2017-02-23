@@ -38,7 +38,7 @@ import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -52,6 +52,11 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+
+import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
+import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 /**
  * EventEmittingTracker is a tracker which receives a (potentially never-ending) series of AisPackets. It uses these
@@ -81,9 +86,9 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
     final Grid grid;
 
-    static final int TRACK_STALE_SECS = 1800;  // 30 mins
-    static final int TRACK_INTERPOLATION_REQUIRED_SECS = 30;  // 30 secs
-    static final int INTERPOLATION_TIME_STEP_MILLIS = 10000;
+    static final Duration TRACK_STALE_AFTER = Duration.of(30, MINUTES);
+    static final Duration TRACK_INTERPOLATION_REQUIRED_AFTER = Duration.of(30, SECONDS);
+    static final Duration INTERPOLATION_TIME_STEP = Duration.of(10, SECONDS);
 
     /**
      * A set of mmsi no.'s for which no messages are processed.
@@ -109,7 +114,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
     /**
      * The time since Epoch when the most recent TimeEvent was posted to the EventBus.
      */
-    private long lastTimeEventMillis = 0;
+    private LocalDateTime lastTimeEventMillis = LocalDateTime.MIN;
 
     /**
      * The approximate no. of milliseconds between each TimeEvent.
@@ -145,7 +150,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
      */
     @Override
     public void update(AisPacket packet) {
-        performUpdate(packet.getBestTimestamp(), packet.tryGetAisMessage(), track -> track.update(packet));
+        performUpdate(MILLIS_TO_LOCALDATETIME_UTC.apply(packet.getBestTimestamp()), packet.tryGetAisMessage(), track -> track.update(packet));
     }
 
     @Override
@@ -160,11 +165,11 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         return track;
     }
 
-    void update(long timeOfCurrentUpdate, AisMessage aisMessage) {
+    void update(LocalDateTime timeOfCurrentUpdate, AisMessage aisMessage) {
         performUpdate(timeOfCurrentUpdate, aisMessage, track -> track.update(timeOfCurrentUpdate, aisMessage));
     }
 
-    private void performUpdate(long timeOfCurrentUpdate, AisMessage aisMessage, Consumer<Track> trackUpdater) {
+    private void performUpdate(LocalDateTime timeOfCurrentUpdate, AisMessage aisMessage, Consumer<Track> trackUpdater) {
         final int mmsi = aisMessage.getUserId();
 
         if (LOG.isDebugEnabled()) {
@@ -185,15 +190,14 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
             if (targetType == AisTargetType.A || targetType == AisTargetType.B) {
                 Track track = getOrCreateTrack(mmsi);
 
-                long timeOfLastUpdate = track.getTimeOfLastUpdate();
-                long timeOfLastPositionUpdate = track.getTimeOfLastPositionReport();
+                LocalDateTime timeOfLastUpdate = track.getTimeOfLastUpdate();
+                LocalDateTime timeOfLastPositionUpdate = track.getTimeOfLastPositionReport();
 
                 // Rebirth track if stale
                 if (isTrackStale(timeOfLastUpdate, timeOfLastPositionUpdate, timeOfCurrentUpdate)) {
                     removeTrack(mmsi);
                     track = getOrCreateTrack(mmsi);
-                    timeOfLastUpdate = 0L;
-                    timeOfLastPositionUpdate = 0L;
+                    timeOfLastPositionUpdate = null;
                 }
 
                 if (aisMessage instanceof IVesselPositionMessage) {
@@ -256,16 +260,16 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         }
     }
 
-    private void interpolateTrackUpToNewMessage(Track track, long timestamp, AisMessage message) {
+    private void interpolateTrackUpToNewMessage(Track track, LocalDateTime timestamp, AisMessage message) {
         if (! (message instanceof IVesselPositionMessage)) {
             throw new IllegalArgumentException();
         }
         IVesselPositionMessage posMessage = (IVesselPositionMessage) message;
 
         Position p1 = track.getPosition();
-        long t1 = track.getNewestTrackingReport().getTimestamp();
+        long t1 = track.getNewestTrackingReport().getTimestamp().toInstant(ZoneOffset.UTC).toEpochMilli();
         Position p2 = posMessage.getPos().getGeoLocation();
-        long t2 = timestamp;
+        long t2 = timestamp.toInstant(ZoneOffset.UTC).toEpochMilli();
 
         Map<Long, Position> interpolatedPositions = calculateInterpolatedPositions(PositionTime.create(p1, t1), PositionTime.create(p2, t2));
 
@@ -296,25 +300,31 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
         final long t1 = pt1.getTime();
         final long t2 = pt2.getTime();
+        final long timestepMillis = INTERPOLATION_TIME_STEP.toMillis();
 
-        for (long t = t1 + INTERPOLATION_TIME_STEP_MILLIS; t < t2; t += INTERPOLATION_TIME_STEP_MILLIS) {
+        for (long t = t1 + timestepMillis; t < t2; t += timestepMillis) {
             interpolatedPositions.put(t, PositionTime.createInterpolated(pt1, pt2, t));
         }
 
         return interpolatedPositions;
     }
 
-    static boolean isTrackStale(long lastAnyUpdate, long lastPositionUpdate, long currentUpdate) {
-        long lastUpdate = Math.max(lastAnyUpdate, lastPositionUpdate);
-        boolean trackStale = lastUpdate > 0L && currentUpdate - lastUpdate >= TRACK_STALE_SECS * 1000L;
+    static boolean isTrackStale(LocalDateTime lastAnyUpdate, LocalDateTime lastPositionUpdate, LocalDateTime currentUpdate) {
+        lastAnyUpdate = lastAnyUpdate == null ? LocalDateTime.MIN : lastAnyUpdate;
+        lastPositionUpdate = lastPositionUpdate == null ? LocalDateTime.MIN : lastPositionUpdate;
+        currentUpdate = currentUpdate == null ? LocalDateTime.MIN : currentUpdate;
+
+        LocalDateTime lastUpdate = lastAnyUpdate.isAfter(lastPositionUpdate) ? lastAnyUpdate : lastPositionUpdate;
+        boolean trackStale = lastUpdate.isAfter(LocalDateTime.MIN) && lastUpdate.until(currentUpdate, SECONDS) >= TRACK_STALE_AFTER.getSeconds();
         if (trackStale) {
             LOG.debug("Track is stale (" + currentUpdate + ", " + lastUpdate + ")");
         }
         return trackStale;
     }
 
-    static boolean isInterpolationRequired(long lastPositionUpdate, long currentPositionUpdate) {
-        return lastPositionUpdate > 0L && currentPositionUpdate - lastPositionUpdate >= TRACK_INTERPOLATION_REQUIRED_SECS * 1000L;
+    static boolean isInterpolationRequired(LocalDateTime lastPositionUpdate, LocalDateTime currentPositionUpdate) {
+        return lastPositionUpdate != null && lastPositionUpdate.until(currentPositionUpdate, SECONDS) >= TRACK_INTERPOLATION_REQUIRED_AFTER.getSeconds();
+
     }
 
     private void removeTrack(int mmsi) {
@@ -417,16 +427,14 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
     /**
      * Occasionally write a mark to show how far we have come in the data stream.
      *
-     * @param timestampMillis current time.
+     * @param dateTime current time.
      */
-    private void mark(long timestampMillis) {
+    private void mark(LocalDateTime now) {
         if ((markTrigger & 0xffff) == 0) {
-            Instant instant = Instant.ofEpochMilli(timestampMillis);
-            LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
-            int t = dateTime.get(ChronoField.HOUR_OF_DAY);
+            int t = now.get(ChronoField.HOUR_OF_DAY);
             if (t != markLastHourLogged) {
                 markLastHourLogged = t;
-                LOG.info("Now processing stream at time " + dateTime.format(DateTimeFormatter.ISO_DATE_TIME));
+                LOG.info("Now processing stream at time " + now.format(DateTimeFormatter.ISO_DATE_TIME));
             }
         }
         markTrigger++;
@@ -436,15 +444,15 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
      * Fire a TimeEvent event to the EventBus if at least TIME_EVENT_PERIOD_MILLIS msecs have
      * passed since the last TimeEvent was emitted.
      *
-     * @param timestampMillis current time.
+     * @param now current time.
      */
-    private void tryFireTimeEvent(long timestampMillis) {
-        long millisSinceLastTimeEvent = timestampMillis - lastTimeEventMillis;
+    private void tryFireTimeEvent(LocalDateTime now) {
+        Duration timeSinceLastTimeEvent = Duration.between(lastTimeEventMillis, now);
 
-        if (millisSinceLastTimeEvent >= TIME_EVENT_PERIOD_MILLIS) {
-            TimeEvent timeEvent = new TimeEvent(timestampMillis, lastTimeEventMillis == 0 ? -1 : (int) millisSinceLastTimeEvent);
+        if (timeSinceLastTimeEvent.compareTo(Duration.of(TIME_EVENT_PERIOD_MILLIS, MILLIS)) > 0) {
+            TimeEvent timeEvent = new TimeEvent(now.toInstant(ZoneOffset.UTC), timeSinceLastTimeEvent);
             eventBus.post(timeEvent);
-            lastTimeEventMillis = timestampMillis;
+            lastTimeEventMillis = now;
             if (LOG.isDebugEnabled()) {
                 LOG.debug("TimeEvent emitted at time " + timeEvent.getTimestamp() + " msecs (" + timeEvent.getMillisSinceLastMark() + " msecs since last).");
             }
