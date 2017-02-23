@@ -6,13 +6,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
+import java.util.GregorianCalendar;
 import java.util.List;
 
-import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -64,7 +62,7 @@ public class TrackTest {
         assertNull(track.getShipDimensionStarboard());
         assertNull(track.getVesselLength());
         assertNull(track.getVesselBeam());
-        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC), track.getTimeOfLastUpdate());
+        assertEquals(0, track.getTimeOfLastUpdate());
 
         track.update(msg5);
 
@@ -77,54 +75,45 @@ public class TrackTest {
         assertEquals(4, track.getShipDimensionStarboard().intValue());
         assertEquals(12 + 58, track.getVesselLength().intValue());
         assertEquals(8 + 4, track.getVesselBeam().intValue());
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1397136629165L), track.getTimeOfLastUpdate());
+        assertEquals(1397136629165L, track.getTimeOfLastUpdate());
     }
 
     @Test
     public void testGetNewestTrackingReport() throws Exception {
         assertNull(track.getNewestTrackingReport());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000000000L), Position.create(56, 12), 45.0f, 10.1f, 10.1f);
+        track.update(1000000000, Position.create(56, 12), 45.0f, 10.1f, 10.1f);
         assertNotNull(track.getNewestTrackingReport());
-        assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(1000000000), ZoneOffset.UTC), track.getNewestTrackingReport().getTimestamp());
+        assertEquals(1000000000, track.getNewestTrackingReport().getTimestamp());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000010000L), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(1000010000, Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertNotNull(track.getNewestTrackingReport());
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000010000L), track.getNewestTrackingReport().getTimestamp());
+        assertEquals(1000010000, track.getNewestTrackingReport().getTimestamp());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000020000L), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(1000020000, Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertNotNull(track.getNewestTrackingReport());
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000020000L), track.getNewestTrackingReport().getTimestamp());
+        assertEquals(1000020000, track.getNewestTrackingReport().getTimestamp());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000L), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(1000, Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertNotNull(track.getNewestTrackingReport());
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000020000L), track.getNewestTrackingReport().getTimestamp());
-    }
-
-    @Test
-    public void testGetTimeOfLastUpdate() throws Exception {
-        // Avoid NPEs elsewhere in code
-        assertNotNull(track.getTimeOfLastUpdate());  // Avoid NPEs elsewhere in code
-        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC), track.getTimeOfLastUpdate());
+        assertEquals(1000020000, track.getNewestTrackingReport().getTimestamp());
     }
 
     @Test
     public void testGetTimeOfLastPositionReport() throws Exception {
-        //assertEquals(null, track.getTimeOfLastPositionReport());
-        assertNotNull(track.getTimeOfLastPositionReport());  // Avoid NPEs elsewhere in code
-        assertEquals(LocalDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC), track.getTimeOfLastPositionReport());
+        assertEquals(0, track.getTimeOfLastPositionReport());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000000000L), Position.create(56, 12), 45.0f, 10.1f, 10.1f);
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000000000L), track.getTimeOfLastPositionReport());
+        track.update(1000000000, Position.create(56, 12), 45.0f, 10.1f, 10.1f);
+        assertEquals(1000000000L, track.getTimeOfLastPositionReport());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000010000L), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000010000L), track.getTimeOfLastPositionReport());
+        track.update(1000010000, Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        assertEquals(1000010000L, track.getTimeOfLastPositionReport());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000020000L), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000020000L), track.getTimeOfLastPositionReport());
+        track.update(1000020000, Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        assertEquals(1000020000L, track.getTimeOfLastPositionReport());
 
-        track.update(MILLIS_TO_LOCALDATETIME_UTC.apply(1000L), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(1000020000L), track.getTimeOfLastPositionReport());
+        track.update(1000, Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        assertEquals(1000020000L, track.getTimeOfLastPositionReport());
     }
 
     @Test
@@ -132,79 +121,79 @@ public class TrackTest {
         assertEquals(0, track.getTrackingReports().size());
         assertEquals(20, track.MAX_AGE_POSITION_REPORTS_MINUTES);
 
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 32, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 32, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(1, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 34, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 34, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(2, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 36, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 36, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(3, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 38, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 38, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(4, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 38, 59), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 38, 59).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(5, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 40, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 40, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(6, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 42, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 42, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(7, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 44, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 44, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(8, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 46, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 46, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(9, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 48, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 48, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(10, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 50, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 50, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(11, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 52, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 52, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(12, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 54, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 54, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(12, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 56, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 56, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(12, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 58, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 58, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(12, track.getTrackingReports().size());
-        track.update(LocalDateTime.of(2014, 02, 11, 13, 00, 00), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
+        track.update(new GregorianCalendar(2014, 02, 11, 13, 00, 00).getTimeInMillis(), Position.create(56.01, 12.01), 45.0f, 10.1f, 10.1f);
         assertEquals(11, track.getTrackingReports().size());
 
         List<TrackingReport> trackingReports = track.getTrackingReports();
         assertEquals(11, trackingReports.size());
-        LocalDateTime oldestKept = LocalDateTime.of(2014, 02, 11, 12, 50).minus(track.MAX_AGE_POSITION_REPORTS_MINUTES, ChronoUnit.MINUTES);
-        trackingReports.forEach(p -> assertTrue(p.getTimestamp().isAfter(oldestKept)));
+        long oldestKept = new GregorianCalendar(2014, 02, 11, 12, 50-track.MAX_AGE_POSITION_REPORTS_MINUTES, 00).getTimeInMillis();
+        trackingReports.forEach(p -> assertTrue(p.getTimestamp() >=  oldestKept));
     }
 
     @Test
     public void testPredictEast() {
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 32, 00), Position.create(56.00, 12.00), 90.0f, 1.0f, 1.0f);
-        track.predict(LocalDateTime.of(2014, 02, 11, 12, 33, 00));
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 32, 00).getTimeInMillis(), Position.create(56.00, 12.00), 90.0f, 1.0f, 1.0f);
+        track.predict(new GregorianCalendar(2014, 02, 11, 12, 33, 00).getTimeInMillis());
         assertEquals(56.000000, track.getNewestTrackingReport().getPosition().getLatitude(), 1e-6);
         assertEquals(12.000496, track.getNewestTrackingReport().getPosition().getLongitude(), 1e-6);
-        assertEquals(LocalDateTime.of(2014, 02, 11, 12, 33, 00), track.getTimeOfLastPositionReport());
+        assertEquals(new GregorianCalendar(2014, 02, 11, 12, 33, 00).getTimeInMillis(), track.getTimeOfLastPositionReport(), 1e-10);
     }
 
     @Test
     public void testPredictNorth() {
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 32, 00), Position.create(56.00, 12.00), 0.0f, 1.0f, 1.0f);
-        track.predict(LocalDateTime.of(2014, 02, 11, 12, 33, 00));
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 32, 00).getTimeInMillis(), Position.create(56.00, 12.00), 0.0f, 1.0f, 1.0f);
+        track.predict(new GregorianCalendar(2014, 02, 11, 12, 33, 00).getTimeInMillis());
         assertEquals(56.000277, track.getNewestTrackingReport().getPosition().getLatitude(), 1e-6);
         assertEquals(12.000000, track.getNewestTrackingReport().getPosition().getLongitude(), 1e-6);
-        assertEquals(LocalDateTime.of(2014, 02, 11, 12, 33, 00), track.getTimeOfLastPositionReport());
+        assertEquals(new GregorianCalendar(2014, 02, 11, 12, 33, 00).getTimeInMillis(), track.getTimeOfLastPositionReport(), 1e-10);
     }
 
     @Test
     public void testPredictLongAndFastNE() {
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 32, 00), Position.create(56.00, 12.00), 45.0f, 20.0f, 20.0f);
-        track.predict(LocalDateTime.of(2014, 02, 11, 12, 42, 00));
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 32, 00).getTimeInMillis(), Position.create(56.00, 12.00), 45.0f, 20.0f, 20.0f);
+        track.predict(new GregorianCalendar(2014, 02, 11, 12, 42, 00).getTimeInMillis());
         assertEquals(56.039237, track.getNewestTrackingReport().getPosition().getLatitude(), 1e-6);
         assertEquals(12.070274, track.getNewestTrackingReport().getPosition().getLongitude(), 1e-6);
-        assertEquals(LocalDateTime.of(2014, 02, 11, 12, 42, 00), track.getTimeOfLastPositionReport());
+        assertEquals(new GregorianCalendar(2014, 02, 11, 12, 42, 00).getTimeInMillis(), track.getTimeOfLastPositionReport(), 1e-10);
     }
 
     @Test
     public void testPredictLongAndFastSW() {
-        track.update(LocalDateTime.of(2014, 02, 11, 12, 32, 00), Position.create(56.00, 12.00), 180.0f+45.0f, 20.0f, 20.0f);
-        track.predict(LocalDateTime.of(2014, 02, 11, 12, 42, 00));
+        track.update(new GregorianCalendar(2014, 02, 11, 12, 32, 00).getTimeInMillis(), Position.create(56.00, 12.00), 180.0f+45.0f, 20.0f, 20.0f);
+        track.predict(new GregorianCalendar(2014, 02, 11, 12, 42, 00).getTimeInMillis());
         assertEquals(55.960722, track.getNewestTrackingReport().getPosition().getLatitude(), 1e-6);
         assertEquals(11.929867, track.getNewestTrackingReport().getPosition().getLongitude(), 1e-6);
-        assertEquals(LocalDateTime.of(2014, 02, 11, 12, 42, 00), track.getTimeOfLastPositionReport());
+        assertEquals(new GregorianCalendar(2014, 02, 11, 12, 42, 00).getTimeInMillis(), track.getTimeOfLastPositionReport(), 1e-10);
     }
 
     @Test
@@ -250,28 +239,28 @@ public class TrackTest {
 
         // No updates yet
         Track track = new Track(219000606);
-        assertEquals(null, track.getTimeOfLastAisTrackingReport());
+        assertEquals(-1, track.getTimeOfLastAisTrackingReport());
 
         // AIS update
         track.update(packets[0]);
-        assertEquals(LocalDateTime.of(2014, 4, 10, 13, 30, 28, 385000000), track.getTimeOfLastAisTrackingReport());
+        assertEquals(LocalDateTime.of(2014, 4, 10, 13, 30, 28, 385).toEpochSecond(ZoneOffset.UTC), track.getTimeOfLastAisTrackingReport() / 1000);
 
         // Predicted update
         track.update(packets[0].getBestTimestamp() + 5000, Position.create(55, 11), 22f, 2.4f, 25f);
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(packets[0].getTimestamp().getTime()), track.getTimeOfLastAisTrackingReport());
+        assertEquals(packets[0].getTimestamp().getTime(), track.getTimeOfLastAisTrackingReport());
 
         // AIS update
         track.update(packets[1]);
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(packets[1].getTimestamp().getTime()), track.getTimeOfLastAisTrackingReport());
+        assertEquals(packets[1].getTimestamp().getTime(), track.getTimeOfLastAisTrackingReport());
 
         // AIS update
         track.update(packets[2]);
-        assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(packets[2].getTimestamp().getTime()), track.getTimeOfLastAisTrackingReport());
+        assertEquals(packets[2].getTimestamp().getTime(), track.getTimeOfLastAisTrackingReport());
 
         // Predicted updates
         for (int i = 0; i < 100; i++) {
             track.update(packets[2].getBestTimestamp() + i*5000, Position.create(55, 11), 22f, 2.4f, 25f);
-            assertEquals(MILLIS_TO_LOCALDATETIME_UTC.apply(packets[2].getTimestamp().getTime()), track.getTimeOfLastAisTrackingReport());
+            assertEquals(packets[2].getTimestamp().getTime(), track.getTimeOfLastAisTrackingReport());
         }
     }
 
@@ -293,5 +282,4 @@ public class TrackTest {
         assertEquals(clone.getTrackingReports().size() + 1, track.getTrackingReports().size());
         assertNotEquals(clone.getNewestTrackingReport(), track.getNewestTrackingReport());
     }
-
 }

@@ -57,7 +57,8 @@ public abstract class TrackingReport implements Cloneable {
 
     // ---
 
-    public abstract LocalDateTime getTimestamp();
+    public abstract long getTimestamp();
+    public abstract LocalDateTime getTimestampTyped();
     public abstract Position getPosition();
     public abstract float getCourseOverGround();
     public abstract float getSpeedOverGround();

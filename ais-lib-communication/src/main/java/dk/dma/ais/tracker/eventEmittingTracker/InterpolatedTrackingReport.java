@@ -16,31 +16,21 @@
 
 package dk.dma.ais.tracker.eventEmittingTracker;
 
+import dk.dma.commons.util.DateTimeUtil;
 import dk.dma.enav.model.geometry.Position;
 import net.jcip.annotations.NotThreadSafe;
 
 import java.time.LocalDateTime;
 
-import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
-
 @NotThreadSafe
 public final class InterpolatedTrackingReport extends TrackingReport {
-    private final LocalDateTime timestamp;
+    private final long timestamp;
     private final Position position;
     private final float courseOverGround;
     private final float speedOverGround;
     private final float trueHeading;
 
-    @Deprecated
     public InterpolatedTrackingReport(long timestamp, Position position, float courseOverGround, float speedOverGround, float trueHeading) {
-        this.timestamp = MILLIS_TO_LOCALDATETIME_UTC.apply(timestamp);
-        this.position = position;
-        this.courseOverGround = courseOverGround;
-        this.speedOverGround = speedOverGround;
-        this.trueHeading = trueHeading;
-    }
-
-    public InterpolatedTrackingReport(LocalDateTime timestamp, Position position, float courseOverGround, float speedOverGround, float trueHeading) {
         this.timestamp = timestamp;
         this.position = position;
         this.courseOverGround = courseOverGround;
@@ -49,8 +39,13 @@ public final class InterpolatedTrackingReport extends TrackingReport {
     }
 
     @Override
-    public LocalDateTime getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public LocalDateTime getTimestampTyped() {
+        return DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC.apply(timestamp);
     }
 
     @Override
