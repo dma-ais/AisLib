@@ -55,7 +55,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import static dk.dma.commons.util.DateTimeUtil.LOCALDATETIME_UTC_TO_MILLIS;
-import static dk.dma.commons.util.DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -152,7 +151,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
      */
     @Override
     public void update(AisPacket packet) {
-        performUpdate(MILLIS_TO_LOCALDATETIME_UTC.apply(packet.getBestTimestamp()), packet.tryGetAisMessage(), track -> track.update(packet));
+        performUpdate(LocalDateTime.ofInstant(Instant.ofEpochMilli(packet.getBestTimestamp()), ZoneOffset.UTC), packet.tryGetAisMessage(), track -> track.update(packet));
     }
 
     @Override
