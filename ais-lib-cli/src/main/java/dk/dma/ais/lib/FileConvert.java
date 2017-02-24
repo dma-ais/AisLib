@@ -73,6 +73,12 @@ public class FileConvert extends AbstractCommandLineTool {
     @Parameter(names = "-columns", required = false, description = "Optional columns, required with -outputFormat table. use ; as delimiter. Example: -columns mmsi;time;lat;lon")
     String columns;
 
+    @Parameter(names = "-kmzPrimaryMmsi", required = false, description = "For use with '-outputFormat kmz': Primary mmsi no. Affects color of vessel.")
+    int kmzPrimaryMmsi = -1;
+
+    @Parameter(names = "-kmzSecondaryMmsi", required = false, description = "For use with '-outputFormat kmz': Secondary mmsi no. Affects color of vessel.")
+    int kmzSecondaryMmsi = -1;
+
     public FileConvert() {
     }
 
@@ -124,7 +130,29 @@ public class FileConvert extends AbstractCommandLineTool {
 
                 final OutputStream fos = new FileOutputStream(filePath.toString()); // 2
 
-                final OutputStreamSink<AisPacket> sink = AisPacketOutputSinks.getOutputSink(outputSinkFormat, columns);
+                boolean snapshotCreated = false;
+
+                OutputStreamSink<AisPacket> sink;
+                if ("kmz".equals(outputSinkFormat)) {
+                    //AisPacketKMZOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
+                    sink = AisPacketOutputSinks.newKmzSink(
+                        e -> true,  // this.filter = e -> true;
+                        true,       // this.createSituationFolder = true;
+                        true,       // createMovementsFolder = true;
+                        true,       // this.createTracksFolder = true;
+                        e -> kmzPrimaryMmsi <= 0 ? false : e.tryGetAisMessage().getUserId() == kmzPrimaryMmsi, // this.isPrimaryTarget = e -> false;
+                        e -> kmzSecondaryMmsi <= 0 ? false : e.tryGetAisMessage().getUserId() == kmzSecondaryMmsi, // this.isSecondaryTarget = e -> false;
+                        e -> false, // this.triggerSnapshot = e -> false;
+                        () -> "",       // this.snapshotDescriptionSupplier = null;
+                        () -> 10,     // this.title = defaultTitleSupplier;
+                        () -> "description", // this.description = defaultDescriptionSupplier;
+                        () -> "10",     //this.movementInterpolationStep = defaultMovementInterpolationStepSupplier;
+                        (shipTypeCargo, navigationalStatus) -> "" // this.iconHrefSupplier = defaultIconHrefSupplier;
+                    );
+
+                } else
+                    sink = AisPacketOutputSinks.getOutputSink(outputSinkFormat, columns);
+
                 sink.closeWhenFooterWritten();
 
                 AisPacketReader apis = AisPacketReader.createFromFile(path, false);
