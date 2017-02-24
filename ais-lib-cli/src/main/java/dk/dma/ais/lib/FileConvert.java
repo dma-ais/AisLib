@@ -35,6 +35,9 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -78,6 +81,11 @@ public class FileConvert extends AbstractCommandLineTool {
 
     @Parameter(names = "-kmzSecondaryMmsi", required = false, description = "For use with '-outputFormat kmz': Secondary mmsi no. Affects color of vessel.")
     int kmzSecondaryMmsi = -1;
+
+    @Parameter(names = "-kmzSnapshotAt", required = false, description = "For use with '-outputFormat kmz': Date and time in datastream for creation of snapshot folder. [YYYY-MM-DD-hh:mm]")
+    String kmzSnapshotAt;
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm");
 
     public FileConvert() {
     }
@@ -132,6 +140,8 @@ public class FileConvert extends AbstractCommandLineTool {
 
                 boolean snapshotCreated = false;
 
+                final long snapshotAtEpochMillis = LocalDateTime.parse(kmzSnapshotAt, formatter).toInstant(ZoneOffset.UTC).toEpochMilli();
+
                 OutputStreamSink<AisPacket> sink;
                 if ("kmz".equals(outputSinkFormat)) {
                     //AisPacketKMZOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
@@ -142,8 +152,8 @@ public class FileConvert extends AbstractCommandLineTool {
                         true,       // this.createTracksFolder = true;
                         e -> kmzPrimaryMmsi <= 0 ? false : e.tryGetAisMessage().getUserId() == kmzPrimaryMmsi, // this.isPrimaryTarget = e -> false;
                         e -> kmzSecondaryMmsi <= 0 ? false : e.tryGetAisMessage().getUserId() == kmzSecondaryMmsi, // this.isSecondaryTarget = e -> false;
-                        e -> false, // this.triggerSnapshot = e -> false;
-                        () -> "",       // this.snapshotDescriptionSupplier = null;
+                        e -> e.getBestTimestamp() >= snapshotAtEpochMillis, // this.triggerSnapshot = e -> false;
+                        () -> "Situation at " + kmzSnapshotAt, // this.snapshotDescriptionSupplier = null;
                         () -> 10,     // this.title = defaultTitleSupplier;
                         () -> "description", // this.description = defaultDescriptionSupplier;
                         () -> "10",     //this.movementInterpolationStep = defaultMovementInterpolationStepSupplier;
