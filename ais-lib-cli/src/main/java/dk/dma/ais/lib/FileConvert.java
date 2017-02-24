@@ -138,16 +138,15 @@ public class FileConvert extends AbstractCommandLineTool {
 
                 final OutputStream fos = new FileOutputStream(filePath.toString()); // 2
 
-                boolean snapshotCreated = false;
-
-                final long snapshotAtEpochMillis = LocalDateTime.parse(kmzSnapshotAt, formatter).toInstant(ZoneOffset.UTC).toEpochMilli();
+                final boolean createSituationFolder = !StringUtils.isBlank(kmzSnapshotAt);
+                final long snapshotAtEpochMillis = createSituationFolder ? LocalDateTime.parse(kmzSnapshotAt, formatter).toInstant(ZoneOffset.UTC).toEpochMilli() : -1;
 
                 OutputStreamSink<AisPacket> sink;
                 if ("kmz".equals(outputSinkFormat)) {
                     //AisPacketKMZOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
                     sink = AisPacketOutputSinks.newKmzSink(
                         e -> true,  // this.filter = e -> true;
-                        true,       // this.createSituationFolder = true;
+                        createSituationFolder,       // this.createSituationFolder = true;
                         true,       // createMovementsFolder = true;
                         true,       // this.createTracksFolder = true;
                         e -> kmzPrimaryMmsi <= 0 ? false : e.tryGetAisMessage().getUserId() == kmzPrimaryMmsi, // this.isPrimaryTarget = e -> false;
