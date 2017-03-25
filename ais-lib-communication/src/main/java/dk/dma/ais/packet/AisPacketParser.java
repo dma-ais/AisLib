@@ -21,13 +21,18 @@ import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.ais.sentence.Vdm;
 import net.jcip.annotations.NotThreadSafe;
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class to parse lines in a stream containing VDM sentences. The class will deliver packets containing complete VDM and
@@ -51,6 +56,8 @@ public class AisPacketParser {
 
     /** A received VDO/VDM */
     private Vdm vdm = new Vdm();
+
+    private Map<String, AisPacket> vdmMessagesInTheLast2Seconds = Collections.synchronizedMap(new PassiveExpiringMap<>(2, TimeUnit.SECONDS, new HashMap<>()));
     
     /**
      * Sentence line parser
@@ -91,7 +98,7 @@ public class AisPacketParser {
             }
             sentenceTrace.addLast(line);
         }
-        
+
         sentenceLine.parse(line);
 
         // Ignore everything else than sentences
@@ -119,7 +126,9 @@ public class AisPacketParser {
         }
 
         // Add line to raw packet
-        packetLines.add(line);
+        if (!sentenceLine.isFormatter("VSI")) {
+            packetLines.add(line);
+        }
 
         // Check if proprietary line
         if (sentenceLine.isProprietary()) {
@@ -133,42 +142,68 @@ public class AisPacketParser {
         }
 
         // Check if VDM. If not the possible current VDM is broken.
-        if (!sentenceLine.isFormatter("VDM", "VDO")) {
+        if (!sentenceLine.isFormatter("VDM", "VDO", "VSI")) {
             newVdm();
             return null;
         }
 
-        // Parse VDM
-        int result;
-        try {
-            result = vdm.parse(sentenceLine);
-        } catch (SentenceException e) {
-            newVdm();
-            // Do a single retry with the current line. The faulty sentence may be the last, not this one.
-            if (!retry) {
-                LOG.debug("Discarding current sentence group. New start: " + e.getMessage());
-                return readLine(line, true);
+        AisPacket packet;
+        if (sentenceLine.isFormatter("VDM", "VDO")) {
+            int result;
+            try {
+                result = vdm.parse(sentenceLine);
+            } catch (SentenceException e) {
+                newVdm();
+                // Do a single retry with the current line. The faulty sentence may be the last, not this one.
+                if (!retry) {
+                    LOG.debug("Discarding current sentence group. New start: " + e.getMessage());
+                    return readLine(line, true);
+                }
+                throw new SentenceException(e, sentenceTrace);
             }
-            throw new SentenceException(e, sentenceTrace);
+
+            // If not complete package wait for more
+            if (result != 0) {
+                return null;
+            }
+
+            // Complete package have been read
+
+            // Put proprietary tags on vdm
+            if (tags.size() > 0) {
+                vdm.setTags(new LinkedList<>(tags));
+            }
+
+            packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"));
+
+            keepPacketForVsiCorrelation(packet);
+        } else { // VSI
+            Vsi vsi = new Vsi();
+            vsi.parse(sentenceLine);
+
+            String messageKey = vsi.getCommentBlock().getString("C") + vsi.getCommentBlock().getString("s");
+            AisPacket correlatedVdmPacket = vdmMessagesInTheLast2Seconds.remove(messageKey);
+
+            if (correlatedVdmPacket != null) {
+                Vdm vdm = new Vdm();
+                vdm.parse(correlatedVdmPacket.getStringMessage());
+
+                packet = new AisPacket(vdm, vsi, correlatedVdmPacket.getStringMessage());
+            } else {
+                packet = null;
+            }
         }
-
-        // If not complete package wait for more
-        if (result != 0) {
-            return null;
-        }
-
-        // Complete package have been read
-
-        // Put proprietary tags on vdm
-        if (tags.size() > 0) {
-            vdm.setTags(new LinkedList<>(tags));
-        }
-
-        // Make packet
-        AisPacket packet = new AisPacket(vdm, StringUtils.join(packetLines, "\r\n"));
 
         newVdm();
 
         return packet;
+    }
+
+    private void keepPacketForVsiCorrelation(AisPacket packet) {
+        if (packet.getVdm().getCommentBlock() != null) {
+            String messageId = packet.getVdm().getCommentBlock().getString("C");
+            String stationId = packet.getVdm().getCommentBlock().getString("s");
+            vdmMessagesInTheLast2Seconds.put(messageId + stationId, AisPacket.from(packet.getStringMessage()));
+        }
     }
 }

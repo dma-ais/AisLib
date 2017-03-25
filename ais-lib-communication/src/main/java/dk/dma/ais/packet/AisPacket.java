@@ -14,15 +14,6 @@
  */
 package dk.dma.ais.packet;
 
-import static java.util.Objects.requireNonNull;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import net.jcip.annotations.NotThreadSafe;
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
@@ -31,6 +22,15 @@ import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.Vdm;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
+import net.jcip.annotations.NotThreadSafe;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag
@@ -43,6 +43,7 @@ public class AisPacket implements Comparable<AisPacket> {
 
     private final String rawMessage;
     private transient Vdm vdm;
+    private transient Vsi vsi;
     private transient AisPacketTags tags;
     private AisMessage message;
     private volatile long timestamp = Long.MIN_VALUE;
@@ -54,6 +55,12 @@ public class AisPacket implements Comparable<AisPacket> {
     AisPacket(Vdm vdm, String stringMessage) {
         this(stringMessage);
         this.vdm = vdm;
+    }
+
+    public AisPacket(Vdm correlatedVdm, Vsi vsi, String stringMessage) {
+        this(stringMessage);
+        this.vdm = correlatedVdm;
+        this.vsi = vsi;
     }
 
     public static AisPacket fromByteBuffer(ByteBuffer buffer) {
@@ -156,7 +163,7 @@ public class AisPacket implements Comparable<AisPacket> {
      * @return
      */
     public boolean isValidMessage() {
-        return tryGetAisMessage() != null;
+        return isVsi() || tryGetAisMessage() != null;
     }
 
     /**
@@ -189,8 +196,7 @@ public class AisPacket implements Comparable<AisPacket> {
      * Construct AisPacket from raw packet string
      * 
      * @param messageString
-     * @param optional
-     *            factory
+     *
      * @return
      * @throws SentenceException
      */
@@ -212,5 +218,13 @@ public class AisPacket implements Comparable<AisPacket> {
     @Override
     public int compareTo(AisPacket p) {
         return Long.compare(getBestTimestamp(), p.getBestTimestamp());
+    }
+
+    public boolean isVsi() {
+        return vsi != null;
+    }
+
+    public Vsi getVsi() {
+        return vsi;
     }
 }

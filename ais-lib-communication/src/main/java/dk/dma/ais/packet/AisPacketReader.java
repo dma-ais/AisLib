@@ -171,15 +171,15 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
             if (throwExceptions) {
                 throw new IOException(se);
             }
-            LOG.error("Sentence error: " + line + " (possible related proptag: " + se.getPossibleProprietaryTag() + ")");
-            LOG.debug("Sentence trace: " + se.getMessage());
+            LOG.error("Sentence error: " + line + " (possible related proptag: " + se.getPossibleProprietaryTag() + ")", se);
+            LOG.debug("Sentence trace: " + se.getMessage(), se);
             return null;
         } catch (Exception e) {
             if (throwExceptions) {
                 throw new IOException(e);
             }
-            LOG.error("Sentence line error: " + line);
-            LOG.debug("Sentence line error: " + e.getMessage());
+            LOG.error("Sentence line error: " + line, e);
+            LOG.debug("Sentence line error: " + e.getMessage(), e);
             return null;
         }
     }
