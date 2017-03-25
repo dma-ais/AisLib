@@ -4,7 +4,8 @@
   <parent>
     <groupId>dk.dma.ais.lib</groupId>
     <artifactId>ais-parent</artifactId>
-    <version>2.4-SNAPSHOT</version>
+    <version>2.4-CCG-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <packaging>jar</packaging>
