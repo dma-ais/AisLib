@@ -14,14 +14,6 @@
  */
 package dk.dma.ais.packet;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Date;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessageException;
@@ -30,7 +22,20 @@ import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.sentence.SentenceException;
+import dk.dma.ais.sentence.Vdm;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Date;
 import java.util.function.Consumer;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 public class AisPacketTest {
 
@@ -156,4 +161,23 @@ public class AisPacketTest {
         Assert.assertEquals(tags.getSourceType(), SourceType.SATELLITE);
     }
 
+    @Test
+    public void packetVdmCanBeUsedToCreateMessage() throws SentenceException, AisMessageException, SixbitException {
+        String sentence = "!BSVDM,1,1,,B,33@nl?@01EPk<FDPw<2qW7`B07kh,0*5E";
+
+        Vdm vdm = new Vdm();
+        vdm.parse(sentence);
+
+        AisMessage messageFromDirectVdm = AisMessage.getInstance(vdm);
+
+        assertThat(messageFromDirectVdm, is(not(nullValue())));
+
+        AisPacket packet = AisPacket.readFromString(sentence);
+        AisMessage msg = packet.tryGetAisMessage();
+
+        Vdm packetVdm = msg.getVdm();
+        AisMessage messageFromPacketVdm = AisMessage.getInstance(packetVdm);
+
+        assertThat(messageFromPacketVdm, is(not(nullValue())));
+    }
 }
