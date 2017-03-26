@@ -181,7 +181,12 @@ public class AisPacketParser {
             Vsi vsi = new Vsi();
             vsi.parse(sentenceLine);
 
-            String messageKey = vsi.getCommentBlock().getString("C") + vsi.getCommentBlock().getString("s");
+            String messageKey;
+            if (vsi.getCommentBlock() != null) {
+                messageKey = vsi.getCommentBlock().getString("C") + vsi.getCommentBlock().getString("s");
+            } else {
+                messageKey = sentenceLine.getFields().get(2) + sentenceLine.getFields().get(4);
+            }
             AisPacket correlatedVdmPacket = vdmMessagesInTheLast2Seconds.remove(messageKey);
 
             if (correlatedVdmPacket != null) {
