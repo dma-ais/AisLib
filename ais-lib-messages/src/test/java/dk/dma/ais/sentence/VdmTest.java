@@ -22,6 +22,9 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage12;
 import dk.dma.ais.message.AisMessageException;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 public class VdmTest {
 
     @Test
@@ -69,5 +72,18 @@ public class VdmTest {
         Assert.assertEquals("Wrong user id", 992199007, msg.getUserId());
 
     }
-    
+
+    @Test
+    public void canParseTwice() throws SentenceException {
+        String sentence = "!BSVDM,1,1,,B,33@nl?@01EPk<FDPw<2qW7`B07kh,0*5E";
+        Vdm vdm = new Vdm();
+
+        int parseResult = vdm.parse(sentence);
+
+        assertThat(parseResult, is(0));
+
+        int secondParseResult = vdm.parse(sentence);
+
+        assertThat(secondParseResult, is(0));
+    }
 }

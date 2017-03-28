@@ -221,17 +221,19 @@ public abstract class AisMessage implements Serializable {
      * @throws SixbitException
      */
     public static AisMessage getInstance(Vdm vdm) throws AisMessageException, SixbitException {
-        AisMessage message = null;
+        AisMessage message;
 
         switch (vdm.getMsgId()) {
         case 1:
             message = new AisMessage1(vdm);
+            vdm.getBinArray().doneReading();
             break;
         case 2:
             message = new AisMessage2(vdm);
             break;
         case 3:
             message = new AisMessage3(vdm);
+            vdm.getBinArray().doneReading();
             break;
         case 4:
             message = new AisMessage4(vdm);
