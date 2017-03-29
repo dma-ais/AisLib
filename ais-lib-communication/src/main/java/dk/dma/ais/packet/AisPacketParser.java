@@ -181,12 +181,7 @@ public class AisPacketParser {
             Vsi vsi = new Vsi();
             vsi.parse(sentenceLine);
 
-            String messageKey;
-            if (vsi.getCommentBlock() != null) {
-                messageKey = vsi.getCommentBlock().getString("C") + vsi.getCommentBlock().getString("s");
-            } else {
-                messageKey = sentenceLine.getFields().get(2) + sentenceLine.getFields().get(4);
-            }
+            String messageKey = sentenceLine.getFields().get(1) + sentenceLine.getFields().get(2);
             AisPacket correlatedVdmPacket = vdmMessagesInTheLast2Seconds.remove(messageKey);
 
             if (correlatedVdmPacket != null) {
@@ -205,9 +200,10 @@ public class AisPacketParser {
 
     private void keepPacketForVsiCorrelation(AisPacket packet) {
         if (packet.getVdm().getCommentBlock() != null) {
-            String messageId = packet.getVdm().getCommentBlock().getString("C");
+            SentenceLine sentenceLine = new SentenceLine(packet.getVdm().getRawSentencesJoined());
             String stationId = packet.getVdm().getCommentBlock().getString("s");
-            vdmMessagesInTheLast2Seconds.put(messageId + stationId, AisPacket.from(packet.getStringMessage()));
+            String messageSequenceNumber = sentenceLine.getFields().get(3);
+            vdmMessagesInTheLast2Seconds.put(stationId + messageSequenceNumber, AisPacket.from(packet.getStringMessage()));
         }
     }
 }
