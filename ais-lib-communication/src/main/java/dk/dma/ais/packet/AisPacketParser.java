@@ -190,8 +190,7 @@ public class AisPacketParser {
             AisPacket correlatedVdmPacket = vdmMessagesInTheLast2Seconds.remove(messageKey);
 
             if (correlatedVdmPacket != null) {
-                Vdm vdm = new Vdm();
-                vdm.parse(correlatedVdmPacket.getStringMessage());
+                Vdm vdm = correlatedVdmPacket.getVdm();
 
                 packet = new AisPacket(vdm, vsi, correlatedVdmPacket.getStringMessage());
             } else {
