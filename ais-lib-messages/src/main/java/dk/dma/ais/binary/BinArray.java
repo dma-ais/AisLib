@@ -268,4 +268,7 @@ public class BinArray {
         return builder.toString();
     }
 
+    public void doneReading() {
+        readPtr = 0;
+    }
 }
