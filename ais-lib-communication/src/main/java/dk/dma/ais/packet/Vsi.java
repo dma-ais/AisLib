@@ -4,11 +4,15 @@ import dk.dma.ais.sentence.CommentBlock;
 import dk.dma.ais.sentence.EncapsulatedSentence;
 import dk.dma.ais.sentence.SentenceException;
 import dk.dma.ais.sentence.SentenceLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a VSI sentence.
  */
 public class Vsi extends EncapsulatedSentence {
+    private static final Logger LOG = LoggerFactory.getLogger(Vsi.class);
+
     private int signalStrength;
     private double latitude;
     private double longitude;
@@ -19,7 +23,12 @@ public class Vsi extends EncapsulatedSentence {
             addSingleCommentBlock(sentenceLine.getPrefix());
         }
 
-        signalStrength = Integer.valueOf(sentenceLine.getFields().get(5));
+        try {
+            signalStrength = Integer.valueOf(sentenceLine.getFields().get(5));
+        } catch (NumberFormatException e) {
+            signalStrength = Integer.MIN_VALUE;
+            LOG.error("Invalid value for signal strength in VSI sentence: [{}]. Using default value [{}]", sentenceLine, Integer.MIN_VALUE);
+        }
 
         return 0;
     }
