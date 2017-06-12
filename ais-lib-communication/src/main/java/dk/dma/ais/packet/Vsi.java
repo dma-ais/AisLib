@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Vsi extends EncapsulatedSentence {
     private static final Logger LOG = LoggerFactory.getLogger(Vsi.class);
+    private static final int SIGNAL_STRENGTH_DEFAULT_VALUE = -10000;
 
     private int signalStrength;
     private double latitude;
@@ -26,8 +27,8 @@ public class Vsi extends EncapsulatedSentence {
         try {
             signalStrength = Integer.valueOf(sentenceLine.getFields().get(5));
         } catch (NumberFormatException e) {
-            signalStrength = Integer.MIN_VALUE;
-            LOG.error("Invalid value for signal strength in VSI sentence: [{}]. Using default value [{}]", sentenceLine, Integer.MIN_VALUE);
+            signalStrength = SIGNAL_STRENGTH_DEFAULT_VALUE;
+            LOG.error("Invalid value for signal strength in VSI sentence: [{}]. Using default value [{}]", sentenceLine, SIGNAL_STRENGTH_DEFAULT_VALUE);
         }
 
         return 0;

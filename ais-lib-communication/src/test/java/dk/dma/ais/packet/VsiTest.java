@@ -43,6 +43,6 @@ public class VsiTest {
     public void givenASentenceWithAnInvalidSignalStrength_whenParse_thenDefaultValueIsUsed() throws SentenceException {
         vsi.parse(new SentenceLine("\\c:1497228032,C:1206,s:M-Chebucto*2F\\$AIVSI,M-Chebucto,4,,,,*31"));
 
-        assertThat(vsi.getSignalStrength(), is(equalTo(Integer.MIN_VALUE)));
+        assertThat(vsi.getSignalStrength(), is(equalTo(-10000)));
     }
 }
