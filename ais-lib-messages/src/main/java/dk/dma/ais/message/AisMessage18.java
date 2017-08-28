@@ -26,7 +26,7 @@ import dk.dma.enav.model.geometry.Position;
  * CLASS B position report implemented according to ITU-R M.1371-4
  * 
  */
-public class AisMessage18 extends AisPositionMessage {
+public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
@@ -242,6 +242,12 @@ public class AisMessage18 extends AisPositionMessage {
      */
     public AisPosition getPos() {
         return pos;
+    }
+
+    @Override
+    public Position getValidPosition() {
+        AisPosition pos = this.pos;
+        return pos == null ? null : pos.getGeoLocation();
     }
 
     /**
