@@ -1,0 +1,10 @@
+rootProject.name = 'ais-parent'
+include ':ais-lib-messages'
+include ':ais-lib-communication'
+include ':ais-lib-utils'
+include ':ais-lib-cli'
+
+project(':ais-lib-messages').projectDir = "$rootDir/ais-lib-messages" as File
+project(':ais-lib-communication').projectDir = "$rootDir/ais-lib-communication" as File
+project(':ais-lib-utils').projectDir = "$rootDir/ais-lib-utils" as File
+project(':ais-lib-cli').projectDir = "$rootDir/ais-lib-cli" as File

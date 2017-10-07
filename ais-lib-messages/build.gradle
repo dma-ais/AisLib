@@ -1,0 +1,6 @@
+
+description = 'AIS Messages'
+dependencies {
+    compile group: 'dk.dma.enav', name: 'enav-model', version:'0.5'
+    compile group: 'dk.dma.commons', name: 'dma-commons-util', version:'0.5-SNAPSHOT'
+}

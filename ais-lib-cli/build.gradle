@@ -1,0 +1,8 @@
+
+description = 'AisLib CLI'
+dependencies {
+  compile project(':ais-lib-communication')
+  compile project(':ais-lib-utils')
+    compile group: 'dk.dma.commons', name: 'dma-commons-app', version:'0.5-SNAPSHOT'
+    compile group: 'commons-io', name: 'commons-io', version:'2.4'
+}

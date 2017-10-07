@@ -1,0 +1,34 @@
+allprojects  {
+  apply plugin: 'maven'
+
+  group = 'dk.dma.ais.lib'
+version = '2.4-CCG-SNAPSHOT'
+}
+
+subprojects {
+  apply plugin: 'java'
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+  tasks.withType(JavaCompile) {
+  	options.encoding = 'UTF-8'
+  }
+
+  
+  repositories {
+    mavenLocal()
+    
+    maven { url "http://repository-dma.forge.cloudbees.com/snapshot/" }
+    maven { url "http://repository-dma.forge.cloudbees.com/release/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+  }
+
+  
+  dependencies {
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.23'
+    compile group: 'net.jcip', name: 'jcip-annotations', version:'1.0'
+    testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.7.23'
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+}
+
+  
+}

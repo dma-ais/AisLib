@@ -1,0 +1,7 @@
+
+description = 'AIS utils'
+dependencies {
+  compile project(':ais-lib-messages')
+  compile project(':ais-lib-communication')
+    compile group: 'dk.dma.commons', name: 'dma-commons-app', version:'0.5-SNAPSHOT'
+}
