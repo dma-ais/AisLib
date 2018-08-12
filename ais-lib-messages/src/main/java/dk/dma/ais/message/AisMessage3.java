@@ -76,6 +76,18 @@ public class AisMessage3 extends AisPositionMessage {
         return keep;
     }
 
+    public void setSlotIncrement(int slotIncrement) {
+        this.slotIncrement = slotIncrement;
+    }
+
+    public void setNumSlots(int numSlots) {
+        this.numSlots = numSlots;
+    }
+
+    public void setKeep(int keep) {
+        this.keep = keep;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
