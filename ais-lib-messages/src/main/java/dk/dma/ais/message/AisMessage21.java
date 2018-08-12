@@ -96,7 +96,28 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
 
     @Override
     public SixbitEncoder getEncoded() {
-        throw new UnsupportedOperationException();
+        SixbitEncoder encoder = super.encode();
+        encoder.addVal(atonType, 5);
+        encoder.addString(name, 20);
+        encoder.addVal(posAcc, 1);
+        encoder.addVal(pos.getRawLongitude(), 28);
+        encoder.addVal(pos.getRawLatitude(), 27);
+        encoder.addVal(dimBow, 9);
+        encoder.addVal(dimStern, 9);
+        encoder.addVal(dimPort, 6);
+        encoder.addVal(dimStarboard, 6);
+        encoder.addVal(posType, 4);
+        encoder.addVal(utcSec, 6);
+        encoder.addVal(offPosition, 1);
+        encoder.addVal(regional, 8);
+        encoder.addVal(raim, 1);
+        encoder.addVal(virtual, 1);
+        encoder.addVal(assigned, 1);
+        encoder.addVal(spare1, 1);
+
+        if (nameExt != null)
+            encoder.addString(nameExt, (vdm.getBinArray().getLength() - 272) / 6);
+        return encoder;
     }
 
     public int getAtonType() {

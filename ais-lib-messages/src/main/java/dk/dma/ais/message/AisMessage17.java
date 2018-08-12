@@ -84,7 +84,20 @@ public class AisMessage17 extends AisMessage {
 
     @Override
     public SixbitEncoder getEncoded() {
-        throw new UnsupportedOperationException();
+        SixbitEncoder encoder = super.encode();
+        encoder.addVal(spare1, 2);
+        encoder.addVal(lon, 18);
+        encoder.addVal(lat, 17);
+        encoder.addVal(spare2, 5);
+        encoder.addVal(messageType, 6);
+        encoder.addVal(stationId, 10);
+        encoder.addVal(zCount, 13);
+        encoder.addVal(seqNum, 3);
+        encoder.addVal(dataWordCount, 5);
+        encoder.addVal(health, 3);
+        for (int dataWord : dataWords)
+            encoder.addVal(dataWord, 24);
+        return encoder;
     }
 
     public int getSpare1() {
