@@ -92,7 +92,25 @@ public class AisMessage24 extends AisStaticCommon {
 
     @Override
     public SixbitEncoder getEncoded() {
-        throw new UnsupportedOperationException();
+        SixbitEncoder encoder = super.encode();
+        encoder.addVal(partNumber, 2);
+
+        // Part A
+        if (partNumber == 0) {
+            encoder.addString(name, 20);
+            return encoder;
+        }
+
+        // Part B
+        encoder.addVal(shipType, 8);
+        encoder.addString(vendorId, 7);
+        encoder.addString(callsign, 7);
+        encoder.addVal(dimBow, 9);
+        encoder.addVal(dimStern, 9);
+        encoder.addVal(dimPort, 6);
+        encoder.addVal(dimStarboard, 6);
+        encoder.addVal(spare, 6);
+        return encoder;
     }
 
     public int getPartNumber() {
