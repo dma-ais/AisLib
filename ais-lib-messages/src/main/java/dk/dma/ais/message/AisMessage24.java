@@ -46,9 +46,16 @@ public class AisMessage24 extends AisStaticCommon {
     String vendorId; // 7x6 (42) bits
 
     /**
+     * Type of electronic position fixing device: 0 = undefined (default) 1 = GPS 2 = GLONASS 3 = combined GPS/GLONASS 4
+     * = Loran-C 5 = Chayka 6 = integrated navigation system 7 = surveyed 8 = Galileo, 9-14 = not used 15 = internal
+     * GNSS
+     */
+    int posType; // 4 bits
+
+    /**
      * Spare bits
      */
-    int spare; // 6 bits
+    int spare; // 2 bits
 
     public AisMessage24() {
         super(24);
@@ -87,7 +94,8 @@ public class AisMessage24 extends AisStaticCommon {
         this.dimStern = (int) binArray.getVal(9);
         this.dimPort = (int) binArray.getVal(6);
         this.dimStarboard = (int) binArray.getVal(6);
-        this.spare = (int) binArray.getVal(6);
+        this.posType = (int) binArray.getVal(4);
+        this.spare = (int) binArray.getVal(2);
     }
 
     @Override
@@ -109,7 +117,8 @@ public class AisMessage24 extends AisStaticCommon {
         encoder.addVal(dimStern, 9);
         encoder.addVal(dimPort, 6);
         encoder.addVal(dimStarboard, 6);
-        encoder.addVal(spare, 6);
+        encoder.addVal(posType, 4);
+        encoder.addVal(spare, 2);
         return encoder;
     }
 
@@ -127,6 +136,14 @@ public class AisMessage24 extends AisStaticCommon {
 
     public void setVendorId(String vendorId) {
         this.vendorId = vendorId;
+    }
+
+    public int getPosType() {
+        return posType;
+    }
+
+    public void setPosType(int posType) {
+        this.posType = posType;
     }
 
     public int getSpare() {
@@ -157,6 +174,8 @@ public class AisMessage24 extends AisStaticCommon {
         builder.append(name);
         builder.append(", shipType=");
         builder.append(shipType);
+        builder.append(", posType=");
+        builder.append(posType);
         builder.append(", spare=");
         builder.append(spare);
         builder.append("]");
