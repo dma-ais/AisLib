@@ -52,6 +52,29 @@ This library is licensed under the Apache License, Version 2.0.
 
 ### Simple read and message handling ###
 
+Reading an **AisMessage** from an sentence in code is easily done with the **Vdm** object whether it it is a single message or multiple.
+
+#####For single messages (AisPositionMessage)
+```java
+String aisSentence = "!AIVDM,1,1,,A,181:Jqh02c1Qra`E46I<@9n@059l,0*30";
+
+Vdm vdm = new Vdm();
+vdm.parse(aisSentence);
+
+AisMessage aisMessage = AisMessage.getInstance(vdm);
+```
+#####For multiple messages (AisMessage5)
+```java
+String aisSentence1 = "!AIVDM,2,1,9,B,53nFBv01SJ<thHp6220H4heHTf2222222222221?50:454o<`9QSlUDp,0*09"; 
+String aisSentence2 = "!AIVDM,2,2,9,B,888888888888880,2*2E";
+
+Vdm vdm = new Vdm();
+vdm.parse(aisSentence1);
+vdm.parse(aisSentence2);
+
+AisMessage aisMessage = AisMessage.getInstance(vdm);
+```
+
 Reading from files or TCP/UDP connections is very simple with AisLib. In the example below messages
 are read from a file.
 
@@ -213,6 +236,70 @@ public void accept(AisMessage aisMessage) {
 ```
 
 [See UML diagram of messages](ais-lib-messages/src/main/doc/ais-messages-diagram.jpg)
+
+####Outputting Human Readable JSON
+AisMessages can be decoded to human readable JSON messages automatically with a single handler.
+```java
+String aisSentence = "!AIVDM,1,1,,A,181:Jqh02c1Qra`E46I<@9n@059l,0*30";
+Decoder decoder = new Decoder(aisSentence);
+String json = decoder.decode();
+``` 
+outputs
+```json
+{
+  "msgId": 1,
+  "repeatDFO": {
+    "ais_value": 0,
+    "decoded_text": "Message has been repeated 0 times"
+  },
+  "userId": 0,
+  "navStatusDFO": {
+    "ais_value": 0,
+    "decoded_text": "Under way using engine"
+  },
+  "rotDFO": {
+    "ais_value": 0,
+    "decoded_text": "Turning right at 0.0 degrees/ min"
+  },
+  "sogDFO": {
+    "ais_value": 171,
+    "decoded_text": "17.1 knots"
+  },
+  "posAccDFO": {
+    "ais_value": 0,
+    "decoded_text": "Low (> 10 m) (default)"
+  },
+  "position": {
+    "latitude": 36.8121133,
+    "longitude": 21.3901667
+  },
+  "cogDFO": {
+    "ais_value": 3136,
+    "decoded_text": "313.6 degrees"
+  },
+  "trueHeadingDFO": {
+    "ais_value": 315,
+    "decoded_text": "315 degrees"
+  },
+  "utcSecDFO": {
+    "ais_value": 8,
+    "decoded_text": "8"
+  },
+  "specialManIndicatorDFO": {
+    "ais_value": 0,
+    "decoded_text": "Not available"
+  },
+  "raimDFO": {
+    "ais_value": 0,
+    "decoded_text": "Raim not in use"
+  },
+  "syncStateDFO": {
+    "ais_value": 0,
+    "decoded_text": "Utc direct"
+  }
+}
+```
+With the decoder you can also pass in any **AisMessage** data type for the same result
 
 ### Multiple sources ###
 
