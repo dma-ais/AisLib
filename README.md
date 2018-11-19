@@ -54,7 +54,7 @@ This library is licensed under the Apache License, Version 2.0.
 
 Reading an **AisMessage** from an sentence in code is easily done with the **Vdm** object whether it it is a single message or multiple.
 
-#####For single messages (AisPositionMessage)
+##### For single messages (AisPositionMessage) #####
 ```java
 String aisSentence = "!AIVDM,1,1,,A,181:Jqh02c1Qra`E46I<@9n@059l,0*30";
 
@@ -63,7 +63,7 @@ vdm.parse(aisSentence);
 
 AisMessage aisMessage = AisMessage.getInstance(vdm);
 ```
-#####For multiple messages (AisMessage5)
+##### For multiple messages (AisMessage5) #####
 ```java
 String aisSentence1 = "!AIVDM,2,1,9,B,53nFBv01SJ<thHp6220H4heHTf2222222222221?50:454o<`9QSlUDp,0*09"; 
 String aisSentence2 = "!AIVDM,2,2,9,B,888888888888880,2*2E";
@@ -237,12 +237,12 @@ public void accept(AisMessage aisMessage) {
 
 [See UML diagram of messages](ais-lib-messages/src/main/doc/ais-messages-diagram.jpg)
 
-####Outputting Human Readable JSON
+#### Outputting Human Readable JSON ####
 AisMessages can be decoded to human readable JSON messages automatically with a single handler.
 ```java
 String aisSentence = "!AIVDM,1,1,,A,181:Jqh02c1Qra`E46I<@9n@059l,0*30";
 Decoder decoder = new Decoder(aisSentence);
-String json = decoder.decode();
+String json = decoder.decode(true);
 ``` 
 outputs
 ```json

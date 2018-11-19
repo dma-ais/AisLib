@@ -27,6 +27,7 @@
 		<module>ais-lib-communication</module>
 		<module>ais-lib-utils</module>
 		<module>ais-lib-cli</module>
+		<module>ais-lib-json</module>
 	</modules>
 
 	<properties>
