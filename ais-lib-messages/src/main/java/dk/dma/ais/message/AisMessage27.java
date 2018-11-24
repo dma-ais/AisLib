@@ -109,6 +109,7 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
         encoder.addVal(this.pos.getRawLatitude(), 17);
         encoder.addVal(sog, 6);
         encoder.addVal(cog, 9);
+        encoder.addVal(gnssPosStatus, 1);
         encoder.addVal(spare, 1);
         return encoder;
     }
