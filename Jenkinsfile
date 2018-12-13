@@ -26,14 +26,15 @@ pipeline {
     }
 
     post {
-        always {
-            archiveArtifacts artifacts: '*.war', onlyIfSuccessful: true
+        success {
+            sh 'curl --data "build=true" -X POST https://registry.hub.docker.com/u/dmadk/ais-store-cli/trigger/a995ad1e-4a4c-11e4-a6f5-dafbef59e66b/'
+            sh 'curl --data "build=true" -X POST https://registry.hub.docker.com/u/dmadk/ais-filedump/trigger/f0eb0638-6378-11e4-aea0-d22c3a4d29af/'
         }
-        failure {
-            // notify users when the Pipeline fails
-            mail to: 'willer@lundogbendsen.dk',
-                    subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
-                    body: "Something is wrong with ${env.BUILD_URL}"
-        }
+//        failure {
+//            // notify users when the Pipeline fails
+//            mail to: 'obo@dma.dk, jtj@dma.dk',
+//                    subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+//                    body: "Something is wrong with ${env.BUILD_URL}"
+//        }
     }
 }
