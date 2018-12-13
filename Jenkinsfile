@@ -19,7 +19,7 @@ pipeline {
         stage('build') {
             steps {
                 withMaven() {
-                    sh 'mvn -e -DincludeSrcJavadocs clean source:jar install'
+                    sh 'mvn -e -DskipTests -DincludeSrcJavadocs clean source:jar install'
                 }
             }
         }
