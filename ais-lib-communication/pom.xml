@@ -53,8 +53,8 @@
   <dependencies>
     <dependency>
       <groupId>net.maritimecloud</groupId>
-      <artifactId>mc-util</artifactId>
-      <version>0.1</version>
+      <artifactId>mc-core</artifactId>
+      <version>0.4-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
