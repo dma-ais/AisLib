@@ -30,6 +30,12 @@ To build
 To run tests
 
 	mvn test
+	
+---	
+
+NOTE: Temporary manual build procedure described here: <https://github.com/dma-ais/AisLib/issues/48#issuecomment-448634262>.
+
+---
 
 ## Developing in Eclipse ##
 
