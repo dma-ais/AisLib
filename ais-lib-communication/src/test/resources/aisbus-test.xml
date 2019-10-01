@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<aisBusConfiguration>
+	<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="duplicateFilterConfiguration">
+		<windowSize>10000</windowSize>
+	</filter>
+	<transformer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="sourceTypeSatTransformerConfiguration">
+		<gh_region>802</gh_region>
+		<gh_region>804</gh_region>
+		<source>ORBCOMM999</source>
+	</transformer>
+	<busPullMaxElements>1000</busPullMaxElements>
+	<busQueueSize>10000</busQueueSize>
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stdoutConsumerConfiguration">
+		<!-- <filter xsi:type="downSampleFilterConfiguration"> -->
+		<!-- <samplingRate>600</samplingRate> -->
+		<!-- </filter> -->
+		<!-- <transformer xsi:type="cropVdmTransformerConfiguration" /> -->
+	</consumer>
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpWriterConsumerConfiguration">
+		<host>localhost</host>
+		<port>8089</port>
+	</consumer>
+	<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerConsumerConfiguration">
+		<consumerPullMaxElements>1000</consumerPullMaxElements>
+		<consumerQueueSize>10000</consumerQueueSize>
+		<serverConf>
+			<maxClients>2</maxClients>
+			<port>9999</port>
+		</serverConf>
+	</consumer>
+	<!-- <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration"> -->
+	<!-- <filter xsi:type="downSampleFilterConfiguration"> -->
+	<!-- <samplingRate>300</samplingRate> -->
+	<!-- </filter> -->
+	<!-- <hostPort>ais163.sealan.dk:65262</hostPort> -->
+	<!-- <reconnectInterval>10</reconnectInterval> -->
+	<!-- <timeout>10</timeout> -->
+	<!-- <transformer xsi:type="taggingTransformerConfiguration"> -->
+	<!-- <extraTags> -->
+	<!-- <entry> -->
+	<!-- <key>key</key> -->
+	<!-- <value>val</value> -->
+	<!-- </entry> -->
+	<!-- </extraTags> -->
+	<!-- <tagPolicy>MERGE_OVERRIDE</tagPolicy> -->
+	<!-- <tagging> -->
+	<!-- <sourceId>AISD</sourceId> -->
+	<!-- <sourceCountry>DNK</sourceCountry> -->
+	<!-- <sourceType>SAT</sourceType> -->
+	<!-- </tagging> -->
+	<!-- </transformer> -->
+	<!-- </provider> -->
+	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpServerProviderConfiguration">
+		<serverConf>
+			<port>9998</port>
+		</serverConf>
+		<clientConf>
+			<gzipCompress>true</gzipCompress>
+		</clientConf>
+	</provider>
+	<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
+		<filename>src/test/resources/replay_dump.txt.gz</filename>
+		<gzip>true</gzip>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="targetCountryFilterConfiguration">
+			<allowed>DNK</allowed>
+			<allowed>SWE</allowed>
+		</filter>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="locationFilterConfiguration">
+			<geometry xsi:type="circleGeometryConfiguration">
+				<lat>55.7</lat>
+				<lon>12.6</lon>
+				<radius>200000</radius>
+			</geometry>
+		</filter>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="messageTypeFilterConfiguration">
+			<disallowed>true</disallowed>
+			<message_type>6</message_type>
+			<message_type>8</message_type>
+		</filter>
+		<transformer xsi:type="replayTransformConfiguration">
+			<speedup>10.0</speedup>
+		</transformer>
+		<transformer xsi:type="taggingTransformerConfiguration">
+			<tagPolicy>PREPEND_MISSING</tagPolicy>
+			<tagging>
+				<sourceId>replay</sourceId>
+				<sourceType>LIVE</sourceType>
+			</tagging>
+			<extraTags>
+				<entry>
+					<key>file</key>
+					<value>replay_dump.txt.gz</value>
+				</entry>
+			</extraTags>
+		</transformer>
+	</provider>
+</aisBusConfiguration>
