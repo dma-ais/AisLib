@@ -20,6 +20,11 @@ package dk.dma.ais.message;
  */
 public interface INameMessage {
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     String getName();
 
 }

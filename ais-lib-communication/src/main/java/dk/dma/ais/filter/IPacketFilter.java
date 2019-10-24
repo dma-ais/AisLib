@@ -23,6 +23,12 @@ import dk.dma.ais.packet.AisPacket;
 @ThreadSafe
 public interface IPacketFilter {
 
+    /**
+     * Rejected by filter boolean.
+     *
+     * @param packet the packet
+     * @return the boolean
+     */
     boolean rejectedByFilter(AisPacket packet);
 
 }

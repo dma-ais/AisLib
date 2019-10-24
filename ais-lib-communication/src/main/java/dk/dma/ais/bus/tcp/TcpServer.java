@@ -35,29 +35,44 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
 
     private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
 
+    /**
+     * The Server socket.
+     */
     protected final AtomicReference<ServerSocket> serverSocket = new AtomicReference<>();
 
+    /**
+     * The Server conf.
+     */
     protected TcpServerConf serverConf = new TcpServerConf();
+    /**
+     * The Client conf.
+     */
     protected TcpClientConf clientConf = new TcpClientConf();
 
     private Semaphore semaphore;
+    /**
+     * The Clients.
+     */
     protected final Set<TcpClient> clients = Collections.newSetFromMap(new ConcurrentHashMap<TcpClient, Boolean>());
 
+    /**
+     * Instantiates a new Tcp server.
+     */
     public TcpServer() {
     }
 
     /**
      * Inheriting classes must be able to provide a new client
-     * 
-     * @param socket
-     * @return
+     *
+     * @param socket the socket
+     * @return tcp client
      */
     protected abstract TcpClient newClient(Socket socket);
 
     /**
      * Clients notify them self when they are done
      * 
-     * @param client
+     * @param client tcpclient
      */
     @Override
     public void clientStopped(TcpClient client) {
@@ -121,7 +136,10 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
         LOG.info("Stopped");
 
     }
-    
+
+    /**
+     * Cancel.
+     */
     public void cancel() {
         this.interrupt();
         if (serverSocket.get() != null) {
@@ -137,22 +155,47 @@ public abstract class TcpServer extends Thread implements IClientStoppedListener
         }
     }
 
+    /**
+     * Gets client conf.
+     *
+     * @return the client conf
+     */
     public TcpClientConf getClientConf() {
         return clientConf;
     }
 
+    /**
+     * Sets client conf.
+     *
+     * @param clientConf the client conf
+     */
     public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
     }
 
+    /**
+     * Gets server conf.
+     *
+     * @return the server conf
+     */
     public TcpServerConf getServerConf() {
         return serverConf;
     }
 
+    /**
+     * Sets server conf.
+     *
+     * @param serverConf the server conf
+     */
     public void setServerConf(TcpServerConf serverConf) {
         this.serverConf = serverConf;
     }
-    
+
+    /**
+     * Gets clients.
+     *
+     * @return the clients
+     */
     public Set<TcpClient> getClients() {
         return clients;
     }

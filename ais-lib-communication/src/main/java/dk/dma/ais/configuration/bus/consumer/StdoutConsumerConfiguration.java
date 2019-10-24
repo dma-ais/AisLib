@@ -20,9 +20,15 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.consumer.StdoutConsumer;
 
+/**
+ * The type Stdout consumer configuration.
+ */
 @XmlRootElement
 public class StdoutConsumerConfiguration extends AisBusConsumerConfiguration {
-    
+
+    /**
+     * Instantiates a new Stdout consumer configuration.
+     */
     public StdoutConsumerConfiguration() {
         
     }

@@ -32,6 +32,12 @@ public class CommentBlockLine {
     private String groupId;
     private int checksum;
 
+    /**
+     * Parse.
+     *
+     * @param line the line
+     * @throws CommentBlockException the comment block exception
+     */
     public void parse(String line) throws CommentBlockException {
         parameterMap = new HashMap<>();
         int start = -1;
@@ -125,18 +131,38 @@ public class CommentBlockLine {
         }
     }
 
+    /**
+     * Gets total lines.
+     *
+     * @return the total lines
+     */
     public Integer getTotalLines() {
         return totalLines;
     }
 
+    /**
+     * Gets line number.
+     *
+     * @return the line number
+     */
     public Integer getLineNumber() {
         return lineNumber;
     }
 
+    /**
+     * Gets group id.
+     *
+     * @return the group id
+     */
     public String getGroupId() {
         return groupId;
     }
 
+    /**
+     * Gets parameter map.
+     *
+     * @return the parameter map
+     */
     public Map<String, String> getParameterMap() {
         return parameterMap;
     }

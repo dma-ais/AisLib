@@ -25,10 +25,9 @@ import dk.dma.ais.message.AisMessage;
 
 /**
  * A doublet filter.
- * 
+ * <p>
  * The doublet filter works by only allowing the same message through once in a time window. The six bit string of the message is
  * used as unique identifier.
- * 
  */
 @ThreadSafe
 public class DuplicateFilter extends MessageFilterBase {
@@ -55,14 +54,16 @@ public class DuplicateFilter extends MessageFilterBase {
      */
     private volatile long cleanupAge;
 
+    /**
+     * Instantiates a new Duplicate filter.
+     */
     public DuplicateFilter() {
     }
 
     /**
      * Constructor given window size
-     * 
-     * @param window
-     *            size in milliseconds
+     *
+     * @param windowSize the window size
      */
     public DuplicateFilter(long windowSize) {
         this.windowSize = windowSize;
@@ -117,10 +118,20 @@ public class DuplicateFilter extends MessageFilterBase {
         return false;
     }
 
+    /**
+     * Gets window size.
+     *
+     * @return the window size
+     */
     public long getWindowSize() {
         return windowSize;
     }
 
+    /**
+     * Sets window size.
+     *
+     * @param windowSize the window size
+     */
     public void setWindowSize(long windowSize) {
         this.windowSize = windowSize;
     }
@@ -133,6 +144,12 @@ public class DuplicateFilter extends MessageFilterBase {
         private String sixbit;
         private long received;
 
+        /**
+         * Instantiates a new Doublet entry.
+         *
+         * @param sixbit   the sixbit
+         * @param received the received
+         */
         public DoubletEntry(String sixbit, long received) {
             this.sixbit = sixbit;
             this.received = received;
@@ -146,10 +163,20 @@ public class DuplicateFilter extends MessageFilterBase {
             return sixbit.compareTo(doubletEntry.sixbit);
         }
 
+        /**
+         * Gets received.
+         *
+         * @return the received
+         */
         public long getReceived() {
             return received;
         }
 
+        /**
+         * Gets sixbit.
+         *
+         * @return the sixbit
+         */
         public String getSixbit() {
             return sixbit;
         }

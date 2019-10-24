@@ -18,17 +18,25 @@ package dk.dma.ais.filter;
 import dk.dma.ais.packet.AisPacket;
 
 /**
- * @author Jens Tuxen
+ * The type Future filter.
  *
- * Reject packets with timestamp in the future according to device clock
+ * @author Jens Tuxen Reject packets with timestamp in the future according to device clock
  */
 public class FutureFilter implements IPacketFilter {
     private final long threshold;
-    
+
+    /**
+     * Instantiates a new Future filter.
+     */
     public FutureFilter() {
         threshold = 60000;
     }
-    
+
+    /**
+     * Instantiates a new Future filter.
+     *
+     * @param threshold the threshold
+     */
     public FutureFilter(long threshold) {
         this.threshold = threshold;
     }

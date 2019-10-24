@@ -26,6 +26,13 @@ public class AisUnsupportedMessageType extends AisMessage {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Ais unsupported message type.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisUnsupportedMessageType(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse(vdm.getBinArray());

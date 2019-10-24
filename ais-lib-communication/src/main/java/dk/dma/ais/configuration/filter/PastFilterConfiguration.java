@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.PastFilter;
 
+/**
+ * The type Past filter configuration.
+ */
 @XmlRootElement
 public class PastFilterConfiguration extends FilterConfiguration {
 
@@ -29,10 +32,18 @@ public class PastFilterConfiguration extends FilterConfiguration {
      */
     private long threshold = 24*60*60*1000;
 
+    /**
+     * Instantiates a new Past filter configuration.
+     */
     public PastFilterConfiguration() {
 
     }
 
+    /**
+     * Instantiates a new Past filter configuration.
+     *
+     * @param threshold the threshold
+     */
     public PastFilterConfiguration(long threshold) {
         this.threshold = threshold;
     }

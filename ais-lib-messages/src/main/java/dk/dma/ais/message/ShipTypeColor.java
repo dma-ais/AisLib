@@ -21,16 +21,42 @@ import java.util.HashMap;
 import static java.util.Objects.requireNonNull;
 
 /**
+ * The enum Ship type color.
+ *
  * @author Kasper Nielsen
  */
 public enum ShipTypeColor {
+    /**
+     * Blue ship type color.
+     */
     BLUE(ShipType.PASSENGER),
+    /**
+     * Grey ship type color.
+     */
     GREY(ShipType.UNDEFINED, ShipType.UNKNOWN),
+    /**
+     * Green ship type color.
+     */
     GREEN(ShipType.CARGO),
+    /**
+     * Orange ship type color.
+     */
     ORANGE(ShipType.FISHING),
+    /**
+     * Purple ship type color.
+     */
     PURPLE(ShipType.SAILING, ShipType.PLEASURE),
+    /**
+     * Red ship type color.
+     */
     RED(ShipType.TANKER),
+    /**
+     * Turquoise ship type color.
+     */
     TURQUOISE,
+    /**
+     * Yellow ship type color.
+     */
     YELLOW(ShipType.HSC, ShipType.WIG);
 
     private static final HashMap<ShipType, ShipTypeColor> REVERSE_LOOKUP = new HashMap<>();
@@ -48,10 +74,21 @@ public enum ShipTypeColor {
         this.shipTypes = shipTypes;
     }
 
+    /**
+     * Get ship types ship type [ ].
+     *
+     * @return the ship type [ ]
+     */
     public ShipType[] getShipTypes() {
         return shipTypes;
     }
 
+    /**
+     * Gets color.
+     *
+     * @param type the type
+     * @return the color
+     */
     public static ShipTypeColor getColor(ShipType type) {
         ShipTypeColor c = REVERSE_LOOKUP.get(requireNonNull(type));
         return c == null ? ShipTypeColor.TURQUOISE : c;

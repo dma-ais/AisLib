@@ -47,7 +47,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Takes care of backing up and restoring in case of a crash.
- * 
+ *
  * @author Kasper Nielsen
  */
 public class TargetTrackerFileBackupService extends AbstractScheduledService {
@@ -58,6 +58,9 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
     /** The folder to backup files to. */
     private final Path backupFolder;
 
+    /**
+     * The F.
+     */
     BackupFile f;
 
     /** A random string appended to each backup file. To distinguish them from backup files created by former runs. */
@@ -74,16 +77,20 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
     /**
      * Creates a new backup service.
      *
-     * @param tracker
-     *            the target tracker that we are make backups and restoring from
-     * @param backupFolder
-     *            the folder to backup and restore from
+     * @param tracker      the target tracker that we are make backups and restoring from
+     * @param backupFolder the folder to backup and restore from
      */
     public TargetTrackerFileBackupService(dk.dma.ais.tracker.targetTracker.TargetTracker tracker, Path backupFolder) {
         this.tracker = requireNonNull(tracker);
         this.backupFolder = requireNonNull(backupFolder);
     }
 
+    /**
+     * Restore backup files.
+     *
+     * @throws IOException            the io exception
+     * @throws ClassNotFoundException the class not found exception
+     */
     void restoreBackupFiles() throws IOException, ClassNotFoundException {
         List<Path> paths = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(backupFolder)) {
@@ -200,11 +207,22 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
         }
     }
 
-    /** Wrapping the versioning */
+    /**
+     * Wrapping the versioning
+     */
     static class BackupFile {
+        /**
+         * The Major backup version.
+         */
         final int majorBackupVersion;
+        /**
+         * The Minor backup version.
+         */
         final int minorBackupVersion;
 
+        /**
+         * Instantiates a new Backup file.
+         */
         BackupFile() {
             this(1, 0);
         }
@@ -214,18 +232,40 @@ public class TargetTrackerFileBackupService extends AbstractScheduledService {
             this.minorBackupVersion = minor;
         }
 
+        /**
+         * Is full boolean.
+         *
+         * @return the boolean
+         */
         boolean isFull() {
             return minorBackupVersion == 0;
         }
 
+        /**
+         * Next backup file.
+         *
+         * @return the backup file
+         */
         BackupFile next() {
             return minorBackupVersion == 99 ? nextFull() : new BackupFile(majorBackupVersion, minorBackupVersion + 1);
         }
 
+        /**
+         * Next full backup file.
+         *
+         * @return the backup file
+         */
         BackupFile nextFull() {
             return new BackupFile((majorBackupVersion + 1) % 100000, 0);
         }
 
+        /**
+         * To path path.
+         *
+         * @param directory the directory
+         * @param prefix    the prefix
+         * @return the path
+         */
         Path toPath(Path directory, String prefix) {
             return directory.resolve("aisviewer_backup-" + prefix + "-"
                     + new DecimalFormat("00000").format(majorBackupVersion) + "-"

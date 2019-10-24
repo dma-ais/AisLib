@@ -25,9 +25,8 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 4
- * 
+ * <p>
  * Ship static and voyage related data as defined by ITU-R M.1371-4
- * 
  */
 public class AisMessage5 extends AisStaticCommon {
 
@@ -68,9 +67,8 @@ public class AisMessage5 extends AisStaticCommon {
 
     /**
      * Ship Destination: Maximum 20 characters using 6-bit ASCII;
-     * 
-     * @@@@@@@@@@@@@@@@@@@@ = not available For SAR aircraft, the use of this field may be decided by the responsible
-     *                      administration
+     *
+     * {@code @@@@@@@@@@@@@@@@@@@@} = not available For SAR aircraft, the use of this field may be decided by the responsible                      administration
      */
     String dest; // 6x20 (120) bits
 
@@ -84,15 +82,31 @@ public class AisMessage5 extends AisStaticCommon {
      */
     int spare; // 1 bit : spare
 
+    /**
+     * Instantiates a new Ais message 5.
+     */
     public AisMessage5() {
         super(5);
     }
 
+    /**
+     * Instantiates a new Ais message 5.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage5(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() < 424) {
@@ -139,38 +153,73 @@ public class AisMessage5 extends AisStaticCommon {
         return encoder;
     }
 
+    /**
+     * Gets version.
+     *
+     * @return the version
+     */
     public int getVersion() {
         return version;
     }
 
+    /**
+     * Sets version.
+     *
+     * @param version the version
+     */
     public void setVersion(int version) {
         this.version = version;
     }
 
+    /**
+     * Gets imo.
+     *
+     * @return the imo
+     */
     public long getImo() {
         return imo;
     }
 
+    /**
+     * Sets imo.
+     *
+     * @param imo the imo
+     */
     public void setImo(long imo) {
         this.imo = imo;
     }
 
+    /**
+     * Gets pos type.
+     *
+     * @return the pos type
+     */
     public int getPosType() {
         return posType;
     }
 
+    /**
+     * Sets pos type.
+     *
+     * @param posType the pos type
+     */
     public void setPosType(int posType) {
         this.posType = posType;
     }
 
+    /**
+     * Gets eta.
+     *
+     * @return the eta
+     */
     public long getEta() {
         return eta;
     }
 
     /**
      * Get ETA as date object
-     * 
-     * @return date
+     *
+     * @return date eta date
      */
     public Date getEtaDate() {
         int min = (int) (eta & 0x3F);
@@ -193,38 +242,83 @@ public class AisMessage5 extends AisStaticCommon {
         return cal.getTime();
     }
 
+    /**
+     * Sets eta.
+     *
+     * @param eta the eta
+     */
     public void setEta(long eta) {
         this.eta = eta;
     }
 
+    /**
+     * Gets draught.
+     *
+     * @return the draught
+     */
     public int getDraught() {
         return draught;
     }
 
+    /**
+     * Sets draught.
+     *
+     * @param draught the draught
+     */
     public void setDraught(int draught) {
         this.draught = draught;
     }
 
+    /**
+     * Gets dest.
+     *
+     * @return the dest
+     */
     public String getDest() {
         return dest;
     }
 
+    /**
+     * Sets dest.
+     *
+     * @param dest the dest
+     */
     public void setDest(String dest) {
         this.dest = dest;
     }
 
+    /**
+     * Gets dte.
+     *
+     * @return the dte
+     */
     public int getDte() {
         return dte;
     }
 
+    /**
+     * Sets dte.
+     *
+     * @param dte the dte
+     */
     public void setDte(int dte) {
         this.dte = dte;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }

@@ -21,6 +21,8 @@ import net.jcip.annotations.ThreadSafe;
 
 /**
  * Thread class to read from a message queue and delegating to a handler
+ *
+ * @param <T> the type parameter
  */
 @ThreadSafe
 public class MessageQueueReader<T> extends Thread {
@@ -29,10 +31,23 @@ public class MessageQueueReader<T> extends Thread {
     private final IMessageQueue<T> queue;
     private final int pullMaxElements;
 
+    /**
+     * Instantiates a new Message queue reader.
+     *
+     * @param handler the handler
+     * @param queue   the queue
+     */
     public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue) {
         this(handler, queue, 1);
     }
 
+    /**
+     * Instantiates a new Message queue reader.
+     *
+     * @param handler         the handler
+     * @param queue           the queue
+     * @param pullMaxElements the pull max elements
+     */
     public MessageQueueReader(IQueueEntryHandler<T> handler, IMessageQueue<T> queue, int pullMaxElements) {
         this.handler = handler;
         this.queue = queue;
@@ -57,14 +72,27 @@ public class MessageQueueReader<T> extends Thread {
         
     }
 
+    /**
+     * Gets queue.
+     *
+     * @return the queue
+     */
     public IMessageQueue<T> getQueue() {
         return queue;
     }
-    
+
+    /**
+     * Gets handler.
+     *
+     * @return the handler
+     */
     public IQueueEntryHandler<T> getHandler() {
         return handler;
     }
-    
+
+    /**
+     * Cancel.
+     */
     public void cancel() {
         this.interrupt();
     }

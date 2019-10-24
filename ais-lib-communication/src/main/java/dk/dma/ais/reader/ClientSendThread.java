@@ -19,29 +19,56 @@ import java.util.function.Consumer;
 
 /**
  * Thread for clients to use for sending. E.g.
- * 
+ * <p>
  * AisReader aisReader = new AisReader(...); aisReader.start();
- * 
+ * <p>
  * SendRequest sendRequest = new SendRequest(...);
- * 
+ * <p>
  * ClientSendThread client = new ClientSendThread(aisReader, sendRequest); client.send();
- * 
+ * <p>
  * client.isSuccess();
- * 
  */
 class ClientSendThread extends Thread implements Consumer<Abk> {
 
+    /**
+     * The Ais reader.
+     */
     protected AisReader aisReader;
+    /**
+     * The Send request.
+     */
     protected SendRequest sendRequest;
+    /**
+     * The Abk.
+     */
     protected Abk abk;
+    /**
+     * The Abk received.
+     */
     protected boolean abkReceived;
+    /**
+     * The Timeout.
+     */
     protected long timeout = 60000; // 60 sec default
 
+    /**
+     * Instantiates a new Client send thread.
+     *
+     * @param aisReader   the ais reader
+     * @param sendRequest the send request
+     */
     public ClientSendThread(AisReader aisReader, SendRequest sendRequest) {
         this.aisReader = aisReader;
         this.sendRequest = sendRequest;
     }
 
+    /**
+     * Send abk.
+     *
+     * @return the abk
+     * @throws SendException        the send exception
+     * @throws InterruptedException the interrupted exception
+     */
     public Abk send() throws SendException, InterruptedException {
         // Send message
         aisReader.send(sendRequest, this);
@@ -94,18 +121,38 @@ class ClientSendThread extends Thread implements Consumer<Abk> {
         }
     }
 
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
     public long getTimeout() {
         return timeout;
     }
 
+    /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
 
+    /**
+     * Gets abk.
+     *
+     * @return the abk
+     */
     public Abk getAbk() {
         return abk;
     }
 
+    /**
+     * Gets abk result.
+     *
+     * @return the abk result
+     */
     public Abk.Result getAbkResult() {
         synchronized (this) {
             if (abkReceived) {
@@ -115,6 +162,11 @@ class ClientSendThread extends Thread implements Consumer<Abk> {
         return null;
     }
 
+    /**
+     * Is success boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSuccess() {
         synchronized (this) {
             if (!abkReceived) {

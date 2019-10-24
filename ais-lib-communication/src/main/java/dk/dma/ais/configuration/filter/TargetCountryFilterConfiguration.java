@@ -23,20 +23,36 @@ import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.TargetCountryFilter;
 import dk.dma.enav.model.Country;
 
+/**
+ * The type Target country filter configuration.
+ */
 @XmlRootElement
 public class TargetCountryFilterConfiguration extends FilterConfiguration {
     
     private HashSet<String> allowedCountries = new HashSet<>();
-    
+
+    /**
+     * Instantiates a new Target country filter configuration.
+     */
     public TargetCountryFilterConfiguration() {
         
     }
-    
+
+    /**
+     * Gets allowed countries.
+     *
+     * @return the allowed countries
+     */
     @XmlElement(name = "allowed")
     public HashSet<String> getAllowedCountries() {
         return allowedCountries;
     }
-    
+
+    /**
+     * Sets allowed countries.
+     *
+     * @param allowedCountries the allowed countries
+     */
     public void setAllowedCountries(HashSet<String> allowedCountries) {
         this.allowedCountries = allowedCountries;
     }

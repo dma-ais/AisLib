@@ -24,16 +24,32 @@ public class OverflowLogger {
     private long lastLogging;
     private final long interval;
     private final Logger logger;
-    
+
+    /**
+     * Instantiates a new Overflow logger.
+     *
+     * @param logger the logger
+     */
     public OverflowLogger(Logger logger) {
         this(logger, 10000);
     }
 
+    /**
+     * Instantiates a new Overflow logger.
+     *
+     * @param logger   the logger
+     * @param interval the interval
+     */
     public OverflowLogger(Logger logger, long interval) {
         this.logger = logger;
         this.interval = interval;
     }
-    
+
+    /**
+     * Log.
+     *
+     * @param message the message
+     */
     public void log(String message) {
         long now = System.currentTimeMillis();
         if (now - lastLogging > interval) {

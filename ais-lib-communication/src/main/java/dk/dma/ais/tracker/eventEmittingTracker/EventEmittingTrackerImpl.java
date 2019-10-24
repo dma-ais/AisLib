@@ -61,17 +61,20 @@ import static java.time.temporal.ChronoUnit.SECONDS;
  * EventEmittingTracker is a tracker which receives a (potentially never-ending) series of AisPackets. It uses these
  * to maintain in-memory a complete state of the "situation" (e.g. positions, speeds, static information,
  * and historic movements) of the targets it has detected.
- *
+ * <p>
  * The tracker will emit events to its subscribes when certain tracking related events occur. Examples of such
  * events are cell changes (a target entered a new grid cell), position changes, track goes stale (has not been
  * updated for a duration of time), heart beats (TimeEvents).
- *
+ * <p>
  * The heart beat mechanism is based on timestamps from the data stream and therefore quite unprecise.
  * Significant slack must be expected.
  */
 @ThreadSafe
 public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
+    /**
+     * The Log.
+     */
     static final Logger LOG = LoggerFactory.getLogger(EventEmittingTrackerImpl.class);
     {
         LOG.info(this.getClass().getSimpleName() + " created (" + this + ").");
@@ -79,14 +82,29 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
     private final EventBus eventBus = new EventBus();
 
+    /**
+     * The Tracks.
+     */
     @GuardedBy("tracksLock")
     final HashMap<Integer, Track> tracks = new HashMap<>(256);
     private final Lock tracksLock = new ReentrantLock();
 
+    /**
+     * The Grid.
+     */
     final Grid grid;
 
+    /**
+     * The Track stale millis.
+     */
     static final long TRACK_STALE_MILLIS = Duration.of(30, MINUTES).toMillis();
+    /**
+     * The Track interpolation required millis.
+     */
     static final long TRACK_INTERPOLATION_REQUIRED_MILLIS = Duration.of(30, SECONDS).toMillis();
+    /**
+     * The Interpolation time step millis.
+     */
     static final long INTERPOLATION_TIME_STEP_MILLIS = Duration.of(10, SECONDS).toMillis();
 
     /**
@@ -122,7 +140,8 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
     /**
      * Initialize the tracker.
-     * @param grid
+     *
+     * @param grid the grid
      */
     public EventEmittingTrackerImpl(Grid grid) {
         this(grid, null);
@@ -130,7 +149,9 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
     /**
      * Initialize the tracker.
-     * @param grid
+     *
+     * @param grid             the grid
+     * @param blackListedMmsis the black listed mmsis
      */
     public EventEmittingTrackerImpl(Grid grid, int... blackListedMmsis) {
         this.grid = grid;
@@ -164,6 +185,12 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         return track;
     }
 
+    /**
+     * Update.
+     *
+     * @param timeOfCurrentUpdate the time of current update
+     * @param aisMessage          the ais message
+     */
     void update(long timeOfCurrentUpdate, AisMessage aisMessage) {
         performUpdate(timeOfCurrentUpdate, aisMessage, track -> track.update(timeOfCurrentUpdate, aisMessage));
     }
@@ -283,7 +310,7 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
     /**
      * Calculate a map of <timestamp, Position>-pairs which are interpolated positions at regular, fixed time-intervals
      * between the two positions p1 and p2 known at time t1 and t2 respectively.
-     *
+     * <p>
      * The set of interpolated positions contains positions up to - but not including - t2/p2.
      *
      * @param pt1 The first of the two positions to interpolate between.
@@ -308,6 +335,14 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         return interpolatedPositions;
     }
 
+    /**
+     * Is track stale boolean.
+     *
+     * @param lastAnyUpdate      the last any update
+     * @param lastPositionUpdate the last position update
+     * @param currentUpdate      the current update
+     * @return the boolean
+     */
     static boolean isTrackStale(long lastAnyUpdate, long lastPositionUpdate, long currentUpdate) {
         long lastUpdate = Math.max(lastAnyUpdate, lastPositionUpdate);
         boolean trackStale = lastUpdate > 0L && currentUpdate - lastUpdate >= TRACK_STALE_MILLIS;
@@ -317,6 +352,13 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
         return trackStale;
     }
 
+    /**
+     * Is interpolation required boolean.
+     *
+     * @param lastPositionUpdate    the last position update
+     * @param currentPositionUpdate the current position update
+     * @return the boolean
+     */
     static boolean isInterpolationRequired(long lastPositionUpdate, long currentPositionUpdate) {
         return lastPositionUpdate > 0L && currentPositionUpdate - lastPositionUpdate >= TRACK_INTERPOLATION_REQUIRED_MILLIS;
     }
@@ -349,6 +391,8 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
     /**
      * {@inheritDoc}
+     *
+     * @param event the event
      */
     @Subscribe
     @SuppressWarnings("unused")
@@ -365,6 +409,8 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
     /**
      * {@inheritDoc}
+     *
+     * @return the tracks
      */
     public Collection<Track> getTracks() {
         tracksLock.lock();
@@ -394,6 +440,8 @@ public class EventEmittingTrackerImpl implements EventEmittingTracker {
 
     /**
      * {@inheritDoc}
+     *
+     * @return the number of tracks
      * @deprecated Use #size() instead
      */
     public int getNumberOfTracks() {

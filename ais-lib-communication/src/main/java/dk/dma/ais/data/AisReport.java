@@ -26,49 +26,109 @@ public abstract class AisReport implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The Mmsi.
+     */
     protected long mmsi;
+    /**
+     * The Received.
+     */
     protected Date received;
+    /**
+     * The Source timestamp.
+     */
     protected Date sourceTimestamp;
+    /**
+     * The Created.
+     */
     protected Date created;
 
+    /**
+     * Instantiates a new Ais report.
+     */
     public AisReport() {
         this.created = new Date();
     }
 
+    /**
+     * Update.
+     *
+     * @param aisMessage the ais message
+     */
     public void update(AisMessage aisMessage) {
         this.mmsi = aisMessage.getUserId();
         this.received = new Date();
         this.sourceTimestamp = aisMessage.getVdm().getTimestamp();
     }
 
+    /**
+     * Gets received.
+     *
+     * @return the received
+     */
     public Date getReceived() {
         return received;
     }
 
+    /**
+     * Sets received.
+     *
+     * @param received the received
+     */
     public void setReceived(Date received) {
         this.received = received;
     }
 
+    /**
+     * Gets source timestamp.
+     *
+     * @return the source timestamp
+     */
     public Date getSourceTimestamp() {
         return sourceTimestamp;
     }
 
+    /**
+     * Sets source timestamp.
+     *
+     * @param sourceTimestamp the source timestamp
+     */
     public void setSourceTimestamp(Date sourceTimestamp) {
         this.sourceTimestamp = sourceTimestamp;
     }
 
+    /**
+     * Gets created.
+     *
+     * @return the created
+     */
     public Date getCreated() {
         return created;
     }
 
+    /**
+     * Sets created.
+     *
+     * @param created the created
+     */
     public void setCreated(Date created) {
         this.created = created;
     }
 
+    /**
+     * Gets mmsi.
+     *
+     * @return the mmsi
+     */
     public long getMmsi() {
         return mmsi;
     }
 
+    /**
+     * Sets mmsi.
+     *
+     * @param mmsi the mmsi
+     */
     public void setMmsi(long mmsi) {
         this.mmsi = mmsi;
     }

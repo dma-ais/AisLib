@@ -20,12 +20,32 @@ package dk.dma.ais.message;
  */
 public interface IDimensionMessage {
 
+    /**
+     * Gets dim bow.
+     *
+     * @return the dim bow
+     */
     int getDimBow();
 
+    /**
+     * Gets dim stern.
+     *
+     * @return the dim stern
+     */
     int getDimStern();
 
+    /**
+     * Gets dim port.
+     *
+     * @return the dim port
+     */
     int getDimPort();
 
+    /**
+     * Gets dim starboard.
+     *
+     * @return the dim starboard
+     */
     int getDimStarboard();
 
 }

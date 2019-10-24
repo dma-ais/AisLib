@@ -18,14 +18,16 @@ import net.jcip.annotations.ThreadSafe;
 
 /**
  * Interface to implement for classes wanting to handle messages from a MessageQueue
+ *
+ * @param <T> the type parameter
  */
 @ThreadSafe
 public interface IQueueEntryHandler<T> {
 
     /**
      * Method which to be called when delivering queue entry
-     * 
-     * @param queueEntry
+     *
+     * @param queueEntry the queue entry
      */
     void receive(T queueEntry);
 

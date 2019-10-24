@@ -25,7 +25,12 @@ import java.util.function.Consumer;
 public class TcpReadServer extends TcpServer {
     
     private final Consumer<AisPacket> packetConsumer;
-    
+
+    /**
+     * Instantiates a new Tcp read server.
+     *
+     * @param packetConsumer the packet consumer
+     */
     public TcpReadServer(Consumer<AisPacket> packetConsumer) {
         super();
         this.packetConsumer = packetConsumer;

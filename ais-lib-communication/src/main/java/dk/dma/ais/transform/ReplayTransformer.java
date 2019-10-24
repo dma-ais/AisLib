@@ -34,10 +34,18 @@ public class ReplayTransformer implements IAisPacketTransformer {
     @GuardedBy("this")
     private Long epochReplay;
 
+    /**
+     * Instantiates a new Replay transformer.
+     */
     public ReplayTransformer() {
 
     }
 
+    /**
+     * Instantiates a new Replay transformer.
+     *
+     * @param speedup the speedup
+     */
     public ReplayTransformer(double speedup) {
         this.speedup = speedup;
     }
@@ -90,8 +98,8 @@ public class ReplayTransformer implements IAisPacketTransformer {
 
     /**
      * Fractional speedup to use
-     * 
-     * @param speedup
+     *
+     * @param speedup the speedup
      */
     public synchronized void setSpeedup(double speedup) {
         this.speedup = speedup;

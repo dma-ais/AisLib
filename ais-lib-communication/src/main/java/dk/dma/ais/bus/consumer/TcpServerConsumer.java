@@ -28,6 +28,9 @@ public class TcpServerConsumer extends AisBusConsumer {
 
     private final TcpWriteServer server = new TcpWriteServer();
 
+    /**
+     * Instantiates a new Tcp server consumer.
+     */
     public TcpServerConsumer() {
 
     }
@@ -60,15 +63,30 @@ public class TcpServerConsumer extends AisBusConsumer {
     public void receiveFiltered(AisBusElement queueElement) {
         server.send(queueElement.getPacket().getStringMessage());
     }
-    
+
+    /**
+     * Sets client conf.
+     *
+     * @param clientConf the client conf
+     */
     public void setClientConf(TcpClientConf clientConf) {
         server.setClientConf(clientConf);        
     }
-    
+
+    /**
+     * Sets server conf.
+     *
+     * @param serverConf the server conf
+     */
     public void setServerConf(TcpServerConf serverConf) {
         server.setServerConf(serverConf);
     }
-    
+
+    /**
+     * Gets server.
+     *
+     * @return the server
+     */
     public TcpServer getServer() {
         return server;
     }

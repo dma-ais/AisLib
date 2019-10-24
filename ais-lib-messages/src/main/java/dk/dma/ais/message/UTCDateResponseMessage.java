@@ -26,9 +26,8 @@ import java.util.TimeZone;
 
 /**
  * AIS message 4
- * 
+ * <p>
  * Base station report as defined by ITU-R M.1371-4
- * 
  */
 public abstract class UTCDateResponseMessage extends AisMessage implements IPositionMessage {
 
@@ -52,15 +51,33 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
     private int slotTimeout; // 3 bits : SOTDMA Slot Timeout
     private int subMessage; // 14 bits : SOTDMA sub-message
 
+    /**
+     * Instantiates a new Utc date response message.
+     *
+     * @param msgId the msg id
+     */
     protected UTCDateResponseMessage(int msgId) {
         super(msgId);
     }
 
+    /**
+     * Instantiates a new Utc date response message.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public UTCDateResponseMessage(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() != 168) {
@@ -112,54 +129,119 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
         return encoder;
     }
 
+    /**
+     * Gets utc year.
+     *
+     * @return the utc year
+     */
     public int getUtcYear() {
         return utcYear;
     }
 
+    /**
+     * Sets utc year.
+     *
+     * @param utcYear the utc year
+     */
     public void setUtcYear(int utcYear) {
         this.utcYear = utcYear;
     }
 
+    /**
+     * Gets utc month.
+     *
+     * @return the utc month
+     */
     public int getUtcMonth() {
         return utcMonth;
     }
 
+    /**
+     * Sets utc month.
+     *
+     * @param utcMonth the utc month
+     */
     public void setUtcMonth(int utcMonth) {
         this.utcMonth = utcMonth;
     }
 
+    /**
+     * Gets utc day.
+     *
+     * @return the utc day
+     */
     public int getUtcDay() {
         return utcDay;
     }
 
+    /**
+     * Sets utc day.
+     *
+     * @param utcDay the utc day
+     */
     public void setUtcDay(int utcDay) {
         this.utcDay = utcDay;
     }
 
+    /**
+     * Gets utc hour.
+     *
+     * @return the utc hour
+     */
     public int getUtcHour() {
         return utcHour;
     }
 
+    /**
+     * Sets utc hour.
+     *
+     * @param utcHour the utc hour
+     */
     public void setUtcHour(int utcHour) {
         this.utcHour = utcHour;
     }
 
+    /**
+     * Gets utc minute.
+     *
+     * @return the utc minute
+     */
     public int getUtcMinute() {
         return utcMinute;
     }
 
+    /**
+     * Sets utc minute.
+     *
+     * @param utcMinute the utc minute
+     */
     public void setUtcMinute(int utcMinute) {
         this.utcMinute = utcMinute;
     }
 
+    /**
+     * Gets utc second.
+     *
+     * @return the utc second
+     */
     public int getUtcSecond() {
         return utcSecond;
     }
 
+    /**
+     * Sets utc second.
+     *
+     * @param utcSecond the utc second
+     */
     public void setUtcSecond(int utcSecond) {
         this.utcSecond = utcSecond;
     }
 
+    /**
+     * Gets date.
+     *
+     * @return the date
+     */
     public Date getDate() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, getUtcYear());
@@ -176,6 +258,11 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
         return posAcc;
     }
 
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
     }
@@ -190,19 +277,36 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
         return pos;
     }
 
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
     public void setPos(AisPosition pos) {
         this.pos = pos;
     }
 
+    /**
+     * Gets pos type.
+     *
+     * @return the pos type
+     */
     public int getPosType() {
         return posType;
     }
 
+    /**
+     * Sets pos type.
+     *
+     * @param posType the pos type
+     */
     public void setPosType(int posType) {
         this.posType = posType;
     }
 
     /**
+     * Gets transmission control.
+     *
      * @return the transmissionControl
      */
     public int getTransmissionControl() {
@@ -210,49 +314,100 @@ public abstract class UTCDateResponseMessage extends AisMessage implements IPosi
     }
 
     /**
-     * @param transmissionControl
-     *            the transmissionControl to set
+     * Sets transmission control.
+     *
+     * @param transmissionControl the transmissionControl to set
      */
     public void setTransmissionControl(int transmissionControl) {
         this.transmissionControl = transmissionControl;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }
 
+    /**
+     * Gets raim.
+     *
+     * @return the raim
+     */
     public int getRaim() {
         return raim;
     }
 
+    /**
+     * Sets raim.
+     *
+     * @param raim the raim
+     */
     public void setRaim(int raim) {
         this.raim = raim;
     }
 
+    /**
+     * Gets sync state.
+     *
+     * @return the sync state
+     */
     public int getSyncState() {
         return syncState;
     }
 
+    /**
+     * Sets sync state.
+     *
+     * @param syncState the sync state
+     */
     public void setSyncState(int syncState) {
         this.syncState = syncState;
     }
 
+    /**
+     * Gets slot timeout.
+     *
+     * @return the slot timeout
+     */
     public int getSlotTimeout() {
         return slotTimeout;
     }
 
+    /**
+     * Sets slot timeout.
+     *
+     * @param slotTimeout the slot timeout
+     */
     public void setSlotTimeout(int slotTimeout) {
         this.slotTimeout = slotTimeout;
     }
 
+    /**
+     * Gets sub message.
+     *
+     * @return the sub message
+     */
     public int getSubMessage() {
         return subMessage;
     }
 
+    /**
+     * Sets sub message.
+     *
+     * @param subMessage the sub message
+     */
     public void setSubMessage(int subMessage) {
         this.subMessage = subMessage;
     }

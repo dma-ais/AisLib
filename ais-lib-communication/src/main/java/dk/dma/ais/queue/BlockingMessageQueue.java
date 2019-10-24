@@ -22,6 +22,8 @@ import net.jcip.annotations.ThreadSafe;
 
 /**
  * Implementation of a IMessageQueue using a Java ArrayBlockingQueue
+ *
+ * @param <T> the type parameter
  */
 @ThreadSafe
 public class BlockingMessageQueue<T> implements IMessageQueue<T> {
@@ -31,10 +33,18 @@ public class BlockingMessageQueue<T> implements IMessageQueue<T> {
     private final int limit;
     private final BlockingQueue<T> queue;
 
+    /**
+     * Instantiates a new Blocking message queue.
+     */
     public BlockingMessageQueue() {
         this(DEFAULT_MAX_SIZE);
     }
 
+    /**
+     * Instantiates a new Blocking message queue.
+     *
+     * @param limit the limit
+     */
     public BlockingMessageQueue(int limit) {
         this.limit = limit;
         this.queue = new ArrayBlockingQueue<>(limit);
@@ -77,6 +87,11 @@ public class BlockingMessageQueue<T> implements IMessageQueue<T> {
         return pull(l, Integer.MAX_VALUE);
     }
 
+    /**
+     * Gets limit.
+     *
+     * @return the limit
+     */
     public int getLimit() {
         return limit;
     }

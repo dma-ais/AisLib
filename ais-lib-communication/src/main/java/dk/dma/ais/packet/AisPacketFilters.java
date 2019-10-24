@@ -42,10 +42,20 @@ import java.util.function.Predicate;
 import static java.util.Objects.requireNonNull;
 
 /**
+ * The type Ais packet filters.
+ *
  * @author Kasper Nielsen
  */
 public class AisPacketFilters extends AisPacketFiltersBase {
 
+    /**
+     * Filter on message type predicate.
+     *
+     * @param <T>         the type parameter
+     * @param messageType the message type
+     * @param predicate   the predicate
+     * @return the predicate
+     */
     public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType, final Predicate<T> predicate) {
         requireNonNull(messageType);
         requireNonNull(predicate);
@@ -70,6 +80,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message type predicate.
+     *
+     * @param <T>         the type parameter
+     * @param messageType the message type
+     * @return the predicate
+     */
     public static <T> Predicate<AisPacket> filterOnMessageType(final Class<T> messageType) {
         requireNonNull(messageType);
         return new AbstractMessagePredicate() {
@@ -79,6 +96,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on source basestation predicate.
+     *
+     * @param ids the ids
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnSourceBasestation(Integer... ids) {
         final Integer[] copy = ids.clone();
         Arrays.sort(copy);
@@ -97,8 +120,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Returns a predicate that will filter packets based on the base station source tag.
      *
-     * @param ids
-     *            the id of the base stations for which packets should be accepted
+     * @param ids the id of the base stations for which packets should be accepted
      * @return the predicate
      */
     public static Predicate<AisPacket> filterOnSourceBasestation(String... ids) {
@@ -112,8 +134,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Returns a predicate that will filter packets based on the country of the source tag.
      *
-     * @param countries
-     *            the countries for which packets should be accepted
+     * @param countries the countries for which packets should be accepted
      * @return the predicate
      */
     public static Predicate<AisPacket> filterOnSourceCountry(final Country... countries) {
@@ -130,6 +151,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on source id predicate.
+     *
+     * @param ids the ids
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnSourceId(final String... ids) {
         final String[] s = check(ids);
         return new Predicate<AisPacket>() {
@@ -144,6 +171,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on source region predicate.
+     *
+     * @param regions the regions
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnSourceRegion(final String... regions) {
         final String[] s = check(regions);
         requireNonNull(regions, "regions is null");
@@ -160,6 +193,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on source type predicate.
+     *
+     * @param sourceType the source type
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnSourceType(final SourceType... sourceType) {
         final SourceType[] sourceTypes = sourceType.clone();
         requireNonNull(sourceType, "sourceType is null");
@@ -184,11 +223,9 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Filter on message to have known position inside given area.
      *
-     * @param area
-     *            The area that the position must reside inside.
-     * @return
+     * @param area The area that the position must reside inside.
+     * @return predicate predicate
      */
-
     public static Predicate<AisPacket> filterOnMessagePositionWithin(final Area area) {
         requireNonNull(area);
         return filterOnMessageType(IPositionMessage.class, new Predicate<IPositionMessage>() {
@@ -210,11 +247,9 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Block position messages outside of given area; let all other messages pass.
      *
-     * @param area
-     *            The area that the position messages must reside inside.
-     * @return
+     * @param area The area that the position messages must reside inside.
+     * @return predicate predicate
      */
-
     public static Predicate<AisPacket> filterRelaxedOnMessagePositionWithin(final Area area) {
         requireNonNull(area);
         return new Predicate<AisPacket>() {
@@ -233,6 +268,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on source basestation predicate.
+     *
+     * @param operator the operator
+     * @param bs       the bs
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -250,12 +292,11 @@ public class AisPacketFilters extends AisPacketFiltersBase {
     /**
      * Filter on a comparison to a value of the indicated calendarField (see java.util.Calendar).
      *
-     * @param operator
-     * @param calendarField
-     * @param value
-     * @return
+     * @param operator      the operator
+     * @param calendarField the calendar field
+     * @param value         the value
+     * @return predicate predicate
      */
-
     protected static Predicate<AisPacket> filterOnMessageReceiveTime(final CompareToOperator operator, final int calendarField,
             final int value) {
         return new Predicate<AisPacket>() {
@@ -276,14 +317,35 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time month predicate.
+     *
+     * @param operator the operator
+     * @param rhs      the rhs
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeMonth(final CompareToOperator operator, Integer rhs) {
         return filterOnMessageReceiveTime(operator, Calendar.MONTH, rhs);
     }
 
+    /**
+     * Filter on message receive time day of week predicate.
+     *
+     * @param operator the operator
+     * @param rhs      the rhs
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfWeek(final CompareToOperator operator, Integer rhs) {
         return filterOnMessageReceiveTime(operator, Calendar.DAY_OF_WEEK, rhs);
     }
 
+    /**
+     * Filter on message receive time year predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeYear(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -296,6 +358,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time year predicate.
+     *
+     * @param years the years
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeYear(Integer... years) {
         final Integer[] copy = years.clone();
         Arrays.sort(copy);
@@ -310,6 +378,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time month predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeMonth(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -322,6 +397,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time month predicate.
+     *
+     * @param months the months
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeMonth(Integer... months) {
         final Integer[] copy = months.clone();
         Arrays.sort(copy);
@@ -336,6 +417,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time day of month predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfMonth(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -348,6 +436,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time day of month predicate.
+     *
+     * @param days the days
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfMonth(Integer... days) {
         final Integer[] copy = days.clone();
         Arrays.sort(copy);
@@ -362,6 +456,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time day of week predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfWeek(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -374,6 +475,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time day of week predicate.
+     *
+     * @param days the days
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeDayOfWeek(Integer... days) {
         final Integer[] copy = days.clone();
         Arrays.sort(copy);
@@ -388,6 +495,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time hour predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeHour(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -400,6 +514,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time hour predicate.
+     *
+     * @param hours the hours
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeHour(Integer... hours) {
         final Integer[] copy = hours.clone();
         Arrays.sort(copy);
@@ -414,6 +534,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time minute predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeMinute(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -426,6 +553,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message receive time minute predicate.
+     *
+     * @param minutes the minutes
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageReceiveTimeMinute(Integer... minutes) {
         final Integer[] copy = minutes.clone();
         Arrays.sort(copy);
@@ -481,6 +614,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
 
     // ---
 
+    /**
+     * Filter on message id predicate.
+     *
+     * @param operator the operator
+     * @param id       the id
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageId(final CompareToOperator operator, final Integer id) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -494,6 +634,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message mmsi predicate.
+     *
+     * @param operator the operator
+     * @param mmsi     the mmsi
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageMmsi(final CompareToOperator operator, final Integer mmsi) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -507,6 +654,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message imo predicate.
+     *
+     * @param operator the operator
+     * @param imo      the imo
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageImo(final CompareToOperator operator, final Integer imo) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -524,6 +678,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message shiptype predicate.
+     *
+     * @param operator the operator
+     * @param shiptype the shiptype
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageShiptype(final CompareToOperator operator, final Integer shiptype) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -541,6 +702,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message navigational status predicate.
+     *
+     * @param operator  the operator
+     * @param navstatus the navstatus
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final CompareToOperator operator, final Integer navstatus) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -558,14 +726,35 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message name predicate.
+     *
+     * @param operator the operator
+     * @param name     the name
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Float name) {
         return filterOnMessageName(operator, name.toString());
     }
 
+    /**
+     * Filter on message name predicate.
+     *
+     * @param operator the operator
+     * @param name     the name
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, final Integer name) {
         return filterOnMessageName(operator, name.toString());
     }
 
+    /**
+     * Filter on message name predicate.
+     *
+     * @param operator the operator
+     * @param name     the name
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageName(final CompareToOperator operator, String name) {
         final String n = preprocessExpressionString(name);
         return new Predicate<AisPacket>() {
@@ -584,6 +773,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message name match predicate.
+     *
+     * @param pattern the pattern
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageNameMatch(String pattern) {
         final String glob = preprocessExpressionString(pattern);
         return new Predicate<AisPacket>() {
@@ -602,6 +797,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message callsign predicate.
+     *
+     * @param operator the operator
+     * @param callsign the callsign
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageCallsign(final CompareToOperator operator, String callsign) {
         final String n = preprocessExpressionString(callsign);
         return new Predicate<AisPacket>() {
@@ -620,6 +822,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message callsign match predicate.
+     *
+     * @param pattern the pattern
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageCallsignMatch(String pattern) {
         final String glob = preprocessExpressionString(pattern);
         return new Predicate<AisPacket>() {
@@ -638,6 +846,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message speed over ground predicate.
+     *
+     * @param operator the operator
+     * @param sog      the sog
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageSpeedOverGround(final CompareToOperator operator, final Float sog) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -655,6 +870,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message course over ground predicate.
+     *
+     * @param operator the operator
+     * @param cog      the cog
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageCourseOverGround(final CompareToOperator operator, final Float cog) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -672,6 +894,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message true heading predicate.
+     *
+     * @param operator the operator
+     * @param hdg      the hdg
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageTrueHeading(final CompareToOperator operator, final Integer hdg) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -689,6 +918,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message longitude predicate.
+     *
+     * @param operator the operator
+     * @param lon      the lon
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageLongitude(final CompareToOperator operator, final Float lon) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -706,6 +942,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message latitude predicate.
+     *
+     * @param operator the operator
+     * @param lat      the lat
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageLatitude(final CompareToOperator operator, final Float lat) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -723,6 +966,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message draught predicate.
+     *
+     * @param operator the operator
+     * @param draught  the draught
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageDraught(final CompareToOperator operator, final Float draught) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -740,6 +990,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message id predicate.
+     *
+     * @param ids the ids
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageId(Integer... ids) {
         final Integer[] m = ids.clone();
         Arrays.sort(m);
@@ -759,6 +1015,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message mmsi predicate.
+     *
+     * @param mmsis the mmsis
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageMmsi(Integer... mmsis) {
         final Integer[] m = mmsis.clone();
         Arrays.sort(m);
@@ -778,6 +1040,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message imo predicate.
+     *
+     * @param imos the imos
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageImo(Integer... imos) {
         final Integer[] m = imos.clone();
         Arrays.sort(m);
@@ -798,6 +1066,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message shiptype predicate.
+     *
+     * @param shiptypes the shiptypes
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageShiptype(Integer... shiptypes) {
         final Integer[] m = shiptypes.clone();
         Arrays.sort(m);
@@ -818,6 +1092,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message navigational status predicate.
+     *
+     * @param navstats the navstats
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageNavigationalStatus(Integer... navstats) {
         final Integer[] m = navstats.clone();
         Arrays.sort(m);
@@ -838,6 +1118,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message name predicate.
+     *
+     * @param names the names
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageName(String... names) {
         final String[] m = preprocessExpressionStrings(names);
         Arrays.sort(m);
@@ -858,6 +1144,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message callsign predicate.
+     *
+     * @param callsigns the callsigns
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageCallsign(String... callsigns) {
         final String[] m = preprocessExpressionStrings(callsigns);
         Arrays.sort(m);
@@ -878,6 +1170,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message true heading predicate.
+     *
+     * @param hdgs the hdgs
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageTrueHeading(Integer... hdgs) {
         final Integer[] m = hdgs.clone();
         Arrays.sort(m);
@@ -898,6 +1196,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message id predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageId(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -915,6 +1220,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message mmsi predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageMmsi(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -932,6 +1244,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message imo predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageImo(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -949,6 +1268,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message shiptype predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageShiptype(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -966,6 +1292,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message navigational status predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageNavigationalStatus(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -983,6 +1316,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message true heading predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageTrueHeading(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -1000,6 +1340,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message latitude predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageLatitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -1017,6 +1364,13 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message longitude predicate.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageLongitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -1034,6 +1388,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Filter on message type predicate.
+     *
+     * @param types the types
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageType(final int... types) {
         final int[] t = types.clone();
         Arrays.sort(t);
@@ -1053,11 +1413,23 @@ public class AisPacketFilters extends AisPacketFiltersBase {
             }
         };
     }
-    
+
+    /**
+     * Filter on message country predicate.
+     *
+     * @param countries the countries
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnMessageCountry(final Country... countries) {
         return filterOnTargetCountry(countries);
     }
 
+    /**
+     * Filter on target country predicate.
+     *
+     * @param countries the countries
+     * @return the predicate
+     */
     public static Predicate<AisPacket> filterOnTargetCountry(final Country... countries) {
         final Country[] c = AisPacketFilters.check(countries);
         return new AbstractMessagePredicate() {
@@ -1072,30 +1444,52 @@ public class AisPacketFilters extends AisPacketFiltersBase {
         };
     }
 
+    /**
+     * Sampling filter predicate.
+     *
+     * @param minDistanceInMeters the min distance in meters
+     * @param minDurationInMS     the min duration in ms
+     * @return the predicate
+     */
     public static Predicate<AisPacket> samplingFilter(Integer minDistanceInMeters, Long minDurationInMS) {
         return new SamplerFilter(minDistanceInMeters, minDurationInMS);
     }
 
     /**
-     * Replaced by Predicate<AisPacket> parseExpressionFilter(String filter)
+     * Replaced by Predicate&lt;AisPacket&gt; parseExpressionFilter(String filter)
      *
+     * @param filter the filter
+     * @return predicate predicate
      * @deprecated
-     * @param filter
-     * @return
      */
     @Deprecated
     public static Predicate<AisPacket> parseSourceFilter(String filter) {
         return AisPacketFiltersExpressionFilterParser.parseExpressionFilter(filter);
     }
 
+    /**
+     * Parse expression filter predicate.
+     *
+     * @param filter the filter
+     * @return the predicate
+     */
     public static Predicate<AisPacket> parseExpressionFilter(String filter) {
         return AisPacketFiltersExpressionFilterParser.parseExpressionFilter(filter);
     }
 
     // ---
 
+    /**
+     * The type Abstract message predicate.
+     */
     abstract static class AbstractMessagePredicate implements Predicate<AisPacket> {
 
+        /**
+         * Test boolean.
+         *
+         * @param message the message
+         * @return the boolean
+         */
         abstract boolean test(AisMessage message);
 
         /**
@@ -1133,6 +1527,12 @@ public class AisPacketFilters extends AisPacketFiltersBase {
          */
         final Long minDurationInMS;
 
+        /**
+         * Instantiates a new Sampler filter.
+         *
+         * @param minDistanceInMeters the min distance in meters
+         * @param minDurationInMS     the min duration in ms
+         */
         SamplerFilter(Integer minDistanceInMeters, Long minDurationInMS) {
             if (minDistanceInMeters == null && minDurationInMS == null) {
                 throw new IllegalArgumentException("minDistanceInMeters and minDurationInMS cannot both be null");
@@ -1167,6 +1567,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
 
     /**
      * Similar to the {@code SamplingFilter} except that it applies the sampling per MMSI target
+     *
      * @param minDistance the minimum distance between two packets per target
      * @param minDuration the minimum time in ms between two packets per target
      * @return the target sampling filter predicate
@@ -1228,6 +1629,7 @@ public class AisPacketFilters extends AisPacketFiltersBase {
 
     /**
      * Removes duplicates within the given time window
+     *
      * @param windowSize the sampling rate in ms
      * @return the target sampling filter predicate
      */

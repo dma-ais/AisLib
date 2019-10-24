@@ -47,20 +47,28 @@ import static java.util.Comparator.comparingLong;
 /**
  * The Track class contains the consolidated information known about a given target - likely as the result
  * of several received AIS messages.
- *
+ * <p>
  * Track supports dynamic storage of track properties via the getProperty()/setProperty() methods, but
  * also contains some business logic and knowledge of what it stores; e.g. via the getMmsi(), and get/setPosition()
  * methods.
- *
+ * <p>
  * Information which is available directly in AisPackets is stored and retrieved from these. Other information,
  * such as cell-id's, event booking-keeping, etc. is set dynamically as custom properties.
- *
  */
 @ThreadSafe
 public final class Track extends Target implements Cloneable {
 
+    /**
+     * The constant CELL_ID.
+     */
     public static final String CELL_ID = "cellId";
+    /**
+     * The constant SAFETY_ZONE.
+     */
     public static final String SAFETY_ZONE = "safetyZone";
+    /**
+     * The constant EXTENT.
+     */
     public static final String EXTENT = "extent";
 
     private Lock trackLock = new ReentrantLock();
@@ -69,6 +77,9 @@ public final class Track extends Target implements Cloneable {
     private static final Supplier<TreeSet<TrackingReport>> treeSetSupplier = () -> new TreeSet<>(byTimestamp);
     private boolean positionReportPurgeEnable = true;
 
+    /**
+     * The constant MAX_AGE_POSITION_REPORTS_MINUTES.
+     */
     public final static int MAX_AGE_POSITION_REPORTS_MINUTES = 20;
 
     @GuardedBy("trackLock")
@@ -121,6 +132,7 @@ public final class Track extends Target implements Cloneable {
 
     /**
      * Create a new track with the given MMSI no.
+     *
      * @param mmsi the MMSI no. assigned to this track.
      */
     public Track(int mmsi) {
@@ -196,6 +208,11 @@ public final class Track extends Target implements Cloneable {
         return result;
     }
 
+    /**
+     * Update.
+     *
+     * @param p the p
+     */
     /*
      * Update this track with a new AisPacket. The MMSI no. inside the packet must match this Track's MMSI no.
      * and in order to maintain low insertion-cost only packets newer than the previously received are accepted.
@@ -219,10 +236,11 @@ public final class Track extends Target implements Cloneable {
     /**
      * Update this track with a new AisPacket. The MMSI no. inside the packet must match this Track's MMSI no.
      * and in order to maintain low insertion-cost only packets newer than the previously received are accepted.
-     *
+     * <p>
      * This update is treated as an interpolated (artifical, non-real) update.
      *
-     * @param m
+     * @param timestamp the timestamp
+     * @param m         the m
      */
     public void update(long timestamp, AisMessage m) {
         if (m instanceof IVesselPositionMessage) {
@@ -234,6 +252,12 @@ public final class Track extends Target implements Cloneable {
     /**
      * Update this track with interpolated or predicted information (as opposed to information
      * received from an AIS receiver or basestation).
+     *
+     * @param timestamp the timestamp
+     * @param position  the position
+     * @param cog       the cog
+     * @param sog       the sog
+     * @param hdg       the hdg
      */
     public void update(long timestamp, Position position, float cog, float sog, float hdg) {
         InterpolatedTrackingReport trackingReport = new InterpolatedTrackingReport(timestamp, position, cog, sog, hdg);
@@ -242,8 +266,9 @@ public final class Track extends Target implements Cloneable {
 
     /**
      * Get a custom property previously set on this track.
-     * @param propertyName
-     * @return
+     *
+     * @param propertyName the property name
+     * @return property property
      */
     public Object getProperty(String propertyName) {
         return threadSafeGetStaticData(() -> properties.get(propertyName));
@@ -252,8 +277,8 @@ public final class Track extends Target implements Cloneable {
     /**
      * Attach/set a custom property on this track.
      *
-     * @param propertyName
-     * @param propertyValue
+     * @param propertyName  the property name
+     * @param propertyValue the property value
      */
     public void setProperty(String propertyName, Object propertyValue) {
         try {
@@ -267,7 +292,7 @@ public final class Track extends Target implements Cloneable {
     /**
      * Remove a custom property previously set on this track.
      *
-     * @param propertyName
+     * @param propertyName the property name
      */
     public void removeProperty(String propertyName) {
         try {
@@ -278,27 +303,47 @@ public final class Track extends Target implements Cloneable {
         }
     }
 
-    /** Get the timestamp of the last update of any type. */
+    /**
+     * Get the timestamp of the last update of any type.  @return the time of last update
+     *
+     * @return the time of last update
+     */
     public long getTimeOfLastUpdate() {
         return threadSafeGetStaticData(() -> timeOfLastUpdate);
     }
 
-    /** Get the timestamp of the last update of any type. */
+    /**
+     * Get the timestamp of the last update of any type.  @return the time of last update typed
+     *
+     * @return the time of last update typed
+     */
     public LocalDateTime getTimeOfLastUpdateTyped() {
         return DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC.apply(getTimeOfLastUpdate());
     }
 
-    /** Get the timestamp of the last position report. */
+    /**
+     * Get the timestamp of the last position report.  @return the time of last position report
+     *
+     * @return the time of last position report
+     */
     public long getTimeOfLastPositionReport() {
         return threadSafeGetStaticData(() -> timeOfLastPositionReport);
     }
 
-    /** Get the timestamp of the last position report. */
+    /**
+     * Get the timestamp of the last position report.  @return the time of last position report typed
+     *
+     * @return the time of last position report typed
+     */
     public LocalDateTime getTimeOfLastPositionReportTyped() {
         return DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC.apply(getTimeOfLastPositionReport());
     }
 
-    /** Get time timestamp of the last non-predicted position report */
+    /**
+     * Get time timestamp of the last non-predicted position report  @return the time of last ais tracking report
+     *
+     * @return the time of last ais tracking report
+     */
     public long getTimeOfLastAisTrackingReport() {
         try {
             trackLock.lock();
@@ -315,19 +360,28 @@ public final class Track extends Target implements Cloneable {
         }
     }
 
-    /** Get time timestamp of the last non-predicted position report */
+    /**
+     * Get time timestamp of the last non-predicted position report  @return the time of last ais tracking report typed
+     *
+     * @return the time of last ais tracking report typed
+     */
     public LocalDateTime getTimeOfLastAisTrackingReportTyped() {
         return DateTimeUtil.MILLIS_TO_LOCALDATETIME_UTC.apply(getTimeOfLastAisTrackingReport());
     }
 
-    /** Return the last received static report (if any) */
+    /**
+     * Return the last received static report (if any)  @return the last static report
+     *
+     * @return the last static report
+     */
     public AisPacket getLastStaticReport() {
         return threadSafeGetStaticData(() -> lastStaticReport);
     }
 
     /**
      * Enable or disable purging of old position reports from the track.
-     * @param positionReportPurgeEnable
+     *
+     * @param positionReportPurgeEnable the position report purge enable
      */
     public void setPositionReportPurgeEnable(boolean positionReportPurgeEnable) {
         this.positionReportPurgeEnable = positionReportPurgeEnable;
@@ -371,7 +425,11 @@ public final class Track extends Target implements Cloneable {
         purgeTrackingReports(MAX_AGE_POSITION_REPORTS_MINUTES);
     }
 
-    /** Get the oldest reported position report kept. */
+    /**
+     * Get the oldest reported position report kept.  @return the oldest tracking report
+     *
+     * @return the oldest tracking report
+     */
     public TrackingReport getOldestTrackingReport() {
         TrackingReport oldestTrackingReport = null;
         try {
@@ -384,7 +442,11 @@ public final class Track extends Target implements Cloneable {
         return oldestTrackingReport;
     }
 
-    /** Get the most recently reported position report. */
+    /**
+     * Get the most recently reported position report.  @return the newest tracking report
+     *
+     * @return the newest tracking report
+     */
     public TrackingReport getNewestTrackingReport() {
         TrackingReport mostRecentTrackingReport = null;
         try {
@@ -397,7 +459,12 @@ public final class Track extends Target implements Cloneable {
         return mostRecentTrackingReport;
     }
 
-    /** Get the the position report at time t. */
+    /**
+     * Get the the position report at time t.  @param t the t
+     *
+     * @param t the t
+     * @return the tracking report at
+     */
     public TrackingReport getTrackingReportAt(long t) {
         TrackingReport trackingReportAtT = null;
         try {
@@ -419,7 +486,8 @@ public final class Track extends Target implements Cloneable {
     /**
      * Get a trail of historic position reports. The oldest will be a maximum of MAX_AGE_POSITION_REPORTS_MINUTES
      * minutes older than the newest (if position report purging is enabled; otherwise there is no limit).
-     * @return
+     *
+     * @return tracking reports
      */
     public List<TrackingReport> getTrackingReports() {
         purgeTrackingReports(MAX_AGE_POSITION_REPORTS_MINUTES);
@@ -458,6 +526,7 @@ public final class Track extends Target implements Cloneable {
 
     /**
      * Predict this track's position forward to time atTime.
+     *
      * @param atTime timestamp in milliseconds since the Epoch
      */
     public void predict(long atTime) {
@@ -498,68 +567,128 @@ public final class Track extends Target implements Cloneable {
         }
     }
 
-    /** Convenience method to return track's last reported ship type or null */
+    /**
+     * Convenience method to return track's last reported ship type or null  @return the ship type
+     *
+     * @return the ship type
+     */
     public Integer getShipType() {
         return threadSafeGetStaticData(() -> shipType);
     }
 
-    /** Convenience method to return track's last reported ship name or null */
+    /**
+     * Convenience method to return track's last reported ship name or null  @return the ship name
+     *
+     * @return the ship name
+     */
     public String getShipName() {
         return threadSafeGetStaticData(() -> shipName);
     }
 
-    /** Convenience method to return track's last reported callsign or null */
+    /**
+     * Convenience method to return track's last reported callsign or null  @return the callsign
+     *
+     * @return the callsign
+     */
     public String getCallsign() {
         return threadSafeGetStaticData(() -> callsign);
     }
 
-    /** Convenience method to return track's last reported IMO no. or null */
+    /**
+     * Convenience method to return track's last reported IMO no. or null  @return the imo
+     *
+     * @return the imo
+     */
     public Integer getIMO() {
         return threadSafeGetStaticData(() -> imo);
     }
 
-    /** Convenience method to return track's last reported vessel length or null */
+    /**
+     * Convenience method to return track's last reported vessel length or null  @return the vessel length
+     *
+     * @return the vessel length
+     */
     public Integer getVesselLength() {
         return shipDimensionBow == null || shipDimensionStern == null ? null : shipDimensionBow + shipDimensionStern;
     }
 
-    /** Convenience method to return track's last reported vessel beam or null */
+    /**
+     * Convenience method to return track's last reported vessel beam or null  @return the vessel beam
+     *
+     * @return the vessel beam
+     */
     public Integer getVesselBeam() {
         return shipDimensionPort == null || shipDimensionStarboard == null ? null : shipDimensionPort + shipDimensionStarboard;
     }
 
+    /**
+     * Gets ship dimension bow.
+     *
+     * @return the ship dimension bow
+     */
     public Integer getShipDimensionBow() {
         return threadSafeGetStaticData(() -> shipDimensionBow);
     }
 
+    /**
+     * Gets ship dimension stern.
+     *
+     * @return the ship dimension stern
+     */
     public Integer getShipDimensionStern() {
         return threadSafeGetStaticData(() -> shipDimensionStern);
     }
 
+    /**
+     * Gets ship dimension port.
+     *
+     * @return the ship dimension port
+     */
     public Integer getShipDimensionPort() {
         return threadSafeGetStaticData(() -> shipDimensionPort);
     }
 
+    /**
+     * Gets ship dimension starboard.
+     *
+     * @return the ship dimension starboard
+     */
     public Integer getShipDimensionStarboard() {
         return threadSafeGetStaticData(() -> shipDimensionStarboard);
     }
 
-    /** Convenience method to return track's last reported position or null */
+    /**
+     * Convenience method to return track's last reported position or null  @return the position
+     *
+     * @return the position
+     */
     public Position getPosition() {
         return nullAndThreadSafeGetFromNewestTrackingReport(tp -> tp.getPosition());
     }
 
-    /** Convenience method to return track's last reported SOG or null */
+    /**
+     * Convenience method to return track's last reported SOG or null  @return the speed over ground
+     *
+     * @return the speed over ground
+     */
     public Float getSpeedOverGround() {
         return nullAndThreadSafeGetFromNewestTrackingReport(tp -> tp.getSpeedOverGround());
     }
 
-    /** Convenience method to return track's last reported COG or null */
+    /**
+     * Convenience method to return track's last reported COG or null  @return the course over ground
+     *
+     * @return the course over ground
+     */
     public Float getCourseOverGround() {
         return nullAndThreadSafeGetFromNewestTrackingReport(tp -> tp.getCourseOverGround());
     }
 
-    /** Convenience method to return track's last reported heading or null */
+    /**
+     * Convenience method to return track's last reported heading or null  @return the true heading
+     *
+     * @return the true heading
+     */
     public Float getTrueHeading() {
         return nullAndThreadSafeGetFromNewestTrackingReport(tp -> tp.getTrueHeading());
     }

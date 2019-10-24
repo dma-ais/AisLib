@@ -21,24 +21,39 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 8
- * 
+ * <p>
  * Binary broadcast message as defined by ITU-R M.1371-4
- * 
  */
 public class AisMessage8 extends AisBinaryMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Ais message 8.
+     */
     public AisMessage8() {
         super(8);
     }
 
+    /**
+     * Instantiates a new Ais message 8.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage8(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() < 56 || binArray.getLength() > 1008) {

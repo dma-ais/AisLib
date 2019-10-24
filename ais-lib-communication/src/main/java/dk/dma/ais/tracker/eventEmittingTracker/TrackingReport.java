@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * A tracking report is a unique, separate report concerning a specific vessel's current
  * position, speed, and course.
- *
+ * <p>
  * This piece of information is stored in the tracker to keep track of each vessel's movements
  * and whereabouts.
  */
@@ -35,14 +35,31 @@ public abstract class TrackingReport implements Cloneable {
 
     private Map<String, Object> properties = new HashMap<>(2);
 
+    /**
+     * Gets property.
+     *
+     * @param propertyName the property name
+     * @return the property
+     */
     public Object getProperty(String propertyName) {
         return properties.get(propertyName);
     }
 
+    /**
+     * Sets property.
+     *
+     * @param propertyName  the property name
+     * @param propertyValue the property value
+     */
     public void setProperty(String propertyName, Object propertyValue) {
         properties.put(propertyName, propertyValue);
     }
 
+    /**
+     * Remove property.
+     *
+     * @param propertyName the property name
+     */
     public void removeProperty(String propertyName) {
         properties.remove(propertyName);
     }
@@ -57,10 +74,45 @@ public abstract class TrackingReport implements Cloneable {
 
     // ---
 
+    /**
+     * Gets timestamp.
+     *
+     * @return the timestamp
+     */
     public abstract long getTimestamp();
+
+    /**
+     * Gets timestamp typed.
+     *
+     * @return the timestamp typed
+     */
     public abstract LocalDateTime getTimestampTyped();
+
+    /**
+     * Gets position.
+     *
+     * @return the position
+     */
     public abstract Position getPosition();
+
+    /**
+     * Gets course over ground.
+     *
+     * @return the course over ground
+     */
     public abstract float getCourseOverGround();
+
+    /**
+     * Gets speed over ground.
+     *
+     * @return the speed over ground
+     */
     public abstract float getSpeedOverGround();
+
+    /**
+     * Gets true heading.
+     *
+     * @return the true heading
+     */
     public abstract float getTrueHeading();
 }

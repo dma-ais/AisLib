@@ -21,6 +21,9 @@ import java.net.Socket;
  */
 public class TcpWriteServer extends TcpServer {
 
+    /**
+     * Instantiates a new Tcp write server.
+     */
     public TcpWriteServer() {
         super();
     }
@@ -32,8 +35,8 @@ public class TcpWriteServer extends TcpServer {
 
     /**
      * Send message to all clients
-     * 
-     * @param sentenceStr
+     *
+     * @param msg the msg
      */
     public void send(String msg) {
         for (TcpClient client : clients) {

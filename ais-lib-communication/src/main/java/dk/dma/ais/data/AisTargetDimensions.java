@@ -20,10 +20,9 @@ import dk.dma.ais.message.AisStaticCommon;
 
 /**
  * Class to represent dimensions of an AIS target with dimensions
- * 
+ * <p>
  * TODO: Evaluate the parameters and set length and witdt accordingly. Make attributes to determine if dimensions is
  * available, and if reference point is available.
- * 
  */
 public class AisTargetDimensions implements Serializable {
 
@@ -34,6 +33,11 @@ public class AisTargetDimensions implements Serializable {
     private byte dimPort;
     private byte dimStarboard;
 
+    /**
+     * Instantiates a new Ais target dimensions.
+     *
+     * @param staticCommon the static common
+     */
     public AisTargetDimensions(AisStaticCommon staticCommon) {
         this.dimBow = (short) staticCommon.getDimBow();
         this.dimStern = (short) staticCommon.getDimStern();
@@ -43,34 +47,74 @@ public class AisTargetDimensions implements Serializable {
         // TODO
     }
 
+    /**
+     * Gets dim bow.
+     *
+     * @return the dim bow
+     */
     public short getDimBow() {
         return dimBow;
     }
 
+    /**
+     * Sets dim bow.
+     *
+     * @param dimBow the dim bow
+     */
     public void setDimBow(short dimBow) {
         this.dimBow = dimBow;
     }
 
+    /**
+     * Gets dim stern.
+     *
+     * @return the dim stern
+     */
     public short getDimStern() {
         return dimStern;
     }
 
+    /**
+     * Sets dim stern.
+     *
+     * @param dimStern the dim stern
+     */
     public void setDimStern(short dimStern) {
         this.dimStern = dimStern;
     }
 
+    /**
+     * Gets dim port.
+     *
+     * @return the dim port
+     */
     public byte getDimPort() {
         return dimPort;
     }
 
+    /**
+     * Sets dim port.
+     *
+     * @param dimPort the dim port
+     */
     public void setDimPort(byte dimPort) {
         this.dimPort = dimPort;
     }
 
+    /**
+     * Gets dim starboard.
+     *
+     * @return the dim starboard
+     */
     public byte getDimStarboard() {
         return dimStarboard;
     }
 
+    /**
+     * Sets dim starboard.
+     *
+     * @param dimStarboard the dim starboard
+     */
     public void setDimStarboard(byte dimStarboard) {
         this.dimStarboard = dimStarboard;
     }

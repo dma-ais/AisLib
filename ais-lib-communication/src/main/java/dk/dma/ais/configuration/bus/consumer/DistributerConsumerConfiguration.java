@@ -19,6 +19,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.consumer.DistributerConsumer;
 
+/**
+ * The type Distributer consumer configuration.
+ */
 @XmlRootElement
 public class DistributerConsumerConfiguration extends AisBusConsumerConfiguration {
     

@@ -21,6 +21,9 @@ import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 
+/**
+ * The type Timestamp tagging transformer.
+ */
 public class TimestampTaggingTransformer implements IAisPacketTransformer {
     @Override
     public AisPacket transform(AisPacket packet) {

@@ -35,9 +35,9 @@ import java.util.zip.ZipInputStream;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Factory and utility methods for {@link AisReader}, {@link AisTcpReader}, {@link AisUdpReader}, 
+ * Factory and utility methods for {@link AisReader}, {@link AisTcpReader}, {@link AisUdpReader},
  * and {@link AisReaderGroup} classes defined in this package.
- * 
+ *
  * @author Kasper Nielsen
  */
 public class AisReaders {
@@ -45,6 +45,10 @@ public class AisReaders {
     /**
      * Equivalent to {@link #parseSource(String)} except that it will parse an array of sources. Returning a map making
      * sure there all source names are unique
+     *
+     * @param name    the name
+     * @param sources the sources
+     * @return the ais reader group
      */
     public static AisReaderGroup createGroup(String name, List<String> sources) {
         Map<String, AisTcpReader> readers = new HashMap<>();
@@ -65,9 +69,9 @@ public class AisReaders {
 
     /**
      * Creates a default group from reader available in the system property ais.default.sources
-     * 
+     *
      * @return a new reader group
-     * @see #getDefaultSources()
+     * @see #getDefaultSources() #getDefaultSources()#getDefaultSources()
      */
     public static AisReaderGroup createGroupFromDefaultsSource() {
         return createGroup("defaults", Arrays.asList(getDefaultSources()));
@@ -75,8 +79,9 @@ public class AisReaders {
 
     /**
      * Creates a {@link AisTcpReader} from a list of one or more hosts. On the form: host1:port1,...,hostN:portN
-     * 
-     * @param commaHostPort
+     *
+     * @param commaHostPort the comma host port
+     * @return the ais tcp reader
      */
     public static AisTcpReader createReader(String commaHostPort) {
         AisTcpReader r = new AisTcpReader();
@@ -87,17 +92,24 @@ public class AisReaders {
         return r;
     }
 
+    /**
+     * Create reader ais tcp reader.
+     *
+     * @param hostname the hostname
+     * @param port     the port
+     * @return the ais tcp reader
+     */
     public static AisTcpReader createReader(String hostname, int port) {
         AisTcpReader r = new AisTcpReader();
         r.addHostPort(HostAndPort.fromParts(hostname, port));
         return r;
     }
-    
+
     /**
      * Creates a {@link AisUdpReader} listening on port for any interface
-     * 
-     * @param port
-     * @return
+     *
+     * @param port the port
+     * @return ais udp reader
      */
     public static AisUdpReader createUdpReader(int port) {
         return createUdpReader(null, port);
@@ -105,37 +117,45 @@ public class AisReaders {
 
     /**
      * Creates a {@link AisUdpReader} listening on ip and port
-     * 
-     * @param address
-     * @param port
-     * @return
+     *
+     * @param address the address
+     * @param port    the port
+     * @return ais udp reader
      */
     public static AisUdpReader createUdpReader(String address, int port) {
         return new AisUdpReader(address, port);
     }
 
+    /**
+     * Create reader from input stream ais reader.
+     *
+     * @param inputStream the input stream
+     * @return the ais reader
+     */
     public static AisReader createReaderFromInputStream(InputStream inputStream) {
         return new AisStreamReader(inputStream);
     }
-    
+
     /**
-     * Creates a {@link AisReader} from a file. If the file has '.zip' or '.gz' suffix the file will treated as a zip file or 
-     * gzip file respectively. 
-     * @param filename
-     * @return
-     * @throws IOException
+     * Creates a {@link AisReader} from a file. If the file has '.zip' or '.gz' suffix the file will treated as a zip file or
+     * gzip file respectively.
+     *
+     * @param filename the filename
+     * @return ais reader
+     * @throws IOException the io exception
      */
     public static AisReader createReaderFromFile(String filename) throws IOException {
         return new AisStreamReader(createFileInputStream(requireNonNull(filename)));
     }
-    
+
     /**
-     * Reader that recursively reads files matching pattern in directories with root dir  
-     * @param dir
-     * @param pattern E.g. *.txt or *.gz
+     * Reader that recursively reads files matching pattern in directories with root dir
+     *
+     * @param dir       the dir
+     * @param pattern   E.g. *.txt or *.gz
      * @param recursive Apply to all sub directories depth first
-     * @return
-     * @throws IOException 
+     * @return ais directory reader
+     * @throws IOException the io exception
      */
     public static AisDirectoryReader createDirectoryReader(String dir, String pattern, boolean recursive) throws IOException {
         return new AisDirectoryReader(dir, pattern, recursive);
@@ -144,7 +164,7 @@ public class AisReaders {
     /**
      * Returns the default sources configured for the system. The default sources can be set using enviroment variable
      * AIS_DEFAULT_SOURCES.
-     * 
+     *
      * @return the default sources configured for the system
      */
     public static String[] getDefaultSources() {
@@ -158,6 +178,12 @@ public class AisReaders {
         return p.split(";");
     }
 
+    /**
+     * Manage group.
+     *
+     * @param group the group
+     * @throws JMException the jm exception
+     */
     public static void manageGroup(AisReaderGroup group) throws JMException {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName mxbeanName = new ObjectName("dk.dma.ais.readers.group." + group.name + ":name=Group");
@@ -174,9 +200,8 @@ public class AisReaders {
      * {@link RoundRobinAisTcpReader} if more than 1 host name is found. Example
      * "mySource=ais163.sealan.dk:65262,ais167.sealan.dk:65261" will return a RoundRobinAisTcpReader alternating between
      * the two sources if one is down.
-     * 
-     * @param fullSource
-     *            the full source
+     *
+     * @param fullSource the full source
      * @return a ais reader
      */
     static AisTcpReader parseSource(String fullSource) {
@@ -208,7 +233,14 @@ public class AisReaders {
             return r;
         }
     }
-    
+
+    /**
+     * Create file input stream input stream.
+     *
+     * @param filename the filename
+     * @return the input stream
+     * @throws IOException the io exception
+     */
     static InputStream createFileInputStream(String filename) throws IOException {
         InputStream in = new FileInputStream(filename);
         if (filename.endsWith(".gz")) {

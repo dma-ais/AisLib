@@ -23,25 +23,63 @@ import com.google.common.base.Joiner;
 import com.google.common.net.HostAndPort;
 
 /**
- * 
+ * The interface Ais reader mx bean.
+ *
  * @author Kasper Nielsen
  */
 public interface AisReaderMXBean {
 
+    /**
+     * Gets hosts.
+     *
+     * @return the hosts
+     */
     String getHosts();
 
+    /**
+     * Add host.
+     *
+     * @param hostname the hostname
+     * @param port     the port
+     */
     void addHost(String hostname, int port);
 
+    /**
+     * Gets bytes read.
+     *
+     * @return the bytes read
+     */
     long getBytesRead();
 
+    /**
+     * Gets packets read.
+     *
+     * @return the packets read
+     */
     long getPacketsRead();
 
+    /**
+     * Gets source.
+     *
+     * @return the source
+     */
     String getSource();
 }
 
+/**
+ * The type Ais reader mx bean.
+ */
 class AisReaderMXBeanImpl implements AisReaderMXBean {
+    /**
+     * The Reader.
+     */
     final AisTcpReader reader;
 
+    /**
+     * Instantiates a new Ais reader mx bean.
+     *
+     * @param reader the reader
+     */
     AisReaderMXBeanImpl(AisTcpReader reader) {
         this.reader = requireNonNull(reader);
     }

@@ -27,9 +27,8 @@ import java.util.function.Consumer;
 
 /**
  * Thread class for reading any InputStream for AIS messages
- * 
+ * <p>
  * For fail tolerant TCP reading use AisTcpReader
- * 
  */
 public class AisStreamReader extends AisReader {
 
@@ -38,6 +37,11 @@ public class AisStreamReader extends AisReader {
     private final InputStream stream;
     private volatile boolean done;
 
+    /**
+     * Instantiates a new Ais stream reader.
+     *
+     * @param stream the stream
+     */
     AisStreamReader(InputStream stream) {
         this.stream = requireNonNull(stream);
     }

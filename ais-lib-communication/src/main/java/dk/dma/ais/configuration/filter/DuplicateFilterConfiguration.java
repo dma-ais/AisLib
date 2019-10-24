@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.filter.DuplicateFilter;
 import dk.dma.ais.filter.IPacketFilter;
 
+/**
+ * The type Duplicate filter configuration.
+ */
 @XmlRootElement
 public class DuplicateFilterConfiguration extends FilterConfiguration {
 
@@ -28,14 +31,27 @@ public class DuplicateFilterConfiguration extends FilterConfiguration {
      */
     private long windowSize = 10000;
 
+    /**
+     * Instantiates a new Duplicate filter configuration.
+     */
     public DuplicateFilterConfiguration() {
 
     }
 
+    /**
+     * Gets window size.
+     *
+     * @return the window size
+     */
     public long getWindowSize() {
         return windowSize;
     }
 
+    /**
+     * Sets window size.
+     *
+     * @param windowSize the window size
+     */
     public void setWindowSize(long windowSize) {
         this.windowSize = windowSize;
     }

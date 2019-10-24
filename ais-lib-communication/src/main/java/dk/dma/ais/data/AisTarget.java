@@ -37,20 +37,35 @@ public abstract class AisTarget implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The Mmsi.
+     */
     protected int mmsi;
+    /**
+     * The Country.
+     */
     protected Country country;
+    /**
+     * The Last report.
+     */
     protected Date lastReport;
+    /**
+     * The Created.
+     */
     protected Date created;
 
+    /**
+     * Instantiates a new Ais target.
+     */
     public AisTarget() {
         this.created = new Date();
     }
 
     /**
      * Determine if target is alive based on ttl given in seconds
-     * 
-     * @param ttl
-     * @return
+     *
+     * @param ttl the ttl
+     * @return boolean boolean
      */
     public boolean isAlive(int ttl) {
         if (lastReport == null) {
@@ -59,13 +74,19 @@ public abstract class AisTarget implements Serializable {
         long elapsed = System.currentTimeMillis() - lastReport.getTime();
         return elapsed / 1000 < ttl;
     }
-    
+
+    /**
+     * Is message compatible boolean.
+     *
+     * @param msg the msg
+     * @return the boolean
+     */
     public abstract boolean isMessageCompatible(AisMessage msg);
 
     /**
      * Update target given AIS message
-     * 
-     * @param aisMessage
+     *
+     * @param aisMessage the ais message
      */
     public void update(AisMessage aisMessage) {
         // Set MMSI
@@ -80,45 +101,90 @@ public abstract class AisTarget implements Serializable {
         country = Country.getCountryForMmsi(aisMessage.getUserId());
     }
 
+    /**
+     * Gets mmsi.
+     *
+     * @return the mmsi
+     */
     public int getMmsi() {
         return mmsi;
     }
 
+    /**
+     * Sets mmsi.
+     *
+     * @param mmsi the mmsi
+     */
     public void setMmsi(int mmsi) {
         this.mmsi = mmsi;
     }
 
+    /**
+     * Gets country.
+     *
+     * @return the country
+     */
     public Country getCountry() {
         return country;
     }
 
+    /**
+     * Sets country.
+     *
+     * @param country the country
+     */
     public void setCountry(Country country) {
         this.country = country;
     }
 
+    /**
+     * Gets last report.
+     *
+     * @return the last report
+     */
     public Date getLastReport() {
         return lastReport;
     }
 
+    /**
+     * Sets last report.
+     *
+     * @param lastReport the last report
+     */
     public void setLastReport(Date lastReport) {
         this.lastReport = lastReport;
     }
 
+    /**
+     * Gets created.
+     *
+     * @return the created
+     */
     public Date getCreated() {
         return created;
     }
 
+    /**
+     * Sets created.
+     *
+     * @param created the created
+     */
     public void setCreated(Date created) {
         this.created = created;
     }
 
+    /**
+     * Gets target type.
+     *
+     * @return the target type
+     */
     public abstract AisTargetType getTargetType();
 
     /**
      * Create new AIS target instance based on AIS message
-     * 
-     * @param aisMessage
-     * @return
+     *
+     * @param aisMessage the ais message
+     * @return ais target
      */
     public static AisTarget createTarget(AisMessage aisMessage) {
         AisTarget target = null;
@@ -136,9 +202,9 @@ public abstract class AisTarget implements Serializable {
 
     /**
      * Determine if message is a message from target containing data about the target
-     * 
-     * @param aisMessage
-     * @return
+     *
+     * @param aisMessage the ais message
+     * @return boolean boolean
      */
     public static boolean isTargetDataMessage(AisMessage aisMessage) {
         if (aisMessage instanceof IVesselPositionMessage) {

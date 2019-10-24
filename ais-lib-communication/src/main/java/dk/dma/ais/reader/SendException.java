@@ -22,6 +22,11 @@ import java.io.IOException;
 public class SendException extends IOException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Send exception.
+     *
+     * @param msg the msg
+     */
     public SendException(String msg) {
         super(msg);
     }

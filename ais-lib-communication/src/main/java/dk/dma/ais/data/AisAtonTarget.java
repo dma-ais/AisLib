@@ -45,9 +45,9 @@ public class AisAtonTarget extends AisTarget {
 
     /**
      * Determine if message is AtoN report
-     * 
-     * @param aisMessage
-     * @return
+     *
+     * @param aisMessage the ais message
+     * @return boolean boolean
      */
     public static boolean isAtonReport(AisMessage aisMessage) {
         return aisMessage instanceof AisMessage21;

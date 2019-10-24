@@ -32,11 +32,21 @@ public class AisReaderProvider extends AisBusProvider implements Consumer<AisPac
      * The AIS reader to provide packets
      */
     private AtomicReference<AisReader> aisReader = new AtomicReference<>();
-    
+
+    /**
+     * Instantiates a new Ais reader provider.
+     *
+     * @param blocking the blocking
+     */
     public AisReaderProvider(boolean blocking) {
         super(blocking);
     }
-    
+
+    /**
+     * Instantiates a new Ais reader provider.
+     *
+     * @param aisReader the ais reader
+     */
     public AisReaderProvider(AisReader aisReader) {
         setAisReader(aisReader);
     }
@@ -67,7 +77,12 @@ public class AisReaderProvider extends AisBusProvider implements Consumer<AisPac
             e.printStackTrace();
         }
     }
-    
+
+    /**
+     * Sets ais reader.
+     *
+     * @param aisReader the ais reader
+     */
     public void setAisReader(AisReader aisReader) {
         if (this.aisReader.get() != null) {
             throw new IllegalStateException("AisReader already defined");

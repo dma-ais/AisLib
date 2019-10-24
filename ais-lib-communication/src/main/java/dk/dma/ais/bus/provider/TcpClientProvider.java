@@ -52,6 +52,9 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
     private int currentHost = -1;
     private volatile Socket socket;
 
+    /**
+     * Instantiates a new Tcp client provider.
+     */
     public TcpClientProvider() {
         super();
     }
@@ -149,22 +152,47 @@ public final class TcpClientProvider extends AisBusProvider implements Runnable,
         super.init();
     }
 
+    /**
+     * Gets hosts ports.
+     *
+     * @return the hosts ports
+     */
     public List<String> getHostsPorts() {
         return hostsPorts;
     }
 
+    /**
+     * Sets hosts ports.
+     *
+     * @param hostsPorts the hosts ports
+     */
     public void setHostsPorts(List<String> hostsPorts) {
         this.hostsPorts = hostsPorts;
     }
 
+    /**
+     * Sets client conf.
+     *
+     * @param clientConf the client conf
+     */
     public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
     }
 
+    /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
+    /**
+     * Sets reconnect interval.
+     *
+     * @param reconnectInterval the reconnect interval
+     */
     public void setReconnectInterval(int reconnectInterval) {
         this.reconnectInterval = reconnectInterval;
     }

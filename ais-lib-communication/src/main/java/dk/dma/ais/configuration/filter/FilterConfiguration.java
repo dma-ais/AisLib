@@ -18,12 +18,20 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import dk.dma.ais.filter.IPacketFilter;
 
+/**
+ * The type Filter configuration.
+ */
 @XmlSeeAlso({ PacketFilterCollectionConfiguration.class, DownSampleFilterConfiguration.class,
         ReplayDownSampleFilterConfiguration.class, DuplicateFilterConfiguration.class, GatehouseSourceFilterConfiguration.class,
         TargetCountryFilterConfiguration.class, TaggingFilterConfiguration.class, LocationFilterConfiguration.class,
         MessageTypeFilterConfiguration.class, ExpressionFilterConfiguration.class, SanityFilterConfiguration.class, FutureFilterConfiguration.class, PastFilterConfiguration.class })
 public abstract class FilterConfiguration {
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public abstract IPacketFilter getInstance();
 
 }

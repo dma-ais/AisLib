@@ -25,6 +25,11 @@ import dk.dma.ais.tracker.eventEmittingTracker.Track;
  */
 public class TrackStaleEvent extends TrackEvent {
 
+    /**
+     * Instantiates a new Track stale event.
+     *
+     * @param track the track
+     */
     public TrackStaleEvent(Track track) {
         super(track);
     }

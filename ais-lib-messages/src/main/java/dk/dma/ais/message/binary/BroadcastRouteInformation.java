@@ -17,12 +17,24 @@ package dk.dma.ais.message.binary;
 import dk.dma.ais.binary.BinArray;
 import dk.dma.ais.binary.SixbitException;
 
+/**
+ * The type Broadcast route information.
+ */
 public class BroadcastRouteInformation extends RouteInformation {
 
+    /**
+     * Instantiates a new Broadcast route information.
+     */
     public BroadcastRouteInformation() {
         super(1, 27);
     }
 
+    /**
+     * Instantiates a new Broadcast route information.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public BroadcastRouteInformation(BinArray binArray) throws SixbitException {
         super(1, 27, binArray);
     }

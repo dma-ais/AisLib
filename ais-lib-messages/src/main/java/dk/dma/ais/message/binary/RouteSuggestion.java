@@ -25,8 +25,22 @@ import dk.dma.ais.binary.SixbitException;
  */
 public class RouteSuggestion extends RouteExchange {
 
+    /**
+     * The enum Route type.
+     */
     public enum RouteType {
-        MANDATORY(1), RECOMMENDED(2), ALTERNATIVE(3);
+        /**
+         * Mandatory route type.
+         */
+        MANDATORY(1),
+        /**
+         * Recommended route type.
+         */
+        RECOMMENDED(2),
+        /**
+         * Alternative route type.
+         */
+        ALTERNATIVE(3);
 
         private int type;
 
@@ -34,22 +48,42 @@ public class RouteSuggestion extends RouteExchange {
             this.type = type;
         }
 
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
         public int getType() {
             return type;
         }
     }
 
+    /**
+     * The constant DAC.
+     */
     public static final int DAC = 219;
+    /**
+     * The constant FI.
+     */
     public static final int FI = 2;
 
     private int msgLinkId; // 10 bits: Source specific running number linking
                            // binary messages
     private int routeType; // 5 bits
 
+    /**
+     * Instantiates a new Route suggestion.
+     */
     public RouteSuggestion() {
         super(DAC, FI);
     }
 
+    /**
+     * Instantiates a new Route suggestion.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public RouteSuggestion(BinArray binArray) throws SixbitException {
         super(DAC, FI, binArray);
     }
@@ -71,18 +105,38 @@ public class RouteSuggestion extends RouteExchange {
         super.parse(binArray);
     }
 
+    /**
+     * Gets msg link id.
+     *
+     * @return the msg link id
+     */
     public int getMsgLinkId() {
         return msgLinkId;
     }
 
+    /**
+     * Sets msg link id.
+     *
+     * @param msgLinkId the msg link id
+     */
     public void setMsgLinkId(int msgLinkId) {
         this.msgLinkId = msgLinkId;
     }
 
+    /**
+     * Gets route type.
+     *
+     * @return the route type
+     */
     public int getRouteType() {
         return routeType;
     }
 
+    /**
+     * Sets route type.
+     *
+     * @param routeType the route type
+     */
     public void setRouteType(int routeType) {
         this.routeType = routeType;
     }

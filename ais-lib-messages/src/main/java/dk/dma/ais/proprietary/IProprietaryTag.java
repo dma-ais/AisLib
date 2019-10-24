@@ -21,8 +21,8 @@ public interface IProprietaryTag {
 
     /**
      * Get the original sentence
-     * 
-     * @return
+     *
+     * @return sentence
      */
     String getSentence();
 

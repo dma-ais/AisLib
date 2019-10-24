@@ -33,15 +33,31 @@ public class AisMessage12 extends AisMessage {
     private int spare; // 1 bit: Spare
     private String message; // Max 936 bit - 156 characters
 
+    /**
+     * Instantiates a new Ais message 12.
+     */
     public AisMessage12() {
         super(12);
     }
 
+    /**
+     * Instantiates a new Ais message 12.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage12(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() < 72 || binArray.getLength() > 1008) {
@@ -68,9 +84,9 @@ public class AisMessage12 extends AisMessage {
 
     /**
      * Set message from a binary array
-     * 
-     * @param binArray
-     * @throws SixbitException
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
      */
     public void setMessage(BinArray binArray) throws SixbitException {
         message = binArray.getString(binArray.getLength() / 6);
@@ -94,42 +110,92 @@ public class AisMessage12 extends AisMessage {
         return builder.toString();
     }
 
+    /**
+     * Gets seq num.
+     *
+     * @return the seq num
+     */
     public int getSeqNum() {
         return seqNum;
     }
 
+    /**
+     * Sets seq num.
+     *
+     * @param seqNum the seq num
+     */
     public void setSeqNum(int seqNum) {
         this.seqNum = seqNum;
     }
 
+    /**
+     * Gets destination.
+     *
+     * @return the destination
+     */
     public long getDestination() {
         return destination;
     }
 
+    /**
+     * Sets destination.
+     *
+     * @param destination the destination
+     */
     public void setDestination(long destination) {
         this.destination = destination;
     }
 
+    /**
+     * Gets retransmit.
+     *
+     * @return the retransmit
+     */
     public int getRetransmit() {
         return retransmit;
     }
 
+    /**
+     * Sets retransmit.
+     *
+     * @param retransmit the retransmit
+     */
     public void setRetransmit(int retransmit) {
         this.retransmit = retransmit;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }
 
+    /**
+     * Gets message.
+     *
+     * @return the message
+     */
     public String getMessage() {
         return message;
     }
 
+    /**
+     * Sets message.
+     *
+     * @param message the message
+     */
     public void setMessage(String message) {
         this.message = message;
     }

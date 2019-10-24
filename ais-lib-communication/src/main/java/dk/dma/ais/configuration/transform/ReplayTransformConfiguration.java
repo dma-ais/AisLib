@@ -20,19 +20,35 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.ReplayTransformer;
 
+/**
+ * The type Replay transform configuration.
+ */
 @XmlRootElement
 public class ReplayTransformConfiguration extends TransformerConfiguration {
 
     private double speedup = 1;
 
+    /**
+     * Instantiates a new Replay transform configuration.
+     */
     public ReplayTransformConfiguration() {
         super();
     }
 
+    /**
+     * Gets speedup.
+     *
+     * @return the speedup
+     */
     public double getSpeedup() {
         return speedup;
     }
 
+    /**
+     * Sets speedup.
+     *
+     * @param speedup the speedup
+     */
     public void setSpeedup(double speedup) {
         this.speedup = speedup;
     }

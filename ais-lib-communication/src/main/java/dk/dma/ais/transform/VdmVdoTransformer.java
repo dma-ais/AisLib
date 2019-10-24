@@ -37,10 +37,21 @@ public class VdmVdoTransformer implements IAisPacketTransformer {
     private final int ownMmsi;
     private final String ownTalker;
 
+    /**
+     * Instantiates a new Vdm vdo transformer.
+     *
+     * @param ownMmsi the own mmsi
+     */
     public VdmVdoTransformer(int ownMmsi) {
         this(ownMmsi, null);
     }
 
+    /**
+     * Instantiates a new Vdm vdo transformer.
+     *
+     * @param ownMmsi   the own mmsi
+     * @param ownTalker the own talker
+     */
     public VdmVdoTransformer(int ownMmsi, String ownTalker) {
         this.ownMmsi = ownMmsi;
         this.ownTalker = ownTalker;

@@ -19,21 +19,30 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 2
- * 
+ * <p>
  * Assigned scheduled position report
- * 
+ * <p>
  * This class handles the content of an AIS class A transponders general position report as defined by ITU-R M.1371-4.
- * 
  */
 public class AisMessage2 extends AisMessage1 {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Ais message 2.
+     */
     public AisMessage2() {
         super(2);
     }
 
+    /**
+     * Instantiates a new Ais message 2.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage2(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
     }

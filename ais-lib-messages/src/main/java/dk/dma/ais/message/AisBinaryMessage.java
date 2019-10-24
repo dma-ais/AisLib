@@ -28,16 +28,31 @@ public abstract class AisBinaryMessage extends AisMessage {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The Spare.
+     */
     protected int spare;
+    /**
+     * The Dac.
+     */
     protected int dac; // 10 bits: Designated area code (DAC)
+    /**
+     * The Fi.
+     */
     protected int fi; // 6 bits: Function identifier
+    /**
+     * The Data.
+     */
     protected BinArray data;
+    /**
+     * The App message.
+     */
     protected AisApplicationMessage appMessage;
 
     /**
      * Construct empty binary message with msgId
-     * 
-     * @param msgId
+     *
+     * @param msgId the msg id
      */
     public AisBinaryMessage(int msgId) {
         super(msgId);
@@ -45,8 +60,8 @@ public abstract class AisBinaryMessage extends AisMessage {
 
     /**
      * Construct binary message from VDM sentence
-     * 
-     * @param vdm
+     *
+     * @param vdm the vdm
      */
     public AisBinaryMessage(Vdm vdm) {
         super(vdm);
@@ -54,9 +69,9 @@ public abstract class AisBinaryMessage extends AisMessage {
 
     /**
      * Get the application specific message, if it is implemented
-     * 
+     *
      * @return application specific message
-     * @throws BitExhaustionException
+     * @throws SixbitException the sixbit exception
      */
     public AisApplicationMessage getApplicationMessage() throws SixbitException {
         if (appMessage != null) {
@@ -73,8 +88,8 @@ public abstract class AisBinaryMessage extends AisMessage {
 
     /**
      * Get binary data for this message
-     * 
-     * @return
+     *
+     * @return binary data
      */
     public SixbitEncoder getBinaryData() {
         SixbitEncoder encoder = new SixbitEncoder();
@@ -84,34 +99,64 @@ public abstract class AisBinaryMessage extends AisMessage {
         return encoder;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }
 
+    /**
+     * Gets dac.
+     *
+     * @return the dac
+     */
     public int getDac() {
         return dac;
     }
 
+    /**
+     * Sets dac.
+     *
+     * @param dac the dac
+     */
     public void setDac(int dac) {
         this.dac = dac;
     }
 
+    /**
+     * Gets fi.
+     *
+     * @return the fi
+     */
     public int getFi() {
         return fi;
     }
 
+    /**
+     * Sets fi.
+     *
+     * @param fi the fi
+     */
     public void setFi(int fi) {
         this.fi = fi;
     }
 
     /**
      * Get the raw binary data of this message
-     * 
-     * @return
+     *
+     * @return data
      */
     public BinArray getData() {
         return data;
@@ -119,8 +164,8 @@ public abstract class AisBinaryMessage extends AisMessage {
 
     /**
      * Set the raw binary data of this message
-     * 
-     * @param data
+     *
+     * @param data the data
      */
     public void setData(BinArray data) {
         this.data = data;
@@ -128,8 +173,8 @@ public abstract class AisBinaryMessage extends AisMessage {
 
     /**
      * Get the application specific message contained in the sentence
-     * 
-     * @return
+     *
+     * @return app message
      */
     public AisApplicationMessage getAppMessage() {
         return appMessage;
@@ -137,8 +182,8 @@ public abstract class AisBinaryMessage extends AisMessage {
 
     /**
      * Set application specific message to be contained in this message
-     * 
-     * @param appMessage
+     *
+     * @param appMessage the app message
      */
     public void setAppMessage(AisApplicationMessage appMessage) {
         this.dac = appMessage.getDac();
@@ -148,9 +193,9 @@ public abstract class AisBinaryMessage extends AisMessage {
 
     /**
      * Set values from ABM/BBM binary part
-     * 
-     * @param binArray
-     * @throws SixbitException
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
      */
     public void setBinary(BinArray binArray) throws SixbitException {
         this.dac = (int) binArray.getVal(10);

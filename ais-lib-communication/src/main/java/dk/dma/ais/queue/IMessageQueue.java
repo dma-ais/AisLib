@@ -20,49 +20,54 @@ import net.jcip.annotations.ThreadSafe;
 
 /**
  * Queue for transporting various data. Suited for AIS use.
+ *
+ * @param <T> the type parameter
  */
 @ThreadSafe
 public interface IMessageQueue<T> {
 
     /**
      * Push AisMessage onto the queue
-     * 
-     * @param aisMessage
+     *
+     * @param content the content
      * @return the number of elements on the queue after the insertion
-     * @throws MessageQueueOverflowException
-     *             when capacity limit has been reached
+     * @throws MessageQueueOverflowException when capacity limit has been reached
      */
     int push(T content) throws MessageQueueOverflowException;
-    
+
     /**
      * Push the specified element on the queue, waiting if necessary for space to become availably
-     * @param content
-     * @return
-     * @throws InterruptedException
+     *
+     * @param content the content
+     * @return int int
+     * @throws InterruptedException the interrupted exception
      */
     int put(T content) throws InterruptedException;
 
     /**
      * Pull message from the queue. This must be implemented as a blocking call.
-     * 
-     * @return AisMessageQueueEntry
+     *
+     * @return AisMessageQueueEntry t
+     * @throws InterruptedException the interrupted exception
      */
     T pull() throws InterruptedException;
 
     /**
      * Pull up to maxElements from queue. This must be a blocking call.
-     * 
-     * @param l list to add elements to 
-     * @param maxElements
+     *
+     * @param l           list to add elements to
+     * @param maxElements the max elements
      * @return list with added elements
+     * @throws InterruptedException the interrupted exception
      */
     List<T> pull(List<T> l, int maxElements) throws InterruptedException;
 
     /**
      * Pull all current message on the queue. This must be a blocking call.
-     * 
-     * @param l list to add elements to 
+     *
+     * @param c the c
      * @return list with added elements
+     * @throws InterruptedException the interrupted exception
      */
     List<T> pullAll(List<T> c) throws InterruptedException;
 

@@ -22,43 +22,112 @@ import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS message 21
- * 
+ * <p>
  * Aids-to-navigation report (AtoN) as defined by ITU-R M.1371-4
- * 
  */
 public class AisMessage21 extends AisMessage implements IPositionMessage, IDimensionMessage, INameMessage {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The Aton type.
+     */
     int atonType; // 5 bits : Type of AtoN
+    /**
+     * The Name.
+     */
     String name; // 120 bits : Name of AtoN in ASCII
+    /**
+     * The Pos acc.
+     */
     int posAcc; // 1 bit : AisPosition Accuracy
+    /**
+     * The Pos.
+     */
     AisPosition pos; // : Lat/Long 1/100000 minute
+    /**
+     * The Dim bow.
+     */
     int dimBow; // 9 bits : GPS Ant. Distance from Bow
+    /**
+     * The Dim stern.
+     */
     int dimStern; // 9 bits : GPS Ant. Distance from Stern
+    /**
+     * The Dim port.
+     */
     int dimPort; // 6 bits : GPS Ant. Distance from Port
+    /**
+     * The Dim starboard.
+     */
     int dimStarboard; // 6 bits : GPS Ant. Distance from Starboard
+    /**
+     * The Pos type.
+     */
     int posType; // 4 bits : Type of AisPosition Fixing Device
+    /**
+     * The Utc sec.
+     */
     int utcSec; // 6 bits : UTC Seconds
+    /**
+     * The Off position.
+     */
     int offPosition; // 1 bit : Off AisPosition Flag
+    /**
+     * The Regional.
+     */
     int regional; // 8 bits : Regional Bits
+    /**
+     * The Raim.
+     */
     int raim; // 1 bit : RAIM Flag
+    /**
+     * The Virtual.
+     */
     int virtual; // 1 bit : Virtual/Pseudo AtoN Flag
+    /**
+     * The Assigned.
+     */
     int assigned; // 1 bit : Assigned Mode Flag
+    /**
+     * The Spare 1.
+     */
     int spare1; // 1 bit : Spare
+    /**
+     * The Name ext.
+     */
     String nameExt; // 0-84 bits : Extended name in ASCII
+    /**
+     * The Spare 2.
+     */
     int spare2; // 0-6 bits : Spare
 
+    /**
+     * Instantiates a new Ais message 21.
+     */
     public AisMessage21() {
         super(21);
     }
 
+    /**
+     * Instantiates a new Ais message 21.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage21(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() < 272 || binArray.getLength() > 360) {
@@ -120,10 +189,20 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return encoder;
     }
 
+    /**
+     * Gets aton type.
+     *
+     * @return the aton type
+     */
     public int getAtonType() {
         return atonType;
     }
 
+    /**
+     * Sets aton type.
+     *
+     * @param atonType the aton type
+     */
     public void setAtonType(int atonType) {
         this.atonType = atonType;
     }
@@ -132,6 +211,11 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return name;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     */
     public void setName(String name) {
         this.name = name;
     }
@@ -140,6 +224,11 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return posAcc;
     }
 
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
     }
@@ -154,6 +243,11 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return pos;
     }
 
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
     public void setPos(AisPosition pos) {
         this.pos = pos;
     }
@@ -162,6 +256,11 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return dimBow;
     }
 
+    /**
+     * Sets dim bow.
+     *
+     * @param dimBow the dim bow
+     */
     public void setDimBow(int dimBow) {
         this.dimBow = dimBow;
     }
@@ -170,6 +269,11 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return dimStern;
     }
 
+    /**
+     * Sets dim stern.
+     *
+     * @param dimStern the dim stern
+     */
     public void setDimStern(int dimStern) {
         this.dimStern = dimStern;
     }
@@ -178,6 +282,11 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return dimPort;
     }
 
+    /**
+     * Sets dim port.
+     *
+     * @param dimPort the dim port
+     */
     public void setDimPort(int dimPort) {
         this.dimPort = dimPort;
     }
@@ -186,86 +295,191 @@ public class AisMessage21 extends AisMessage implements IPositionMessage, IDimen
         return dimStarboard;
     }
 
+    /**
+     * Sets dim starboard.
+     *
+     * @param dimStarboard the dim starboard
+     */
     public void setDimStarboard(int dimStarboard) {
         this.dimStarboard = dimStarboard;
     }
 
+    /**
+     * Gets pos type.
+     *
+     * @return the pos type
+     */
     public int getPosType() {
         return posType;
     }
 
+    /**
+     * Sets pos type.
+     *
+     * @param posType the pos type
+     */
     public void setPosType(int posType) {
         this.posType = posType;
     }
 
+    /**
+     * Gets utc sec.
+     *
+     * @return the utc sec
+     */
     public int getUtcSec() {
         return utcSec;
     }
 
+    /**
+     * Sets utc sec.
+     *
+     * @param utcSec the utc sec
+     */
     public void setUtcSec(int utcSec) {
         this.utcSec = utcSec;
     }
 
+    /**
+     * Gets off position.
+     *
+     * @return the off position
+     */
     public int getOffPosition() {
         return offPosition;
     }
 
+    /**
+     * Sets off position.
+     *
+     * @param offPosition the off position
+     */
     public void setOffPosition(int offPosition) {
         this.offPosition = offPosition;
     }
 
+    /**
+     * Gets regional.
+     *
+     * @return the regional
+     */
     public int getRegional() {
         return regional;
     }
 
+    /**
+     * Sets regional.
+     *
+     * @param regional the regional
+     */
     public void setRegional(int regional) {
         this.regional = regional;
     }
 
+    /**
+     * Gets raim.
+     *
+     * @return the raim
+     */
     public int getRaim() {
         return raim;
     }
 
+    /**
+     * Sets raim.
+     *
+     * @param raim the raim
+     */
     public void setRaim(int raim) {
         this.raim = raim;
     }
 
+    /**
+     * Gets virtual.
+     *
+     * @return the virtual
+     */
     public int getVirtual() {
         return virtual;
     }
 
+    /**
+     * Sets virtual.
+     *
+     * @param virtual the virtual
+     */
     public void setVirtual(int virtual) {
         this.virtual = virtual;
     }
 
+    /**
+     * Gets assigned.
+     *
+     * @return the assigned
+     */
     public int getAssigned() {
         return assigned;
     }
 
+    /**
+     * Sets assigned.
+     *
+     * @param assigned the assigned
+     */
     public void setAssigned(int assigned) {
         this.assigned = assigned;
     }
 
+    /**
+     * Gets spare 1.
+     *
+     * @return the spare 1
+     */
     public int getSpare1() {
         return spare1;
     }
 
+    /**
+     * Sets spare 1.
+     *
+     * @param spare1 the spare 1
+     */
     public void setSpare1(int spare1) {
         this.spare1 = spare1;
     }
 
+    /**
+     * Gets name ext.
+     *
+     * @return the name ext
+     */
     public String getNameExt() {
         return nameExt;
     }
 
+    /**
+     * Sets name ext.
+     *
+     * @param nameExt the name ext
+     */
     public void setNameExt(String nameExt) {
         this.nameExt = nameExt;
     }
 
+    /**
+     * Gets spare 2.
+     *
+     * @return the spare 2
+     */
     public int getSpare2() {
         return spare2;
     }
 
+    /**
+     * Sets spare 2.
+     *
+     * @param spare2 the spare 2
+     */
     public void setSpare2(int spare2) {
         this.spare2 = spare2;
     }

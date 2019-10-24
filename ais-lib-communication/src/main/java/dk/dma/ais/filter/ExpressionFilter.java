@@ -21,12 +21,21 @@ import java.util.function.Predicate;
 
 /**
  * Filtering using string expression
- * @see dk.dma.ais.packet.AisPacketFiltersParseHelper 
+ *
+ * see dk.dma.ais.packet.AisPacketFiltersParseHelper (broken link!?)
  */
 public class ExpressionFilter implements IPacketFilter {
-    
+
+    /**
+     * The Predicate.
+     */
     final Predicate<AisPacket> predicate;
-    
+
+    /**
+     * Instantiates a new Expression filter.
+     *
+     * @param filter the filter
+     */
     public ExpressionFilter(String filter) {
         this.predicate = AisPacketFilters.parseExpressionFilter(filter);
     }

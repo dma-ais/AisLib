@@ -38,9 +38,9 @@ public abstract class SendSentence extends EncapsulatedSentence {
 
     /**
      * Set binary content from binary application specific message
-     * 
-     * @param sentenceStr
-     * @throws SixbitException
+     *
+     * @param msg the msg
+     * @throws SixbitException the sixbit exception
      */
     public void setBinaryData(AisBinaryMessage msg) throws SixbitException {
         this.msgId = msg.getMsgId();
@@ -51,9 +51,9 @@ public abstract class SendSentence extends EncapsulatedSentence {
 
     /**
      * Set binary content from AIS message 12
-     * 
-     * @param sentenceStr
-     * @throws SixbitException
+     *
+     * @param msg the msg
+     * @throws SixbitException the sixbit exception
      */
     public void setTextData(AisMessage12 msg) throws SixbitException {
         this.msgId = msg.getMsgId();
@@ -62,9 +62,9 @@ public abstract class SendSentence extends EncapsulatedSentence {
 
     /**
      * Set binary content from AIS message 14
-     * 
-     * @param sentenceStr
-     * @throws SixbitException
+     *
+     * @param msg the msg
+     * @throws SixbitException the sixbit exception
      */
     public void setTextData(AisMessage14 msg) throws SixbitException {
         this.msgId = msg.getMsgId();
@@ -86,7 +86,7 @@ public abstract class SendSentence extends EncapsulatedSentence {
 
     /**
      * Split sentence to multiple sentences to agree with the 80 character max
-     * 
+     *
      * @return array of sentences
      */
     public SendSentence[] split() {

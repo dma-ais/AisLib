@@ -19,19 +19,35 @@ import javax.xml.bind.annotation.XmlRootElement;
 import dk.dma.ais.filter.ExpressionFilter;
 import dk.dma.ais.filter.IPacketFilter;
 
+/**
+ * The type Expression filter configuration.
+ */
 @XmlRootElement
 public class ExpressionFilterConfiguration extends FilterConfiguration {
 
     private String expression;
 
+    /**
+     * Instantiates a new Expression filter configuration.
+     */
     public ExpressionFilterConfiguration() {
 
     }
 
+    /**
+     * Gets expression.
+     *
+     * @return the expression
+     */
     public String getExpression() {
         return expression;
     }
 
+    /**
+     * Sets expression.
+     *
+     * @param expression the expression
+     */
     public void setExpression(String expression) {
         this.expression = expression;
     }

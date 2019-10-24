@@ -18,14 +18,25 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import dk.dma.ais.transform.IAisPacketTransformer;
 
+/**
+ * The type Transformer configuration.
+ */
 @XmlSeeAlso({ CropVdmTransformerConfiguration.class, TaggingTransformerConfiguration.class, ReplayTransformConfiguration.class,
         SourceTypeSatTransformerConfiguration.class, AnonymousTransfomerConfiguration.class, PacketTransformerCollectionConfiguration.class, TimestampTaggingTransformerConfiguration.class  })
 public abstract class TransformerConfiguration {
 
+    /**
+     * Instantiates a new Transformer configuration.
+     */
     public TransformerConfiguration() {
 
     }
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public abstract IAisPacketTransformer getInstance();
 
 }

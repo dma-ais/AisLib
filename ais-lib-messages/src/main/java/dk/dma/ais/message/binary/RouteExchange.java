@@ -22,10 +22,24 @@ import dk.dma.ais.binary.SixbitException;
  */
 public abstract class RouteExchange extends RouteMessage {
 
+    /**
+     * Instantiates a new Route exchange.
+     *
+     * @param dac the dac
+     * @param fi  the fi
+     */
     public RouteExchange(int dac, int fi) {
         super(dac, fi);
     }
 
+    /**
+     * Instantiates a new Route exchange.
+     *
+     * @param dac      the dac
+     * @param fi       the fi
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public RouteExchange(int dac, int fi, BinArray binArray) throws SixbitException {
         super(dac, fi, binArray);
     }

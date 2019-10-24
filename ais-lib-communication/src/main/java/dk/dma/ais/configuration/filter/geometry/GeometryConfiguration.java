@@ -19,9 +19,17 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import dk.dma.enav.model.geometry.Position;
 import java.util.function.Predicate;
 
+/**
+ * The type Geometry configuration.
+ */
 @XmlSeeAlso({ CircleGeometryConfiguration.class })
 public abstract class GeometryConfiguration {
 
+    /**
+     * Gets predicate.
+     *
+     * @return the predicate
+     */
     public abstract Predicate<? super Position> getPredicate();
 
 }

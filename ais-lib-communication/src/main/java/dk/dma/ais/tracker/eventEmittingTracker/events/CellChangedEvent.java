@@ -25,11 +25,22 @@ import dk.dma.ais.tracker.eventEmittingTracker.Track;
 public class CellChangedEvent extends TrackEvent {
     private final Long oldCellId;
 
+    /**
+     * Instantiates a new Cell changed event.
+     *
+     * @param track     the track
+     * @param oldCellId the old cell id
+     */
     public CellChangedEvent(Track track, Long oldCellId) {
         super(track);
         this.oldCellId = oldCellId;
     }
 
+    /**
+     * Gets old cell id.
+     *
+     * @return the old cell id
+     */
     public final Long getOldCellId() {
         return oldCellId;
     }

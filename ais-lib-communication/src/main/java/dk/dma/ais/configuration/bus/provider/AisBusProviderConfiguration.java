@@ -19,14 +19,26 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.configuration.bus.AisBusSocketConfiguration;
 
+/**
+ * The type Ais bus provider configuration.
+ */
 @XmlSeeAlso({ TcpClientProviderConfiguration.class, TcpServerProviderConfiguration.class, FileReaderProviderConfiguration.class,
         CollectorProviderConfiguration.class, RepeatingFileReaderProviderConfiguration.class })
 public abstract class AisBusProviderConfiguration extends AisBusSocketConfiguration {
 
+    /**
+     * Instantiates a new Ais bus provider configuration.
+     */
     public AisBusProviderConfiguration() {
 
     }
 
+    /**
+     * Configure ais bus provider.
+     *
+     * @param provider the provider
+     * @return the ais bus provider
+     */
     protected AisBusProvider configure(AisBusProvider provider) {
         super.configure(provider);
         return provider;

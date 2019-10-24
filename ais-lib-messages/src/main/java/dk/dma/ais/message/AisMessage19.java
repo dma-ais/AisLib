@@ -22,9 +22,8 @@ import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS message 19
- * 
+ * <p>
  * Extended Class B equipment position report as defined by ITU-R M.1371-4
- * 
  */
 public class AisMessage19 extends AisStaticCommon implements IVesselPositionMessage {
 
@@ -43,7 +42,7 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
     private int sog; // 10 bits
 
     /**
-     * AisPosition Accuracy 1 = high ( =< 10 m) 0 = low (>10 m) 0 = default The PA flag should be determined in
+     * AisPosition Accuracy 1 = high ( =&lt; 10 m) 0 = low (&gt;10 m) 0 = default The PA flag should be determined in
      * accordance with Table 47
      */
     private int posAcc; // 1 bit
@@ -105,10 +104,20 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
      */
     private int spare3; // 4 bits
 
+    /**
+     * Instantiates a new Ais message 19.
+     */
     public AisMessage19() {
         super(19);
     }
 
+    /**
+     * Instantiates a new Ais message 19.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage19(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse(vdm.getBinArray());
@@ -218,10 +227,20 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
         return builder.toString();
     }
 
+    /**
+     * Gets spare 1.
+     *
+     * @return the spare 1
+     */
     public int getSpare1() {
         return spare1;
     }
 
+    /**
+     * Sets spare 1.
+     *
+     * @param spare1 the spare 1
+     */
     public void setSpare1(int spare1) {
         this.spare1 = spare1;
     }
@@ -230,6 +249,11 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
         return sog;
     }
 
+    /**
+     * Sets sog.
+     *
+     * @param sog the sog
+     */
     public void setSog(int sog) {
         this.sog = sog;
     }
@@ -238,6 +262,11 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
         return posAcc;
     }
 
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
     }
@@ -252,6 +281,11 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
         return pos;
     }
 
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
     public void setPos(AisPosition pos) {
         this.pos = pos;
     }
@@ -260,6 +294,11 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
         return cog;
     }
 
+    /**
+     * Sets cog.
+     *
+     * @param cog the cog
+     */
     public void setCog(int cog) {
         this.cog = cog;
     }
@@ -268,6 +307,11 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
         return trueHeading;
     }
 
+    /**
+     * Sets true heading.
+     *
+     * @param trueHeading the true heading
+     */
     public void setTrueHeading(int trueHeading) {
         this.trueHeading = trueHeading;
     }
@@ -276,54 +320,119 @@ public class AisMessage19 extends AisStaticCommon implements IVesselPositionMess
         return utcSec;
     }
 
+    /**
+     * Sets utc sec.
+     *
+     * @param utcSec the utc sec
+     */
     public void setUtcSec(int utcSec) {
         this.utcSec = utcSec;
     }
 
+    /**
+     * Gets spare 2.
+     *
+     * @return the spare 2
+     */
     public int getSpare2() {
         return spare2;
     }
 
+    /**
+     * Sets spare 2.
+     *
+     * @param spare2 the spare 2
+     */
     public void setSpare2(int spare2) {
         this.spare2 = spare2;
     }
 
+    /**
+     * Gets pos type.
+     *
+     * @return the pos type
+     */
     public int getPosType() {
         return posType;
     }
 
+    /**
+     * Sets pos type.
+     *
+     * @param posType the pos type
+     */
     public void setPosType(int posType) {
         this.posType = posType;
     }
 
+    /**
+     * Gets raim flag.
+     *
+     * @return the raim flag
+     */
     public int getRaimFlag() {
         return raimFlag;
     }
 
+    /**
+     * Sets raim flag.
+     *
+     * @param raimFlag the raim flag
+     */
     public void setRaimFlag(int raimFlag) {
         this.raimFlag = raimFlag;
     }
 
+    /**
+     * Gets dte.
+     *
+     * @return the dte
+     */
     public int getDte() {
         return dte;
     }
 
+    /**
+     * Sets dte.
+     *
+     * @param dte the dte
+     */
     public void setDte(int dte) {
         this.dte = dte;
     }
 
+    /**
+     * Gets mode flag.
+     *
+     * @return the mode flag
+     */
     public int getModeFlag() {
         return modeFlag;
     }
 
+    /**
+     * Sets mode flag.
+     *
+     * @param modeFlag the mode flag
+     */
     public void setModeFlag(int modeFlag) {
         this.modeFlag = modeFlag;
     }
 
+    /**
+     * Gets spare 3.
+     *
+     * @return the spare 3
+     */
     public int getSpare3() {
         return spare3;
     }
 
+    /**
+     * Sets spare 3.
+     *
+     * @param spare3 the spare 3
+     */
     public void setSpare3(int spare3) {
         this.spare3 = spare3;
     }

@@ -47,6 +47,13 @@ public class SendThread extends Thread {
      */
     private Abk abk;
 
+    /**
+     * Instantiates a new Send thread.
+     *
+     * @param hash           the hash
+     * @param resultListener the result listener
+     * @param sendThreadPool the send thread pool
+     */
     public SendThread(String hash, Consumer<Abk> resultListener, SendThreadPool sendThreadPool) {
         setDaemon(true);
         this.hash = hash;
@@ -56,8 +63,8 @@ public class SendThread extends Thread {
 
     /**
      * Set the result for this thread
-     * 
-     * @param abk
+     *
+     * @param abk the abk
      */
     public synchronized void setAbk(Abk abk) {
         if (this.abk != null) {

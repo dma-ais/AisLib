@@ -39,6 +39,7 @@ public class FlowStat {
 
     /**
      * Constructor given the interval to calculate rate for
+     *
      * @param interval in milliseconds
      */
     public FlowStat(long interval) {
@@ -48,7 +49,8 @@ public class FlowStat {
 
     /**
      * Get the last received time
-     * @return
+     *
+     * @return last received
      */
     public Long getLastReceived() {
         return lastReceived;
@@ -56,7 +58,8 @@ public class FlowStat {
 
     /**
      * Get time of creation
-     * @return
+     *
+     * @return created created
      */
     public long getCreated() {
         return created;
@@ -64,7 +67,8 @@ public class FlowStat {
 
     /**
      * Get rate as receives/seconds
-     * @return
+     *
+     * @return rate rate
      */
     public double getRate() {
         long now = System.currentTimeMillis();

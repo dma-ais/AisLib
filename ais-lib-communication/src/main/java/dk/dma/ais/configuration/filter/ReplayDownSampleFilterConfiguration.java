@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.ReplayDownSampleFilter;
 
+/**
+ * The type Replay down sample filter configuration.
+ */
 @XmlRootElement
 public class ReplayDownSampleFilterConfiguration extends FilterConfiguration {
 
@@ -28,18 +31,36 @@ public class ReplayDownSampleFilterConfiguration extends FilterConfiguration {
      */
     private long samplingRate = 60;
 
+    /**
+     * Instantiates a new Replay down sample filter configuration.
+     */
     public ReplayDownSampleFilterConfiguration() {
 
     }
 
+    /**
+     * Instantiates a new Replay down sample filter configuration.
+     *
+     * @param samplingRate the sampling rate
+     */
     public ReplayDownSampleFilterConfiguration(long samplingRate) {
         this.samplingRate = samplingRate;
     }
 
+    /**
+     * Gets sampling rate.
+     *
+     * @return the sampling rate
+     */
     public long getSamplingRate() {
         return samplingRate;
     }
 
+    /**
+     * Sets sampling rate.
+     *
+     * @param samplingRate the sampling rate
+     */
     public void setSamplingRate(long samplingRate) {
         this.samplingRate = samplingRate;
     }

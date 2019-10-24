@@ -25,11 +25,15 @@ import java.util.ServiceLoader;
 import dk.dma.ais.sentence.SentenceLine;
 
 /**
- * 
+ * The type Proprietary factory.
+ *
  * @author Kasper Nielsen
  */
 public abstract class ProprietaryFactory {
 
+    /**
+     * The All factories.
+     */
     static Map<String, ProprietaryFactory> ALL_FACTORIES;
 
     static {
@@ -43,6 +47,11 @@ public abstract class ProprietaryFactory {
 
     private final String prefix;
 
+    /**
+     * Instantiates a new Proprietary factory.
+     *
+     * @param prefix the prefix
+     */
     public ProprietaryFactory(String prefix) {
         this.prefix = requireNonNull(prefix);
         if (prefix.length() != 3) {
@@ -50,31 +59,59 @@ public abstract class ProprietaryFactory {
         }
     }
 
+    /**
+     * Gets prefix.
+     *
+     * @return the prefix
+     */
     public String getPrefix() {
         return prefix;
     }
 
     /**
      * Return the tag for line, if matches, otherwise null is returned
-     * 
-     * @param line
-     * @return
+     *
+     * @param sl the sl
+     * @return tag
      */
     public abstract IProprietaryTag getTag(SentenceLine sl);
 
+    /**
+     * Gets all factories.
+     *
+     * @return the all factories
+     */
     public static Collection<ProprietaryFactory> getAllFactories() {
         return ALL_FACTORIES.values();
     }
 
+    /**
+     * Parse tag proprietary tag.
+     *
+     * @param sl the sl
+     * @return the proprietary tag
+     */
     public static IProprietaryTag parseTag(SentenceLine sl) {
         ProprietaryFactory psf = match(sl.getSentenceHead());
         return psf == null ? null : psf.getTag(sl);
     }
 
+    /**
+     * Is proprietary tag boolean.
+     *
+     * @param line the line
+     * @return the boolean
+     */
     public static boolean isProprietaryTag(String line) {
         return line != null && line.length() >= 5 && line.startsWith("$P");
     }
 
+    /**
+     * Match proprietary factory.
+     *
+     * @param line the line
+     * @return the proprietary factory
+     */
     public static ProprietaryFactory match(String line) {
         if (isProprietaryTag(line)) {
             String p = line.substring(2, 5);

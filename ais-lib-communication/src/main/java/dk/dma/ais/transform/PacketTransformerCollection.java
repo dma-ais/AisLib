@@ -19,14 +19,27 @@ import java.util.List;
 
 import dk.dma.ais.packet.AisPacket;
 
+/**
+ * The type Packet transformer collection.
+ */
 public class PacketTransformerCollection implements IAisPacketTransformer {
 
     private List<IAisPacketTransformer> collection = new ArrayList<>();
-    
+
+    /**
+     * Gets collection.
+     *
+     * @return the collection
+     */
     public List<IAisPacketTransformer> getCollection() {
         return collection;
     }
 
+    /**
+     * Sets collection.
+     *
+     * @param collection the collection
+     */
     public void setCollection(List<IAisPacketTransformer> collection) {
         this.collection = collection;
     }
@@ -39,7 +52,12 @@ public class PacketTransformerCollection implements IAisPacketTransformer {
         }
         return p;
     }
-    
+
+    /**
+     * Add transformer.
+     *
+     * @param packetTransformer the packet transformer
+     */
     public void addTransformer(IAisPacketTransformer packetTransformer) {
         this.collection.add(packetTransformer);
     }

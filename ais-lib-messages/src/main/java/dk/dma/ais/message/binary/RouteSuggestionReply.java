@@ -33,10 +33,19 @@ public class RouteSuggestionReply extends AisApplicationMessage {
      */
     private int response; // 6 bits
 
+    /**
+     * Instantiates a new Route suggestion reply.
+     */
     public RouteSuggestionReply() {
         super(0, 32);
     }
 
+    /**
+     * Instantiates a new Route suggestion reply.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public RouteSuggestionReply(BinArray binArray) throws SixbitException {
         super(0, 32, binArray);
     }
@@ -57,26 +66,56 @@ public class RouteSuggestionReply extends AisApplicationMessage {
         return encoder;
     }
 
+    /**
+     * Gets msg link id.
+     *
+     * @return the msg link id
+     */
     public int getMsgLinkId() {
         return msgLinkId;
     }
 
+    /**
+     * Sets msg link id.
+     *
+     * @param msgLinkId the msg link id
+     */
     public void setMsgLinkId(int msgLinkId) {
         this.msgLinkId = msgLinkId;
     }
 
+    /**
+     * Gets ref msg link id.
+     *
+     * @return the ref msg link id
+     */
     public int getRefMsgLinkId() {
         return refMsgLinkId;
     }
 
+    /**
+     * Sets ref msg link id.
+     *
+     * @param refMsgLinkId the ref msg link id
+     */
     public void setRefMsgLinkId(int refMsgLinkId) {
         this.refMsgLinkId = refMsgLinkId;
     }
 
+    /**
+     * Gets response.
+     *
+     * @return the response
+     */
     public int getResponse() {
         return response;
     }
 
+    /**
+     * Sets response.
+     *
+     * @param response the response
+     */
     public void setResponse(int response) {
         this.response = response;
     }

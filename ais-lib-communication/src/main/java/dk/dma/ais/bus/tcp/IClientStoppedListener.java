@@ -18,7 +18,12 @@ package dk.dma.ais.bus.tcp;
  * Interface for classes wanting to be notified of a client stopping
  */
 public interface IClientStoppedListener {
-    
+
+    /**
+     * Client stopped.
+     *
+     * @param client the client
+     */
     void clientStopped(TcpClient client);
 
 }

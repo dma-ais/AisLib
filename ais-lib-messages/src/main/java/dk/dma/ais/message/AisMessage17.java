@@ -21,9 +21,8 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 17
- * 
+ * <p>
  * GNSS broadcast binary message
- * 
  */
 public class AisMessage17 extends AisMessage {
 
@@ -42,19 +41,40 @@ public class AisMessage17 extends AisMessage {
     private int health; // 3 bits: Reference station health (specified in Recommendation ITU-R M.823)
     private int[] dataWords; // 29 bit each: DGNSS message data words excluding parity
 
+    /**
+     * Instantiates a new Ais message 17.
+     */
     public AisMessage17() {
         super(7);
     }
 
+    /**
+     * Instantiates a new Ais message 17.
+     *
+     * @param num the num
+     */
     public AisMessage17(int num) {
         super(num);
     }
 
+    /**
+     * Instantiates a new Ais message 17.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage17(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray sixbit = vdm.getBinArray();
         if (sixbit.getLength() < 80 || sixbit.getLength() > 816) {
@@ -100,90 +120,200 @@ public class AisMessage17 extends AisMessage {
         return encoder;
     }
 
+    /**
+     * Gets spare 1.
+     *
+     * @return the spare 1
+     */
     public int getSpare1() {
         return spare1;
     }
 
+    /**
+     * Sets spare 1.
+     *
+     * @param spare1 the spare 1
+     */
     public void setSpare1(int spare1) {
         this.spare1 = spare1;
     }
 
+    /**
+     * Gets lon.
+     *
+     * @return the lon
+     */
     public int getLon() {
         return lon;
     }
 
+    /**
+     * Sets lon.
+     *
+     * @param lon the lon
+     */
     public void setLon(int lon) {
         this.lon = lon;
     }
 
+    /**
+     * Gets lat.
+     *
+     * @return the lat
+     */
     public int getLat() {
         return lat;
     }
 
+    /**
+     * Sets lat.
+     *
+     * @param lat the lat
+     */
     public void setLat(int lat) {
         this.lat = lat;
     }
 
+    /**
+     * Gets spare 2.
+     *
+     * @return the spare 2
+     */
     public int getSpare2() {
         return spare2;
     }
 
+    /**
+     * Sets spare 2.
+     *
+     * @param spare2 the spare 2
+     */
     public void setSpare2(int spare2) {
         this.spare2 = spare2;
     }
 
+    /**
+     * Gets message type.
+     *
+     * @return the message type
+     */
     public int getMessageType() {
         return messageType;
     }
 
+    /**
+     * Sets message type.
+     *
+     * @param messageType the message type
+     */
     public void setMessageType(int messageType) {
         this.messageType = messageType;
     }
 
+    /**
+     * Gets station id.
+     *
+     * @return the station id
+     */
     public int getStationId() {
         return stationId;
     }
 
+    /**
+     * Sets station id.
+     *
+     * @param stationId the station id
+     */
     public void setStationId(int stationId) {
         this.stationId = stationId;
     }
 
+    /**
+     * Gets count.
+     *
+     * @return the count
+     */
     public int getzCount() {
         return zCount;
     }
 
+    /**
+     * Sets count.
+     *
+     * @param zCount the z count
+     */
     public void setzCount(int zCount) {
         this.zCount = zCount;
     }
 
+    /**
+     * Gets seq num.
+     *
+     * @return the seq num
+     */
     public int getSeqNum() {
         return seqNum;
     }
 
+    /**
+     * Sets seq num.
+     *
+     * @param seqNum the seq num
+     */
     public void setSeqNum(int seqNum) {
         this.seqNum = seqNum;
     }
 
+    /**
+     * Gets data word count.
+     *
+     * @return the data word count
+     */
     public int getDataWordCount() {
         return dataWordCount;
     }
 
+    /**
+     * Sets data word count.
+     *
+     * @param dataWordCount the data word count
+     */
     public void setDataWordCount(int dataWordCount) {
         this.dataWordCount = dataWordCount;
     }
 
+    /**
+     * Gets health.
+     *
+     * @return the health
+     */
     public int getHealth() {
         return health;
     }
 
+    /**
+     * Sets health.
+     *
+     * @param health the health
+     */
     public void setHealth(int health) {
         this.health = health;
     }
 
+    /**
+     * Get data words int [ ].
+     *
+     * @return the int [ ]
+     */
     public int[] getDataWords() {
         return dataWords;
     }
 
+    /**
+     * Sets data words.
+     *
+     * @param dataWords the data words
+     */
     public void setDataWords(int[] dataWords) {
         this.dataWords = dataWords;
     }

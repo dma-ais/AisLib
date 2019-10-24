@@ -42,6 +42,9 @@ public class SanityFilter extends MessageFilterBase {
      */
     private final Cache<Integer, Boolean> hasStaticMap;
 
+    /**
+     * Instantiates a new Sanity filter.
+     */
     public SanityFilter() {
         hasStaticMap = CacheBuilder.newBuilder().maximumSize(STATIC_CACHE_SIZE).expireAfterWrite(24, TimeUnit.HOURS).build();
     }
@@ -105,10 +108,20 @@ public class SanityFilter extends MessageFilterBase {
         return false;
     }
 
+    /**
+     * Gets count.
+     *
+     * @return the count
+     */
     public long getCount() {
         return count;
     }
 
+    /**
+     * Gets reject count.
+     *
+     * @return the reject count
+     */
     public long getRejectCount() {
         return rejectCount;
     }

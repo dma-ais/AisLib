@@ -25,18 +25,47 @@ public class AisVesselPosition extends AisReport {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The Sog.
+     */
     protected Double sog;
+    /**
+     * The Cog.
+     */
     protected Double cog;
+    /**
+     * The Heading.
+     */
     protected Double heading;
+    /**
+     * The Pos.
+     */
     protected Position pos;
+    /**
+     * The Pos acc.
+     */
     protected byte posAcc;
+    /**
+     * The Utc sec.
+     */
     protected byte utcSec;
+    /**
+     * The Raim.
+     */
     protected byte raim;
 
+    /**
+     * Instantiates a new Ais vessel position.
+     */
     public AisVesselPosition() {
         super();
     }
 
+    /**
+     * Update.
+     *
+     * @param posMessage the pos message
+     */
     public void update(IVesselPositionMessage posMessage) {
         sog = posMessage.isSogValid() ? posMessage.getSog() / 10.0 : null;
         cog = posMessage.isCogValid() ? posMessage.getCog() / 10.0 : null;
@@ -52,58 +81,128 @@ public class AisVesselPosition extends AisReport {
         super.update((AisMessage) posMessage);
     }
 
+    /**
+     * Gets sog.
+     *
+     * @return the sog
+     */
     public Double getSog() {
         return sog;
     }
 
+    /**
+     * Sets sog.
+     *
+     * @param sog the sog
+     */
     public void setSog(Double sog) {
         this.sog = sog;
     }
 
+    /**
+     * Gets cog.
+     *
+     * @return the cog
+     */
     public Double getCog() {
         return cog;
     }
 
+    /**
+     * Sets cog.
+     *
+     * @param cog the cog
+     */
     public void setCog(Double cog) {
         this.cog = cog;
     }
 
+    /**
+     * Gets heading.
+     *
+     * @return the heading
+     */
     public Double getHeading() {
         return heading;
     }
 
+    /**
+     * Sets heading.
+     *
+     * @param heading the heading
+     */
     public void setHeading(Double heading) {
         this.heading = heading;
     }
 
+    /**
+     * Gets pos.
+     *
+     * @return the pos
+     */
     public Position getPos() {
         return pos;
     }
 
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
     public void setPos(Position pos) {
         this.pos = pos;
     }
 
+    /**
+     * Gets pos acc.
+     *
+     * @return the pos acc
+     */
     public byte getPosAcc() {
         return posAcc;
     }
 
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
     public void setPosAcc(byte posAcc) {
         this.posAcc = posAcc;
     }
 
+    /**
+     * Gets utc sec.
+     *
+     * @return the utc sec
+     */
     public byte getUtcSec() {
         return utcSec;
     }
 
+    /**
+     * Sets utc sec.
+     *
+     * @param utcSec the utc sec
+     */
     public void setUtcSec(byte utcSec) {
         this.utcSec = utcSec;
     }
 
+    /**
+     * Gets raim.
+     *
+     * @return the raim
+     */
     public byte getRaim() {
         return raim;
     }
 
+    /**
+     * Sets raim.
+     *
+     * @param raim the raim
+     */
     public void setRaim(byte raim) {
         this.raim = raim;
     }

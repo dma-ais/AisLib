@@ -19,6 +19,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.provider.CollectorProvider;
 
+/**
+ * The type Collector provider configuration.
+ */
 @XmlRootElement
 public class CollectorProviderConfiguration extends AisBusProviderConfiguration {
     

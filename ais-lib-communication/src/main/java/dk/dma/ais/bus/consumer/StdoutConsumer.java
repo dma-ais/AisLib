@@ -24,6 +24,9 @@ import dk.dma.ais.bus.AisBusElement;
 @ThreadSafe
 public class StdoutConsumer extends AisBusConsumer {
 
+    /**
+     * Instantiates a new Stdout consumer.
+     */
     public StdoutConsumer() {
         super();
     }

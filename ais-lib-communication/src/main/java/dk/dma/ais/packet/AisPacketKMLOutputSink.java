@@ -61,9 +61,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class receives AisPacket and use them to build a scenario
- *
+ * <p>
  * When the sink is closed it dumps the entire target state to the output stream in KML format.
- *
+ * <p>
  * TODO Even though the triggerSnapshot predicate encourages generation of multiple snapshots, only one is currently
  * supported.
  *
@@ -92,13 +92,19 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      */
     private final Predicate<? super AisPacket> filter;
 
-    /** Include the 'situation' folder in the generated KML */
+    /**
+     * Include the 'situation' folder in the generated KML
+     */
     final boolean createSituationFolder;
 
-    /** Include the 'movements' folder in the generated KML */
+    /**
+     * Include the 'movements' folder in the generated KML
+     */
     final boolean createMovementsFolder;
 
-    /** Include the 'tracks' folder in the generated KML */
+    /**
+     * Include the 'tracks' folder in the generated KML
+     */
     final boolean createTracksFolder;
 
     private final Predicate<? super AisPacket> isPrimaryTarget;
@@ -174,6 +180,9 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      */
     private static final int KML_POSITION_TIMESPAN_SECS = 1;
 
+    /**
+     * Instantiates a new Ais packet kml output sink.
+     */
     public AisPacketKMLOutputSink() {
         this.filter = e -> true;
         this.createSituationFolder = true;
@@ -193,8 +202,7 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * Create a sink that writes KML contents to outputStream - but build the scenario only from AisPackets which comply
      * with the filter predicate.
      *
-     * @param filter
-     *            a filter predicate for pre-filtering of AisPackets.
+     * @param filter a filter predicate for pre-filtering of AisPackets.
      */
     public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter) {
         this.filter = filter;
@@ -215,18 +223,16 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * Create a sink that writes KML contents to outputStream - but build the scenario only from AisPackets which comply
      * with the filter predicate.
      *
-     * @param filter
-     *            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param createSituationFolder
-     *            create and populate the 'situation' folder in the generated KML
-     * @param createMovementsFolder
-     *            create and populate the 'movements' folder in the generated KML
-     * @param createTracksFolder
-     *            create and populate the 'tracks' folder in the generated KML
-     * @param isPrimaryTarget
-     *            Apply primary KML styling to targets which are updated by packets that pass this predicate.
-     * @param isSecondaryTarget
-     *            Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param filter                            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder             create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder             create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder                create and populate the 'tracks' folder in the generated KML
+     * @param isPrimaryTarget                   Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget                 Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param triggerSnapshot                   the trigger snapshot
+     * @param snapshotDescriptionSupplier       the snapshot description supplier
+     * @param movementInterpolationStepSupplier the movement interpolation step supplier
+     * @param iconHrefSupplier                  the icon href supplier
      */
     public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder,
             boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget,
@@ -254,22 +260,18 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
      * Create a sink that writes KML contents to outputStream - but build the scenario only from AisPackets which comply
      * with the filter predicate.
      *
-     * @param filter
-     *            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param createSituationFolder
-     *            create and populate the 'situation' folder in the generated KML
-     * @param createMovementsFolder
-     *            create and populate the 'movements' folder in the generated KML
-     * @param createTracksFolder
-     *            create and populate the 'tracks' folder in the generated KML
-     * @param isPrimaryTarget
-     *            Apply primary KML styling to targets which are updated by packets that pass this predicate.
-     * @param isSecondaryTarget
-     *            Apply secondary KML styling to targets which are updated by packets that pass this predicate.
-     * @param supplyTitle
-     *            Supplier of KML folder title
-     * @param supplyDescription
-     *            Supplier of KML folder description
+     * @param filter                            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder             create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder             create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder                create and populate the 'tracks' folder in the generated KML
+     * @param isPrimaryTarget                   Apply primary KML styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget                 Apply secondary KML styling to targets which are updated by packets that pass this predicate.
+     * @param triggerSnapshot                   the trigger snapshot
+     * @param snapshotDescriptionSupplier       the snapshot description supplier
+     * @param movementInterpolationStepSupplier the movement interpolation step supplier
+     * @param supplyTitle                       Supplier of KML folder title
+     * @param supplyDescription                 Supplier of KML folder description
+     * @param iconHrefSupplier                  the icon href supplier
      */
     public AisPacketKMLOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder,
             boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget,
@@ -320,6 +322,12 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         kml.marshal(outputStream);
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws IOException the io exception
+     */
     public static void main(String[] args) throws IOException {
         Predicate<AisPacket> filter = new Predicate<AisPacket>() {
             @Override
@@ -377,6 +385,12 @@ class AisPacketKMLOutputSink extends OutputStreamSink<AisPacket> {
         }
     };
 
+    /**
+     * Create kml kml.
+     *
+     * @return the kml
+     * @throws IOException the io exception
+     */
     protected Kml createKml() throws IOException {
         Kml kml = new Kml();
 

@@ -24,9 +24,21 @@ import dk.dma.ais.message.AisBinaryMessage;
  */
 public abstract class AisApplicationMessage {
 
+    /**
+     * The Dac.
+     */
     protected int dac; // 10 bits: Designated area code (DAC)
+    /**
+     * The Fi.
+     */
     protected int fi; // 6 bits: Function identifier
 
+    /**
+     * Instantiates a new Ais application message.
+     *
+     * @param dac the dac
+     * @param fi  the fi
+     */
     public AisApplicationMessage(int dac, int fi) {
         this.dac = dac;
         this.fi = fi;
@@ -34,10 +46,11 @@ public abstract class AisApplicationMessage {
 
     /**
      * Constructor that also parses six bit string
-     * 
-     * @param binArray
-     * @throws BitExhaustionException
-     * @throws SixbitException
+     *
+     * @param dac      the dac
+     * @param fi       the fi
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
      */
     public AisApplicationMessage(int dac, int fi, BinArray binArray) throws SixbitException {
         this.dac = dac;
@@ -47,28 +60,26 @@ public abstract class AisApplicationMessage {
 
     /**
      * Method to parse given six bit string
-     * 
-     * @param binArray
-     * @throws BitExhaustionException
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
      */
     public abstract void parse(BinArray binArray) throws SixbitException;
 
     /**
      * Method that returns six bit encoding of message
-     * 
-     * @return
+     *
+     * @return encoded
      */
     public abstract SixbitEncoder getEncoded();
 
     /**
      * Method to get application specific message from an {@link AisBinaryMessage}. When implementing new application
      * specific messages they should be added here.
-     * 
-     * @param binary
-     *            message
+     *
+     * @param binaryMessage the binary message
      * @return application specific message or null if not implemented
-     * @throws SixbitException
-     * @throws BitExhaustionException
+     * @throws SixbitException the sixbit exception
      */
     public static AisApplicationMessage getInstance(AisBinaryMessage binaryMessage) throws SixbitException {
         if (binaryMessage.getFi() == 3) {
@@ -112,10 +123,20 @@ public abstract class AisApplicationMessage {
         return new UnknownAsm(binaryMessage);
     }
 
+    /**
+     * Gets dac.
+     *
+     * @return the dac
+     */
     public int getDac() {
         return dac;
     }
 
+    /**
+     * Gets fi.
+     *
+     * @return the fi
+     */
     public int getFi() {
         return fi;
     }

@@ -18,15 +18,24 @@ package dk.dma.ais.tracker;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 
+/**
+ * The type Target.
+ */
 @Immutable
 public abstract class Target implements Serializable {
 
+    /**
+     * Instantiates a new Target.
+     *
+     * @param mmsi the mmsi
+     */
     protected Target(int mmsi) {
         this.mmsi = mmsi;
     }
 
     /**
      * Returns the MMSI of the Track.
+     *
      * @return the MMSI of the Track
      */
     public int getMmsi() {

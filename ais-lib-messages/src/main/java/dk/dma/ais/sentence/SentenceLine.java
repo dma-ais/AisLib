@@ -51,12 +51,23 @@ public class SentenceLine {
         }
     }
 
+    /**
+     * Instantiates a new Sentence line.
+     */
     public SentenceLine() {}
 
+    /**
+     * Instantiates a new Sentence line.
+     *
+     * @param line the line
+     */
     public SentenceLine(String line) {
         parse(line);
     }
 
+    /**
+     * Clear.
+     */
     public void clear() {
         line = null;
         talker = null;
@@ -69,6 +80,11 @@ public class SentenceLine {
         checksumField = -1;
     }
 
+    /**
+     * Parse.
+     *
+     * @param line the line
+     */
     public void parse(String line) {
         clear();
         this.line = line;
@@ -146,6 +162,12 @@ public class SentenceLine {
         }
     }
 
+    /**
+     * Is formatter boolean.
+     *
+     * @param formatters the formatters
+     * @return the boolean
+     */
     public boolean isFormatter(String... formatters) {
         if (formatter == null) {
             return false;
@@ -158,10 +180,20 @@ public class SentenceLine {
         return false;
     }
 
+    /**
+     * Has sentence boolean.
+     *
+     * @return the boolean
+     */
     public boolean hasSentence() {
         return sentence != null;
     }
 
+    /**
+     * Gets postfix start.
+     *
+     * @return the postfix start
+     */
     public int getPostfixStart() {
         if (checksumField < 0) {
             return -1;
@@ -169,6 +201,11 @@ public class SentenceLine {
         return checksumField + 1;
     }
 
+    /**
+     * Is checksum match boolean.
+     *
+     * @return the boolean
+     */
     public boolean isChecksumMatch() {
         String strChecksum = getChecksumField();
         if (strChecksum == null) {
@@ -184,18 +221,38 @@ public class SentenceLine {
         return true;
     }
 
+    /**
+     * Gets sentence head.
+     *
+     * @return the sentence head
+     */
     public String getSentenceHead() {
         return delimiter == null || fields.size() == 0 ? null : fields.get(0);
     }
 
+    /**
+     * Is proprietary boolean.
+     *
+     * @return the boolean
+     */
     public boolean isProprietary() {
         return ProprietaryFactory.isProprietaryTag(getSentenceHead());
     }
 
+    /**
+     * Gets checksum.
+     *
+     * @return the checksum
+     */
     public int getChecksum() {
         return checksum;
     }
 
+    /**
+     * Gets checksum string.
+     *
+     * @return the checksum string
+     */
     public String getChecksumString() {
         String strChecksum = Integer.toString(checksum, 16).toUpperCase();
         if (strChecksum.length() < 2) {
@@ -204,58 +261,128 @@ public class SentenceLine {
         return strChecksum;
     }
 
+    /**
+     * Gets checksum field.
+     *
+     * @return the checksum field
+     */
     public String getChecksumField() {
         return this.checksumField >= 0 ? fields.get(this.checksumField) : null;
     }
 
+    /**
+     * Gets line.
+     *
+     * @return the line
+     */
     public String getLine() {
         return line;
     }
 
+    /**
+     * Sets line.
+     *
+     * @param line the line
+     */
     public void setLine(String line) {
         this.line = line;
     }
 
+    /**
+     * Gets talker.
+     *
+     * @return the talker
+     */
     public String getTalker() {
         return talker;
     }
 
+    /**
+     * Sets talker.
+     *
+     * @param talker the talker
+     */
     public void setTalker(String talker) {
         this.talker = talker;
     }
 
+    /**
+     * Gets formatter.
+     *
+     * @return the formatter
+     */
     public String getFormatter() {
         return formatter;
     }
 
+    /**
+     * Sets formatter.
+     *
+     * @param formatter the formatter
+     */
     public void setFormatter(String formatter) {
         this.formatter = formatter;
     }
 
+    /**
+     * Gets delimiter.
+     *
+     * @return the delimiter
+     */
     public Character getDelimiter() {
         return delimiter;
     }
 
+    /**
+     * Sets delimiter.
+     *
+     * @param delimiter the delimiter
+     */
     public void setDelimiter(Character delimiter) {
         this.delimiter = delimiter;
     }
 
+    /**
+     * Gets prefix.
+     *
+     * @return the prefix
+     */
     public String getPrefix() {
         return prefix;
     }
 
+    /**
+     * Sets prefix.
+     *
+     * @param prefix the prefix
+     */
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 
+    /**
+     * Gets sentence.
+     *
+     * @return the sentence
+     */
     public String getSentence() {
         return sentence;
     }
 
+    /**
+     * Sets sentence.
+     *
+     * @param sentence the sentence
+     */
     public void setSentence(String sentence) {
         this.sentence = sentence;
     }
 
+    /**
+     * Gets fields.
+     *
+     * @return the fields
+     */
     public List<String> getFields() {
         return fields;
     }

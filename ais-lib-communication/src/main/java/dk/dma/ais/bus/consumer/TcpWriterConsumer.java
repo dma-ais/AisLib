@@ -47,6 +47,9 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
     private String host;
     private int port;
 
+    /**
+     * Instantiates a new Tcp writer consumer.
+     */
     public TcpWriterConsumer() {
 
     }
@@ -125,34 +128,74 @@ public class TcpWriterConsumer extends AisBusConsumer implements Runnable, IClie
         super.cancel();
     }
 
+    /**
+     * Gets port.
+     *
+     * @return the port
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * Sets port.
+     *
+     * @param port the port
+     */
     public void setPort(int port) {
         this.port = port;
     }
 
+    /**
+     * Gets host.
+     *
+     * @return the host
+     */
     public String getHost() {
         return host;
     }
 
+    /**
+     * Sets host.
+     *
+     * @param host the host
+     */
     public void setHost(String host) {
         this.host = host;
     }
 
+    /**
+     * Gets reconnect interval.
+     *
+     * @return the reconnect interval
+     */
     public int getReconnectInterval() {
         return reconnectInterval;
     }
 
+    /**
+     * Sets reconnect interval.
+     *
+     * @param reconnectInterval the reconnect interval
+     */
     public void setReconnectInterval(int reconnectInterval) {
         this.reconnectInterval = reconnectInterval;
     }
 
+    /**
+     * Gets client conf.
+     *
+     * @return the client conf
+     */
     public TcpClientConf getClientConf() {
         return clientConf;
     }
 
+    /**
+     * Sets client conf.
+     *
+     * @param clientConf the client conf
+     */
     public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
     }

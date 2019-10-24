@@ -33,7 +33,7 @@ import dk.dma.ais.queue.MessageQueueOverflowException;
 
 /**
  * Bus for exchanging AIS packets
- * 
+ * <p>
  * Thread safety by delegation
  */
 @ThreadSafe
@@ -60,6 +60,9 @@ public class AisBus extends AisBusComponent implements Runnable {
     private volatile int busPullMaxElements = 1000;
     private volatile int busQueueSize = 10000;
 
+    /**
+     * Instantiates a new Ais bus.
+     */
     public AisBus() {
 
     }
@@ -77,7 +80,6 @@ public class AisBus extends AisBusComponent implements Runnable {
     /**
      * Start AisBus thread
      * 
-     * @return thread
      */
     public synchronized void start() {
         // Start thread
@@ -135,10 +137,11 @@ public class AisBus extends AisBusComponent implements Runnable {
             provider.cancel();
         }
     }
-        
+
     /**
      * Push packets non-blocking on to the bus
-     * @param packet
+     *
+     * @param packet the packet
      * @return if pushing was a success
      */
     public boolean push(AisPacket packet) {
@@ -147,9 +150,9 @@ public class AisBus extends AisBusComponent implements Runnable {
 
     /**
      * Push element onto the bus. Returns false if the bus is overflowing
-     * 
-     * @param packet
-     * @param blocking
+     *
+     * @param packet   the packet
+     * @param blocking the blocking
      * @return if pushing was a success
      */
     public boolean push(AisPacket packet, boolean blocking) {
@@ -181,10 +184,11 @@ public class AisBus extends AisBusComponent implements Runnable {
         }
         return true;
     }
-    
+
     /**
      * Get the average overflow rate experienced by all providers
-     * @return
+     *
+     * @return double double
      */
     public double avgOverflowRate() {
         double sum = 0;
@@ -198,8 +202,8 @@ public class AisBus extends AisBusComponent implements Runnable {
 
     /**
      * Register a consumer
-     * 
-     * @param consumer
+     *
+     * @param consumer the consumer
      */
     public void registerConsumer(AisBusConsumer consumer) {
         // Tie aisbus to consumer
@@ -207,11 +211,12 @@ public class AisBus extends AisBusComponent implements Runnable {
         // Make consumer queue
         consumers.add(consumer);
     }
-    
+
     /**
      * Get consumer by name
-     * @param name
-     * @return
+     *
+     * @param name the name
+     * @return consumer consumer
      */
     public AisBusConsumer getConsumer(String name) {
         for (AisBusConsumer consumer : consumers) {
@@ -221,11 +226,12 @@ public class AisBus extends AisBusComponent implements Runnable {
         }
         return null;
     }
-    
+
     /**
      * Get provider by name
-     * @param name
-     * @return
+     *
+     * @param name the name
+     * @return provider provider
      */
     public AisBusProvider getProvider(String name) {
         for (AisBusProvider provider : providers) {
@@ -238,8 +244,8 @@ public class AisBus extends AisBusComponent implements Runnable {
 
     /**
      * Register a provider
-     * 
-     * @param provider
+     *
+     * @param provider the provider
      */
     public void registerProvider(AisBusProvider provider) {
         // Tie aisbus to provider
@@ -279,18 +285,38 @@ public class AisBus extends AisBusComponent implements Runnable {
         LOG.info("Stopped");
     }
 
+    /**
+     * Sets bus pull max elements.
+     *
+     * @param busPullMaxElements the bus pull max elements
+     */
     public void setBusPullMaxElements(int busPullMaxElements) {
         this.busPullMaxElements = busPullMaxElements;
     }
 
+    /**
+     * Sets bus queue size.
+     *
+     * @param busQueueSize the bus queue size
+     */
     public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
 
+    /**
+     * Gets consumers.
+     *
+     * @return the consumers
+     */
     public Set<AisBusConsumer> getConsumers() {
         return Collections.unmodifiableSet(consumers);
     }
 
+    /**
+     * Gets providers.
+     *
+     * @return the providers
+     */
     public Set<AisBusProvider> getProviders() {
         return Collections.unmodifiableSet(providers);
     }

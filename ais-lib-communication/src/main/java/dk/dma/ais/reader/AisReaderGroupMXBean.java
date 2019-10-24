@@ -18,57 +18,64 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * An MXBean interface to {@link AisReaderGroup}.
- * 
+ *
  * @author Kasper Nielsen
  */
 public interface AisReaderGroupMXBean {
 
     /**
      * Adds the specified reader to the group.
-     * 
-     * @param sourceId
-     *            the source id of the reader
-     * @param oneOrMorHosts
-     *            one or more hosts
+     *
+     * @param sourceId      the source id of the reader
+     * @param oneOrMorHosts one or more hosts
      */
     void addReader(String sourceId, String oneOrMorHosts);
 
     /**
      * Returns the number of bytes received.
-     * 
+     *
      * @return the number of bytes received
      */
     long getBytesReceived();
 
     /**
      * Returns the number of bytes received.
-     * 
+     *
      * @return the number of bytes received
      */
     long getPacketsReceived();
 
     /**
      * Returns the number of readers.
-     * 
+     *
      * @return the number of readers
      */
     int getReaderCount();
 
     /**
      * Removes a reader from the group.
-     * 
-     * @param sourceId
-     *            the source id of the group
+     *
+     * @param sourceId the source id of the group
      * @return true if a reader with the specified id was removed, false otherwise
      */
     boolean removeReader(String sourceId);
 }
 
-/** The default implementation */
+/**
+ * The default implementation
+ */
 class AisReaderGroupMXBeanImpl implements AisReaderGroupMXBean {
 
+    /**
+     * The Group.
+     */
     final AisReaderGroup group;
 
+    /**
+     * Instantiates a new Ais reader group mx bean.
+     *
+     * @param group the group
+     */
     AisReaderGroupMXBeanImpl(AisReaderGroup group) {
         this.group = requireNonNull(group);
     }

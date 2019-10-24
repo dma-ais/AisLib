@@ -51,7 +51,7 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
 
     /**
      * AisPosition Accuracy: The position accuracy (PA) flag should be
-     * determined in accordance with Table 47 1 = high ( =< 10 m) 0 = low (>10
+     * determined in accordance with Table 47 1 = high ( =&lt; 10 m) 0 = low (&gt;10
      * m) 0 = default
      */
     private int posAcc; // 1 bit
@@ -142,10 +142,20 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
      */
     private int subMessage; // 14 bits
 
+    /**
+     * Instantiates a new Ais message 9.
+     */
     public AisMessage9() {
         super(9);
     }
 
+    /**
+     * Instantiates a new Ais message 9.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage9(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse(vdm.getBinArray());
@@ -241,18 +251,38 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
         return builder.toString();
     }
 
+    /**
+     * Gets altitude.
+     *
+     * @return the altitude
+     */
     public int getAltitude() {
         return altitude;
     }
 
+    /**
+     * Sets altitude.
+     *
+     * @param altitude the altitude
+     */
     public void setAltitude(int altitude) {
         this.altitude = altitude;
     }
 
+    /**
+     * Gets sog.
+     *
+     * @return the sog
+     */
     public int getSog() {
         return sog;
     }
 
+    /**
+     * Sets sog.
+     *
+     * @param sog the sog
+     */
     public void setSog(int sog) {
         this.sog = sog;
     }
@@ -261,6 +291,11 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
         return posAcc;
     }
 
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
     }
@@ -269,94 +304,209 @@ public class AisMessage9 extends AisMessage implements IPositionMessage {
         return pos;
     }
 
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
     public void setPos(AisPosition pos) {
         this.pos = pos;
     }
 
+    /**
+     * Gets cog.
+     *
+     * @return the cog
+     */
     public int getCog() {
         return cog;
     }
 
+    /**
+     * Sets cog.
+     *
+     * @param cog the cog
+     */
     public void setCog(int cog) {
         this.cog = cog;
     }
 
+    /**
+     * Gets utc sec.
+     *
+     * @return the utc sec
+     */
     public int getUtcSec() {
         return utcSec;
     }
 
+    /**
+     * Sets utc sec.
+     *
+     * @param utcSec the utc sec
+     */
     public void setUtcSec(int utcSec) {
         this.utcSec = utcSec;
     }
 
+    /**
+     * Gets regional reserved.
+     *
+     * @return the regional reserved
+     */
     public int getRegionalReserved() {
         return regionalReserved;
     }
 
+    /**
+     * Sets regional reserved.
+     *
+     * @param regionalReserved the regional reserved
+     */
     public void setRegionalReserved(int regionalReserved) {
         this.regionalReserved = regionalReserved;
     }
 
+    /**
+     * Gets dte.
+     *
+     * @return the dte
+     */
     public int getDte() {
         return dte;
     }
 
+    /**
+     * Sets dte.
+     *
+     * @param dte the dte
+     */
     public void setDte(int dte) {
         this.dte = dte;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }
 
+    /**
+     * Gets assigned.
+     *
+     * @return the assigned
+     */
     public int getAssigned() {
         return assigned;
     }
 
+    /**
+     * Sets assigned.
+     *
+     * @param assigned the assigned
+     */
     public void setAssigned(int assigned) {
         this.assigned = assigned;
     }
 
+    /**
+     * Gets raim.
+     *
+     * @return the raim
+     */
     public int getRaim() {
         return raim;
     }
 
+    /**
+     * Sets raim.
+     *
+     * @param raim the raim
+     */
     public void setRaim(int raim) {
         this.raim = raim;
     }
 
+    /**
+     * Gets comm state selector flag.
+     *
+     * @return the comm state selector flag
+     */
     public int getCommStateSelectorFlag() {
         return commStateSelectorFlag;
     }
 
+    /**
+     * Sets comm state selector flag.
+     *
+     * @param commStateSelectorFlag the comm state selector flag
+     */
     public void setCommStateSelectorFlag(int commStateSelectorFlag) {
         this.commStateSelectorFlag = commStateSelectorFlag;
     }
 
+    /**
+     * Gets sync state.
+     *
+     * @return the sync state
+     */
     public int getSyncState() {
         return syncState;
     }
 
+    /**
+     * Sets sync state.
+     *
+     * @param syncState the sync state
+     */
     public void setSyncState(int syncState) {
         this.syncState = syncState;
     }
 
+    /**
+     * Gets slot timeout.
+     *
+     * @return the slot timeout
+     */
     public int getSlotTimeout() {
         return slotTimeout;
     }
 
+    /**
+     * Sets slot timeout.
+     *
+     * @param slotTimeout the slot timeout
+     */
     public void setSlotTimeout(int slotTimeout) {
         this.slotTimeout = slotTimeout;
     }
 
+    /**
+     * Gets sub message.
+     *
+     * @return the sub message
+     */
     public int getSubMessage() {
         return subMessage;
     }
 
+    /**
+     * Sets sub message.
+     *
+     * @param subMessage the sub message
+     */
     public void setSubMessage(int subMessage) {
         this.subMessage = subMessage;
     }

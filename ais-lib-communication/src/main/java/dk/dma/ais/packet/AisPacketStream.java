@@ -28,21 +28,21 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A stream of packets.
- * 
+ *
  * @author Kasper Nielsen
  */
 public abstract class AisPacketStream {
 
-    /** Thrown by a subscriber to indicate that the subscription should be cancelled. */
+    /**
+     * Thrown by a subscriber to indicate that the subscription should be cancelled.
+     */
     public static final RuntimeException CANCEL = new RuntimeException();
 
     /**
      * Adds the specified packet to the stream
-     * 
-     * @param packet
-     *            the packet to add
-     * @throws UnsupportedOperationException
-     *             if the stream is immutable
+     *
+     * @param p the p
+     * @throws UnsupportedOperationException if the stream is immutable
      */
     public void add(AisPacket p) {
         throw new UnsupportedOperationException("Stream is immutable");// default stream is immutable.
@@ -50,25 +50,47 @@ public abstract class AisPacketStream {
 
     /**
      * Returns a new stream that only streams packets accepted by the specified predicate.
-     * 
-     * @param predicate
-     *            the predicate to test against each element
+     *
+     * @param predicate the predicate to test against each element
      * @return the new stream
      */
     public abstract AisPacketStream filter(Predicate<? super AisPacket> predicate);
 
+    /**
+     * Filter ais packet stream.
+     *
+     * @param expression the expression
+     * @return the ais packet stream
+     */
     public AisPacketStream filter(String expression) {
         return filter(AisPacketFilters.parseExpressionFilter(expression));
     }
 
+    /**
+     * Filter on message type ais packet stream.
+     *
+     * @param messageTypes the message types
+     * @return the ais packet stream
+     */
     public AisPacketStream filterOnMessageType(int... messageTypes) {
         return filter(AisPacketFilters.filterOnMessageType(messageTypes));
     }
 
+    /**
+     * Immutable stream ais packet stream.
+     *
+     * @return the ais packet stream
+     */
     public final AisPacketStream immutableStream() {
         return this instanceof ImmutableAisPacketStream ? this : new ImmutableAisPacketStream(this);
     }
 
+    /**
+     * Limit ais packet stream.
+     *
+     * @param limit the limit
+     * @return the ais packet stream
+     */
     public AisPacketStream limit(long limit) {
         if (limit < 1) {
             throw new IllegalArgumentException("Limit must be at least 1, was: " + limit);
@@ -84,8 +106,20 @@ public abstract class AisPacketStream {
         });
     }
 
+    /**
+     * Subscribe subscription.
+     *
+     * @param c the c
+     * @return the subscription
+     */
     public abstract Subscription subscribe(Consumer<AisPacket> c);
 
+    /**
+     * Subscribe messages subscription.
+     *
+     * @param c the c
+     * @return the subscription
+     */
     public Subscription subscribeMessages(final Consumer<AisMessage> c) {
         requireNonNull(c);
         if (c instanceof AisPacketStream.StreamConsumer) {
@@ -118,6 +152,13 @@ public abstract class AisPacketStream {
         }
     }
 
+    /**
+     * Subscribe sink subscription.
+     *
+     * @param sink the sink
+     * @param os   the os
+     * @return the subscription
+     */
     public Subscription subscribeSink(final OutputStreamSink<AisPacket> sink, final OutputStream os) {
         requireNonNull(sink);
         requireNonNull(os);
@@ -154,30 +195,51 @@ public abstract class AisPacketStream {
 
     /**
      * Returns a new stream.
-     * 
+     *
      * @return the new stream
      */
     public static AisPacketStream newStream() {
         return new AisPacketStreamImpl();
     }
 
+    /**
+     * The type Stream consumer.
+     *
+     * @param <T> the type parameter
+     */
     public abstract static class StreamConsumer<T> implements Consumer<T> {
-        /** Invoked immediately before the first message is delivered. */
+        /**
+         * Invoked immediately before the first message is delivered.
+         */
         public void begin() {}
 
         /**
          * Invoked immediately after the last message has been delivered.
-         * 
-         * @param cause
-         *            if an exception caused the consumer to be unsubscribed
+         *
+         * @param cause if an exception caused the consumer to be unsubscribed
          */
         public void end(Throwable cause) {}
     }
 
-    /** A subcription is created each time a new consumer is added to the stream. */
+    /**
+     * A subcription is created each time a new consumer is added to the stream.
+     */
     public interface Subscription {
+        /**
+         * Await cancelled.
+         *
+         * @throws InterruptedException the interrupted exception
+         */
         void awaitCancelled() throws InterruptedException;
 
+        /**
+         * Await cancelled boolean.
+         *
+         * @param timeout the timeout
+         * @param unit    the unit
+         * @return the boolean
+         * @throws InterruptedException the interrupted exception
+         */
         boolean awaitCancelled(long timeout, TimeUnit unit) throws InterruptedException;
 
         /**
@@ -186,15 +248,27 @@ public abstract class AisPacketStream {
          */
         void cancel();
 
-        /** Returns whether or not the subscription has been cancelled. */
+        /**
+         * Returns whether or not the subscription has been cancelled.  @return the boolean
+         *
+         * @return the boolean
+         */
         boolean isCancelled();
     }
 
+    /**
+     * The type Delegating ais packet stream.
+     */
     static class DelegatingAisPacketStream extends AisPacketStream {
+        /**
+         * The Stream.
+         */
         final AisPacketStream stream;
 
         /**
-         * @param stream
+         * Instantiates a new Delegating ais packet stream.
+         *
+         * @param stream the stream
          */
         public DelegatingAisPacketStream(AisPacketStream stream) {
             this.stream = requireNonNull(stream);
@@ -235,10 +309,15 @@ public abstract class AisPacketStream {
         }
     }
 
+    /**
+     * The type Immutable ais packet stream.
+     */
     static class ImmutableAisPacketStream extends DelegatingAisPacketStream {
 
         /**
-         * @param stream
+         * Instantiates a new Immutable ais packet stream.
+         *
+         * @param stream the stream
          */
         public ImmutableAisPacketStream(AisPacketStream stream) {
             super(stream);

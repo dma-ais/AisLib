@@ -20,11 +20,14 @@ import dk.dma.ais.packet.AisPacket;
 import java.util.function.Consumer;
 
 /**
- * Provider that allows to push packets onto the bus 
+ * Provider that allows to push packets onto the bus
  */
 @ThreadSafe
 public class CollectorProvider extends AisBusProvider implements Consumer<AisPacket> {
-    
+
+    /**
+     * Instantiates a new Collector provider.
+     */
     public CollectorProvider() {
         super();
     }

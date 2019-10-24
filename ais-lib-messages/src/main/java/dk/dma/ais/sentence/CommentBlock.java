@@ -38,8 +38,9 @@ public class CommentBlock {
 
     /**
      * Add line containing comment block
-     * 
-     * @param line
+     *
+     * @param line the line
+     * @throws CommentBlockException the comment block exception
      */
     public void addLine(String line) throws CommentBlockException {
         // Make line object and parse
@@ -80,17 +81,18 @@ public class CommentBlock {
 
     /**
      * Get number of entries in comment block
-     * @return
+     *
+     * @return size
      */
     public int getSize() {
         return parameterMap.size();
     }
-    
+
     /**
      * Get string value for parameter code
-     * 
-     * @param parameter
-     * @return
+     *
+     * @param parameter the parameter
+     * @return string
      */
     public String getString(String parameter) {
         return parameterMap.get(parameter);
@@ -98,9 +100,9 @@ public class CommentBlock {
 
     /**
      * Add key value pair with string value
-     * 
-     * @param parameter
-     * @param value
+     *
+     * @param parameter the parameter
+     * @param value     the value
      */
     public void addString(String parameter, String value) {
         parameterMap.put(parameter, value);
@@ -108,9 +110,9 @@ public class CommentBlock {
 
     /**
      * Add integer value
-     * 
-     * @param parameter
-     * @param value
+     *
+     * @param parameter the parameter
+     * @param value     the value
      */
     public void addInt(String parameter, int value) {
         parameterMap.put(parameter, Integer.toString(value));
@@ -118,8 +120,8 @@ public class CommentBlock {
 
     /**
      * Add timestamp
-     * 
-     * @param timestamp
+     *
+     * @param timestamp the timestamp
      */
     public void addTimestamp(Date timestamp) {
         parameterMap.put("c", Long.toString(timestamp.getTime() / 1000));
@@ -127,9 +129,9 @@ public class CommentBlock {
 
     /**
      * Get integer value of parameter code
-     * 
-     * @param parameter
-     * @return
+     *
+     * @param parameter the parameter
+     * @return int
      */
     public Integer getInt(String parameter) {
         String val = parameterMap.get(parameter);
@@ -142,9 +144,9 @@ public class CommentBlock {
 
     /**
      * Get long value of parameter code
-     * 
-     * @param parameter
-     * @return
+     *
+     * @param parameter the parameter
+     * @return long
      */
     public Long getLong(String parameter) {
         String val = parameterMap.get(parameter);
@@ -157,8 +159,8 @@ public class CommentBlock {
 
     /**
      * Get timestamp in tag
-     * 
-     * @return
+     *
+     * @return timestamp
      */
     public Long getTimestamp() {
         return getLong("c");
@@ -166,9 +168,9 @@ public class CommentBlock {
 
     /**
      * Determine if parameter exists in comment block
-     * 
-     * @param parameter
-     * @return
+     *
+     * @param parameter the parameter
+     * @return boolean
      */
     public boolean contains(String parameter) {
         return parameterMap.containsKey(parameter);
@@ -176,9 +178,9 @@ public class CommentBlock {
 
     /**
      * Determine if a line contains comment block
-     * 
-     * @param line
-     * @return
+     *
+     * @param line the line
+     * @return boolean
      */
     public static boolean hasCommentBlock(String line) {
         return line.length() > 0 && line.charAt(0) == '\\';
@@ -186,8 +188,8 @@ public class CommentBlock {
 
     /**
      * Determine if comment block is completed. That is no unfinished groups.
-     * 
-     * @return
+     *
+     * @return boolean
      */
     public boolean isFinished() {
         return lastGroupId == null;
@@ -195,8 +197,8 @@ public class CommentBlock {
 
     /**
      * Get id of last group
-     * 
-     * @return
+     *
+     * @return last group id
      */
     public String getLastGroupId() {
         return lastGroupId;
@@ -204,8 +206,8 @@ public class CommentBlock {
 
     /**
      * Get total number of lines in last group
-     * 
-     * @return
+     *
+     * @return total lines
      */
     public int getTotalLines() {
         return totalLines;
@@ -213,8 +215,8 @@ public class CommentBlock {
 
     /**
      * Determine if comment block contains any key value pairs
-     * 
-     * @return
+     *
+     * @return boolean
      */
     public boolean isEmpty() {
         return parameterMap.size() == 0;
@@ -222,8 +224,8 @@ public class CommentBlock {
 
     /**
      * Encode comment block in 80 character lines
-     * 
-     * @return
+     *
+     * @return string
      */
     public String encode() {
         return encode(80);
@@ -231,10 +233,9 @@ public class CommentBlock {
 
     /**
      * Encode comment block in a number of lines
-     * 
-     * @param maxLen
-     *            Maximum line length
-     * @return
+     *
+     * @param maxLen Maximum line length
+     * @return string
      */
     public String encode(int maxLen) {
         // Get all pairs

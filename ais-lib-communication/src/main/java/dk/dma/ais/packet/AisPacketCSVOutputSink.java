@@ -51,8 +51,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Transform AisPackets into csv objects with only specific columns
- * @author Thomas Borg Salling
  *
+ * @author Thomas Borg Salling
  */
 public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
@@ -67,16 +67,33 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     private Lock csvLock = new ReentrantLock();
 
+    /**
+     * The constant NULL_INDICATOR.
+     */
     protected static final String NULL_INDICATOR = "null";
-    
+
+    /**
+     * Instantiates a new Ais packet csv output sink.
+     */
     public AisPacketCSVOutputSink() {
         this("timestamp_pretty;timestamp;targetType;mmsi;msgid;posacc;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipTypeCargoTypeCode;shipType;shipCargo;destination;eta;imo;callsign", ";");
     }
 
+    /**
+     * Instantiates a new Ais packet csv output sink.
+     *
+     * @param format the format
+     */
     public AisPacketCSVOutputSink(String format) {
         this(format, ";");
     }
 
+    /**
+     * Instantiates a new Ais packet csv output sink.
+     *
+     * @param format    the format
+     * @param separator the separator
+     */
     public AisPacketCSVOutputSink(String format, String separator) {
         LOG.info("Exporting CSV columns: " + format);
         columns = format.split(separator);
@@ -404,6 +421,12 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
 
     // ---
 
+    /**
+     * Format eta string.
+     *
+     * @param eta the eta
+     * @return the string
+     */
     protected String formatEta(long eta) {
         /*
         Estimated time of arrival; MMDDHHMM UTC
@@ -421,88 +444,199 @@ public class AisPacketCSVOutputSink extends OutputStreamSink<AisPacket> {
         return formatEta(day, month, hour, minute);
     }
 
+    /**
+     * Format eta string.
+     *
+     * @param eta the eta
+     * @return the string
+     */
     protected String formatEta(Date eta) {
         LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(eta.getTime()), ZoneId.systemDefault());
         return formatEta(time.getDayOfMonth(), time.getMonthValue(), time.getHour(), time.getMinute());
     }
 
+    /**
+     * Format eta string.
+     *
+     * @param day    the day
+     * @param month  the month
+     * @param hour   the hour
+     * @param minute the minute
+     * @return the string
+     */
     protected String formatEta(int day, int month, int hour, int minute) {
         return String.format("%02d/%02d %02d:%02d UTC", day, month, hour, minute);
     }
 
     // ---
 
+    /**
+     * Sets null value for position accuracy.
+     *
+     * @param nullValueForPositionAccuracy the null value for position accuracy
+     */
     protected void setNullValueForPositionAccuracy(Function<AisMessage, Object> nullValueForPositionAccuracy) {
         this.nullValueForPositionAccuracy = nullValueForPositionAccuracy;
     }
 
+    /**
+     * Sets null value for latitude.
+     *
+     * @param nullValueForLatitude the null value for latitude
+     */
     protected void setNullValueForLatitude(Function<AisMessage, Object> nullValueForLatitude) {
         this.nullValueForLatitude = nullValueForLatitude;
     }
 
+    /**
+     * Sets null value for longitude.
+     *
+     * @param nullValueForLongitude the null value for longitude
+     */
     protected void setNullValueForLongitude(Function<AisMessage, Object> nullValueForLongitude) {
         this.nullValueForLongitude = nullValueForLongitude;
     }
 
+    /**
+     * Sets null value for sog.
+     *
+     * @param nullValueForSog the null value for sog
+     */
     protected void setNullValueForSog(Function<AisMessage, Object> nullValueForSog) {
         this.nullValueForSog = nullValueForSog;
     }
 
+    /**
+     * Sets null value for cog.
+     *
+     * @param nullValueForCog the null value for cog
+     */
     protected void setNullValueForCog(Function<AisMessage, Object> nullValueForCog) {
         this.nullValueForCog = nullValueForCog;
     }
 
+    /**
+     * Sets null value for true heading.
+     *
+     * @param nullValueForTrueHeading the null value for true heading
+     */
     protected void setNullValueForTrueHeading(Function<AisMessage, Object> nullValueForTrueHeading) {
         this.nullValueForTrueHeading = nullValueForTrueHeading;
     }
 
+    /**
+     * Sets null value for draught.
+     *
+     * @param nullValueForDraught the null value for draught
+     */
     protected void setNullValueForDraught(Function<AisMessage, Object> nullValueForDraught) {
         this.nullValueForDraught = nullValueForDraught;
     }
 
+    /**
+     * Sets null value for name.
+     *
+     * @param nullValueForName the null value for name
+     */
     protected void setNullValueForName(Function<AisMessage, Object> nullValueForName) {
         this.nullValueForName = nullValueForName;
     }
 
+    /**
+     * Sets null value for dim bow.
+     *
+     * @param nullValueForDimBow the null value for dim bow
+     */
     protected void setNullValueForDimBow(Function<AisMessage, Object> nullValueForDimBow) {
         this.nullValueForDimBow = nullValueForDimBow;
     }
 
+    /**
+     * Sets null value for dim port.
+     *
+     * @param nullValueForDimPort the null value for dim port
+     */
     protected void setNullValueForDimPort(Function<AisMessage, Object> nullValueForDimPort) {
         this.nullValueForDimPort = nullValueForDimPort;
     }
 
+    /**
+     * Sets null value for dim starboard.
+     *
+     * @param nullValueForDimStarboard the null value for dim starboard
+     */
     protected void setNullValueForDimStarboard(Function<AisMessage, Object> nullValueForDimStarboard) {
         this.nullValueForDimStarboard = nullValueForDimStarboard;
     }
 
+    /**
+     * Sets null value for dim stern.
+     *
+     * @param nullValueForDimStern the null value for dim stern
+     */
     protected void setNullValueForDimStern(Function<AisMessage, Object> nullValueForDimStern) {
         this.nullValueForDimStern = nullValueForDimStern;
     }
 
+    /**
+     * Sets null value for ship type cargo type code.
+     *
+     * @param nullValueForShipTypeCargoTypeCode the null value for ship type cargo type code
+     */
     protected void setNullValueForShipTypeCargoTypeCode(Function<AisMessage, Object> nullValueForShipTypeCargoTypeCode) {
         this.nullValueForShipTypeCargoTypeCode = nullValueForShipTypeCargoTypeCode;
     }
+
+    /**
+     * Sets null value for ship type.
+     *
+     * @param nullValueForShipType the null value for ship type
+     */
     protected void setNullValueForShipType(Function<AisMessage, Object> nullValueForShipType) {
         this.nullValueForShipType = nullValueForShipType;
     }
 
+    /**
+     * Sets null value for ship cargo.
+     *
+     * @param nullValueForShipCargo the null value for ship cargo
+     */
     protected void setNullValueForShipCargo(Function<AisMessage, Object> nullValueForShipCargo) {
         this.nullValueForShipCargo = nullValueForShipCargo;
     }
 
+    /**
+     * Sets null value for callsign.
+     *
+     * @param nullValueForCallsign the null value for callsign
+     */
     protected void setNullValueForCallsign(Function<AisMessage, Object> nullValueForCallsign) {
         this.nullValueForCallsign = nullValueForCallsign;
     }
 
+    /**
+     * Sets null value for imo.
+     *
+     * @param nullValueForImo the null value for imo
+     */
     protected void setNullValueForImo(Function<AisMessage, Object> nullValueForImo) {
         this.nullValueForImo = nullValueForImo;
     }
 
+    /**
+     * Sets null value for destination.
+     *
+     * @param nullValueForDestination the null value for destination
+     */
     protected void setNullValueForDestination(Function<AisMessage, Object> nullValueForDestination) {
         this.nullValueForDestination = nullValueForDestination;
     }
 
+    /**
+     * Sets null value for eta.
+     *
+     * @param nullValueForEta the null value for eta
+     */
     protected void setNullValueForEta(Function<AisMessage, Object> nullValueForEta) {
         this.nullValueForEta = nullValueForEta;
     }

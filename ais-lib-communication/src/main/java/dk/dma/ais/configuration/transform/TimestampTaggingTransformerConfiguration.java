@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.TimestampTaggingTransformer;
 
+/**
+ * The type Timestamp tagging transformer configuration.
+ */
 @XmlRootElement
 public class TimestampTaggingTransformerConfiguration extends TransformerConfiguration {
 

@@ -18,18 +18,26 @@ package dk.dma.ais.filter;
 import dk.dma.ais.packet.AisPacket;
 
 /**
- * @author Jens Tuxen
+ * The type Past filter.
  *
- * Reject packets with timestamp in the future according to device clock
+ * @author Jens Tuxen Reject packets with timestamp in the future according to device clock
  */
 public class PastFilter implements IPacketFilter {
     private final long threshold;
-    
+
+    /**
+     * Instantiates a new Past filter.
+     */
     public PastFilter() {
         /* defaults to filtering packets older than 24 hours */
         threshold = 24*60*60*1000; 
     }
-    
+
+    /**
+     * Instantiates a new Past filter.
+     *
+     * @param threshold the threshold
+     */
     public PastFilter(long threshold) {
         this.threshold = threshold;
     }

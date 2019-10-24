@@ -23,36 +23,72 @@ import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.configuration.filter.FilterConfiguration;
 import dk.dma.ais.configuration.transform.TransformerConfiguration;
 
+/**
+ * The type Ais bus component configuration.
+ */
 public abstract class AisBusComponentConfiguration {
 
     private List<FilterConfiguration> filters = new ArrayList<>();
         
     private List<TransformerConfiguration> transformers = new ArrayList<>();
 
+    /**
+     * Instantiates a new Ais bus component configuration.
+     */
     public AisBusComponentConfiguration() {
 
     }
 
+    /**
+     * Gets filters.
+     *
+     * @return the filters
+     */
     @XmlElement(name = "filter")
     public List<FilterConfiguration> getFilters() {
         return filters;
     }
 
+    /**
+     * Sets filters.
+     *
+     * @param filters the filters
+     */
     public void setFilters(List<FilterConfiguration> filters) {
         this.filters = filters;
     }
-    
+
+    /**
+     * Gets transformers.
+     *
+     * @return the transformers
+     */
     @XmlElement(name = "transformer")
     public List<TransformerConfiguration> getTransformers() {
         return transformers;
     }
-    
+
+    /**
+     * Sets transformers.
+     *
+     * @param transformers the transformers
+     */
     public void setTransformers(List<TransformerConfiguration> transformers) {
         this.transformers = transformers;
     }
-    
+
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public abstract AisBusComponent getInstance();
-    
+
+    /**
+     * Configure.
+     *
+     * @param comp the comp
+     */
     protected void configure(AisBusComponent comp) {
         // Add filters
         for (FilterConfiguration filterConf : filters) {

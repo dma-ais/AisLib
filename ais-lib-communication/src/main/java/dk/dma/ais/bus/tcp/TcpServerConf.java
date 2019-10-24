@@ -22,22 +22,45 @@ public class TcpServerConf {
     private int port = 8090;
     private int maxClients = 1000;
 
+    /**
+     * Instantiates a new Tcp server conf.
+     */
     public TcpServerConf() {
 
     }
 
+    /**
+     * Gets port.
+     *
+     * @return the port
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * Sets port.
+     *
+     * @param port the port
+     */
     public void setPort(int port) {
         this.port = port;
     }
 
+    /**
+     * Gets max clients.
+     *
+     * @return the max clients
+     */
     public int getMaxClients() {
         return maxClients;
     }
 
+    /**
+     * Sets max clients.
+     *
+     * @param maxClients the max clients
+     */
     public void setMaxClients(int maxClients) {
         this.maxClients = maxClients;
     }

@@ -20,6 +20,9 @@ import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.enav.model.Country;
 
+/**
+ * The type Packet tagging configuration.
+ */
 public class PacketTaggingConfiguration {
 
     private String sourceId;
@@ -27,42 +30,90 @@ public class PacketTaggingConfiguration {
     private String sourceCountry;
     private String sourceType;
 
+    /**
+     * Instantiates a new Packet tagging configuration.
+     */
     public PacketTaggingConfiguration() {
 
     }
 
+    /**
+     * Gets source id.
+     *
+     * @return the source id
+     */
     public String getSourceId() {
         return sourceId;
     }
 
+    /**
+     * Sets source id.
+     *
+     * @param sourceId the source id
+     */
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
 
+    /**
+     * Gets source bs.
+     *
+     * @return the source bs
+     */
     public Integer getSourceBs() {
         return sourceBs;
     }
 
+    /**
+     * Sets source bs.
+     *
+     * @param sourceBs the source bs
+     */
     public void setSourceBs(Integer sourceBs) {
         this.sourceBs = sourceBs;
     }
 
+    /**
+     * Gets source country.
+     *
+     * @return the source country
+     */
     public String getSourceCountry() {
         return sourceCountry;
     }
 
+    /**
+     * Sets source country.
+     *
+     * @param sourceCountry the source country
+     */
     public void setSourceCountry(String sourceCountry) {
         this.sourceCountry = sourceCountry;
     }
 
+    /**
+     * Gets source type.
+     *
+     * @return the source type
+     */
     public String getSourceType() {
         return sourceType;
     }
 
+    /**
+     * Sets source type.
+     *
+     * @param sourceType the source type
+     */
     public void setSourceType(String sourceType) {
         this.sourceType = sourceType;
     }
-    
+
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     @XmlTransient
     public AisPacketTags getInstance() {
         AisPacketTags tagging = new AisPacketTags();

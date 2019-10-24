@@ -22,7 +22,8 @@ import java.io.Serializable;
 import java.util.function.Predicate;
 
 /**
- * 
+ * The type Ais packet source.
+ *
  * @author Kasper Nielsen
  */
 public class AisPacketSource implements Serializable {
@@ -48,6 +49,15 @@ public class AisPacketSource implements Serializable {
     /** Source type (comment block key: 'st', value: SAT | LIVE) */
     private final SourceType sourceType;
 
+    /**
+     * Instantiates a new Ais packet source.
+     *
+     * @param sourceId          the source id
+     * @param sourceBaseStation the source base station
+     * @param sourceCountry     the source country
+     * @param sourceType        the source type
+     * @param sourceRegion      the source region
+     */
     AisPacketSource(String sourceId, Integer sourceBaseStation, Country sourceCountry, SourceType sourceType,
             String sourceRegion) {
         if (sourceBaseStation != null && sourceBaseStation.intValue() < 0) {
@@ -61,7 +71,11 @@ public class AisPacketSource implements Serializable {
         this.hash = calcHash();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc} @return the int
+     *
+     * @return the int
+     */
     int calcHash() {
         final int prime = 31;
         int result = 1;
@@ -120,12 +134,18 @@ public class AisPacketSource implements Serializable {
         return true;
     }
 
-    /** Returns the base station source. */
+    /**
+     * Returns the base station source.  @return the source base station
+     *
+     * @return the source base station
+     */
     public Integer getSourceBaseStation() {
         return sourceBaseStation;
     }
 
     /**
+     * Gets source country.
+     *
      * @return the sourceCountry
      */
     public Country getSourceCountry() {
@@ -133,6 +153,8 @@ public class AisPacketSource implements Serializable {
     }
 
     /**
+     * Gets source id.
+     *
      * @return the sourceId
      */
     public String getSourceId() {
@@ -140,6 +162,8 @@ public class AisPacketSource implements Serializable {
     }
 
     /**
+     * Gets source region.
+     *
      * @return the sourceRegion
      */
     public String getSourceRegion() {
@@ -147,6 +171,8 @@ public class AisPacketSource implements Serializable {
     }
 
     /**
+     * Gets source type.
+     *
      * @return the sourceType
      */
     public SourceType getSourceType() {
@@ -168,6 +194,12 @@ public class AisPacketSource implements Serializable {
                 + ", sourceRegion=" + sourceRegion + ", sourceType=" + sourceType + "]";
     }
 
+    /**
+     * Create ais packet source.
+     *
+     * @param packet the packet
+     * @return the ais packet source
+     */
     public static AisPacketSource create(AisPacket packet) {
         AisPacketTags tags = packet.getTags();
         Integer sourceBaseStation = tags.getSourceBs();
@@ -181,6 +213,12 @@ public class AisPacketSource implements Serializable {
         return new AisPacketSource(sourceId, sourceBaseStation, sourceCountry, sourceType, region);
     }
 
+    /**
+     * Create predicate predicate.
+     *
+     * @param expression the expression
+     * @return the predicate
+     */
     public static Predicate<AisPacketSource> createPredicate(String expression) {
         return AisPacketSourceFilters.parseSourceFilter(expression);
     }

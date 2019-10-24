@@ -24,6 +24,9 @@ import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.provider.TcpClientProvider;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 
+/**
+ * The type Tcp client provider configuration.
+ */
 @XmlRootElement
 public class TcpClientProviderConfiguration extends AisBusProviderConfiguration {
 
@@ -32,39 +35,82 @@ public class TcpClientProviderConfiguration extends AisBusProviderConfiguration 
     private int reconnectInterval = 10;
     private int timeout = 10;
 
+    /**
+     * Instantiates a new Tcp client provider configuration.
+     */
     public TcpClientProviderConfiguration() {
 
     }
 
+    /**
+     * Gets host port.
+     *
+     * @return the host port
+     */
     public List<String> getHostPort() {
         return hostPort;
     }
 
+    /**
+     * Sets host port.
+     *
+     * @param hostPort the host port
+     */
     public void setHostPort(List<String> hostPort) {
         this.hostPort = hostPort;
     }
 
 
+    /**
+     * Gets client conf.
+     *
+     * @return the client conf
+     */
     public TcpClientConf getClientConf() {
         return clientConf;
     }
 
+    /**
+     * Sets client conf.
+     *
+     * @param clientConf the client conf
+     */
     public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
     }
 
+    /**
+     * Gets reconnect interval.
+     *
+     * @return the reconnect interval
+     */
     public int getReconnectInterval() {
         return reconnectInterval;
     }
 
+    /**
+     * Sets reconnect interval.
+     *
+     * @param reconnectInterval the reconnect interval
+     */
     public void setReconnectInterval(int reconnectInterval) {
         this.reconnectInterval = reconnectInterval;
     }
 
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
     public int getTimeout() {
         return timeout;
     }
 
+    /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }

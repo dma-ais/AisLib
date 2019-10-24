@@ -57,6 +57,9 @@ public class AisPacketParser {
      */
     private SentenceLine sentenceLine = new SentenceLine();
 
+    /**
+     * New vdm.
+     */
     void newVdm() {
         vdm = new Vdm();
         tags.clear();
@@ -65,10 +68,10 @@ public class AisPacketParser {
 
     /**
      * Handle a single line. If a complete packet is assembled the package will be returned. Otherwise null is returned.
-     * 
-     * @param line
-     * @return
-     * @throws SentenceException
+     *
+     * @param line the line
+     * @return ais packet
+     * @throws SentenceException the sentence exception
      */
     public AisPacket readLine(String line) throws SentenceException {
         return readLine(line, false);

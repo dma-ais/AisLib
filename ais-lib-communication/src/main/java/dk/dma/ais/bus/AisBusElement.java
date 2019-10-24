@@ -22,21 +22,41 @@ import dk.dma.ais.packet.AisPacket;
 public final class AisBusElement {
 
     private final long timestamp;
-    private AisPacket packet;    
+    private AisPacket packet;
 
+    /**
+     * Instantiates a new Ais bus element.
+     *
+     * @param packet the packet
+     */
     public AisBusElement(AisPacket packet) {
         this.packet = packet;
         this.timestamp = System.currentTimeMillis();
     }
 
+    /**
+     * Gets packet.
+     *
+     * @return the packet
+     */
     public AisPacket getPacket() {
         return packet;
     }
-    
+
+    /**
+     * Sets packet.
+     *
+     * @param packet the packet
+     */
     public void setPacket(AisPacket packet) {
         this.packet = packet;
     }
-    
+
+    /**
+     * Gets timestamp.
+     *
+     * @return the timestamp
+     */
     public long getTimestamp() {
         return timestamp;
     }

@@ -25,17 +25,25 @@ import java.util.function.Consumer;
 
 /**
  * Consumer that distributes consumed packets from the bus to
- * a set of packet consumers 
+ * a set of packet consumers
  */
 @ThreadSafe
 public class DistributerConsumer extends AisBusConsumer {
     
     private final List<Consumer<AisPacket>> consumers = new CopyOnWriteArrayList<>();
-    
+
+    /**
+     * Instantiates a new Distributer consumer.
+     */
     public DistributerConsumer() {
         this(false);
     }
-    
+
+    /**
+     * Instantiates a new Distributer consumer.
+     *
+     * @param blocking the blocking
+     */
     public DistributerConsumer(boolean blocking) {
         super(blocking);
     }
@@ -46,7 +54,12 @@ public class DistributerConsumer extends AisBusConsumer {
             consumer.accept(queueElement.getPacket());
         }
     }
-    
+
+    /**
+     * Gets consumers.
+     *
+     * @return the consumers
+     */
     public List<Consumer<AisPacket>> getConsumers() {
         return consumers;
     }

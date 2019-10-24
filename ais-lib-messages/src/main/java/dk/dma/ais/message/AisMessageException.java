@@ -21,8 +21,16 @@ public class AisMessageException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Ais message exception.
+     */
     public AisMessageException() {}
 
+    /**
+     * Instantiates a new Ais message exception.
+     *
+     * @param msg the msg
+     */
     public AisMessageException(String msg) {
         super(msg);
     }

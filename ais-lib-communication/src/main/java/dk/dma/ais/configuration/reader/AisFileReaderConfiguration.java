@@ -20,6 +20,9 @@ import java.io.FileNotFoundException;
 import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
 
+/**
+ * The type Ais file reader configuration.
+ */
 public class AisFileReaderConfiguration extends AisReaderConfiguration {
     private String filePath;
 
@@ -29,11 +32,21 @@ public class AisFileReaderConfiguration extends AisReaderConfiguration {
         return aisStreamReader;
     }
 
+    /**
+     * Sets file path.
+     *
+     * @param filePath the file path
+     */
     public void setFilePath(String filePath) {
         this.filePath = filePath;
 
     }
 
+    /**
+     * Gets file path.
+     *
+     * @return the file path
+     */
     public String getFilePath() {
         return filePath;
     }

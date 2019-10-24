@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.filter.DownSampleFilter;
 import dk.dma.ais.filter.IPacketFilter;
 
+/**
+ * The type Down sample filter configuration.
+ */
 @XmlRootElement
 public class DownSampleFilterConfiguration extends FilterConfiguration {
 
@@ -28,18 +31,36 @@ public class DownSampleFilterConfiguration extends FilterConfiguration {
      */
     private long samplingRate = 60;
 
+    /**
+     * Instantiates a new Down sample filter configuration.
+     */
     public DownSampleFilterConfiguration() {
 
     }
 
+    /**
+     * Instantiates a new Down sample filter configuration.
+     *
+     * @param samplingRate the sampling rate
+     */
     public DownSampleFilterConfiguration(long samplingRate) {
         this.samplingRate = samplingRate;
     }
 
+    /**
+     * Gets sampling rate.
+     *
+     * @return the sampling rate
+     */
     public long getSamplingRate() {
         return samplingRate;
     }
 
+    /**
+     * Sets sampling rate.
+     *
+     * @param samplingRate the sampling rate
+     */
     public void setSamplingRate(long samplingRate) {
         this.samplingRate = samplingRate;
     }

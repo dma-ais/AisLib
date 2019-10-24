@@ -26,10 +26,21 @@ public class UnknownAsm extends AisApplicationMessage {
 
     private BinArray binArray;
 
+    /**
+     * Instantiates a new Unknown asm.
+     *
+     * @param dac the dac
+     * @param fi  the fi
+     */
     public UnknownAsm(int dac, int fi) {
         super(dac, fi);
     }
 
+    /**
+     * Instantiates a new Unknown asm.
+     *
+     * @param binaryMessage the binary message
+     */
     public UnknownAsm(AisBinaryMessage binaryMessage) {
         this(binaryMessage.getDac(), binaryMessage.getFi());
         this.binArray = binaryMessage.getData();        

@@ -29,7 +29,7 @@ import dk.dma.ais.transform.IAisPacketTransformer;
  */
 @ThreadSafe
 public abstract class AisBusComponent {
-    
+
     /**
      * Maximum time to wait for threads to stop after having been cancelled
      */
@@ -56,6 +56,9 @@ public abstract class AisBusComponent {
      */
     protected final CopyOnWriteArrayList<IAisPacketTransformer> packetTransformers = new CopyOnWriteArrayList<>();
 
+    /**
+     * Instantiates a new Ais bus component.
+     */
     public AisBusComponent() {
         this.status = new AisBusComponentStatus();
     }
@@ -73,22 +76,32 @@ public abstract class AisBusComponent {
     public void start() {
         status.setStarted();
     }
-        
+
+    /**
+     * Sets connected.
+     */
     public void setConnected() {
         status.setConnected();
     }
-    
+
+    /**
+     * Sets not connected.
+     */
     public void setNotConnected() {
         status.setNotConnected();
     }
-    
+
+    /**
+     * Sets stopped.
+     */
     public void setStopped() {
         status.setStopped();
     }
-    
+
     /**
      * Get component status
-     * @return
+     *
+     * @return status status
      */
     public AisBusComponentStatus getStatus() {
         return status;
@@ -96,8 +109,8 @@ public abstract class AisBusComponent {
 
     /**
      * Set component thread
-     * 
-     * @param thread
+     *
+     * @param thread the thread
      */
     protected synchronized void setThread(Thread thread) {
         this.thread = thread;
@@ -105,23 +118,23 @@ public abstract class AisBusComponent {
 
     /**
      * Get component thread
-     * 
-     * @return
+     *
+     * @return thread thread
      */
     public synchronized Thread getThread() {
         return thread;
     }
-    
+
     /**
-     * All components must implement a way to stop    
+     * All components must implement a way to stop
      */
     public abstract void cancel();
 
     /**
      * Method to handle incoming packet for all AisBus components. Will do filtering, transformation and tagging.
-     * 
-     * @param element
-     * @return
+     *
+     * @param packet the packet
+     * @return ais packet
      */
     protected AisPacket handleReceived(AisPacket packet) {
         status.receive();
@@ -148,8 +161,8 @@ public abstract class AisBusComponent {
 
     /**
      * Get filters collection
-     * 
-     * @return
+     *
+     * @return filters filters
      */
     public PacketFilterCollection getFilters() {
         return filters;
@@ -157,8 +170,8 @@ public abstract class AisBusComponent {
 
     /**
      * Get packet transformers list
-     * 
-     * @return
+     *
+     * @return packet transformers
      */
     public CopyOnWriteArrayList<IAisPacketTransformer> getPacketTransformers() {
         return packetTransformers;
@@ -174,7 +187,12 @@ public abstract class AisBusComponent {
         builder.append("]");
         return builder.toString();
     }
-    
+
+    /**
+     * Rate report string.
+     *
+     * @return the string
+     */
     public String rateReport() {
         return String.format("[received/filtered/overflow] %4.2f / %4.2f / %4.2f  (packets/sec)", status.getInRate(), status.getFilteredRate(), status.getOverflowRate());
     }

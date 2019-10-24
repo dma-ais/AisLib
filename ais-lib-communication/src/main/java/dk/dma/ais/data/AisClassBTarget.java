@@ -28,6 +28,9 @@ public class AisClassBTarget extends AisVesselTarget {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Ais class b target.
+     */
     public AisClassBTarget() {
         super();
     }
@@ -45,11 +48,21 @@ public class AisClassBTarget extends AisVesselTarget {
         super.update(aisMessage);
     }
 
+    /**
+     * Gets class b position.
+     *
+     * @return the class b position
+     */
     @JsonIgnore
     public AisClassBPosition getClassBPosition() {
         return (AisClassBPosition) this.vesselPosition;
     }
 
+    /**
+     * Gets class b static.
+     *
+     * @return the class b static
+     */
     @JsonIgnore
     public AisClassBStatic getClassBStatic() {
         return (AisClassBStatic) this.vesselStatic;
@@ -62,9 +75,9 @@ public class AisClassBTarget extends AisVesselTarget {
 
     /**
      * Determine if AIS message is class B position report or static report
-     * 
-     * @param aisMessage
-     * @return
+     *
+     * @param aisMessage the ais message
+     * @return boolean boolean
      */
     public static boolean isClassBPosOrStatic(AisMessage aisMessage) {
         return aisMessage instanceof AisMessage18 || aisMessage instanceof AisMessage24 || aisMessage instanceof AisMessage19;

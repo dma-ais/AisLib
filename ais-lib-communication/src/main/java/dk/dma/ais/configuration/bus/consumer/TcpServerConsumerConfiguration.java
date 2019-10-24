@@ -22,28 +22,54 @@ import dk.dma.ais.bus.consumer.TcpServerConsumer;
 import dk.dma.ais.bus.tcp.TcpClientConf;
 import dk.dma.ais.bus.tcp.TcpServerConf;
 
+/**
+ * The type Tcp server consumer configuration.
+ */
 @XmlRootElement
 public class TcpServerConsumerConfiguration extends AisBusConsumerConfiguration {
 
     private TcpClientConf clientConf = new TcpClientConf();
     private TcpServerConf serverConf = new TcpServerConf();
 
+    /**
+     * Instantiates a new Tcp server consumer configuration.
+     */
     public TcpServerConsumerConfiguration() {
 
     }
 
+    /**
+     * Gets client conf.
+     *
+     * @return the client conf
+     */
     public TcpClientConf getClientConf() {
         return clientConf;
     }
 
+    /**
+     * Sets client conf.
+     *
+     * @param clientConf the client conf
+     */
     public void setClientConf(TcpClientConf clientConf) {
         this.clientConf = clientConf;
     }
 
+    /**
+     * Gets server conf.
+     *
+     * @return the server conf
+     */
     public TcpServerConf getServerConf() {
         return serverConf;
     }
 
+    /**
+     * Sets server conf.
+     *
+     * @param serverConf the server conf
+     */
     public void setServerConf(TcpServerConf serverConf) {
         this.serverConf = serverConf;
     }

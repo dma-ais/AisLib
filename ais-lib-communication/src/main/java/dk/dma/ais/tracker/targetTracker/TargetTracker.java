@@ -39,19 +39,22 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * There are no automatically cleanup instead users must regularly cleanup targets by calling
  * {@link #removeAll(Predicate)}
- * 
+ *
  * @author Kasper Nielsen
  * @author Jens Tuxen
  */
 public class TargetTracker implements Tracker {
 
-    /** All targets that we are currently monitoring. */
+    /**
+     * All targets that we are currently monitoring.
+     */
     final ConcurrentHashMap<Integer, MmsiTarget> targets = new ConcurrentHashMap<>();
 
     /**
      * Returns the number of targets that is being tracked. This is usually a lot faster than invoking
      * <tt>stream(predicate).count()</tt>
-     * 
+     *
+     * @param predicate the predicate
      * @return the number of targets that is being tracked
      */
     public int count(Predicate<? super AisPacketSource> predicate) {
@@ -91,6 +94,13 @@ public class TargetTracker implements Tracker {
         return get(mmsi, e -> true);
     }
 
+    /**
+     * Get target info.
+     *
+     * @param mmsi            the mmsi
+     * @param sourcePredicate the source predicate
+     * @return the target info
+     */
     public TargetInfo get(int mmsi, Predicate<? super AisPacketSource> sourcePredicate) {
         MmsiTarget target = targets.get(mmsi);
         return target == null ? null : target.getLatest(sourcePredicate);
@@ -99,8 +109,7 @@ public class TargetTracker implements Tracker {
     /**
      * Returns a set of all packet sources for a given MMSI number.
      *
-     * @param mmsi
-     *            the MMSI number
+     * @param mmsi the MMSI number
      * @return a set of all packet sources for a given MMSI number
      */
     public Set<AisPacketSource> getPacketSourcesForMMSI(int mmsi) {
@@ -112,8 +121,7 @@ public class TargetTracker implements Tracker {
      * Removes all targets that are accepted by the specified predicate. Is typically used to remove targets based on
      * time stamps.
      *
-     * @param predicate
-     *            the predicate that selects which items to remove
+     * @param predicate the predicate that selects which items to remove
      */
     public void removeAll(Predicate<? super TargetInfo> predicate) {
         requireNonNull(predicate);
@@ -134,8 +142,7 @@ public class TargetTracker implements Tracker {
      * Removes all targets that are accepted by the specified predicate. Is
      * typically used to remove targets based on time stamps.
      *
-     * @param predicate
-     *            the predicate that selects which items to remove
+     * @param predicate the predicate that selects which items to remove
      */
     public void removeAll(BiPredicate<? super AisPacketSource, ? super TargetInfo> predicate) {
         requireNonNull(predicate);
@@ -185,8 +192,9 @@ public class TargetTracker implements Tracker {
 
     /**
      * Creates a sequential stream of targets with the specified source predicate and matching the given targetPredicate.
-     * @param sourcePredicate
-     * @param targetPredicate
+     *
+     * @param sourcePredicate the source predicate
+     * @param targetPredicate the target predicate
      * @return a stream of targets
      */
     public Stream<TargetInfo> stream(Predicate<? super AisPacketSource> sourcePredicate, Predicate<? super TargetInfo> targetPredicate) {
@@ -207,8 +215,7 @@ public class TargetTracker implements Tracker {
     /**
      * Creates a sequential stream of targets with the specified source predicate.
      *
-     * @param sourcePredicate
-     *            the predicate on AIS packet source
+     * @param sourcePredicate the predicate on AIS packet source
      * @return a stream of targets
      */
     public Stream<TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate) {
@@ -218,8 +225,9 @@ public class TargetTracker implements Tracker {
 
     /**
      * Creates a sequential stream of targets with the specified source predicate and matching the given targetPredicate.
-     * @param sourcePredicate
-     * @param targetPredicate
+     *
+     * @param sourcePredicate the source predicate
+     * @param targetPredicate the target predicate
      * @return a stream of targets
      */
     public Stream<TargetInfo> streamSequential(Predicate<? super AisPacketSource> sourcePredicate, Predicate<? super TargetInfo> targetPredicate) {
@@ -283,10 +291,8 @@ public class TargetTracker implements Tracker {
     /**
      * Used by the backup routine to restore data.
      *
-     * @param packetSource
-     *            the source
-     * @param targetInfo
-     *            the target info
+     * @param packetSource the source
+     * @param targetInfo   the target info
      */
     void update(AisPacketSource packetSource, TargetInfo targetInfo) {
         tryUpdate(targetInfo.getMmsi(),
@@ -299,12 +305,21 @@ public class TargetTracker implements Tracker {
     @SuppressWarnings("serial")
     static class MmsiTarget extends ConcurrentHashMap<AisPacketSource, TargetInfo> {
 
-        /** The MMSI number */
+        /**
+         * The MMSI number
+         */
         final int mmsi;
 
-        /** A cache of AIS messages 24 part 0. */
+        /**
+         * A cache of AIS messages 24 part 0.
+         */
         final ConcurrentHashMap<AisPacketSource, byte[]> msg24Part0 = new ConcurrentHashMap<>();
 
+        /**
+         * Instantiates a new Mmsi target.
+         *
+         * @param mmsi the mmsi
+         */
         MmsiTarget(int mmsi) {
             this.mmsi = mmsi;
         }
@@ -312,8 +327,7 @@ public class TargetTracker implements Tracker {
         /**
          * Returns the newest position and static data.
          *
-         * @param predicate
-         *            a predicate for filtering on the sources
+         * @param predicate a predicate for filtering on the sources
          * @return the newest position and static data
          */
         TargetInfo getLatest(Predicate<? super AisPacketSource> predicate) {

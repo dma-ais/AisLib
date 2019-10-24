@@ -24,28 +24,250 @@ import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
+/**
+ * The type Expression filter lexer.
+ */
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class ExpressionFilterLexer extends Lexer {
+	/**
+	 * The constant _decisionToDFA.
+	 */
 	protected static final DFA[] _decisionToDFA;
+	/**
+	 * The constant _sharedContextCache.
+	 */
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
+	/**
+	 * The constant T__15.
+	 */
 	public static final int
-		T__15=1, T__14=2, T__13=3, T__12=4, T__11=5, T__10=6, T__9=7, T__8=8, 
-		T__7=9, T__6=10, T__5=11, T__4=12, T__3=13, T__2=14, T__1=15, T__0=16, 
-		AND=17, OR=18, RANGE=19, LIKE=20, BBOX=21, CIRCLE=22, WITHIN=23, INT=24, 
-		FLOAT=25, STRING=26, WS=27, PREFIX_SOURCE=28, PREFIX_MESSAGE=29, PREFIX_TARGET=30, 
-		SRC_ID=31, SRC_BASESTATION=32, SRC_COUNTRY=33, SRC_TYPE=34, SRC_REGION=35, 
-		MSG_MSGID=36, MSG_MMSI=37, MSG_IMO=38, MSG_TYPE=39, MSG_COUNTRY=40, MSG_NAVSTAT=41, 
-		MSG_NAME=42, MSG_CALLSIGN=43, MSG_SPEED=44, MSG_COURSE=45, MSG_HEADING=46, 
-		MSG_DRAUGHT=47, MSG_LATITUDE=48, MSG_LONGITUDE=49, MSG_POSITION=50, MSG_TIME_YEAR=51, 
-		MSG_TIME_MONTH=52, MSG_TIME_DAY=53, MSG_TIME_WEEKDAY=54, MSG_TIME_HOUR=55, 
-		MSG_TIME_MINUTE=56, TGT_IMO=57, TGT_TYPE=58, TGT_COUNTRY=59, TGT_NAVSTAT=60, 
-		TGT_NAME=61, TGT_CALLSIGN=62, TGT_SPEED=63, TGT_COURSE=64, TGT_HEADING=65, 
-		TGT_DRAUGHT=66, TGT_LATITUDE=67, TGT_LONGITUDE=68, TGT_POSITION=69;
+		T__15=1, /**
+	 * The T __ 14.
+	 */
+	T__14=2, /**
+	 * The T __ 13.
+	 */
+	T__13=3, /**
+	 * The T __ 12.
+	 */
+	T__12=4, /**
+	 * The T __ 11.
+	 */
+	T__11=5, /**
+	 * The T __ 10.
+	 */
+	T__10=6, /**
+	 * The T __ 9.
+	 */
+	T__9=7, /**
+	 * The T __ 8.
+	 */
+	T__8=8,
+	/**
+	 * The T __ 7.
+	 */
+	T__7=9, /**
+	 * The T __ 6.
+	 */
+	T__6=10, /**
+	 * The T __ 5.
+	 */
+	T__5=11, /**
+	 * The T __ 4.
+	 */
+	T__4=12, /**
+	 * The T __ 3.
+	 */
+	T__3=13, /**
+	 * The T __ 2.
+	 */
+	T__2=14, /**
+	 * The T __ 1.
+	 */
+	T__1=15, /**
+	 * The T __ 0.
+	 */
+	T__0=16,
+	/**
+	 * The And.
+	 */
+	AND=17, /**
+	 * The Or.
+	 */
+	OR=18, /**
+	 * The Range.
+	 */
+	RANGE=19, /**
+	 * The Like.
+	 */
+	LIKE=20, /**
+	 * The Bbox.
+	 */
+	BBOX=21, /**
+	 * The Circle.
+	 */
+	CIRCLE=22, /**
+	 * The Within.
+	 */
+	WITHIN=23, /**
+	 * The Int.
+	 */
+	INT=24,
+	/**
+	 * The Float.
+	 */
+	FLOAT=25, /**
+	 * The String.
+	 */
+	STRING=26, /**
+	 * The Ws.
+	 */
+	WS=27, /**
+	 * The Prefix source.
+	 */
+	PREFIX_SOURCE=28, /**
+	 * The Prefix message.
+	 */
+	PREFIX_MESSAGE=29, /**
+	 * The Prefix target.
+	 */
+	PREFIX_TARGET=30,
+	/**
+	 * The Src id.
+	 */
+	SRC_ID=31, /**
+	 * The Src basestation.
+	 */
+	SRC_BASESTATION=32, /**
+	 * The Src country.
+	 */
+	SRC_COUNTRY=33, /**
+	 * The Src type.
+	 */
+	SRC_TYPE=34, /**
+	 * The Src region.
+	 */
+	SRC_REGION=35,
+	/**
+	 * The Msg msgid.
+	 */
+	MSG_MSGID=36, /**
+	 * The Msg mmsi.
+	 */
+	MSG_MMSI=37, /**
+	 * The Msg imo.
+	 */
+	MSG_IMO=38, /**
+	 * The Msg type.
+	 */
+	MSG_TYPE=39, /**
+	 * The Msg country.
+	 */
+	MSG_COUNTRY=40, /**
+	 * The Msg navstat.
+	 */
+	MSG_NAVSTAT=41,
+	/**
+	 * The Msg name.
+	 */
+	MSG_NAME=42, /**
+	 * The Msg callsign.
+	 */
+	MSG_CALLSIGN=43, /**
+	 * The Msg speed.
+	 */
+	MSG_SPEED=44, /**
+	 * The Msg course.
+	 */
+	MSG_COURSE=45, /**
+	 * The Msg heading.
+	 */
+	MSG_HEADING=46,
+	/**
+	 * The Msg draught.
+	 */
+	MSG_DRAUGHT=47, /**
+	 * The Msg latitude.
+	 */
+	MSG_LATITUDE=48, /**
+	 * The Msg longitude.
+	 */
+	MSG_LONGITUDE=49, /**
+	 * The Msg position.
+	 */
+	MSG_POSITION=50, /**
+	 * The Msg time year.
+	 */
+	MSG_TIME_YEAR=51,
+	/**
+	 * The Msg time month.
+	 */
+	MSG_TIME_MONTH=52, /**
+	 * The Msg time day.
+	 */
+	MSG_TIME_DAY=53, /**
+	 * The Msg time weekday.
+	 */
+	MSG_TIME_WEEKDAY=54, /**
+	 * The Msg time hour.
+	 */
+	MSG_TIME_HOUR=55,
+	/**
+	 * The Msg time minute.
+	 */
+	MSG_TIME_MINUTE=56, /**
+	 * The Tgt imo.
+	 */
+	TGT_IMO=57, /**
+	 * The Tgt type.
+	 */
+	TGT_TYPE=58, /**
+	 * The Tgt country.
+	 */
+	TGT_COUNTRY=59, /**
+	 * The Tgt navstat.
+	 */
+	TGT_NAVSTAT=60,
+	/**
+	 * The Tgt name.
+	 */
+	TGT_NAME=61, /**
+	 * The Tgt callsign.
+	 */
+	TGT_CALLSIGN=62, /**
+	 * The Tgt speed.
+	 */
+	TGT_SPEED=63, /**
+	 * The Tgt course.
+	 */
+	TGT_COURSE=64, /**
+	 * The Tgt heading.
+	 */
+	TGT_HEADING=65,
+	/**
+	 * The Tgt draught.
+	 */
+	TGT_DRAUGHT=66, /**
+	 * The Tgt latitude.
+	 */
+	TGT_LATITUDE=67, /**
+	 * The Tgt longitude.
+	 */
+	TGT_LONGITUDE=68, /**
+	 * The Tgt position.
+	 */
+	TGT_POSITION=69;
+	/**
+	 * The Mode names.
+	 */
 	public static String[] modeNames = {
 		"DEFAULT_MODE"
 	};
 
+	/**
+	 * The constant tokenNames.
+	 */
 	public static final String[] tokenNames = {
 		"<INVALID>",
 		"'NOT IN'", "'not in'", "'!='", "'messagetype'", "'!@'", "'>='", "'<'", 
@@ -60,6 +282,9 @@ public class ExpressionFilterLexer extends Lexer {
 		"TGT_NAVSTAT", "TGT_NAME", "TGT_CALLSIGN", "TGT_SPEED", "TGT_COURSE", 
 		"TGT_HEADING", "TGT_DRAUGHT", "TGT_LATITUDE", "TGT_LONGITUDE", "TGT_POSITION"
 	};
+	/**
+	 * The constant ruleNames.
+	 */
 	public static final String[] ruleNames = {
 		"T__15", "T__14", "T__13", "T__12", "T__11", "T__10", "T__9", "T__8", 
 		"T__7", "T__6", "T__5", "T__4", "T__3", "T__2", "T__1", "T__0", "AND", 
@@ -76,6 +301,11 @@ public class ExpressionFilterLexer extends Lexer {
 	};
 
 
+	/**
+	 * Instantiates a new Expression filter lexer.
+	 *
+	 * @param input the input
+	 */
 	public ExpressionFilterLexer(CharStream input) {
 		super(input);
 		_interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
@@ -99,6 +329,9 @@ public class ExpressionFilterLexer extends Lexer {
 	@Override
 	public ATN getATN() { return _ATN; }
 
+	/**
+	 * The constant _serializedATN.
+	 */
 	public static final String _serializedATN =
 		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\2G\u0208\b\1\4\2\t"+
 		"\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
@@ -270,6 +503,9 @@ public class ExpressionFilterLexer extends Lexer {
 		"\7p\2\2\u0202\u008a\3\2\2\2\u0203\u0204\5=\37\2\u0204\u0205\7r\2\2\u0205"+
 		"\u0206\7q\2\2\u0206\u0207\7u\2\2\u0207\u008c\3\2\2\2\r\2\u00d3\u00e9\u00ee"+
 		"\u00f1\u00f6\u00fd\u0102\u0108\u010c\u0111\3\b\2\2";
+	/**
+	 * The constant _ATN.
+	 */
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

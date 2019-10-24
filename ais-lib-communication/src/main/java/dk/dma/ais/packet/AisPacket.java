@@ -35,7 +35,7 @@ import dk.dma.enav.model.geometry.PositionTime;
 /**
  * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag
  * blocks.
- * 
+ *
  * @author Kasper Nielsen
  */
 @NotThreadSafe
@@ -51,11 +51,23 @@ public class AisPacket implements Comparable<AisPacket> {
         this.rawMessage = requireNonNull(stringMessage);
     }
 
+    /**
+     * Instantiates a new Ais packet.
+     *
+     * @param vdm           the vdm
+     * @param stringMessage the string message
+     */
     AisPacket(Vdm vdm, String stringMessage) {
         this(stringMessage);
         this.vdm = vdm;
     }
 
+    /**
+     * From byte buffer ais packet.
+     *
+     * @param buffer the buffer
+     * @return the ais packet
+     */
     public static AisPacket fromByteBuffer(ByteBuffer buffer) {
         int cap = buffer.remaining();
         byte[] buf = new byte[cap];
@@ -63,17 +75,28 @@ public class AisPacket implements Comparable<AisPacket> {
         return fromByteArray(buf);
     }
 
+    /**
+     * From byte array ais packet.
+     *
+     * @param array the array
+     * @return the ais packet
+     */
     public static AisPacket fromByteArray(byte[] array) {
         return from(new String(array, StandardCharsets.US_ASCII));
     }
 
+    /**
+     * To byte array byte [ ].
+     *
+     * @return the byte [ ]
+     */
     public byte[] toByteArray() {
         return rawMessage.getBytes(StandardCharsets.US_ASCII);
     }
 
     /**
      * Returns the timestamp of the packet, or -1 if no timestamp is available.
-     * 
+     *
      * @return the timestamp of the packet, or -1 if no timestamp is available
      */
     public long getBestTimestamp() {
@@ -85,18 +108,28 @@ public class AisPacket implements Comparable<AisPacket> {
         return timestamp;
     }
 
+    /**
+     * Gets string message.
+     *
+     * @return the string message
+     */
     public String getStringMessage() {
         return rawMessage;
     }
 
+    /**
+     * Gets string message lines.
+     *
+     * @return the string message lines
+     */
     public List<String> getStringMessageLines() {
         return Arrays.asList(rawMessage.split("\\r?\\n"));
     }
 
     /**
      * Get existing VDM or parse one from message string
-     * 
-     * @return Vdm
+     *
+     * @return Vdm vdm
      */
     public Vdm getVdm() {
         if (vdm == null) {
@@ -116,7 +149,7 @@ public class AisPacket implements Comparable<AisPacket> {
 
     /**
      * Returns the tags of the packet.
-     * 
+     *
      * @return the tags of the packet
      */
     public AisPacketTags getTags() {
@@ -127,7 +160,12 @@ public class AisPacket implements Comparable<AisPacket> {
         return tags;
     }
 
-    // TODO fizx
+    /**
+     * Try get ais message ais message.
+     *
+     * @return the ais message
+     */
+// TODO fizx
     public AisMessage tryGetAisMessage() {
         try {
             return getAisMessage();
@@ -138,10 +176,10 @@ public class AisPacket implements Comparable<AisPacket> {
 
     /**
      * Try to get AIS message from packet
-     * 
-     * @return
-     * @throws SixbitException
-     * @throws AisMessageException
+     *
+     * @return ais message
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
      */
     public AisMessage getAisMessage() throws AisMessageException, SixbitException {
         if (message != null || getVdm() == null) {
@@ -152,8 +190,8 @@ public class AisPacket implements Comparable<AisPacket> {
 
     /**
      * Check if VDM contains a valid AIS message
-     * 
-     * @return
+     *
+     * @return boolean boolean
      */
     public boolean isValidMessage() {
         return tryGetAisMessage() != null;
@@ -161,8 +199,8 @@ public class AisPacket implements Comparable<AisPacket> {
 
     /**
      * Try to get timestamp for packet.
-     * 
-     * @return
+     *
+     * @return timestamp timestamp
      */
     public Date getTimestamp() {
         if (getVdm() == null) {
@@ -171,6 +209,11 @@ public class AisPacket implements Comparable<AisPacket> {
         return vdm.getTimestamp();
     }
 
+    /**
+     * Try get position time position time.
+     *
+     * @return the position time
+     */
     public PositionTime tryGetPositionTime() {
         AisMessage m = tryGetAisMessage();
         if (m instanceof IPositionMessage) {
@@ -181,18 +224,22 @@ public class AisPacket implements Comparable<AisPacket> {
 
     }
 
+    /**
+     * From ais packet.
+     *
+     * @param stringMessage the string message
+     * @return the ais packet
+     */
     public static AisPacket from(String stringMessage) {
         return new AisPacket(stringMessage);
     }
 
     /**
      * Construct AisPacket from raw packet string
-     * 
-     * @param messageString
-     * @param optional
-     *            factory
-     * @return
-     * @throws SentenceException
+     *
+     * @param messageString the message string
+     * @return ais packet
+     * @throws SentenceException the sentence exception
      */
     public static AisPacket readFromString(String messageString) throws SentenceException {
         AisPacket packet = null;

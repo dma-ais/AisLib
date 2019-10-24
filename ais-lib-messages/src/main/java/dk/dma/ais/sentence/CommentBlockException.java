@@ -21,6 +21,11 @@ public class CommentBlockException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Comment block exception.
+     *
+     * @param msg the msg
+     */
     public CommentBlockException(String msg) {
         super(msg);
     }

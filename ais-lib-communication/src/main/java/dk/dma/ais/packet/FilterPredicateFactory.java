@@ -15,5 +15,8 @@
 
 package dk.dma.ais.packet;
 
+/**
+ * The interface Filter predicate factory.
+ */
 public interface FilterPredicateFactory {
 }

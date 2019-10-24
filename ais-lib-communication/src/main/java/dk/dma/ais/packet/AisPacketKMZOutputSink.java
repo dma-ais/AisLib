@@ -32,12 +32,15 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * This class receives AisPacket and use them to build a scenario for replay in Google Earth.
- *
+ * <p>
  * When the sink is closed it dumps the entire target state to the output stream in KMZ format.
  */
 @NotThreadSafe
 class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
 
+    /**
+     * Instantiates a new Ais packet kmz output sink.
+     */
     public AisPacketKMZOutputSink() {
         super();
     }
@@ -56,12 +59,16 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
      * Create a sink that writes KMZ contents to outputStream - but build the scenario only from
      * AisPackets which comply with the filter predicate.
      *
-     * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
-     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
-     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
-     * @param isPrimaryTarget Apply primary KMZ styling to targets which are updated by packets that pass this predicate.
-     * @param isSecondaryTarget Apply secondary KMZ styling to targets which are updated by packets that pass this predicate.
+     * @param filter                            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder             create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder             create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder                create and populate the 'tracks' folder in the generated KML
+     * @param isPrimaryTarget                   Apply primary KMZ styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget                 Apply secondary KMZ styling to targets which are updated by packets that pass this predicate.
+     * @param triggerSnapshot                   the trigger snapshot
+     * @param snapshotDescriptionSupplier       the snapshot description supplier
+     * @param movementInterpolationStepSupplier the movement interpolation step supplier
+     * @param iconHrefSupplier                  the icon href supplier
      */
     public AisPacketKMZOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         super(filter,
@@ -81,14 +88,18 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
      * Create a sink that writes KMZ contents to outputStream - but build the scenario only from
      * AisPackets which comply with the filter predicate.
      *
-     * @param filter a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
-     * @param createSituationFolder create and populate the 'situation' folder in the generated KML
-     * @param createMovementsFolder create and populate the 'movements' folder in the generated KML
-     * @param createTracksFolder create and populate the 'tracks' folder in the generated KML
-     * @param isPrimaryTarget Apply primary KMZ styling to targets which are updated by packets that pass this predicate.
-     * @param isSecondaryTarget Apply secondary KMZ styling to targets which are updated by packets that pass this predicate.
-     * @param supplyTitle Supplier of KMZ folder title
-     * @param supplyDescription Supplier of KMZ folder description
+     * @param filter                            a filter predicate for pre-filtering of AisPackets before they are passed to the tracker.
+     * @param createSituationFolder             create and populate the 'situation' folder in the generated KML
+     * @param createMovementsFolder             create and populate the 'movements' folder in the generated KML
+     * @param createTracksFolder                create and populate the 'tracks' folder in the generated KML
+     * @param isPrimaryTarget                   Apply primary KMZ styling to targets which are updated by packets that pass this predicate.
+     * @param isSecondaryTarget                 Apply secondary KMZ styling to targets which are updated by packets that pass this predicate.
+     * @param triggerSnapshot                   the trigger snapshot
+     * @param snapshotDescriptionSupplier       the snapshot description supplier
+     * @param movementInterpolationStepSupplier the movement interpolation step supplier
+     * @param supplyTitle                       Supplier of KMZ folder title
+     * @param supplyDescription                 Supplier of KMZ folder description
+     * @param iconHrefSupplier                  the icon href supplier
      */
     public AisPacketKMZOutputSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStepSupplier, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         super(filter,
@@ -148,6 +159,12 @@ class AisPacketKMZOutputSink extends AisPacketKMLOutputSink {
         }
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws IOException the io exception
+     */
     public static void main(String[] args) throws IOException {
         byte[] bytes = Files.toByteArray(new File("/Users/tbsalling/tmp/img/vessel_blue.png"));
         //byte[] bytes = Files.toByteArray(new File("/Users/tbsalling/tmp/img/vessel_blue_moored.png"));

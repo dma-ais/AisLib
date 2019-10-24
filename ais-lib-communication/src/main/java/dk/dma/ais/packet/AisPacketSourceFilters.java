@@ -24,10 +24,19 @@ import java.util.function.Predicate;
 import static java.util.Objects.requireNonNull;
 
 /**
+ * The type Ais packet source filters.
+ *
  * @author Kasper Nielsen
  */
 public class AisPacketSourceFilters implements FilterPredicateFactory {
 
+    /**
+     * Check t [ ].
+     *
+     * @param <T>      the type parameter
+     * @param elements the elements
+     * @return the t [ ]
+     */
     @SafeVarargs
     static <T> T[] check(T... elements) {
         T[] s = elements.clone();
@@ -41,6 +50,13 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         return s;
     }
 
+    /**
+     * Filter on source basestation predicate.
+     *
+     * @param operator the operator
+     * @param bs       the bs
+     * @return the predicate
+     */
     public static Predicate<AisPacketSource> filterOnSourceBasestation(final CompareToOperator operator, final Integer bs) {
         return new Predicate<AisPacketSource>() {
             public boolean test(AisPacketSource p) {
@@ -53,6 +69,12 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         };
     }
 
+    /**
+     * Filter on source basestation predicate.
+     *
+     * @param ids the ids
+     * @return the predicate
+     */
     public static Predicate<AisPacketSource> filterOnSourceBasestation(Integer... ids) {
         final Integer[] copy = ids.clone();
         Arrays.sort(copy);
@@ -70,12 +92,10 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
 
     /**
      * Returns a predicate that will filter packets based on the country of the source tag.
-     * 
-     * @param countries
-     *            the countries for which packets should be accepted
+     *
+     * @param countries the countries for which packets should be accepted
      * @return the predicate
      */
-
     public static Predicate<AisPacketSource> filterOnSourceCountry(final Country... countries) {
         final Country[] c = check(countries);
         return new Predicate<AisPacketSource>() {
@@ -90,6 +110,12 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         };
     }
 
+    /**
+     * Filter on source id predicate.
+     *
+     * @param ids the ids
+     * @return the predicate
+     */
     public static Predicate<AisPacketSource> filterOnSourceId(final String... ids) {
         final String[] s = check(ids);
         return new Predicate<AisPacketSource>() {
@@ -104,6 +130,12 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         };
     }
 
+    /**
+     * Filter on source region predicate.
+     *
+     * @param regions the regions
+     * @return the predicate
+     */
     public static Predicate<AisPacketSource> filterOnSourceRegion(final String... regions) {
         final String[] s = check(regions);
         requireNonNull(regions, "regions is null");
@@ -119,6 +151,12 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         };
     }
 
+    /**
+     * Filter on source type predicate.
+     *
+     * @param sourceType the source type
+     * @return the predicate
+     */
     public static Predicate<AisPacketSource> filterOnSourceType(final SourceType... sourceType) {
         requireNonNull(sourceType, "sourceType is null");
         final ImmutableSet<SourceType> sourceTypes = ImmutableSet.copyOf(sourceType);
@@ -133,10 +171,22 @@ public class AisPacketSourceFilters implements FilterPredicateFactory {
         };
     }
 
+    /**
+     * Parse source filter predicate.
+     *
+     * @param filter the filter
+     * @return the predicate
+     */
     public static Predicate<AisPacketSource> parseSourceFilter(String filter) {
         return AisPacketSourceFiltersParser.parseSourceFilter(filter);
     }
 
+    /**
+     * Skip brackets string.
+     *
+     * @param s the s
+     * @return the string
+     */
     static String skipBrackets(String s) {
         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
     }

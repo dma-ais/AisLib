@@ -22,13 +22,24 @@ import dk.dma.internal.ais.generated.parser.expressionfilter.ExpressionFilterPar
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**
+ * The type Ais packet source filters parser.
+ *
  * @author Kasper Nielsen
  */
 class AisPacketSourceFiltersParser extends ExpressionFilterParserBase {
+    /**
+     * Parse source filter predicate.
+     *
+     * @param filter the filter
+     * @return the predicate
+     */
     static Predicate<AisPacketSource> parseSourceFilter(String filter) {
         return createFilterContext(filter).filterExpression().accept(new SourceFilterToPredicateVisitor());
     }
 
+    /**
+     * The type Source filter to predicate visitor.
+     */
     static class SourceFilterToPredicateVisitor extends ExpressionFilterBaseVisitor<Predicate<AisPacketSource>> {
 
         @Override
