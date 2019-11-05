@@ -22,9 +22,8 @@ import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS message 18
- * 
+ * <p>
  * CLASS B position report implemented according to ITU-R M.1371-4
- * 
  */
 public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
 
@@ -40,7 +39,7 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     private int sog; // 10 bits
 
     /**
-     * AisPosition Accuracy 1 = high ( =< 10 m) 0 = low (>10 m) 0 = default The PA flag should be determined in
+     * AisPosition Accuracy 1 = high ( =&lt; 10 m) 0 = low (&gt;10 m) 0 = default The PA flag should be determined in
      * accordance with Table 47
      */
     private int posAcc; // 1 bit
@@ -124,15 +123,31 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
      */
     private int commState; // 19 bits : SOTDMA sync state
 
+    /**
+     * Instantiates a new Ais message 18.
+     */
     public AisMessage18() {
         super(18);
     }
 
+    /**
+     * Instantiates a new Ais message 18.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage18(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         this.parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray sixbit = vdm.getBinArray();
         if (sixbit.getLength() != 168) {
@@ -193,6 +208,8 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
+     * Gets spare after user id.
+     *
      * @return the spareAfterUserId
      */
     public int getSpareAfterUserId() {
@@ -200,8 +217,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param spareAfterUserId
-     *            the spareAfterUserId to set
+     * Sets spare after user id.
+     *
+     * @param spareAfterUserId the spareAfterUserId to set
      */
     public void setSpareAfterUserId(int spareAfterUserId) {
         this.spareAfterUserId = spareAfterUserId;
@@ -215,8 +233,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param sog
-     *            the sog to set
+     * Sets sog.
+     *
+     * @param sog the sog to set
      */
     public void setSog(int sog) {
         this.sog = sog;
@@ -230,8 +249,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param posAcc
-     *            the posAcc to set
+     * Sets pos acc.
+     *
+     * @param posAcc the posAcc to set
      */
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
@@ -251,8 +271,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param pos
-     *            the pos to set
+     * Sets pos.
+     *
+     * @param pos the pos to set
      */
     public void setPos(AisPosition pos) {
         this.pos = pos;
@@ -266,8 +287,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param cog
-     *            the cog to set
+     * Sets cog.
+     *
+     * @param cog the cog to set
      */
     public void setCog(int cog) {
         this.cog = cog;
@@ -281,8 +303,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param trueHeading
-     *            the trueHeading to set
+     * Sets true heading.
+     *
+     * @param trueHeading the trueHeading to set
      */
     public void setTrueHeading(int trueHeading) {
         this.trueHeading = trueHeading;
@@ -296,14 +319,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param utcSec
-     *            the utcSec to set
+     * Sets utc sec.
+     *
+     * @param utcSec the utcSec to set
      */
     public void setUtcSec(int utcSec) {
         this.utcSec = utcSec;
     }
 
     /**
+     * Gets spare.
+     *
      * @return the spare
      */
     public int getSpare() {
@@ -311,14 +337,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param spare
-     *            the spare to set
+     * Sets spare.
+     *
+     * @param spare the spare to set
      */
     public void setSpare(int spare) {
         this.spare = spare;
     }
 
     /**
+     * Gets class b unit flag.
+     *
      * @return the classBUnitFlag
      */
     public int getClassBUnitFlag() {
@@ -326,14 +355,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param classBUnitFlag
-     *            the classBUnitFlag to set
+     * Sets class b unit flag.
+     *
+     * @param classBUnitFlag the classBUnitFlag to set
      */
     public void setClassBUnitFlag(int classBUnitFlag) {
         this.classBUnitFlag = classBUnitFlag;
     }
 
     /**
+     * Gets class b display flag.
+     *
      * @return the classBDisplayFlag
      */
     public int getClassBDisplayFlag() {
@@ -341,14 +373,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param classBDisplayFlag
-     *            the classBDisplayFlag to set
+     * Sets class b display flag.
+     *
+     * @param classBDisplayFlag the classBDisplayFlag to set
      */
     public void setClassBDisplayFlag(int classBDisplayFlag) {
         this.classBDisplayFlag = classBDisplayFlag;
     }
 
     /**
+     * Gets class b dsc flag.
+     *
      * @return the classBDscFlag
      */
     public int getClassBDscFlag() {
@@ -356,14 +391,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param classBDscFlag
-     *            the classBDscFlag to set
+     * Sets class b dsc flag.
+     *
+     * @param classBDscFlag the classBDscFlag to set
      */
     public void setClassBDscFlag(int classBDscFlag) {
         this.classBDscFlag = classBDscFlag;
     }
 
     /**
+     * Gets class b band flag.
+     *
      * @return the classBBandFlag
      */
     public int getClassBBandFlag() {
@@ -371,14 +409,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param classBBandFlag
-     *            the classBBandFlag to set
+     * Sets class b band flag.
+     *
+     * @param classBBandFlag the classBBandFlag to set
      */
     public void setClassBBandFlag(int classBBandFlag) {
         this.classBBandFlag = classBBandFlag;
     }
 
     /**
+     * Gets class b msg 22 flag.
+     *
      * @return the classBMsg22Flag
      */
     public int getClassBMsg22Flag() {
@@ -386,14 +427,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param classBMsg22Flag
-     *            the classBMsg22Flag to set
+     * Sets class b msg 22 flag.
+     *
+     * @param classBMsg22Flag the classBMsg22Flag to set
      */
     public void setClassBMsg22Flag(int classBMsg22Flag) {
         this.classBMsg22Flag = classBMsg22Flag;
     }
 
     /**
+     * Gets mode flag.
+     *
      * @return the modeFlag
      */
     public int getModeFlag() {
@@ -401,8 +445,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param modeFlag
-     *            the modeFlag to set
+     * Sets mode flag.
+     *
+     * @param modeFlag the modeFlag to set
      */
     public void setModeFlag(int modeFlag) {
         this.modeFlag = modeFlag;
@@ -416,14 +461,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param raimFlag
-     *            the raimFlag to set
+     * Sets raim.
+     *
+     * @param raim the raim
      */
     public void setRaim(int raim) {
         this.raim = raim;
     }
 
     /**
+     * Gets comm state selector flag.
+     *
      * @return the commStateSelectorFlag
      */
     public int getCommStateSelectorFlag() {
@@ -431,14 +479,17 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param commStateSelectorFlag
-     *            the commStateSelectorFlag to set
+     * Sets comm state selector flag.
+     *
+     * @param commStateSelectorFlag the commStateSelectorFlag to set
      */
     public void setCommStateSelectorFlag(int commStateSelectorFlag) {
         this.commStateSelectorFlag = commStateSelectorFlag;
     }
 
     /**
+     * Gets comm state.
+     *
      * @return the commState
      */
     public int getCommState() {
@@ -446,8 +497,9 @@ public class AisMessage18 extends AisMessage implements IVesselPositionMessage {
     }
 
     /**
-     * @param commState
-     *            the commState to set
+     * Sets comm state.
+     *
+     * @param commState the commState to set
      */
     public void setCommState(int commState) {
         this.commState = commState;

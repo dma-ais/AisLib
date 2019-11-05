@@ -22,15 +22,15 @@ public interface IPositionMessage {
 
     /**
      * Get position
-     * 
-     * @return
+     *
+     * @return pos
      */
     AisPosition getPos();
 
     /**
      * Position accuracy
-     * 
-     * @return
+     *
+     * @return pos acc
      */
     int getPosAcc();
 

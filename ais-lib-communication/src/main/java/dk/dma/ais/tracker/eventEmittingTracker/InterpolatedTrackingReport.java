@@ -22,6 +22,9 @@ import net.jcip.annotations.NotThreadSafe;
 
 import java.time.LocalDateTime;
 
+/**
+ * The type Interpolated tracking report.
+ */
 @NotThreadSafe
 public final class InterpolatedTrackingReport extends TrackingReport {
     private final long timestamp;
@@ -30,6 +33,15 @@ public final class InterpolatedTrackingReport extends TrackingReport {
     private final float speedOverGround;
     private final float trueHeading;
 
+    /**
+     * Instantiates a new Interpolated tracking report.
+     *
+     * @param timestamp        the timestamp
+     * @param position         the position
+     * @param courseOverGround the course over ground
+     * @param speedOverGround  the speed over ground
+     * @param trueHeading      the true heading
+     */
     public InterpolatedTrackingReport(long timestamp, Position position, float courseOverGround, float speedOverGround, float trueHeading) {
         this.timestamp = timestamp;
         this.position = position;

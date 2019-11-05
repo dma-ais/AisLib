@@ -22,10 +22,19 @@ import dk.dma.ais.binary.SixbitException;
  */
 public class AddressedAreaNotice extends AreaNotice {
 
+    /**
+     * Instantiates a new Addressed area notice.
+     */
     public AddressedAreaNotice() {
         super(23);
     }
 
+    /**
+     * Instantiates a new Addressed area notice.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public AddressedAreaNotice(BinArray binArray) throws SixbitException {
         super(23, binArray);
     }

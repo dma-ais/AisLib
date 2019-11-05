@@ -38,6 +38,14 @@ public class TcpReadClient extends TcpClient implements Consumer<AisPacket> {
     private final Consumer<AisPacket> packetConsumer;
     private final AtomicReference<AisReader> reader = new AtomicReference<>();
 
+    /**
+     * Instantiates a new Tcp read client.
+     *
+     * @param packetConsumer the packet consumer
+     * @param stopListener   the stop listener
+     * @param socket         the socket
+     * @param conf           the conf
+     */
     public TcpReadClient(Consumer<AisPacket> packetConsumer, IClientStoppedListener stopListener, Socket socket,
             TcpClientConf conf) {
         super(stopListener, socket, conf);

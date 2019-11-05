@@ -39,6 +39,13 @@ public class TcpWriteClient extends TcpClient {
 
     private final BlockingQueue<String> buffer;
 
+    /**
+     * Instantiates a new Tcp write client.
+     *
+     * @param stopListener the stop listener
+     * @param socket       the socket
+     * @param conf         the conf
+     */
     public TcpWriteClient(IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
         super(stopListener, socket, conf);
         this.buffer = new ArrayBlockingQueue<>(conf.getBufferSize());
@@ -46,8 +53,9 @@ public class TcpWriteClient extends TcpClient {
 
     /**
      * Send message
-     * 
-     * @param sentenceStr
+     *
+     * @param msg the msg
+     * @return the boolean
      */
     public boolean send(String msg) {
         status.receive();

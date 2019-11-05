@@ -23,6 +23,9 @@ import dk.dma.enav.model.geometry.Circle;
 import dk.dma.enav.model.geometry.CoordinateSystem;
 import dk.dma.enav.model.geometry.Position;
 
+/**
+ * The type Circle geometry configuration.
+ */
 @XmlRootElement
 public class CircleGeometryConfiguration extends GeometryConfiguration {
 
@@ -32,30 +35,63 @@ public class CircleGeometryConfiguration extends GeometryConfiguration {
 
     private double radius;
 
+    /**
+     * Instantiates a new Circle geometry configuration.
+     */
     public CircleGeometryConfiguration() {
 
     }
 
+    /**
+     * Gets lat.
+     *
+     * @return the lat
+     */
     public double getLat() {
         return lat;
     }
 
+    /**
+     * Sets lat.
+     *
+     * @param lat the lat
+     */
     public void setLat(double lat) {
         this.lat = lat;
     }
 
+    /**
+     * Gets lon.
+     *
+     * @return the lon
+     */
     public double getLon() {
         return lon;
     }
 
+    /**
+     * Sets lon.
+     *
+     * @param lon the lon
+     */
     public void setLon(double lon) {
         this.lon = lon;
     }
 
+    /**
+     * Gets radius.
+     *
+     * @return the radius
+     */
     public double getRadius() {
         return radius;
     }
 
+    /**
+     * Sets radius.
+     *
+     * @param radius the radius
+     */
     public void setRadius(double radius) {
         this.radius = radius;
     }

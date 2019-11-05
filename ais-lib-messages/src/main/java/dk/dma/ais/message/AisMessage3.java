@@ -21,13 +21,12 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 3
- * 
+ * <p>
  * Special position report, response to interrogation;(Class A shipborne mobile equipment)
- * 
+ * <p>
  * This class handles the content of an AIS class A transponders general position report as defined by ITU-R M.1371-4.
- * 
+ * <p>
  * Generally the position report is handled in the super class but there are some ITDMA specific purposes of this class.
- * 
  */
 public class AisMessage3 extends AisPositionMessage {
 
@@ -38,15 +37,31 @@ public class AisMessage3 extends AisPositionMessage {
     private int numSlots; // 3 bits : ITDMA Number of Slots
     private int keep; // 1 bit : ITDMA Keep Flag
 
+    /**
+     * Instantiates a new Ais message 3.
+     */
     public AisMessage3() {
         super(3);
     }
 
+    /**
+     * Instantiates a new Ais message 3.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage3(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         super.parse(binArray);
@@ -64,26 +79,56 @@ public class AisMessage3 extends AisPositionMessage {
         return encoder;
     }
 
+    /**
+     * Gets slot increment.
+     *
+     * @return the slot increment
+     */
     public int getSlotIncrement() {
         return slotIncrement;
     }
 
+    /**
+     * Gets num slots.
+     *
+     * @return the num slots
+     */
     public int getNumSlots() {
         return numSlots;
     }
 
+    /**
+     * Gets keep.
+     *
+     * @return the keep
+     */
     public int getKeep() {
         return keep;
     }
 
+    /**
+     * Sets slot increment.
+     *
+     * @param slotIncrement the slot increment
+     */
     public void setSlotIncrement(int slotIncrement) {
         this.slotIncrement = slotIncrement;
     }
 
+    /**
+     * Sets num slots.
+     *
+     * @param numSlots the num slots
+     */
     public void setNumSlots(int numSlots) {
         this.numSlots = numSlots;
     }
 
+    /**
+     * Sets keep.
+     *
+     * @param keep the keep
+     */
     public void setKeep(int keep) {
         this.keep = keep;
     }

@@ -38,19 +38,33 @@ public abstract class AisMessage implements Serializable {
     /** serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
-    /** A set of all valid AIS message types. */
+    /**
+     * A set of all valid AIS message types.
+     */
     public static final Set<Integer> VALID_MESSAGE_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(1,
             2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 17, 18, 19, 21, 24)));
 
+    /**
+     * The Msg id.
+     */
     protected int msgId; // 6 bit: message id
+    /**
+     * The Repeat.
+     */
     protected int repeat; // 2 bit: How many times message has been repeated
+    /**
+     * The User id.
+     */
     protected int userId; // 30 bit: MMSI number
+    /**
+     * The Vdm.
+     */
     protected transient Vdm vdm; // The VDM encapsulating the AIS message
 
     /**
      * Constructor given message id
-     * 
-     * @param msgId
+     *
+     * @param msgId the msg id
      */
     public AisMessage(int msgId) {
         this.msgId = msgId;
@@ -59,8 +73,8 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Constructor given VDM with AIS message
-     * 
-     * @param vdm
+     *
+     * @param vdm the vdm
      */
     public AisMessage(Vdm vdm) {
         this.vdm = vdm;
@@ -69,10 +83,10 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Base parse method to be called by all extending classes
-     * 
-     * @param binArray
-     * @throws AisMessageException
-     * @throws SixbitException
+     *
+     * @param binArray the bin array
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
      */
     protected void parse(BinArray binArray) throws AisMessageException, SixbitException {
         this.repeat = (int) binArray.getVal(2);
@@ -81,8 +95,8 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Base encode method to be called by all extending classes
-     * 
-     * @return SixbitEncoder
+     *
+     * @return SixbitEncoder sixbit encoder
      */
     protected SixbitEncoder encode() {
         SixbitEncoder encoder = new SixbitEncoder();
@@ -94,35 +108,60 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Abstract method to be implemented by all extending classes
-     * 
-     * @return SixbitEncoder
+     *
+     * @return SixbitEncoder encoded
      */
     public abstract SixbitEncoder getEncoded();
 
+    /**
+     * Gets msg id.
+     *
+     * @return the msg id
+     */
     public int getMsgId() {
         return msgId;
     }
 
+    /**
+     * Gets repeat.
+     *
+     * @return the repeat
+     */
     public int getRepeat() {
         return repeat;
     }
 
+    /**
+     * Sets repeat.
+     *
+     * @param repeat the repeat
+     */
     public void setRepeat(int repeat) {
         this.repeat = repeat;
     }
 
+    /**
+     * Gets user id.
+     *
+     * @return the user id
+     */
     public int getUserId() {
         return userId;
     }
 
+    /**
+     * Sets user id.
+     *
+     * @param userId the user id
+     */
     public void setUserId(int userId) {
         this.userId = userId;
     }
 
     /**
      * Return the LAST source tag (closest to AIS sentence)
-     * 
-     * @return
+     *
+     * @return source tag
      */
     public IProprietarySourceTag getSourceTag() {
         LinkedList<IProprietaryTag> tags = vdm == null ? null : vdm.getTags();
@@ -141,8 +180,8 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Get all tags
-     * 
-     * @return
+     *
+     * @return tags
      */
     public LinkedList<IProprietaryTag> getTags() {
         return vdm.getTags();
@@ -150,8 +189,8 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Add tag (to front)
-     * 
-     * @param sourceTag
+     *
+     * @param tag the tag
      */
     public void setTag(IProprietaryTag tag) {
         LinkedList<IProprietaryTag> tags = vdm.getTags();
@@ -161,14 +200,19 @@ public abstract class AisMessage implements Serializable {
         tags.addFirst(tag);
     }
 
+    /**
+     * Sets tags.
+     *
+     * @param tags the tags
+     */
     public void setTags(LinkedList<IProprietaryTag> tags) {
         vdm.setTags(tags);
     }
 
     /**
      * Get VDM this message was encapsulated in
-     * 
-     * @return Vdm
+     *
+     * @return Vdm vdm
      */
     public Vdm getVdm() {
         return vdm;
@@ -176,7 +220,7 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Returns a valid position if this message has a valid position, otherwise null.
-     * 
+     *
      * @return a valid position if this message has a valid position, otherwise null
      */
     public Position getValidPosition() {
@@ -185,7 +229,7 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Returns the target type of the message or <code>null</code> if the message does not have a target type.
-     * 
+     *
      * @return the target type of the message or <code>null</code> if the message does not have a target type
      */
     public AisTargetType getTargetType() {
@@ -211,14 +255,14 @@ public abstract class AisMessage implements Serializable {
     /**
      * Given VDM return the encapsulated AIS message. To determine which message is returned use instanceof operator or
      * getMsgId() before casting.
-     * 
+     * <p>
      * Example: AisMessage aisMessage = AisMessage.getInstance(vmd); if (aisMessage instanceof AisPositionMessage) {
      * AisPositionMessage posMessage = (AisPositionMessage)aisMessage; } ...
-     * 
-     * @param vdm
-     * @return AisMessage
-     * @throws AisMessageException
-     * @throws SixbitException
+     *
+     * @param vdm the vdm
+     * @return AisMessage instance
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
      */
     public static AisMessage getInstance(Vdm vdm) throws AisMessageException, SixbitException {
         AisMessage message;
@@ -315,9 +359,9 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Utility to trim text from AIS message
-     * 
-     * @param text
-     * @return
+     *
+     * @param text the text
+     * @return string
      */
     public static String trimText(String text) {
         if (text == null) {
@@ -334,8 +378,8 @@ public abstract class AisMessage implements Serializable {
 
     /**
      * Method for reassembling original message appending possible proprietary source tags
-     * 
-     * @return
+     *
+     * @return string
      */
     public String reassemble() {
         LinkedList<IProprietaryTag> tags = vdm.getTags();

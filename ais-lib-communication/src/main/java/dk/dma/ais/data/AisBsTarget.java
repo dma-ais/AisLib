@@ -45,9 +45,9 @@ public class AisBsTarget extends AisTarget {
 
     /**
      * Determine if message is BS report
-     * 
-     * @param aisMessage
-     * @return
+     *
+     * @param aisMessage the ais message
+     * @return boolean boolean
      */
     public static boolean isBsReport(AisMessage aisMessage) {
         return aisMessage instanceof AisMessage4;

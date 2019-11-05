@@ -22,10 +22,19 @@ import dk.dma.ais.binary.SixbitException;
  */
 public class BroadcastAreaNotice extends AreaNotice {
 
+    /**
+     * Instantiates a new Broadcast area notice.
+     */
     public BroadcastAreaNotice() {
         super(22);
     }
 
+    /**
+     * Instantiates a new Broadcast area notice.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public BroadcastAreaNotice(BinArray binArray) throws SixbitException {
         super(22, binArray);
     }

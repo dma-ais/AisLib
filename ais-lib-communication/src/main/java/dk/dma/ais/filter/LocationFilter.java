@@ -69,6 +69,11 @@ public class LocationFilter extends MessageFilterBase {
         return true;
     }
 
+    /**
+     * Add filter geometry.
+     *
+     * @param geometry the geometry
+     */
     public void addFilterGeometry(Predicate<? super Position> geometry) {
         geomtries.add(geometry);
     }

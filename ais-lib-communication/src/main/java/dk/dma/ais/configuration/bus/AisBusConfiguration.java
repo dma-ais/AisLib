@@ -37,6 +37,9 @@ import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.configuration.bus.consumer.AisBusConsumerConfiguration;
 import dk.dma.ais.configuration.bus.provider.AisBusProviderConfiguration;
 
+/**
+ * The type Ais bus configuration.
+ */
 @XmlRootElement
 public class AisBusConfiguration extends AisBusComponentConfiguration {
 
@@ -46,40 +49,83 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
     private List<AisBusProviderConfiguration> providers = new ArrayList<>();
     private List<AisBusConsumerConfiguration> consumers = new ArrayList<>();
 
+    /**
+     * Instantiates a new Ais bus configuration.
+     */
     public AisBusConfiguration() {
 
     }
 
+    /**
+     * Gets bus pull max elements.
+     *
+     * @return the bus pull max elements
+     */
     public int getBusPullMaxElements() {
         return busPullMaxElements;
     }
 
+    /**
+     * Sets bus pull max elements.
+     *
+     * @param busPullMaxElements the bus pull max elements
+     */
     public void setBusPullMaxElements(int busPullMaxElements) {
         this.busPullMaxElements = busPullMaxElements;
     }
 
+    /**
+     * Gets bus queue size.
+     *
+     * @return the bus queue size
+     */
     public int getBusQueueSize() {
         return busQueueSize;
     }
 
+    /**
+     * Sets bus queue size.
+     *
+     * @param busQueueSize the bus queue size
+     */
     public void setBusQueueSize(int busQueueSize) {
         this.busQueueSize = busQueueSize;
     }
 
+    /**
+     * Gets providers.
+     *
+     * @return the providers
+     */
     @XmlElement(name = "provider")
     public List<AisBusProviderConfiguration> getProviders() {
         return providers;
     }
 
+    /**
+     * Sets providers.
+     *
+     * @param providers the providers
+     */
     public void setProviders(List<AisBusProviderConfiguration> providers) {
         this.providers = providers;
     }
 
+    /**
+     * Gets consumers.
+     *
+     * @return the consumers
+     */
     @XmlElement(name = "consumer")
     public List<AisBusConsumerConfiguration> getConsumers() {
         return consumers;
     }
 
+    /**
+     * Sets consumers.
+     *
+     * @param consumers the consumers
+     */
     public void setConsumers(List<AisBusConsumerConfiguration> consumers) {
         this.consumers = consumers;
     }
@@ -109,6 +155,13 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
         return aisBus;
     }
 
+    /**
+     * Save.
+     *
+     * @param out  the out
+     * @param conf the conf
+     * @throws JAXBException the jaxb exception
+     */
     public static void save(OutputStream out, final AisBusConfiguration conf) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
         Marshaller m = context.createMarshaller();
@@ -117,16 +170,39 @@ public class AisBusConfiguration extends AisBusComponentConfiguration {
         m.marshal(conf, out);
     }
 
+    /**
+     * Load ais bus configuration.
+     *
+     * @param in the in
+     * @return the ais bus configuration
+     * @throws JAXBException the jaxb exception
+     */
     public static AisBusConfiguration load(InputStream in) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
         Unmarshaller um = context.createUnmarshaller();
         return (AisBusConfiguration) um.unmarshal(in);
     }
-    
+
+    /**
+     * Save.
+     *
+     * @param filename the filename
+     * @param conf     the conf
+     * @throws JAXBException         the jaxb exception
+     * @throws FileNotFoundException the file not found exception
+     */
     public static void save(String filename, final AisBusConfiguration conf) throws JAXBException, FileNotFoundException {
         save(new FileOutputStream(new File(filename)), conf);
     }
-    
+
+    /**
+     * Load ais bus configuration.
+     *
+     * @param filename the filename
+     * @return the ais bus configuration
+     * @throws FileNotFoundException the file not found exception
+     * @throws JAXBException         the jaxb exception
+     */
     public static AisBusConfiguration load(String filename) throws FileNotFoundException, JAXBException {
         return load(new FileInputStream(new File(filename)));
     }

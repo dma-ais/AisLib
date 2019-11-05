@@ -28,14 +28,53 @@ import dk.dma.ais.binary.SixbitException;
  */
 public abstract class AreaNotice extends AisApplicationMessage {
 
+    /**
+     * The enum Sub area type.
+     */
     public enum SubAreaType {
-        CIRCLE_OR_POINT(0), RECTANGLE(1), SECTOR(2), POLYLINE(3), POLYGON(4), TEXT(5), RESERVED(6), RESERVED2(7);
+        /**
+         * Circle or point sub area type.
+         */
+        CIRCLE_OR_POINT(0),
+        /**
+         * Rectangle sub area type.
+         */
+        RECTANGLE(1),
+        /**
+         * Sector sub area type.
+         */
+        SECTOR(2),
+        /**
+         * Polyline sub area type.
+         */
+        POLYLINE(3),
+        /**
+         * Polygon sub area type.
+         */
+        POLYGON(4),
+        /**
+         * Text sub area type.
+         */
+        TEXT(5),
+        /**
+         * Reserved sub area type.
+         */
+        RESERVED(6),
+        /**
+         * Reserved 2 sub area type.
+         */
+        RESERVED2(7);
         private int astype;
 
         private SubAreaType(int astype) {
             this.astype = astype;
         }
 
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
         public int getType() {
             return astype;
         }
@@ -59,11 +98,23 @@ public abstract class AreaNotice extends AisApplicationMessage {
 
     // TODO the rest from SN Circ 289
 
+    /**
+     * Instantiates a new Area notice.
+     *
+     * @param fi the fi
+     */
     public AreaNotice(int fi) {
         super(1, fi);
         this.subareas = new ArrayList<>();
     }
 
+    /**
+     * Instantiates a new Area notice.
+     *
+     * @param fi       the fi
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public AreaNotice(int fi, BinArray binArray) throws SixbitException {
         super(1, fi, binArray);
     }
@@ -238,71 +289,156 @@ public abstract class AreaNotice extends AisApplicationMessage {
 
     }
 
+    /**
+     * Gets msg link id.
+     *
+     * @return the msg link id
+     */
     public int getMsgLinkId() {
         return msgLinkId;
     }
 
+    /**
+     * Sets msg link id.
+     *
+     * @param msgLinkId the msg link id
+     */
     public void setMsgLinkId(int msgLinkId) {
         this.msgLinkId = msgLinkId;
     }
 
+    /**
+     * Gets notice.
+     *
+     * @return the notice
+     */
     public int getNotice() {
         return notice;
     }
 
+    /**
+     * Sets notice.
+     *
+     * @param notice the notice
+     */
     public void setNotice(int notice) {
         this.notice = notice;
     }
 
+    /**
+     * Gets start month.
+     *
+     * @return the start month
+     */
     public int getStartMonth() {
         return startMonth;
     }
 
+    /**
+     * Sets start month.
+     *
+     * @param startMonth the start month
+     */
     public void setStartMonth(int startMonth) {
         this.startMonth = startMonth;
     }
 
+    /**
+     * Gets start day.
+     *
+     * @return the start day
+     */
     public int getStartDay() {
         return startDay;
     }
 
+    /**
+     * Sets start day.
+     *
+     * @param startDay the start day
+     */
     public void setStartDay(int startDay) {
         this.startDay = startDay;
     }
 
+    /**
+     * Gets start hour.
+     *
+     * @return the start hour
+     */
     public int getStartHour() {
         return startHour;
     }
 
+    /**
+     * Sets start hour.
+     *
+     * @param startHour the start hour
+     */
     public void setStartHour(int startHour) {
         this.startHour = startHour;
     }
 
+    /**
+     * Gets start min.
+     *
+     * @return the start min
+     */
     public int getStartMin() {
         return startMin;
     }
 
+    /**
+     * Sets start min.
+     *
+     * @param startMin the start min
+     */
     public void setStartMin(int startMin) {
         this.startMin = startMin;
     }
 
+    /**
+     * Gets duration.
+     *
+     * @return the duration
+     */
     public int getDuration() {
         return duration;
     }
 
+    /**
+     * Sets duration.
+     *
+     * @param duration the duration
+     */
     public void setDuration(int duration) {
         this.duration = duration;
     }
 
+    /**
+     * Sets sub areas.
+     *
+     * @param subareas the subareas
+     */
     public void setSubAreas(List<SubArea> subareas) {
         this.subareas = subareas;
     }
 
+    /**
+     * Add sub area.
+     *
+     * @param subarea the subarea
+     */
     public void addSubArea(SubArea subarea) {
         subareas.add(subarea);
         subareasCount = subareas.size();
     }
 
+    /**
+     * Gets sub areas.
+     *
+     * @return the sub areas
+     */
     public List<SubArea> getSubAreas() {
         return subareas;
     }

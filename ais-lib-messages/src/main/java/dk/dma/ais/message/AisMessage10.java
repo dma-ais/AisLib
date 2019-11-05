@@ -42,10 +42,20 @@ public class AisMessage10 extends AisMessage {
      */
     private int spare2; // 2 bits
 
+    /**
+     * Instantiates a new Ais message 10.
+     */
     public AisMessage10() {
         super(10);
     }
 
+    /**
+     * Instantiates a new Ais message 10.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage10(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse(vdm.getBinArray());
@@ -87,26 +97,56 @@ public class AisMessage10 extends AisMessage {
         return builder.toString();
     }
 
+    /**
+     * Gets spare 1.
+     *
+     * @return the spare 1
+     */
     public int getSpare1() {
         return spare1;
     }
 
+    /**
+     * Sets spare 1.
+     *
+     * @param spare1 the spare 1
+     */
     public void setSpare1(int spare1) {
         this.spare1 = spare1;
     }
 
+    /**
+     * Gets destination.
+     *
+     * @return the destination
+     */
     public int getDestination() {
         return destination;
     }
 
+    /**
+     * Sets destination.
+     *
+     * @param destination the destination
+     */
     public void setDestination(int destination) {
         this.destination = destination;
     }
 
+    /**
+     * Gets spare 2.
+     *
+     * @return the spare 2
+     */
     public int getSpare2() {
         return spare2;
     }
 
+    /**
+     * Sets spare 2.
+     *
+     * @param spare2 the spare 2
+     */
     public void setSpare2(int spare2) {
         this.spare2 = spare2;
     }

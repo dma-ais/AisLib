@@ -42,7 +42,8 @@ import dk.dma.ais.message.IPositionMessage;
 import dk.dma.commons.util.io.OutputStreamSink;
 
 /**
- * 
+ * The type Ais packet output sink table.
+ *
  * @author Kasper Nielsen
  */
 class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
@@ -64,14 +65,33 @@ class AisPacketOutputSinkTable extends OutputStreamSink<AisPacket> {
             .appendMonthOfYear(2).appendLiteral('-').appendYear(2, 2).appendLiteral(' ').appendHourOfDay(2)
             .appendLiteral(':').appendMinuteOfHour(2).appendLiteral(':').appendSecondOfMinute(2).toFormatter();
 
+    /**
+     * The Separator.
+     */
     final byte[] separator;
 
+    /**
+     * The Write header.
+     */
     final boolean writeHeader;
 
+    /**
+     * Instantiates a new Ais packet output sink table.
+     *
+     * @param format      the format
+     * @param writeHeader the write header
+     */
     public AisPacketOutputSinkTable(String format, boolean writeHeader) {
         this(format, writeHeader, ";");
     }
 
+    /**
+     * Instantiates a new Ais packet output sink table.
+     *
+     * @param format      the format
+     * @param writeHeader the write header
+     * @param separator   the separator
+     */
     public AisPacketOutputSinkTable(String format, boolean writeHeader, String separator) {
         columns = format.split(";");
         this.writeHeader = writeHeader;

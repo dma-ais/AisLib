@@ -24,6 +24,9 @@ import dk.dma.ais.binary.SixbitException;
  */
 public class AnySentence extends Sentence {
 
+    /**
+     * The Any fields.
+     */
     List<String> anyFields = new ArrayList<>();
 
     @Override
@@ -43,6 +46,11 @@ public class AnySentence extends Sentence {
         return super.finalEncode();
     }
 
+    /**
+     * Add field.
+     *
+     * @param field the field
+     */
     public void addField(String field) {
         anyFields.add(field);
     }

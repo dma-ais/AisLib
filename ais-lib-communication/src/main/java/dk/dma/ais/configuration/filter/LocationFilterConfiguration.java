@@ -25,20 +25,36 @@ import dk.dma.ais.configuration.filter.geometry.GeometryConfiguration;
 import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.LocationFilter;
 
+/**
+ * The type Location filter configuration.
+ */
 @XmlRootElement
 public class LocationFilterConfiguration extends FilterConfiguration {
 
     private List<GeometryConfiguration> geometries = new ArrayList<>();
 
+    /**
+     * Instantiates a new Location filter configuration.
+     */
     public LocationFilterConfiguration() {
 
     }
 
+    /**
+     * Gets geometries.
+     *
+     * @return the geometries
+     */
     @XmlElement(name = "geometry")
     public List<GeometryConfiguration> getGeometries() {
         return geometries;
     }
 
+    /**
+     * Sets geometries.
+     *
+     * @param geometries the geometries
+     */
     public void setGeometries(List<GeometryConfiguration> geometries) {
         this.geometries = geometries;
     }

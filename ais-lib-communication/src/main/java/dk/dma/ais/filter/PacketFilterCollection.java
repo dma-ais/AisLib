@@ -21,24 +21,38 @@ import dk.dma.ais.packet.AisPacket;
 
 /**
  * Filter that holds a collection of packet filers and checks against all filters
- * 
+ * <p>
  * Thread safe by delegation
  */
 @ThreadSafe
 public class PacketFilterCollection implements IPacketFilter {
 
     private final CopyOnWriteArrayList<IPacketFilter> packetFilters = new CopyOnWriteArrayList<>();
+    /**
+     * The constant TYPE_AND.
+     */
     public static final int TYPE_AND = 0;
+    /**
+     * The constant TYPE_OR.
+     */
     public static final int TYPE_OR = 1;
     
     private int filterType = TYPE_AND;
-    
 
+
+    /**
+     * Gets filter type.
+     *
+     * @return the filter type
+     */
     public int getFilterType() {
         return filterType;
     }
 
 
+    /**
+     * Instantiates a new Packet filter collection.
+     */
     public PacketFilterCollection() {
 
     }
@@ -72,20 +86,28 @@ public class PacketFilterCollection implements IPacketFilter {
 
     /**
      * Add a filter
-     * 
-     * @param filter
+     *
+     * @param filter the filter
      */
     public void addFilter(IPacketFilter filter) {
            packetFilters.add(filter);
     }
-    
+
     /**
-     * 
+     * Is type boolean.
+     *
+     * @param t the t
+     * @return the boolean
      */
     public boolean isType(int t) {
         return filterType == t;
     }
 
+    /**
+     * Sets filter type.
+     *
+     * @param filterType the filter type
+     */
     public void setFilterType(int filterType) {
         this.filterType = filterType;
         

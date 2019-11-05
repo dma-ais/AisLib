@@ -36,7 +36,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Immutable information about a target. Whenever we receive a new message from the target. We create a new TargetInfo
  * instance via {@link #updateTarget(TargetInfo, AisPacket, AisTargetType, long, AisPacketSource, Map)}.
- * 
+ *
  * @author Kasper Nielsen
  */
 public class TargetInfo extends Target {
@@ -44,34 +44,86 @@ public class TargetInfo extends Target {
     /** serialVersionUID. */
     private static final long serialVersionUID = 2L;
 
-    /** The target type of the info, is never null. */
+    /**
+     * The target type of the info, is never null.
+     */
     final AisTargetType targetType;
-    
-    /** The latest position and time stamp that was received Packet that was received. */
+
+    /**
+     * The latest position and time stamp that was received Packet that was received.
+     */
     final long positionTimestamp;
+    /**
+     * The Position packet.
+     */
     final byte[] positionPacket;
+    /**
+     * The Position.
+     */
     final Position position;
 
+    /**
+     * The Cog.
+     */
     final float cog;
+    /**
+     * The Heading.
+     */
     final int heading;
+    /**
+     * The Nav status.
+     */
     final byte navStatus;
+    /**
+     * The Sog.
+     */
     final float sog;
-    
-    //Do not want serialization of mutable complex object
+
+    /**
+     * The Ais target.
+     */
+//Do not want serialization of mutable complex object
     transient volatile AisTarget aisTarget;
-    //further caching
+    /**
+     * The Position ais packet.
+     */
+//further caching
     transient volatile AisPacket positionAisPacket;
+    /**
+     * The Static ais packet 1.
+     */
     transient volatile AisPacket staticAisPacket1;
+    /**
+     * The Static ais packet 2.
+     */
     transient volatile AisPacket staticAisPacket2;
 
-    // The latest static info
+    /**
+     * The constant staticTimestamp.
+     */
+// The latest static info
     final long staticTimestamp;
+    /**
+     * The Static data 1.
+     */
     final byte[] staticData1;
+    /**
+     * The Static data 2.
+     */
     final byte[] staticData2;
+    /**
+     * The Static ship type.
+     */
     final int staticShipType;
 
-    final AisPacketSource packetSource;
     /**
+     * The Packet source.
+     */
+    final AisPacketSource packetSource;
+
+    /**
+     * Gets packet source.
+     *
      * @return the packetSource
      */
     public AisPacketSource getPacketSource() {
@@ -113,44 +165,90 @@ public class TargetInfo extends Target {
 
     /**
      * Returns the target type of the target.
-     * @return
+     *
+     * @return target type
      */
     public AisTargetType getTargetType() {
         return targetType;
     }
 
+    /**
+     * Gets position timestamp.
+     *
+     * @return the position timestamp
+     */
     public long getPositionTimestamp() {
         return positionTimestamp;
     }
 
+    /**
+     * Gets position.
+     *
+     * @return the position
+     */
     public Position getPosition() {
         return position;
     }
 
+    /**
+     * Gets cog.
+     *
+     * @return the cog
+     */
     public float getCog() {
         return cog;
     }
 
+    /**
+     * Gets heading.
+     *
+     * @return the heading
+     */
     public int getHeading() {
         return heading;
     }
 
+    /**
+     * Gets nav status.
+     *
+     * @return the nav status
+     */
     public byte getNavStatus() {
         return navStatus;
     }
 
+    /**
+     * Gets sog.
+     *
+     * @return the sog
+     */
     public float getSog() {
         return sog;
     }
 
+    /**
+     * Gets static timestamp.
+     *
+     * @return the static timestamp
+     */
     public long getStaticTimestamp() {
         return staticTimestamp;
     }
 
+    /**
+     * Gets static ship type.
+     *
+     * @return the static ship type
+     */
     public int getStaticShipType() {
         return staticShipType;
     }
 
+    /**
+     * Gets ais target.
+     *
+     * @return the ais target
+     */
     public AisTarget getAisTarget() {
         AisTarget t = aisTarget;
         return t == null ?aisTarget = TargetInfoToAisTarget.generateAisTarget(this) : t;
@@ -158,7 +256,7 @@ public class TargetInfo extends Target {
 
     /**
      * Returns the country of the vessel based on its MMSI number.
-     * 
+     *
      * @return the country of the vessel based on its MMSI number
      */
     public Country getCountry() {
@@ -168,7 +266,7 @@ public class TargetInfo extends Target {
     /**
      * Returns the latest received position packet. Or <code>null</code> if no position has been received from the
      * vessel.
-     * 
+     *
      * @return the latest received position packet
      */
     public AisPacket getPositionPacket() {
@@ -183,7 +281,7 @@ public class TargetInfo extends Target {
     /**
      * Returns the number of static packets we have received. Either return 0 if we have received 0 packets. 1 if we
      * have received a single packet. Or 2 we if have received two packets (AisMessage type 24).
-     * 
+     *
      * @return the number of static packets we have received
      */
     public int getStaticCount() {
@@ -192,6 +290,8 @@ public class TargetInfo extends Target {
 
     /**
      * Returns any static packets we have received from the target.
+     *
+     * @return the ais packet [ ]
      */
     public AisPacket[] getStaticPackets() {
         if (staticData1 == null) {
@@ -202,7 +302,12 @@ public class TargetInfo extends Target {
             return new AisPacket[] { getStaticAisPacket1(), getStaticAisPacket2() };
         }
     }
-    
+
+    /**
+     * Get packets ais packet [ ].
+     *
+     * @return the ais packet [ ]
+     */
     public AisPacket[] getPackets() {
         if (!hasPositionInfo()) {
             return getStaticPackets();
@@ -219,6 +324,11 @@ public class TargetInfo extends Target {
         return packets.toArray(new AisPacket[packets.size()]);
     }
 
+    /**
+     * Gets static ais packet 1.
+     *
+     * @return the static ais packet 1
+     */
     public AisPacket getStaticAisPacket1() {
         byte[] staticData1 = this.staticData1;
         if (staticData1 != null) {
@@ -227,7 +337,12 @@ public class TargetInfo extends Target {
         }
         return null;
     }
-    
+
+    /**
+     * Gets static ais packet 2.
+     *
+     * @return the static ais packet 2
+     */
     public AisPacket getStaticAisPacket2() {
         byte[] staticData2 = this.staticData2;
         if (staticData2 != null) {
@@ -235,11 +350,11 @@ public class TargetInfo extends Target {
             return staticAisPacket2 == null ? staticAisPacket2 = AisPacket.fromByteArray(staticData2): staticAisPacket2;
         }
         return null;
-    }    
+    }
 
     /**
      * Returns true if we have positional information.
-     * 
+     *
      * @return true if we have positional information
      */
     public boolean hasPositionInfo() {
@@ -248,13 +363,19 @@ public class TargetInfo extends Target {
 
     /**
      * Returns true if we have static information.
-     * 
+     *
      * @return true if we have static information
      */
     public boolean hasStaticInfo() {
         return staticData1 != null;
     }
 
+    /**
+     * Merge target info.
+     *
+     * @param other the other
+     * @return the target info
+     */
     TargetInfo merge(TargetInfo other) {
         if (positionTimestamp >= other.positionTimestamp && staticTimestamp >= other.staticTimestamp) {
             return this;
@@ -268,8 +389,8 @@ public class TargetInfo extends Target {
     /**
      * Copies the static information from the specified target into a new target. Maintaining the position information
      * of the current target.
-     * 
-     * @param other
+     *
+     * @param other the other
      * @return the new target
      */
     TargetInfo mergeWithStaticFrom(TargetInfo other) {
@@ -280,19 +401,13 @@ public class TargetInfo extends Target {
 
     /**
      * We have received a new AIS message from a target.
-     * 
-     * @param existing
-     *            non-null if an existing target with the same MMSI number already exists
-     * @param packet
-     *            the packet that was received
-     * @param targetType
-     *            the type of target
-     * @param timestamp
-     *            the timestamp of the packet
-     * @param source
-     *            the source of the packet
-     * @param msg24Part0
-     *            a map of cached message type 24 static part 0 messages
+     *
+     * @param existing   non-null if an existing target with the same MMSI number already exists
+     * @param packet     the packet that was received
+     * @param targetType the type of target
+     * @param timestamp  the timestamp of the packet
+     * @param source     the source of the packet
+     * @param msg24Part0 a map of cached message type 24 static part 0 messages
      * @return a new target info
      */
     static TargetInfo updateTarget(TargetInfo existing, AisPacket packet, AisTargetType targetType, long timestamp,
@@ -314,6 +429,18 @@ public class TargetInfo extends Target {
         return updateTargetWithStatic(packet, message, mmsi, targetType, timestamp, source, result, msg24Part0);
     }
 
+    /**
+     * Update target with position target info.
+     *
+     * @param existing   the existing
+     * @param packet     the packet
+     * @param message    the message
+     * @param mmsi       the mmsi
+     * @param targetType the target type
+     * @param timestamp  the timestamp
+     * @param source     the source
+     * @return the target info
+     */
     static TargetInfo updateTargetWithPosition(TargetInfo existing, AisPacket packet, AisMessage message, int mmsi,
             AisTargetType targetType, long timestamp, AisPacketSource source) {
         if (message instanceof IVesselPositionMessage) {
@@ -345,6 +472,19 @@ public class TargetInfo extends Target {
         return existing;
     }
 
+    /**
+     * Update target with static target info.
+     *
+     * @param packet     the packet
+     * @param message    the message
+     * @param mmsi       the mmsi
+     * @param targetType the target type
+     * @param timestamp  the timestamp
+     * @param source     the source
+     * @param existing   the existing
+     * @param msg24Part0 the msg 24 part 0
+     * @return the target info
+     */
     static TargetInfo updateTargetWithStatic(AisPacket packet, AisMessage message, int mmsi, AisTargetType targetType,
             long timestamp, AisPacketSource source, TargetInfo existing, Map<AisPacketSource, byte[]> msg24Part0) {
         if (message instanceof AisStaticCommon) {

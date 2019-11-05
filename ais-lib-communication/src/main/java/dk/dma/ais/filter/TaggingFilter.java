@@ -27,6 +27,11 @@ public class TaggingFilter implements IPacketFilter {
 
     private final AisPacketTags filterTagging;
 
+    /**
+     * Instantiates a new Tagging filter.
+     *
+     * @param filterTagging the filter tagging
+     */
     public TaggingFilter(AisPacketTags filterTagging) {
         this.filterTagging = filterTagging;
     }

@@ -22,19 +22,35 @@ import javax.xml.bind.annotation.XmlRootElement;
 import dk.dma.ais.filter.GatehouseSourceFilter;
 import dk.dma.ais.filter.IPacketFilter;
 
+/**
+ * The type Gatehouse source filter configuration.
+ */
 @XmlRootElement
 public class GatehouseSourceFilterConfiguration extends FilterConfiguration {
 
     private HashMap<String, String> filterEntries = new HashMap<>();
 
+    /**
+     * Instantiates a new Gatehouse source filter configuration.
+     */
     public GatehouseSourceFilterConfiguration() {
 
     }
-    
+
+    /**
+     * Gets filter entries.
+     *
+     * @return the filter entries
+     */
     public HashMap<String, String> getFilterEntries() {
         return filterEntries;
     }
-    
+
+    /**
+     * Sets filter entries.
+     *
+     * @param filterEntries the filter entries
+     */
     public void setFilterEntries(HashMap<String, String> filterEntries) {
         this.filterEntries = filterEntries;
     }

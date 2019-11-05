@@ -20,9 +20,15 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.SanityFilter;
 
+/**
+ * The type Sanity filter configuration.
+ */
 @XmlRootElement
 public class SanityFilterConfiguration extends FilterConfiguration {
 
+    /**
+     * Instantiates a new Sanity filter configuration.
+     */
     public SanityFilterConfiguration() {
 
     }

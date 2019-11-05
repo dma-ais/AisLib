@@ -21,9 +21,8 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 6
- * 
+ * <p>
  * Addressed binary message as defined by ITU-R M.1371-4
- * 
  */
 public class AisMessage6 extends AisBinaryMessage {
 
@@ -34,15 +33,31 @@ public class AisMessage6 extends AisBinaryMessage {
     private long destination; // 30 bits: Destination MMSI
     private int retransmit; // 1 bit: Retransmit flag
 
+    /**
+     * Instantiates a new Ais message 6.
+     */
     public AisMessage6() {
         super(6);
     }
 
+    /**
+     * Instantiates a new Ais message 6.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage6(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray sixbit = vdm.getBinArray();
         if (sixbit.getLength() < 88 || sixbit.getLength() > 1008) {
@@ -71,26 +86,56 @@ public class AisMessage6 extends AisBinaryMessage {
         return encoder;
     }
 
+    /**
+     * Gets seq num.
+     *
+     * @return the seq num
+     */
     public int getSeqNum() {
         return seqNum;
     }
 
+    /**
+     * Sets seq num.
+     *
+     * @param seqNum the seq num
+     */
     public void setSeqNum(int seqNum) {
         this.seqNum = seqNum;
     }
 
+    /**
+     * Gets destination.
+     *
+     * @return the destination
+     */
     public long getDestination() {
         return destination;
     }
 
+    /**
+     * Sets destination.
+     *
+     * @param destination the destination
+     */
     public void setDestination(long destination) {
         this.destination = destination;
     }
 
+    /**
+     * Gets retransmit.
+     *
+     * @return the retransmit
+     */
     public int getRetransmit() {
         return retransmit;
     }
 
+    /**
+     * Sets retransmit.
+     *
+     * @param retransmit the retransmit
+     */
     public void setRetransmit(int retransmit) {
         this.retransmit = retransmit;
     }

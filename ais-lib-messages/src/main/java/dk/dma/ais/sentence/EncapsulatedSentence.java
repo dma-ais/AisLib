@@ -24,15 +24,42 @@ import dk.dma.ais.message.AisMessage;
  */
 public abstract class EncapsulatedSentence extends Sentence {
 
+    /**
+     * The Msg id.
+     */
     protected int msgId;
+    /**
+     * The Total.
+     */
     protected int total;
+    /**
+     * The Sequence.
+     */
     protected Integer sequence;
     private int lastSeq = -1;
+    /**
+     * The Num.
+     */
     protected int num;
+    /**
+     * The Channel.
+     */
     protected Character channel;
+    /**
+     * The Bin array.
+     */
     protected BinArray binArray = new BinArray();
+    /**
+     * The Complete packet.
+     */
     protected boolean completePacket;
+    /**
+     * The Sixbit string.
+     */
     protected StringBuilder sixbitString = new StringBuilder();
+    /**
+     * The Pad bits.
+     */
     protected int padBits;
 
     /**
@@ -95,60 +122,100 @@ public abstract class EncapsulatedSentence extends Sentence {
         encodedFields.add(Integer.toString(padBits));
     }
 
+    /**
+     * Gets msg id.
+     *
+     * @return the msg id
+     */
     public int getMsgId() {
         return msgId;
     }
 
+    /**
+     * Sets msg id.
+     *
+     * @param msgId the msg id
+     */
     public void setMsgId(int msgId) {
         this.msgId = msgId;
     }
 
+    /**
+     * Gets sequence.
+     *
+     * @return the sequence
+     */
     public int getSequence() {
         return sequence;
     }
 
+    /**
+     * Sets sequence.
+     *
+     * @param sequence the sequence
+     */
     public void setSequence(int sequence) {
         this.sequence = sequence;
     }
 
     /**
      * Get total number of actual sentences
-     * 
+     *
      * @return number of sentences
      */
     public int getTotal() {
         return total;
     }
 
+    /**
+     * Sets total.
+     *
+     * @param total the total
+     */
     public void setTotal(int total) {
         this.total = total;
     }
 
     /**
      * Get sentence number
-     * 
-     * @return
+     *
+     * @return num
      */
     public int getNum() {
         return num;
     }
 
+    /**
+     * Sets num.
+     *
+     * @param num the num
+     */
     public void setNum(int num) {
         this.num = num;
     }
 
+    /**
+     * Gets channel.
+     *
+     * @return the channel
+     */
     public Character getChannel() {
         return channel;
     }
 
+    /**
+     * Sets channel.
+     *
+     * @param channel the channel
+     */
     public void setChannel(Character channel) {
         this.channel = channel;
     }
 
     /**
      * Get binary encapsulated data
-     * 
-     * @return
+     *
+     * @return bin array
      */
     public BinArray getBinArray() {
         return binArray;
@@ -156,8 +223,8 @@ public abstract class EncapsulatedSentence extends Sentence {
 
     /**
      * Set binary encapsulated data
-     * 
-     * @param binArray
+     *
+     * @param binArray the bin array
      */
     public void setBinArray(BinArray binArray) {
         this.binArray = binArray;
@@ -165,9 +232,9 @@ public abstract class EncapsulatedSentence extends Sentence {
 
     /**
      * Set binary part and pad bits from encoder
-     * 
-     * @param encoder
-     * @throws SixbitException
+     *
+     * @param encoder the encoder
+     * @throws SixbitException the sixbit exception
      */
     public void setEncodedMessage(SixbitEncoder encoder) throws SixbitException {
         sixbitString = new StringBuilder(encoder.encode());
@@ -176,9 +243,9 @@ public abstract class EncapsulatedSentence extends Sentence {
 
     /**
      * Set the binary encapsulated data from AIS message
-     * 
-     * @param aisMessage
-     * @throws SixbitException
+     *
+     * @param aisMessage the ais message
+     * @throws SixbitException the sixbit exception
      */
     public void setMessageData(AisMessage aisMessage) throws SixbitException {
         this.msgId = aisMessage.getMsgId();
@@ -187,11 +254,18 @@ public abstract class EncapsulatedSentence extends Sentence {
         padBits = encoder.getPadBits();
     }
 
+    /**
+     * Gets pad bits.
+     *
+     * @return the pad bits
+     */
     public int getPadBits() {
         return padBits;
     }
 
     /**
+     * Is complete packet boolean.
+     *
      * @return is complete packet has been received
      */
     public boolean isCompletePacket() {
@@ -200,17 +274,27 @@ public abstract class EncapsulatedSentence extends Sentence {
 
     /**
      * Set the six bit string of the sentence
-     * 
-     * @param sixbitString
+     *
+     * @param sixbitString the sixbit string
      */
     public void setSixbitString(String sixbitString) {
         this.sixbitString = new StringBuilder(sixbitString);
     }
 
+    /**
+     * Sets pad bits.
+     *
+     * @param padBits the pad bits
+     */
     public void setPadBits(int padBits) {
         this.padBits = padBits;
     }
 
+    /**
+     * Gets sixbit string.
+     *
+     * @return the sixbit string
+     */
     public String getSixbitString() {
         return sixbitString.toString();
     }

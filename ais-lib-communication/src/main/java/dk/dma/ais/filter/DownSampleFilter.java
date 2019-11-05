@@ -22,14 +22,13 @@ import dk.dma.ais.message.AisMessage;
 
 /**
  * A down sampling filter.
- * 
+ * <p>
  * For position reports 1,2,3,4 and 18, only one message will be forwarded within the give sampling rate. E.g. one message per
  * minute.
- * 
+ * <p>
  * For static reports 5 and 24 the same apply. But it is handled separately from the position reports.
- * 
+ * <p>
  * All remaining message types are passed through without down sampling.
- * 
  */
 @ThreadSafe
 public class DownSampleFilter extends MessageFilterBase {
@@ -57,8 +56,8 @@ public class DownSampleFilter extends MessageFilterBase {
 
     /**
      * Constructor given sampling rate in seconds
-     * 
-     * @param samplingRate
+     *
+     * @param samplingRate the sampling rate
      */
     public DownSampleFilter(long samplingRate) {
         this.samplingRate = samplingRate;
@@ -118,8 +117,8 @@ public class DownSampleFilter extends MessageFilterBase {
 
     /**
      * Get sampling rate in seconds
-     * 
-     * @return
+     *
+     * @return sampling rate
      */
     public long getSamplingRate() {
         return samplingRate;
@@ -127,10 +126,9 @@ public class DownSampleFilter extends MessageFilterBase {
 
     /**
      * Set sampling rate in seconds
-     * 
-     * @param samplingRate
+     *
+     * @param samplingRate the sampling rate
      */
-
     public void setSamplingRate(long samplingRate) {
         this.samplingRate = samplingRate;
     }

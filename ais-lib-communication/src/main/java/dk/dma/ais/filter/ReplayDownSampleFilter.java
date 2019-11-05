@@ -25,14 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A down sampling filter.
- * <p/>
+ * <p>
  * For position reports 1,2,3,4 and 18, only one message will be forwarded within the give sampling rate. E.g. one message per
  * minute.
- * <p/>
+ * <p>
  * For static reports 5 and 24 the same apply. But it is handled separately from the position reports.
- * <p/>
+ * <p>
  * All remaining message types are passed through without down sampling.
- * <p/>
+ * <p>
  * As opposed to the DownSampleFilter (which operates on current system time), this filter uses the timestamp on
  * AisPackets as current time when filtering.
  */
@@ -63,12 +63,18 @@ public class ReplayDownSampleFilter implements IPacketFilter {
     /**
      * Constructor given sampling rate in seconds
      *
-     * @param samplingRate
+     * @param samplingRate the sampling rate
      */
     public ReplayDownSampleFilter(long samplingRate) {
         this.samplingRate = samplingRate;
     }
 
+    /**
+     * Gets message id.
+     *
+     * @param packet the packet
+     * @return the message id
+     */
     protected static int getMessageId(AisPacket packet) {
         int msgId = -1;
 
@@ -125,8 +131,8 @@ public class ReplayDownSampleFilter implements IPacketFilter {
 
     /**
      * Get sampling rate in seconds
-     * 
-     * @return
+     *
+     * @return sampling rate
      */
     public long getSamplingRate() {
         return samplingRate;
@@ -134,10 +140,9 @@ public class ReplayDownSampleFilter implements IPacketFilter {
 
     /**
      * Set sampling rate in seconds
-     * 
-     * @param samplingRate
+     *
+     * @param samplingRate the sampling rate
      */
-
     public void setSamplingRate(long samplingRate) {
         this.samplingRate = samplingRate;
     }

@@ -22,6 +22,13 @@ import java.util.Arrays;
  */
 public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
+    /**
+     * Check t [ ].
+     *
+     * @param <T>      the type parameter
+     * @param elements the elements
+     * @return the t [ ]
+     */
     @SafeVarargs
     static <T> T[] check(T... elements) {
         T[] s = elements.clone();
@@ -35,12 +42,19 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
         return s;
     }
 
+    /**
+     * Skip brackets string.
+     *
+     * @param s the s
+     * @return the string
+     */
     static String skipBrackets(String s) {
         return s.length() < 2 ? "" : s.substring(1, s.length() - 1);
     }
 
     /**
      * Convert an AIS string to a Java string. I.e. convert '@' to space and remove leading and trailing spaces.
+     *
      * @param aisString the AIS string
      * @return the Java string
      */
@@ -50,8 +64,9 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Remove an optional pair of apostrophes around the string.
-     * @param string
-     * @return
+     *
+     * @param string the string
+     * @return string string
      */
     protected static final String preprocessExpressionString(String string) {
         String preprocessedString = string;
@@ -63,8 +78,9 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Remove an optional pair of apostrophes around each string in an array of strings.
-     * @param strings
-     * @return
+     *
+     * @param strings the strings
+     * @return string [ ]
      */
     protected static final String[] preprocessExpressionStrings(String[] strings) {
         String[] preprocessedStrings = new String[strings.length];
@@ -76,8 +92,9 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Lexically compare the left-hand side value to the right-hand side value using the specified operator.
-     * @param lhs the value of the left-hand side.
-     * @param rhs the value of the right-hand side.
+     *
+     * @param lhs      the value of the left-hand side.
+     * @param rhs      the value of the right-hand side.
      * @param operator the binary operator to apply for the comparison.
      * @return true if the left-hand side compares true to the right-hand side. False otherwise.
      */
@@ -105,8 +122,9 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Compare the left-hand side value to the right-hand side value using the specified operator.
-     * @param lhs the value of the left-hand side.
-     * @param rhs the value of the right-hand side.
+     *
+     * @param lhs      the value of the left-hand side.
+     * @param rhs      the value of the right-hand side.
      * @param operator the binary operator to apply for the comparison.
      * @return true if the left-hand side compares true to the right-hand side. False otherwise.
      */
@@ -131,8 +149,9 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Compare the left-hand side value to the right-hand side value using the specified operator.
-     * @param lhs the value of the left-hand side.
-     * @param rhs the value of the right-hand side.
+     *
+     * @param lhs      the value of the left-hand side.
+     * @param rhs      the value of the right-hand side.
      * @param operator the binary operator to apply for the comparison.
      * @return true if the left-hand side compares true to the right-hand side. False otherwise.
      */
@@ -157,10 +176,11 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Test if the integer value is in the closed range between min and max.
-     * @param min
-     * @param max
-     * @param value
-     * @return
+     *
+     * @param min   the min
+     * @param max   the max
+     * @param value the value
+     * @return boolean boolean
      */
     protected static final boolean inRange(int min, int max, int value) {
         return value >= min && value <= max;
@@ -168,10 +188,11 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Test if the floating point value is in the closed range between min and max.
-     * @param min
-     * @param max
-     * @param value
-     * @return
+     *
+     * @param min   the min
+     * @param max   the max
+     * @param value the value
+     * @return boolean boolean
      */
     protected static final boolean inRange(float min, float max, float value) {
         return value >= min && value <= max;
@@ -179,11 +200,12 @@ public abstract class AisPacketFiltersBase implements FilterPredicateFactory {
 
     /**
      * Test of the string representation of the supplied value matches the given glob expression.
-     * @see <a href="https://en.wikipedia.org/wiki/Glob_(programming)">Wikipedia on Glob expressions.</a>
-     * @param value
-     * @param glob
-     * @param <T>
+     *
+     * @param <T>   the type parameter
+     * @param value the value
+     * @param glob  the glob
      * @return true if the value matches the glob.
+     * @see <a href="https://en.wikipedia.org/wiki/Glob_(programming)">Wikipedia on Glob expressions.</a>
      */
     protected static final <T> boolean matchesGlob(T value, String glob) {
         return value.toString().matches(convertGlobToRegex(glob));

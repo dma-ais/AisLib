@@ -59,10 +59,10 @@ public class BinArray {
 
     /**
      * Append bits from a sixbit encoded string
-     * 
-     * @param str
-     * @param padBits
-     * @throws SixbitException
+     *
+     * @param str     the str
+     * @param padBits the pad bits
+     * @throws SixbitException the sixbit exception
      */
     public void appendSixbit(String str, int padBits) throws SixbitException {
         if (str.length() == 0) {
@@ -115,8 +115,8 @@ public class BinArray {
 
     /**
      * Append another binary array
-     * 
-     * @param binArray
+     *
+     * @param binArray the bin array
      */
     public void append(BinArray binArray) {
         int len = binArray.length;
@@ -127,9 +127,9 @@ public class BinArray {
 
     /**
      * Append value with number of bits bits
-     * 
-     * @param val
-     * @param bits
+     *
+     * @param val  the val
+     * @param bits the bits
      */
     public void append(long val, int bits) {
         long powMask = 1;
@@ -143,10 +143,10 @@ public class BinArray {
 
     /**
      * Get six bit string representation of the next len six bit characters and move read ptr
-     * 
-     * @param len
-     * @return string
-     * @throws SixbitException
+     *
+     * @param len the len
+     * @return string string
+     * @throws SixbitException the sixbit exception
      */
     public String getString(int len) throws SixbitException {
         char[] resStr = new char[len];
@@ -158,10 +158,10 @@ public class BinArray {
 
     /**
      * Get value from the next bits number of bits and move read pointer
-     * 
-     * @param bits
-     * @return
-     * @throws SixbitException
+     *
+     * @param bits the bits
+     * @return val
+     * @throws SixbitException the sixbit exception
      */
     public long getVal(int bits) throws SixbitException {
         int to = readPtr + bits - 1;
@@ -172,11 +172,11 @@ public class BinArray {
 
     /**
      * Get value from bit position from and to
-     * 
-     * @param from
-     * @param to
-     * @return
-     * @throws SixbitException
+     *
+     * @param from the from
+     * @param to   the to
+     * @return val
+     * @throws SixbitException the sixbit exception
      */
     public long getVal(int from, int to) throws SixbitException {
         if (to >= length) {
@@ -195,8 +195,8 @@ public class BinArray {
 
     /**
      * Get bit length
-     * 
-     * @return
+     *
+     * @return length
      */
     public int getLength() {
         return length;
@@ -204,21 +204,26 @@ public class BinArray {
 
     /**
      * Get the position of the read ptr within the array
-     * 
-     * @return
+     *
+     * @return read ptr
      */
     public int getReadPtr() {
         return readPtr;
     }
 
+    /**
+     * Size int.
+     *
+     * @return the int
+     */
     public int size() {
         return bitSet.length;
     }
 
     /**
      * Returns true if there are more bits to read
-     * 
-     * @return
+     *
+     * @return boolean
      */
     public boolean hasMoreBits() {
         return readPtr < length - 1;
@@ -226,10 +231,10 @@ public class BinArray {
 
     /**
      * Convert six bit int value to character
-     * 
-     * @param val
-     * @return
-     * @throws SixbitException
+     *
+     * @param val the val
+     * @return int
+     * @throws SixbitException the sixbit exception
      */
     public static int intToascii(int val) throws SixbitException {
         if (val > 63) {
@@ -244,10 +249,10 @@ public class BinArray {
 
     /**
      * Convert a int value to a sixbit ascii value
-     * 
-     * @param val
-     * @return
-     * @throws SixbitException
+     *
+     * @param val the val
+     * @return int
+     * @throws SixbitException the sixbit exception
      */
     public static int intToSixbit(int val) throws SixbitException {
         if (val > 63) {
@@ -268,6 +273,9 @@ public class BinArray {
         return builder.toString();
     }
 
+    /**
+     * Done reading.
+     */
     public void doneReading() {
         readPtr = 0;
     }

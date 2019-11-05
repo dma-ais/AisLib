@@ -23,23 +23,23 @@ public interface IPastTrack {
 
     /**
      * Add position to past track if it is more than minimum distance from last position
-     * 
-     * @param vesselPosition
-     * @param minDist
+     *
+     * @param vesselPosition the vessel position
+     * @param minDist        the min dist
      */
     void addPosition(AisVesselPosition vesselPosition, int minDist);
 
     /**
      * Remove points in past track older than ttl
-     * 
-     * @param ttl
+     *
+     * @param ttl the ttl
      */
     void cleanup(int ttl);
 
     /**
      * Get past track points
-     * 
-     * @return
+     *
+     * @return points points
      */
     List<PastTrackPoint> getPoints();
 

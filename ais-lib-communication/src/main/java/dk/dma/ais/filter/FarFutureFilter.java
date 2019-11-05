@@ -19,10 +19,9 @@ import java.util.Date;
 import dk.dma.ais.packet.AisPacket;
 
 /**
- * @author Jens Tuxen
+ * The type Far future filter.
  *
- * Reject packets with timestamp far into the future according to device clock
- * 
+ * @author Jens Tuxen Reject packets with timestamp far into the future according to device clock
  * @deprecated please use FutureFilter with argument new FutureFilter(86400000)
  */
 @Deprecated

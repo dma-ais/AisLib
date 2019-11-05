@@ -37,14 +37,17 @@ public class SendThreadPool {
      */
     private ConcurrentHashMap<String, SendThread> threads = new ConcurrentHashMap<>();
 
+    /**
+     * Instantiates a new Send thread pool.
+     */
     public SendThreadPool() {}
 
     /**
      * Create a new send thread and register in pool
-     * 
-     * @param sendRequest
-     * @param resultListener
-     * @return
+     *
+     * @param sendRequest    the send request
+     * @param resultListener the result listener
+     * @return send thread
      */
     public SendThread createSendThread(SendRequest sendRequest, Consumer<Abk> resultListener) {
         // Generate hash value that uniquely defines message
@@ -63,8 +66,8 @@ public class SendThreadPool {
 
     /**
      * Handle received ABK
-     * 
-     * @param abk
+     *
+     * @param abk the abk
      */
     public void handleAbk(Abk abk) {
         LOG.debug("Handling Abk: " + abk);
@@ -79,6 +82,11 @@ public class SendThreadPool {
         sendThread.setAbk(abk);
     }
 
+    /**
+     * Remove thread.
+     *
+     * @param hash the hash
+     */
     public void removeThread(String hash) {
         LOG.debug("Removing thread with hash: " + hash);
         threads.remove(hash);
@@ -87,9 +95,9 @@ public class SendThreadPool {
 
     /**
      * Static method to generate hash from send request
-     * 
-     * @param sendRequest
-     * @return seq+sentenceStr id+dest
+     *
+     * @param sendRequest the send request
+     * @return seq +sentenceStr id+dest
      */
     public static String sendHash(SendRequest sendRequest) {
         int seq = sendRequest.getSequence();
@@ -100,9 +108,9 @@ public class SendThreadPool {
 
     /**
      * Static method to generate hash from ABK
-     * 
-     * @param abk
-     * @return seq+sentenceStr id+dest
+     *
+     * @param abk the abk
+     * @return seq +sentenceStr id+dest
      */
     public static String abkHash(Abk abk) {
         int seq = abk.getSequence();

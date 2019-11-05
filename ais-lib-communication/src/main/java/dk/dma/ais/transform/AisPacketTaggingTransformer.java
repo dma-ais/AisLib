@@ -57,6 +57,12 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
          */
         MERGE_PRESERVE;
 
+        /**
+         * From string policy.
+         *
+         * @param str the str
+         * @return the policy
+         */
         public static Policy fromString(String str) {
             if (str.equalsIgnoreCase("PREPEND_MISSING")) {
                 return PREPEND_MISSING;
@@ -78,9 +84,9 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
 
     /**
      * Constructor taking policy and the tagging to be used
-     * 
-     * @param policy
-     * @param tagging
+     *
+     * @param policy  the policy
+     * @param tagging the tagging
      */
     public AisPacketTaggingTransformer(Policy policy, AisPacketTags tagging) {
         Objects.requireNonNull(policy);
@@ -91,13 +97,18 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
 
     /**
      * Get map of optional extra tags to be included in the tagging
-     * 
-     * @return map
+     *
+     * @return map extra tags
      */
     public Map<String, String> getExtraTags() {
         return extraTags;
     }
 
+    /**
+     * Add extra tags.
+     *
+     * @param tags the tags
+     */
     public void addExtraTags(Map<String, String> tags) {
         extraTags.putAll(tags);
     }
@@ -205,10 +216,10 @@ public class AisPacketTaggingTransformer implements IAisPacketTransformer {
 
     /**
      * Remove any thing else than sentences (and proprietary is chosen)
-     * 
-     * @param rawPacket
-     * @param removeProprietary
-     * @return
+     *
+     * @param rawLines          the raw lines
+     * @param removeProprietary the remove proprietary
+     * @return list list
      */
     public static List<String> cropSentences(List<String> rawLines, boolean removeProprietary) {
         List<String> croppedLines = new ArrayList<>();

@@ -54,7 +54,8 @@ public class ScenarioTracker implements Tracker {
 
     /**
      * Get the Date of the first update in this scenario.
-     * @return
+     *
+     * @return date date
      */
     public Date scenarioBegin() {
         Date scenarioBegin = null;
@@ -75,7 +76,8 @@ public class ScenarioTracker implements Tracker {
 
     /**
      * Get the Date of the last update in this scenario.
-     * @return
+     *
+     * @return date date
      */
     public Date scenarioEnd() {
         Date scenarioEnd = null;
@@ -96,7 +98,8 @@ public class ScenarioTracker implements Tracker {
 
     /**
      * Get bounding box containing all movements in this scenario.
-     * @return
+     *
+     * @return bounding box
      */
     public BoundingBox boundingBox() {
         return boundingBox;
@@ -104,7 +107,8 @@ public class ScenarioTracker implements Tracker {
 
     /**
      * Return all targets involved in this scenario.
-     * @return
+     *
+     * @return targets targets
      */
     public ImmutableSet<Target> getTargets() {
         return ImmutableSet.copyOf(targets.values());
@@ -123,7 +127,8 @@ public class ScenarioTracker implements Tracker {
 
     /**
      * Return all targets involved in this scenario and with a known location (ie. located inside of the bounding box).
-     * @return
+     *
+     * @return targets having position updates
      */
     public Set<Target> getTargetsHavingPositionUpdates() {
         return Sets.filter(getTargets(), new com.google.common.base.Predicate<Target>() {
@@ -156,6 +161,12 @@ public class ScenarioTracker implements Tracker {
         }
     }
 
+    /**
+     * Tag target.
+     *
+     * @param mmsi the mmsi
+     * @param tag  the tag
+     */
     public void tagTarget(int mmsi, Object tag) {
         targets.get(mmsi).setTag(tag);
     }
@@ -181,47 +192,105 @@ public class ScenarioTracker implements Tracker {
         return aisString.replace('@',' ').trim();
     }
 
+    /**
+     * The type Target.
+     */
     @NotThreadSafe
     public final class Target extends dk.dma.ais.tracker.Target implements Cloneable {
 
+        /**
+         * Instantiates a new Target.
+         *
+         * @param mmsi the mmsi
+         */
         public Target(int mmsi) {
             super(mmsi);
         }
 
+        /**
+         * Gets name.
+         *
+         * @return the name
+         */
         public String getName() {
             return StringUtils.isBlank(name) ? String.valueOf(getMmsi()) : name;
         }
 
+        /**
+         * Gets imo.
+         *
+         * @return the imo
+         */
         public int getImo() {
             return imo;
         }
 
+        /**
+         * Gets destination.
+         *
+         * @return the destination
+         */
         public String getDestination() {
             return destination == null ? "" : destination;
         }
 
+        /**
+         * Gets ship type cargo.
+         *
+         * @return the ship type cargo
+         */
         public ShipTypeCargo getShipTypeCargo() { return shipTypeCargo; }
 
+        /**
+         * Gets cargo type as string.
+         *
+         * @return the cargo type as string
+         */
         public String getCargoTypeAsString() {
             return shipTypeCargo == null ? null : shipTypeCargo.prettyCargo();
         }
 
+        /**
+         * Gets ship type as string.
+         *
+         * @return the ship type as string
+         */
         public String getShipTypeAsString() {
             return shipTypeCargo == null ? null : shipTypeCargo.prettyType();
         }
 
+        /**
+         * Gets to bow.
+         *
+         * @return the to bow
+         */
         public int getToBow() {
             return toBow;
         }
 
+        /**
+         * Gets to stern.
+         *
+         * @return the to stern
+         */
         public int getToStern() {
             return toStern;
         }
 
+        /**
+         * Gets to port.
+         *
+         * @return the to port
+         */
         public int getToPort() {
             return toPort;
         }
 
+        /**
+         * Gets to starboard.
+         *
+         * @return the to starboard
+         */
         public int getToStarboard() {
             return toStarboard;
         }
@@ -230,30 +299,56 @@ public class ScenarioTracker implements Tracker {
             tags.add(tag);
         }
 
+        /**
+         * Is tagged boolean.
+         *
+         * @param tag the tag
+         * @return the boolean
+         */
         public boolean isTagged(Object tag) {
             return tags.contains(tag);
         }
 
+        /**
+         * Has position boolean.
+         *
+         * @return the boolean
+         */
         public boolean hasPosition() {
             return positionReports.size() > 0;
         }
 
+        /**
+         * Gets position reports.
+         *
+         * @return the position reports
+         */
         public Set<PositionReport> getPositionReports() {
             return ImmutableSet.copyOf(positionReports.values());
         }
 
+        /**
+         * Time of first position report date.
+         *
+         * @return the date
+         */
         public Date timeOfFirstPositionReport() {
             return positionReports.firstKey();
         }
 
+        /**
+         * Time of last position report date.
+         *
+         * @return the date
+         */
         public Date timeOfLastPositionReport() {
             return positionReports.lastKey();
         }
 
         /**
-         *  Return position at at time atTime. If a real position report which is not older than 'maxAge' seconds compared to
-         *  atTime exists, then that real AIS-based position report will be returned. Otherwise a position report will
-         *  be inter- or extrapolated to provide an estimated position report.
+         * Return position at at time atTime. If a real position report which is not older than 'maxAge' seconds compared to
+         * atTime exists, then that real AIS-based position report will be returned. Otherwise a position report will
+         * be inter- or extrapolated to provide an estimated position report.
          *
          * @param atTime The time at which to return a position report.
          * @param maxAge The max. no. of seconds to look back in history for a position report before estimating one.
@@ -283,7 +378,7 @@ public class ScenarioTracker implements Tracker {
          * Get or estimate a position report. If a real position report exists somewhere in the range
          * (atTime - deltaSeconds; atTime] then return this report. Otherwise return null.
          *
-         * @param atTime the time to which to look for a position report.
+         * @param atTime       the time to which to look for a position report.
          * @param deltaSeconds the maximum number of seconds to go back to find a matching position report.
          * @return a matching position report or null.
          */
@@ -339,6 +434,9 @@ public class ScenarioTracker implements Tracker {
         private final Set<Object> tags = new HashSet<>();
         private final TreeMap<Date, PositionReport> positionReports = new TreeMap<>();
 
+        /**
+         * The type Position report.
+         */
         @Immutable
         public final class PositionReport {
             private PositionReport(PositionTime pt, float cog, float sog, int heading, NavigationalStatus navstat, boolean estimated) {
@@ -359,36 +457,81 @@ public class ScenarioTracker implements Tracker {
                 this.estimated = estimated;
             }
 
+            /**
+             * Gets position time.
+             *
+             * @return the position time
+             */
             public PositionTime getPositionTime() {
                 return positionTime;
             }
 
+            /**
+             * Gets timestamp.
+             *
+             * @return the timestamp
+             */
             public long getTimestamp() {
                 return positionTime.getTime();
             }
 
+            /**
+             * Gets latitude.
+             *
+             * @return the latitude
+             */
             public double getLatitude() {
                 return positionTime.getLatitude();
             }
 
+            /**
+             * Gets longitude.
+             *
+             * @return the longitude
+             */
             public double getLongitude() {
                 return positionTime.getLongitude();
             }
 
+            /**
+             * Gets cog.
+             *
+             * @return the cog
+             */
             public float getCog() {
                 return cog;
             }
 
+            /**
+             * Gets sog.
+             *
+             * @return the sog
+             */
             public float getSog() {
                 return sog;
             }
 
+            /**
+             * Gets heading.
+             *
+             * @return the heading
+             */
             public int getHeading() {
                 return heading;
             }
 
+            /**
+             * Gets navigational status.
+             *
+             * @return the navigational status
+             */
             public NavigationalStatus getNavigationalStatus() { return navstat; }
 
+            /**
+             * Is estimated boolean.
+             *
+             * @return the boolean
+             */
             public boolean isEstimated() {
                 return estimated;
             }

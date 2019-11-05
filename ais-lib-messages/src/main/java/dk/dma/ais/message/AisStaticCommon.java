@@ -31,9 +31,9 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
 
     /**
      * Ship name: Maximum 20 characters 6 bit ASCII, as defined in Table 44
-     * 
-     * @@@@@@@@@@@@@@@@@@@@ = not available = default. For SAR aircraft, it should be set to "SAR AIRCRAFT NNNNNNN"
-     *                      where NNNNNNN equals the aircraft registration number
+     *
+     * {@literal @@@@@@@@@@@@@@@@@@@@ } = not available = default. For SAR aircraft, it should be set to "SAR AIRCRAFT NNNNNNN"
+     * where NNNNNNN equals the aircraft registration number
      */
     protected String name; // 20x6 (120) bits
 
@@ -46,7 +46,7 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
     /**
      * GPS Ant. Distance from bow (A): Reference point for reported position. Also indicates the dimension of ship (m)
      * (see Fig. 42 and § 3.3.3)
-     * 
+     * <p>
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be 0
      */
     protected int dimBow; // 9 bits
@@ -54,7 +54,7 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
     /**
      * GPS Ant. Distance from stern (B) Reference point for reported position. Also indicates the dimension of ship (m)
      * (see Fig. 42 and § 3.3.3)
-     * 
+     * <p>
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be
      * representing the length of the ship
      */
@@ -63,7 +63,7 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
     /**
      * GPS Ant. Distance from port (C) Reference point for reported position. Also indicates the dimension of ship (m)
      * (see Fig. 42 and § 3.3.3)
-     * 
+     * <p>
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be 0
      */
     protected int dimPort; // 6 bits
@@ -71,24 +71,44 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
     /**
      * GPS Ant. Distance from starboard (D): Reference point for reported position. Also indicates the dimension of ship
      * (m) (see Fig. 42 and § 3.3.3)
-     * 
+     * <p>
      * NOTE: When GPS position is not available, but the ships dimensions is available, then this field should be
      * representing the with of the ship
      */
     protected int dimStarboard; // 6 bits
 
+    /**
+     * Instantiates a new Ais static common.
+     *
+     * @param msgId the msg id
+     */
     public AisStaticCommon(int msgId) {
         super(msgId);
     }
 
+    /**
+     * Instantiates a new Ais static common.
+     *
+     * @param vdm the vdm
+     */
     public AisStaticCommon(Vdm vdm) {
         super(vdm);
     }
 
+    /**
+     * Gets callsign.
+     *
+     * @return the callsign
+     */
     public String getCallsign() {
         return callsign;
     }
 
+    /**
+     * Sets callsign.
+     *
+     * @param callsign the callsign
+     */
     public void setCallsign(String callsign) {
         this.callsign = callsign;
     }
@@ -97,14 +117,29 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
         return name;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Gets ship type.
+     *
+     * @return the ship type
+     */
     public int getShipType() {
         return shipType;
     }
 
+    /**
+     * Sets ship type.
+     *
+     * @param shipType the ship type
+     */
     public void setShipType(int shipType) {
         this.shipType = shipType;
     }
@@ -113,6 +148,11 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
         return dimBow;
     }
 
+    /**
+     * Sets dim bow.
+     *
+     * @param dimBow the dim bow
+     */
     public void setDimBow(int dimBow) {
         this.dimBow = dimBow;
     }
@@ -121,6 +161,11 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
         return dimStern;
     }
 
+    /**
+     * Sets dim stern.
+     *
+     * @param dimStern the dim stern
+     */
     public void setDimStern(int dimStern) {
         this.dimStern = dimStern;
     }
@@ -129,6 +174,11 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
         return dimPort;
     }
 
+    /**
+     * Sets dim port.
+     *
+     * @param dimPort the dim port
+     */
     public void setDimPort(int dimPort) {
         this.dimPort = dimPort;
     }
@@ -137,6 +187,11 @@ public abstract class AisStaticCommon extends AisMessage implements IDimensionMe
         return dimStarboard;
     }
 
+    /**
+     * Sets dim starboard.
+     *
+     * @param dimStarboard the dim starboard
+     */
     public void setDimStarboard(int dimStarboard) {
         this.dimStarboard = dimStarboard;
     }

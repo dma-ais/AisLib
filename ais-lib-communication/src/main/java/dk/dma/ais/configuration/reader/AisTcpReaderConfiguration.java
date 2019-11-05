@@ -20,6 +20,9 @@ import dk.dma.ais.reader.AisReader;
 import dk.dma.ais.reader.AisReaders;
 import dk.dma.ais.reader.AisTcpReader;
 
+/**
+ * The type Ais tcp reader configuration.
+ */
 public class AisTcpReaderConfiguration extends AisReaderConfiguration {
 
     private long reconnectInterval = 5000; // Default 5 sec

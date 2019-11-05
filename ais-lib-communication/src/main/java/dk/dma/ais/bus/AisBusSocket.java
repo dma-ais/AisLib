@@ -29,13 +29,24 @@ public abstract class AisBusSocket extends AisBusComponent {
     private String name;
     @GuardedBy("this")
     private String description;
-    
+
+    /**
+     * The Blocking.
+     */
     protected final boolean blocking;
-    
+
+    /**
+     * Instantiates a new Ais bus socket.
+     */
     public AisBusSocket() {
         this(false);
     }
-    
+
+    /**
+     * Instantiates a new Ais bus socket.
+     *
+     * @param blocking the blocking
+     */
     public AisBusSocket(boolean blocking) {
         super();
         this.blocking = blocking;
@@ -51,10 +62,20 @@ public abstract class AisBusSocket extends AisBusComponent {
         super.start();
     }
 
+    /**
+     * Gets ais bus.
+     *
+     * @return the ais bus
+     */
     public synchronized AisBus getAisBus() {
         return aisBus;
     }
-    
+
+    /**
+     * Sets ais bus.
+     *
+     * @param aisBus the ais bus
+     */
     public synchronized void setAisBus(AisBus aisBus) {
         if (this.aisBus != null) {
             throw new IllegalStateException("AisBus already defined");
@@ -62,18 +83,38 @@ public abstract class AisBusSocket extends AisBusComponent {
         this.aisBus = aisBus;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     public synchronized String getName() {
         return name == null ? getClass().getSimpleName() : name;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     */
     public synchronized void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Gets description.
+     *
+     * @return the description
+     */
     public synchronized String getDescription() {
         return description;
     }
 
+    /**
+     * Sets description.
+     *
+     * @param description the description
+     */
     public synchronized void setDescription(String description) {
         this.description = description;
     }

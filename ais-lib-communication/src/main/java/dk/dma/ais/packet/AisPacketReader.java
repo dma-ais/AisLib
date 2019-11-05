@@ -51,28 +51,38 @@ import static java.util.Objects.requireNonNull;
  */
 public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
 
-    /** The logger */
+    /**
+     * The logger
+     */
     static final Logger LOG = LoggerFactory.getLogger(AisPacketReader.class);
 
     /** The number of bytes read by this instance. */
     private final AtomicLong bytesRead = new AtomicLong();
 
-    /** Whether or not this reader has been closed. */
+    /**
+     * Whether or not this reader has been closed.
+     */
     volatile boolean closed;
 
     /** The number of lines read by this instance. */
     private final AtomicLong linesRead = new AtomicLong();
 
-    /** Reader to parse lines and deliver complete AIS packets. */
+    /**
+     * Reader to parse lines and deliver complete AIS packets.
+     */
     protected final AisPacketParser packetReader = new AisPacketParser();
 
     /** The number of packets read by this instance. */
     private final AtomicLong packetsRead = new AtomicLong();
 
-    /** The wrapped reader. */
+    /**
+     * The wrapped reader.
+     */
     final BufferedReader reader;
 
-    /** The wrapped input stream. */
+    /**
+     * The wrapped input stream.
+     */
     final InputStream stream;
 
     /**
@@ -84,13 +94,18 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
     /**
      * Create
      *
-     * @param stream
-     *            the input stream to read data from
+     * @param stream the input stream to read data from
      */
     public AisPacketReader(InputStream stream) {
         this(stream, false);
     }
 
+    /**
+     * Instantiates a new Ais packet reader.
+     *
+     * @param stream    the stream
+     * @param errorFree the error free
+     */
     AisPacketReader(InputStream stream, boolean errorFree) {
         this.stream = requireNonNull(stream);
         this.reader = new BufferedReader(new InputStreamReader(new CountingInputStream(stream, bytesRead),
@@ -133,8 +148,7 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
     /**
      * Override this method to handle {@link Abk} sentences.
      *
-     * @param abk
-     *            the sentence to handle
+     * @param abk the sentence to handle
      */
     protected void handleAbk(Abk abk) {}
 
@@ -184,6 +198,12 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
         }
     }
 
+    /**
+     * For each remaining.
+     *
+     * @param consumers the consumers
+     * @throws IOException the io exception
+     */
     @SafeVarargs
     public final void forEachRemaining(Consumer<? super AisPacket>... consumers) throws IOException {
         requireNonNull(consumers);
@@ -195,6 +215,12 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
         }
     }
 
+    /**
+     * For each remaining message.
+     *
+     * @param consumers the consumers
+     * @throws IOException the io exception
+     */
     @SafeVarargs
     public final void forEachRemainingMessage(Consumer<? super AisMessage>... consumers) throws IOException {
         requireNonNull(consumers);
@@ -210,9 +236,10 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
     }
 
     /**
+     * Read packet ais packet.
+     *
      * @return the next packet or null if the end of the stream has been reached
-     * @throws IOException
-     *             if an exception occurred while reading the packet
+     * @throws IOException if an exception occurred while reading the packet
      */
     public AisPacket readPacket() throws IOException {
         return readPacket0();
@@ -220,6 +247,9 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
 
     /**
      * Reads the next AisPacket
+     *
+     * @return the ais packet
+     * @throws IOException the io exception
      */
     AisPacket readPacket0() throws IOException {
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -247,6 +277,7 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
     /**
      * Returns a AIS packet stream using the specified executor.
      *
+     * @param e the e
      * @return a AIS packet stream using the specified executor
      */
     public AisPacketStream stream(Executor e) {
@@ -265,6 +296,14 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
         return s.immutableStream();
     }
 
+    /**
+     * Create from system resource ais packet reader.
+     *
+     * @param resourceName    the resource name
+     * @param throwExceptions the throw exceptions
+     * @return the ais packet reader
+     * @throws IOException the io exception
+     */
     public static AisPacketReader createFromSystemResource(String resourceName, boolean throwExceptions)
             throws IOException {
         URL url = ClassLoader.getSystemResource(resourceName);
@@ -280,13 +319,10 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
      * Creates a new AIS packet reader from the specified file. If the specified file has a '.zip' suffix. The file is
      * automatically treated as a zip file.
      *
-     * @param p
-     *            the path of the file
-     * @param throwExceptions
-     *            whether to throw exceptions or just log them
+     * @param p               the path of the file
+     * @param throwExceptions whether to throw exceptions or just log them
      * @return a new reader
-     * @throws IOException
-     *             if the reader failed to be constructed, for example, if the specified file does not exist
+     * @throws IOException if the reader failed to be constructed, for example, if the specified file does not exist
      */
     public static AisPacketReader createFromFile(Path p, boolean throwExceptions) throws IOException {
         InputStream is = Files.newInputStream(p);
@@ -324,12 +360,9 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
     /**
      * Writes the reminder of packets to the output stream using the specified sink
      *
-     * @param os
-     *            the output stream to write to
-     * @param sink
-     *            the sink to write to
-     * @throws IOException
-     *             if the a packet could not be written
+     * @param os   the output stream to write to
+     * @param sink the sink to write to
+     * @throws IOException if the a packet could not be written
      */
     public void writeTo(OutputStream os, OutputStreamSink<AisPacket> sink) throws IOException {
         sink.header(os);
@@ -349,6 +382,9 @@ public class AisPacketReader implements AutoCloseable, Iterable<AisPacket> {
         return new IteratorImpl();
     }
 
+    /**
+     * The type Iterator.
+     */
     class IteratorImpl extends AbstractIterator<AisPacket> {
 
         /** {@inheritDoc} */

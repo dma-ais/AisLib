@@ -31,9 +31,9 @@ public class SixbitEncoder {
 
     /**
      * Add a value using bits number of bits
-     * 
-     * @param value
-     * @param bits
+     *
+     * @param value the value
+     * @param bits  the bits
      */
     public void addVal(long value, int bits) {
         binArray.append(value, bits);
@@ -41,8 +41,8 @@ public class SixbitEncoder {
 
     /**
      * Add string
-     * 
-     * @param str
+     *
+     * @param str the str
      */
     public void addString(String str) {
         for (int i = 0; i < str.length(); i++) {
@@ -56,9 +56,9 @@ public class SixbitEncoder {
 
     /**
      * Add string and a number of spaces to fill length characters
-     * 
-     * @param str
-     * @param length
+     *
+     * @param str    the str
+     * @param length the length
      */
     public void addString(String str, int length) {
         int i = 0;
@@ -76,8 +76,8 @@ public class SixbitEncoder {
 
     /**
      * Append another encoder
-     * 
-     * @param encoder
+     *
+     * @param encoder the encoder
      */
     public void append(SixbitEncoder encoder) {
         binArray.append(encoder.binArray);
@@ -85,8 +85,8 @@ public class SixbitEncoder {
 
     /**
      * Append a binary array
-     * 
-     * @param ba
+     *
+     * @param ba the ba
      */
     public void append(BinArray ba) {
         binArray.append(ba);
@@ -94,9 +94,9 @@ public class SixbitEncoder {
 
     /**
      * Get encoded six bit string
-     * 
-     * @return string
-     * @throws SixbitException
+     *
+     * @return string string
+     * @throws SixbitException the sixbit exception
      */
     public String encode() throws SixbitException {
         StringBuilder buf = new StringBuilder();
@@ -119,8 +119,8 @@ public class SixbitEncoder {
 
     /**
      * The number of padding bits
-     * 
-     * @return
+     *
+     * @return pad bits
      */
     public int getPadBits() {
         return padBits;
@@ -128,8 +128,8 @@ public class SixbitEncoder {
 
     /**
      * Get bit length
-     * 
-     * @return
+     *
+     * @return length
      */
     public int getLength() {
         return binArray.getLength();
@@ -137,8 +137,8 @@ public class SixbitEncoder {
 
     /**
      * Get the underlying binary array
-     * 
-     * @return
+     *
+     * @return bin array
      */
     public BinArray getBinArray() {
         return binArray;

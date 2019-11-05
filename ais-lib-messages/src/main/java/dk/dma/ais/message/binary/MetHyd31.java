@@ -20,6 +20,9 @@ import dk.dma.ais.binary.SixbitException;
 import dk.dma.ais.message.AisPosition;
 import dk.dma.ais.message.binary.AisApplicationMessage;
 
+/**
+ * The type Met hyd 31.
+ */
 public class MetHyd31 extends AisApplicationMessage {
 
 	private AisPosition pos;
@@ -60,7 +63,13 @@ public class MetHyd31 extends AisApplicationMessage {
 	private int spare; // 6 bits
 	private int posAcc; // 1 bit
 
-	public MetHyd31(BinArray binArray) throws SixbitException {
+    /**
+     * Instantiates a new Met hyd 31.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
+    public MetHyd31(BinArray binArray) throws SixbitException {
 		super(1, 31, binArray);
 	}
 
@@ -113,299 +122,669 @@ public class MetHyd31 extends AisApplicationMessage {
 		this.spare = (int) binArray.getVal(6);
 	}
 
-	public AisPosition getPos() {
+    /**
+     * Gets pos.
+     *
+     * @return the pos
+     */
+    public AisPosition getPos() {
 		return pos;
 	}
 
-	public void setPos(AisPosition pos) {
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
+    public void setPos(AisPosition pos) {
 		this.pos = pos;
 	}
 
-	public int getUtcDay() {
+    /**
+     * Gets utc day.
+     *
+     * @return the utc day
+     */
+    public int getUtcDay() {
 		return utcDay;
 	}
 
-	public void setUtcDay(int utcDay) {
+    /**
+     * Sets utc day.
+     *
+     * @param utcDay the utc day
+     */
+    public void setUtcDay(int utcDay) {
 		this.utcDay = utcDay;
 	}
 
-	public int getUtcHour() {
+    /**
+     * Gets utc hour.
+     *
+     * @return the utc hour
+     */
+    public int getUtcHour() {
 		return utcHour;
 	}
 
-	public void setUtcHour(int utcHour) {
+    /**
+     * Sets utc hour.
+     *
+     * @param utcHour the utc hour
+     */
+    public void setUtcHour(int utcHour) {
 		this.utcHour = utcHour;
 	}
 
-	public int getUtcMinute() {
+    /**
+     * Gets utc minute.
+     *
+     * @return the utc minute
+     */
+    public int getUtcMinute() {
 		return utcMinute;
 	}
 
-	public void setUtcMinute(int utcMinute) {
+    /**
+     * Sets utc minute.
+     *
+     * @param utcMinute the utc minute
+     */
+    public void setUtcMinute(int utcMinute) {
 		this.utcMinute = utcMinute;
 	}
 
-	public int getWind() {
+    /**
+     * Gets wind.
+     *
+     * @return the wind
+     */
+    public int getWind() {
 		return wind;
 	}
 
-	public void setWind(int wind) {
+    /**
+     * Sets wind.
+     *
+     * @param wind the wind
+     */
+    public void setWind(int wind) {
 		this.wind = wind;
 	}
 
-	public int getGust() {
+    /**
+     * Gets gust.
+     *
+     * @return the gust
+     */
+    public int getGust() {
 		return gust;
 	}
 
-	public void setGust(int gust) {
+    /**
+     * Sets gust.
+     *
+     * @param gust the gust
+     */
+    public void setGust(int gust) {
 		this.gust = gust;
 	}
 
-	public int getWindDirection() {
+    /**
+     * Gets wind direction.
+     *
+     * @return the wind direction
+     */
+    public int getWindDirection() {
 		return windDirection;
 	}
 
-	public void setWindDirection(int windDirection) {
+    /**
+     * Sets wind direction.
+     *
+     * @param windDirection the wind direction
+     */
+    public void setWindDirection(int windDirection) {
 		this.windDirection = windDirection;
 	}
 
-	public int getGustDirection() {
+    /**
+     * Gets gust direction.
+     *
+     * @return the gust direction
+     */
+    public int getGustDirection() {
 		return gustDirection;
 	}
 
-	public void setGustDirection(int gustDirection) {
+    /**
+     * Sets gust direction.
+     *
+     * @param gustDirection the gust direction
+     */
+    public void setGustDirection(int gustDirection) {
 		this.gustDirection = gustDirection;
 	}
 
-	public int getAirTemp() {
+    /**
+     * Gets air temp.
+     *
+     * @return the air temp
+     */
+    public int getAirTemp() {
 		return airTemp;
 	}
 
-	public void setAirTemp(int airTemp) {
+    /**
+     * Sets air temp.
+     *
+     * @param airTemp the air temp
+     */
+    public void setAirTemp(int airTemp) {
 		this.airTemp = airTemp;
 	}
 
-	public int getHumidity() {
+    /**
+     * Gets humidity.
+     *
+     * @return the humidity
+     */
+    public int getHumidity() {
 		return humidity;
 	}
 
-	public void setHumidity(int humidity) {
+    /**
+     * Sets humidity.
+     *
+     * @param humidity the humidity
+     */
+    public void setHumidity(int humidity) {
 		this.humidity = humidity;
 	}
 
-	public int getDewPoint() {
+    /**
+     * Gets dew point.
+     *
+     * @return the dew point
+     */
+    public int getDewPoint() {
 		return dewPoint;
 	}
 
-	public void setDewPoint(int dewPoint) {
+    /**
+     * Sets dew point.
+     *
+     * @param dewPoint the dew point
+     */
+    public void setDewPoint(int dewPoint) {
 		this.dewPoint = dewPoint;
 	}
 
-	public int getAirPressure() {
+    /**
+     * Gets air pressure.
+     *
+     * @return the air pressure
+     */
+    public int getAirPressure() {
 		return airPressure;
 	}
 
-	public void setAirPressure(int airPressure) {
+    /**
+     * Sets air pressure.
+     *
+     * @param airPressure the air pressure
+     */
+    public void setAirPressure(int airPressure) {
 		this.airPressure = airPressure;
 	}
 
-	public int getAirPressureTend() {
+    /**
+     * Gets air pressure tend.
+     *
+     * @return the air pressure tend
+     */
+    public int getAirPressureTend() {
 		return airPressureTend;
 	}
 
-	public void setAirPressureTend(int airPressureTend) {
+    /**
+     * Sets air pressure tend.
+     *
+     * @param airPressureTend the air pressure tend
+     */
+    public void setAirPressureTend(int airPressureTend) {
 		this.airPressureTend = airPressureTend;
 	}
 
-	public int getHorzVisibility() {
+    /**
+     * Gets horz visibility.
+     *
+     * @return the horz visibility
+     */
+    public int getHorzVisibility() {
 		return horzVisibility;
 	}
 
-	public void setHorzVisibility(int horzVisibility) {
+    /**
+     * Sets horz visibility.
+     *
+     * @param horzVisibility the horz visibility
+     */
+    public void setHorzVisibility(int horzVisibility) {
 		this.horzVisibility = horzVisibility;
 	}
 
-	public int getWaterLevel() {
+    /**
+     * Gets water level.
+     *
+     * @return the water level
+     */
+    public int getWaterLevel() {
 		return waterLevel;
 	}
 
-	public void setWaterLevel(int waterLevel) {
+    /**
+     * Sets water level.
+     *
+     * @param waterLevel the water level
+     */
+    public void setWaterLevel(int waterLevel) {
 		this.waterLevel = waterLevel;
 	}
 
-	public int getWaterLevelTrend() {
+    /**
+     * Gets water level trend.
+     *
+     * @return the water level trend
+     */
+    public int getWaterLevelTrend() {
 		return waterLevelTrend;
 	}
 
-	public void setWaterLevelTrend(int waterLevelTrend) {
+    /**
+     * Sets water level trend.
+     *
+     * @param waterLevelTrend the water level trend
+     */
+    public void setWaterLevelTrend(int waterLevelTrend) {
 		this.waterLevelTrend = waterLevelTrend;
 	}
 
-	public int getSurfaceCurrent() {
+    /**
+     * Gets surface current.
+     *
+     * @return the surface current
+     */
+    public int getSurfaceCurrent() {
 		return surfaceCurrent;
 	}
 
-	public void setSurfaceCurrent(int surfaceCurrent) {
+    /**
+     * Sets surface current.
+     *
+     * @param surfaceCurrent the surface current
+     */
+    public void setSurfaceCurrent(int surfaceCurrent) {
 		this.surfaceCurrent = surfaceCurrent;
 	}
 
-	public int getSurfaceCurrentDir() {
+    /**
+     * Gets surface current dir.
+     *
+     * @return the surface current dir
+     */
+    public int getSurfaceCurrentDir() {
 		return surfaceCurrentDir;
 	}
 
-	public void setSurfaceCurrentDir(int surfaceCurrentDir) {
+    /**
+     * Sets surface current dir.
+     *
+     * @param surfaceCurrentDir the surface current dir
+     */
+    public void setSurfaceCurrentDir(int surfaceCurrentDir) {
 		this.surfaceCurrentDir = surfaceCurrentDir;
 	}
 
-	public int getSecondCurrent() {
+    /**
+     * Gets second current.
+     *
+     * @return the second current
+     */
+    public int getSecondCurrent() {
 		return secondCurrent;
 	}
 
-	public void setSecondCurrent(int secondCurrent) {
+    /**
+     * Sets second current.
+     *
+     * @param secondCurrent the second current
+     */
+    public void setSecondCurrent(int secondCurrent) {
 		this.secondCurrent = secondCurrent;
 	}
 
-	public int getSecondCurrentDir() {
+    /**
+     * Gets second current dir.
+     *
+     * @return the second current dir
+     */
+    public int getSecondCurrentDir() {
 		return secondCurrentDir;
 	}
 
-	public void setSecondCurrentDir(int secondCurrentDir) {
+    /**
+     * Sets second current dir.
+     *
+     * @param secondCurrentDir the second current dir
+     */
+    public void setSecondCurrentDir(int secondCurrentDir) {
 		this.secondCurrentDir = secondCurrentDir;
 	}
 
-	public int getSecondCurrentLevel() {
+    /**
+     * Gets second current level.
+     *
+     * @return the second current level
+     */
+    public int getSecondCurrentLevel() {
 		return secondCurrentLevel;
 	}
 
-	public void setSecondCurrentLevel(int secondCurrentLevel) {
+    /**
+     * Sets second current level.
+     *
+     * @param secondCurrentLevel the second current level
+     */
+    public void setSecondCurrentLevel(int secondCurrentLevel) {
 		this.secondCurrentLevel = secondCurrentLevel;
 	}
 
-	public int getThirdCurrent() {
+    /**
+     * Gets third current.
+     *
+     * @return the third current
+     */
+    public int getThirdCurrent() {
 		return thirdCurrent;
 	}
 
-	public void setThirdCurrent(int thirdCurrent) {
+    /**
+     * Sets third current.
+     *
+     * @param thirdCurrent the third current
+     */
+    public void setThirdCurrent(int thirdCurrent) {
 		this.thirdCurrent = thirdCurrent;
 	}
 
-	public int getThirdCurrentDir() {
+    /**
+     * Gets third current dir.
+     *
+     * @return the third current dir
+     */
+    public int getThirdCurrentDir() {
 		return thirdCurrentDir;
 	}
 
-	public void setThirdCurrentDir(int thirdCurrentDir) {
+    /**
+     * Sets third current dir.
+     *
+     * @param thirdCurrentDir the third current dir
+     */
+    public void setThirdCurrentDir(int thirdCurrentDir) {
 		this.thirdCurrentDir = thirdCurrentDir;
 	}
 
-	public int getThirdCurrentLevel() {
+    /**
+     * Gets third current level.
+     *
+     * @return the third current level
+     */
+    public int getThirdCurrentLevel() {
 		return thirdCurrentLevel;
 	}
 
-	public void setThirdCurrentLevel(int thirdCurrentLevel) {
+    /**
+     * Sets third current level.
+     *
+     * @param thirdCurrentLevel the third current level
+     */
+    public void setThirdCurrentLevel(int thirdCurrentLevel) {
 		this.thirdCurrentLevel = thirdCurrentLevel;
 	}
 
-	public int getWaveHeight() {
+    /**
+     * Gets wave height.
+     *
+     * @return the wave height
+     */
+    public int getWaveHeight() {
 		return waveHeight;
 	}
 
-	public void setWaveHeight(int waveHeight) {
+    /**
+     * Sets wave height.
+     *
+     * @param waveHeight the wave height
+     */
+    public void setWaveHeight(int waveHeight) {
 		this.waveHeight = waveHeight;
 	}
 
-	public int getWavePeriod() {
+    /**
+     * Gets wave period.
+     *
+     * @return the wave period
+     */
+    public int getWavePeriod() {
 		return wavePeriod;
 	}
 
-	public void setWavePeriod(int wavePeriod) {
+    /**
+     * Sets wave period.
+     *
+     * @param wavePeriod the wave period
+     */
+    public void setWavePeriod(int wavePeriod) {
 		this.wavePeriod = wavePeriod;
 	}
 
-	public int getWaveDirection() {
+    /**
+     * Gets wave direction.
+     *
+     * @return the wave direction
+     */
+    public int getWaveDirection() {
 		return waveDirection;
 	}
 
-	public void setWaveDirection(int waveDirection) {
+    /**
+     * Sets wave direction.
+     *
+     * @param waveDirection the wave direction
+     */
+    public void setWaveDirection(int waveDirection) {
 		this.waveDirection = waveDirection;
 	}
 
-	public int getSwellHeight() {
+    /**
+     * Gets swell height.
+     *
+     * @return the swell height
+     */
+    public int getSwellHeight() {
 		return swellHeight;
 	}
 
-	public void setSwellHeight(int swellHeight) {
+    /**
+     * Sets swell height.
+     *
+     * @param swellHeight the swell height
+     */
+    public void setSwellHeight(int swellHeight) {
 		this.swellHeight = swellHeight;
 	}
 
-	public int getSwellPeriod() {
+    /**
+     * Gets swell period.
+     *
+     * @return the swell period
+     */
+    public int getSwellPeriod() {
 		return swellPeriod;
 	}
 
-	public void setSwellPeriod(int swellPeriod) {
+    /**
+     * Sets swell period.
+     *
+     * @param swellPeriod the swell period
+     */
+    public void setSwellPeriod(int swellPeriod) {
 		this.swellPeriod = swellPeriod;
 	}
 
-	public int getSwellDirection() {
+    /**
+     * Gets swell direction.
+     *
+     * @return the swell direction
+     */
+    public int getSwellDirection() {
 		return swellDirection;
 	}
 
-	public void setSwellDirection(int swellDirection) {
+    /**
+     * Sets swell direction.
+     *
+     * @param swellDirection the swell direction
+     */
+    public void setSwellDirection(int swellDirection) {
 		this.swellDirection = swellDirection;
 	}
 
-	public int getSeaState() {
+    /**
+     * Gets sea state.
+     *
+     * @return the sea state
+     */
+    public int getSeaState() {
 		return seaState;
 	}
 
-	public void setSeaState(int seaState) {
+    /**
+     * Sets sea state.
+     *
+     * @param seaState the sea state
+     */
+    public void setSeaState(int seaState) {
 		this.seaState = seaState;
 	}
 
-	public int getWaterTemp() {
+    /**
+     * Gets water temp.
+     *
+     * @return the water temp
+     */
+    public int getWaterTemp() {
 		return waterTemp;
 	}
 
-	public void setWaterTemp(int waterTemp) {
+    /**
+     * Sets water temp.
+     *
+     * @param waterTemp the water temp
+     */
+    public void setWaterTemp(int waterTemp) {
 		this.waterTemp = waterTemp;
 	}
 
-	public int getPrecipitation() {
+    /**
+     * Gets precipitation.
+     *
+     * @return the precipitation
+     */
+    public int getPrecipitation() {
 		return precipitation;
 	}
 
-	public void setPrecipitation(int precipitation) {
+    /**
+     * Sets precipitation.
+     *
+     * @param precipitation the precipitation
+     */
+    public void setPrecipitation(int precipitation) {
 		this.precipitation = precipitation;
 	}
 
-	public int getSalinity() {
+    /**
+     * Gets salinity.
+     *
+     * @return the salinity
+     */
+    public int getSalinity() {
 		return salinity;
 	}
 
-	public void setSalinity(int salinity) {
+    /**
+     * Sets salinity.
+     *
+     * @param salinity the salinity
+     */
+    public void setSalinity(int salinity) {
 		this.salinity = salinity;
 	}
 
-	public int getIce() {
+    /**
+     * Gets ice.
+     *
+     * @return the ice
+     */
+    public int getIce() {
 		return ice;
 	}
 
-	public void setIce(int ice) {
+    /**
+     * Sets ice.
+     *
+     * @param ice the ice
+     */
+    public void setIce(int ice) {
 		this.ice = ice;
 	}
 
-	public int getSpare() {
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
+    public int getSpare() {
 		return spare;
 	}
 
-	public void setSpare(int spare) {
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
+    public void setSpare(int spare) {
 		this.spare = spare;
 	}
 
-	public int getPosAcc() {
+    /**
+     * Gets pos acc.
+     *
+     * @return the pos acc
+     */
+    public int getPosAcc() {
 		return posAcc;
 	}
 
-	public void setPosAcc(int posAcc) {
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
+    public void setPosAcc(int posAcc) {
 		this.posAcc = posAcc;
 	}
 

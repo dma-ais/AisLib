@@ -26,20 +26,38 @@ public class AisClassBStatic extends AisVesselStatic {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Ais class b static.
+     */
     public AisClassBStatic() {
         super();
     }
 
+    /**
+     * Instantiates a new Ais class b static.
+     *
+     * @param msg24 the msg 24
+     */
     public AisClassBStatic(AisMessage24 msg24) {
         super();
         update(msg24);
     }
-    
+
+    /**
+     * Instantiates a new Ais class b static.
+     *
+     * @param msg19 the msg 19
+     */
     public AisClassBStatic(AisMessage19 msg19) {
         super();
         update(msg19);
     }
 
+    /**
+     * Update.
+     *
+     * @param msg24 the msg 24
+     */
     public void update(AisMessage24 msg24) {
         if (msg24.getPartNumber() == 0) {
             this.name = AisMessage.trimText(msg24.getName());
@@ -51,7 +69,12 @@ public class AisClassBStatic extends AisVesselStatic {
         }
         super.update((AisMessage) msg24);
     }
-    
+
+    /**
+     * Update.
+     *
+     * @param msg19 the msg 19
+     */
     public void update(AisMessage19 msg19) {
         this.name = AisMessage.trimText(msg19.getName());
         this.callsign = AisMessage.trimText(msg19.getCallsign());

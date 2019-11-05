@@ -17,8 +17,14 @@ package dk.dma.ais.configuration.transform;
 import dk.dma.ais.transform.AnonymousTransformer;
 import dk.dma.ais.transform.IAisPacketTransformer;
 
+/**
+ * The type Anonymous transfomer configuration.
+ */
 public class AnonymousTransfomerConfiguration extends TransformerConfiguration {
-    
+
+    /**
+     * Instantiates a new Anonymous transfomer configuration.
+     */
     public AnonymousTransfomerConfiguration() {
         
     }

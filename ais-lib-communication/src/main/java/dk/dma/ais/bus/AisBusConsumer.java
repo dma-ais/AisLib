@@ -26,6 +26,9 @@ import dk.dma.ais.queue.IQueueEntryHandler;
 import dk.dma.ais.queue.MessageQueueOverflowException;
 import dk.dma.ais.queue.MessageQueueReader;
 
+/**
+ * The type Ais bus consumer.
+ */
 @ThreadSafe
 public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntryHandler<AisBusElement> {
 
@@ -39,10 +42,18 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
     @GuardedBy("this")
     private int consumerPullMaxElements = 1000;
 
+    /**
+     * Instantiates a new Ais bus consumer.
+     */
     public AisBusConsumer() {
         super();
     }
 
+    /**
+     * Instantiates a new Ais bus consumer.
+     *
+     * @param blocking the blocking
+     */
     public AisBusConsumer(boolean blocking) {
         super(blocking);
     }
@@ -63,8 +74,8 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
 
     /**
      * Push elements onto the queue
-     * 
-     * @param element
+     *
+     * @param element the element
      */
     public final void push(AisBusElement element) {
         try {
@@ -109,15 +120,25 @@ public abstract class AisBusConsumer extends AisBusSocket implements IQueueEntry
 
     /**
      * All consumers must implement a method to get the filtered packet
-     * 
-     * @param queueElement
+     *
+     * @param queueElement the queue element
      */
     public abstract void receiveFiltered(AisBusElement queueElement);
 
+    /**
+     * Sets consumer queue size.
+     *
+     * @param consumerQueueSize the consumer queue size
+     */
     public synchronized void setConsumerQueueSize(int consumerQueueSize) {
         this.consumerQueueSize = consumerQueueSize;
     }
 
+    /**
+     * Sets consumer pull max elements.
+     *
+     * @param consumerPullMaxElements the consumer pull max elements
+     */
     public synchronized void setConsumerPullMaxElements(int consumerPullMaxElements) {
         this.consumerPullMaxElements = consumerPullMaxElements;
     }

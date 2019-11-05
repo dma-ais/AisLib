@@ -18,6 +18,14 @@ package dk.dma.ais.tracker.eventEmittingTracker;
 
 import dk.dma.ais.tracker.Tracker;
 
+/**
+ * The interface Event emitting tracker.
+ */
 public interface EventEmittingTracker extends Tracker {
+    /**
+     * Register subscriber.
+     *
+     * @param subscriber the subscriber
+     */
     void registerSubscriber(Object subscriber);
 }

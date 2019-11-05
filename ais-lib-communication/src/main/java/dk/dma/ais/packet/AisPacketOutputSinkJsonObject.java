@@ -33,28 +33,46 @@ import dk.dma.enav.model.geometry.Position;
 
 /**
  * Transform AisPackets into json objects with only specific columns
- * @author Jens Tuxen
  *
+ * @author Jens Tuxen
  */
 public class AisPacketOutputSinkJsonObject extends OutputStreamSink<AisPacket> {
     
     /** The column we are writing. */
     private final String[] columns;
-    
+
+    /**
+     * The Separator.
+     */
     final byte[] separator;
     
     private DecimalFormat df = new DecimalFormat("###.#####");
     
     private boolean first = true;
-    
+
+    /**
+     * The constant ALLCOLUMNS.
+     */
     public static final String ALLCOLUMNS = "mmsi;timestamp;lat;lon;sog;cog;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;callsign;targetType";
 
     private String objectName;
-    
+
+    /**
+     * Instantiates a new Ais packet output sink json object.
+     *
+     * @param format the format
+     */
     public AisPacketOutputSinkJsonObject(String format) {
         this(format,";","data");
     }
-    
+
+    /**
+     * Instantiates a new Ais packet output sink json object.
+     *
+     * @param format     the format
+     * @param separator  the separator
+     * @param objectName the object name
+     */
     public AisPacketOutputSinkJsonObject(String format, String separator, String objectName) {
        columns = format.split(separator);
        this.objectName = objectName;

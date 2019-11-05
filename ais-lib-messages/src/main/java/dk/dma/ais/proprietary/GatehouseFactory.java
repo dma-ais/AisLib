@@ -26,11 +26,15 @@ import dk.dma.ais.sentence.SentenceLine;
 import dk.dma.enav.model.Country;
 
 /**
+ * The type Gatehouse factory.
  *
  * @author Kasper Nielsen
  */
 public class GatehouseFactory extends ProprietaryFactory {
 
+    /**
+     * Instantiates a new Gatehouse factory.
+     */
     public GatehouseFactory() {
         super("GHP");
     }

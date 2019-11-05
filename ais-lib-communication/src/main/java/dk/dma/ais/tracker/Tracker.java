@@ -25,9 +25,9 @@ import java.io.IOException;
 /**
  * A tracking service receives AisPackets and based on these it maintains a collection of all known tracks,
  * including their position, speed, course, etc.
- *
+ * <p>
  * The AisPackets are assumed to arrive in timely order; i.e. by ever-increasing values of timestamp.
- *
+ * <p>
  * TODO: Identify further methods which can be shared between tracker implementations.
  */
 public interface Tracker {
@@ -46,6 +46,7 @@ public interface Tracker {
      * Start to track targets based on AisPackets received from an AisPacketReader.
      *
      * @param packetReader the AisPacketReader to receive packets from.
+     * @throws IOException the io exception
      */
     default void subscribeToPacketReader(AisPacketReader packetReader) throws IOException {
         packetReader.forEachRemaining(p -> update(p));
@@ -53,6 +54,7 @@ public interface Tracker {
 
     /**
      * Update the tracker with a single AisPacket.
+     *
      * @param aisPacket the AIS packet.
      */
     void update(AisPacket aisPacket);
@@ -60,8 +62,7 @@ public interface Tracker {
     /**
      * Returns the latest target info for the specified MMSI number.
      *
-     * @param mmsi
-     *            the MMSI number
+     * @param mmsi the MMSI number
      * @return the latest target info for the specified MMSI number
      */
     Target get(int mmsi);

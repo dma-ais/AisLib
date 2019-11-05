@@ -33,32 +33,55 @@ import dk.dma.ais.packet.AisPacketStream;
 
 /**
  * A reader group organizes a group of readers.
- * 
+ *
  * @author Kasper Nielsen
  */
 public class AisReaderGroup implements Iterable<AisReader> {
 
-    /** The logger. */
+    /**
+     * The logger.
+     */
     static final Logger LOG = LoggerFactory.getLogger(AisReaderGroup.class);
 
-    /** A stream of all incoming packets. */
+    /**
+     * A stream of all incoming packets.
+     */
     final AisPacketStream stream = AisPacketStream.newStream();
 
+    /**
+     * The Lock.
+     */
     final ReentrantLock lock = new ReentrantLock();
 
-    /** All readers configured for this group. */
+    /**
+     * All readers configured for this group.
+     */
     final ConcurrentHashMap<String, AisTcpReader> readers = new ConcurrentHashMap<>();
 
-    /** All current subscriptions. */
+    /**
+     * All current subscriptions.
+     */
     final ConcurrentHashMap<AisReader, AisPacketStream.Subscription> subscriptions = new ConcurrentHashMap<>();
 
-    /** The name of the group. */
+    /**
+     * The name of the group.
+     */
     final String name;
 
+    /**
+     * Instantiates a new Ais reader group.
+     *
+     * @param name the name
+     */
     AisReaderGroup(String name) {
         this.name = requireNonNull(name);
     }
 
+    /**
+     * Add.
+     *
+     * @param reader the reader
+     */
     void add(AisTcpReader reader) {
         lock.lock();
         try {
@@ -77,6 +100,11 @@ public class AisReaderGroup implements Iterable<AisReader> {
         }
     }
 
+    /**
+     * As service service.
+     *
+     * @return the service
+     */
     public Service asService() {
         return new AbstractIdleService() {
             @Override
@@ -121,6 +149,12 @@ public class AisReaderGroup implements Iterable<AisReader> {
         return (Iterator) Collections.unmodifiableCollection(readers.values()).iterator();
     }
 
+    /**
+     * Remove boolean.
+     *
+     * @param name the name
+     * @return the boolean
+     */
     boolean remove(String name) {
         lock.lock();
         try {
@@ -137,7 +171,7 @@ public class AisReaderGroup implements Iterable<AisReader> {
 
     /**
      * Returns a stream of incoming packets for all the readers this group is managing.
-     * 
+     *
      * @return a stream of incoming packets for all the readers this group is managing
      */
     public AisPacketStream stream() {

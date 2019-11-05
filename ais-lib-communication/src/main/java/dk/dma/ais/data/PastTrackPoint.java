@@ -32,6 +32,11 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
     private final double sog;
     private final long time;
 
+    /**
+     * Instantiates a new Past track point.
+     *
+     * @param vesselPosition the vessel position
+     */
     public PastTrackPoint(AisVesselPosition vesselPosition) {
         Position pos = vesselPosition.getPos();
         this.lat = pos.getLatitude();
@@ -46,31 +51,67 @@ public class PastTrackPoint implements Serializable, Comparable<PastTrackPoint> 
         }
     }
 
+    /**
+     * Is dead boolean.
+     *
+     * @param ttl the ttl
+     * @return the boolean
+     */
     public boolean isDead(int ttl) {
         int elapsed = (int) ((System.currentTimeMillis() - time) / 1000);
         return elapsed > ttl;
     }
 
+    /**
+     * Gets lat.
+     *
+     * @return the lat
+     */
     public double getLat() {
         return lat;
     }
 
+    /**
+     * Gets lon.
+     *
+     * @return the lon
+     */
     public double getLon() {
         return lon;
     }
 
+    /**
+     * Gets cog.
+     *
+     * @return the cog
+     */
     public double getCog() {
         return cog;
     }
 
+    /**
+     * Gets sog.
+     *
+     * @return the sog
+     */
     public double getSog() {
         return sog;
     }
 
+    /**
+     * Gets time.
+     *
+     * @return the time
+     */
     public long getTime() {
         return time;
     }
-    
+
+    /**
+     * Gets date.
+     *
+     * @return the date
+     */
     public Date getDate() {
         return new Date(time);
     }

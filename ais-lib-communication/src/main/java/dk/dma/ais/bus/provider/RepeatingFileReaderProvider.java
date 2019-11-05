@@ -48,6 +48,12 @@ public class RepeatingFileReaderProvider extends AisBusProvider implements Consu
     private final String filename;
     private final boolean gzip;
 
+    /**
+     * Instantiates a new Repeating file reader provider.
+     *
+     * @param filename the filename
+     * @param gzip     the gzip
+     */
     public RepeatingFileReaderProvider(String filename, boolean gzip) {
         this.filename = filename;
         this.gzip = gzip;

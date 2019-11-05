@@ -59,11 +59,11 @@ abstract class ExpressionFilterParserBase {
      * Create a filter predicate with will compare the left-hand side to the right-hand side both assumed to be present
      * in the supplied ANTLR context.
      *
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForComparison(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         Predicate<T> filter = null;
@@ -101,11 +101,11 @@ abstract class ExpressionFilterParserBase {
      * Create a filter predicate with will test the left-side value assumed to be present
      * in the supplied ANTLR context against the list or range supplied on the right-hand side.
      *
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForRangeOrList(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         Predicate<T> filter = null;
@@ -132,10 +132,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for comparisons of strings, including the LIKE operator.
-     * @param filterPredicateFactoryClass
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForStringComparison(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         Predicate<T> filter = null;
@@ -155,11 +157,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for comparison of ship types (as numbers or named in strings).
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForComparisonOfShipType(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasCompareTo(ctx) && hasString(ctx)) {
@@ -183,11 +186,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for testing against lists of ship types (as numbers or named in strings).
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForListOfShipType(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasStringList(ctx)) {
@@ -201,11 +205,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create a predicate for comparing navigational statuses (as numbers or named in strings).
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForComparisonOfNavigationalStatus(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasCompareTo(ctx) && hasString(ctx)) {
@@ -228,11 +233,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for testing against lists of navigational statuses (as numbers or named in strings).
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForListOfNavigationalStatus(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasStringList(ctx)) {
@@ -246,11 +252,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for testing against lists of countries.
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForListOfCountry(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasStringList(ctx)) {
@@ -264,11 +271,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for testing against lists of source types.
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForListOfSourceType(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasStringList(ctx)) {
@@ -282,11 +290,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for comparing months (as numbers or named in strings).
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForComparisonOfMonth(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasCompareTo(ctx)) {
@@ -307,11 +316,11 @@ abstract class ExpressionFilterParserBase {
      * Create predicate for testing against lists of navigational statuses (as numbers or named in strings) or
      * ranges of months (as numbers).
      *
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForRangeOrListOfMonth(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         Predicate<T> filter = null;
@@ -333,11 +342,12 @@ abstract class ExpressionFilterParserBase {
 
     /**
      * Create predicate for comparing weekdays (as numbers (monday = 1) or named in strings (in English)).
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForComparisonOfWeekday(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         if (hasCompareTo(ctx)) {
@@ -358,11 +368,11 @@ abstract class ExpressionFilterParserBase {
      * Create predicate for testing against lists of weekdays (as numbers (monday = 1) or named in strings (in
      * English))) or ranges of months (as numbers).
      *
-     * @param filterPredicateFactoryClass
-     * @param filterPredicateFactory
-     * @param ctx
-     * @param <T>
-     * @return
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return predicate predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForRangeOrListOfWeekday(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         Predicate<T> filter = null;
@@ -382,6 +392,16 @@ abstract class ExpressionFilterParserBase {
         return filter;
     }
 
+    /**
+     * Create filter predicate for comparison of message receive time predicate.
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @param calendarField               the calendar field
+     * @return the predicate
+     */
     protected static <T> Predicate<T> createFilterPredicateForComparisonOfMessageReceiveTime(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx, int calendarField) {
         Predicate<T> filter = null;
         String filterPredicateFactoryMethodName = "filterOnMessageReceiveTime";
@@ -399,6 +419,15 @@ abstract class ExpressionFilterParserBase {
         return filter;
     }
 
+    /**
+     * Create filter predicate for range or list of message receive time predicate.
+     *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return the predicate
+     */
     protected static <T> Predicate<T> createFilterPredicateForRangeOrListOfMessageReceiveTime(Class<? extends FilterPredicateFactory> filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         Predicate<T> filter = null;
         String filterPredicateFactoryMethodName = mapFieldTokenToFilterPredicateFactoryMethodName(ctx.getStart().getText());
@@ -424,7 +453,13 @@ abstract class ExpressionFilterParserBase {
     }
 
     /**
+     * Create filter predicate for position within predicate.
      *
+     * @param <T>                         the type parameter
+     * @param filterPredicateFactoryClass the filter predicate factory class
+     * @param filterPredicateFactory      the filter predicate factory
+     * @param ctx                         the ctx
+     * @return the predicate
      */
     protected static <T> Predicate<T> createFilterPredicateForPositionWithin(Class filterPredicateFactoryClass, FilterPredicateFactory filterPredicateFactory, ParserRuleContext ctx) {
         Predicate<T> filter = null;
@@ -1148,6 +1183,12 @@ abstract class ExpressionFilterParserBase {
         return month + 1; // 1 = jan
     }
 
+    /**
+     * Create filter context expression filter parser . filter context.
+     *
+     * @param filter the filter
+     * @return the expression filter parser . filter context
+     */
     static ExpressionFilterParser.FilterContext createFilterContext(String filter) {
         ANTLRInputStream input = new ANTLRInputStream(requireNonNull(filter));
         ExpressionFilterLexer lexer = new ExpressionFilterLexer(input);
@@ -1163,6 +1204,9 @@ abstract class ExpressionFilterParserBase {
         return parser.filter();
     }
 
+    /**
+     * The type Verbose listener.
+     */
     static class VerboseListener extends BaseErrorListener {
         @Override
         public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {

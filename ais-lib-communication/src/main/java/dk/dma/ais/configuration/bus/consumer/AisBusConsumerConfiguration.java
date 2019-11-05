@@ -19,6 +19,9 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import dk.dma.ais.bus.AisBusConsumer;
 import dk.dma.ais.configuration.bus.AisBusSocketConfiguration;
 
+/**
+ * The type Ais bus consumer configuration.
+ */
 @XmlSeeAlso({ StdoutConsumerConfiguration.class, TcpWriterConsumerConfiguration.class, TcpServerConsumerConfiguration.class,
         DistributerConsumerConfiguration.class })
 public abstract class AisBusConsumerConfiguration extends AisBusSocketConfiguration {
@@ -26,26 +29,55 @@ public abstract class AisBusConsumerConfiguration extends AisBusSocketConfigurat
     private int consumerPullMaxElements = 1000;
     private int consumerQueueSize = 10000;
 
+    /**
+     * Instantiates a new Ais bus consumer configuration.
+     */
     public AisBusConsumerConfiguration() {
 
     }
 
+    /**
+     * Gets consumer queue size.
+     *
+     * @return the consumer queue size
+     */
     public int getConsumerQueueSize() {
         return consumerQueueSize;
     }
 
+    /**
+     * Sets consumer queue size.
+     *
+     * @param consumerQueueSize the consumer queue size
+     */
     public void setConsumerQueueSize(int consumerQueueSize) {
         this.consumerQueueSize = consumerQueueSize;
     }
 
+    /**
+     * Gets consumer pull max elements.
+     *
+     * @return the consumer pull max elements
+     */
     public int getConsumerPullMaxElements() {
         return consumerPullMaxElements;
     }
 
+    /**
+     * Sets consumer pull max elements.
+     *
+     * @param consumerPullMaxElements the consumer pull max elements
+     */
     public void setConsumerPullMaxElements(int consumerPullMaxElements) {
         this.consumerPullMaxElements = consumerPullMaxElements;
     }
 
+    /**
+     * Configure ais bus consumer.
+     *
+     * @param consumer the consumer
+     * @return the ais bus consumer
+     */
     protected AisBusConsumer configure(AisBusConsumer consumer) {
         consumer.setConsumerPullMaxElements(consumerPullMaxElements);
         consumer.setConsumerQueueSize(consumerQueueSize);

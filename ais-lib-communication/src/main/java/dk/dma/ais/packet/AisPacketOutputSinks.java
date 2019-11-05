@@ -47,20 +47,27 @@ import static dk.dma.commons.util.io.IoUtil.writeAscii;
  */
 public class AisPacketOutputSinks {
 
-    /** A thread local with a default text format. */
+    /**
+     * A thread local with a default text format.
+     */
     static final ThreadLocal<SimpleDateFormat> DEFAULT_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         }
     };
 
+    /**
+     * The Position formatter.
+     */
     static final ThreadLocal<DecimalFormat> POSITION_FORMATTER = new ThreadLocal<DecimalFormat>() {
         protected DecimalFormat initialValue() {
             return new DecimalFormat("###.#####");
         }
     };
 
-    /** A sink that writes an ais packet to an output stream. Using the default multi-line format. */
+    /**
+     * A sink that writes an ais packet to an output stream. Using the default multi-line format.
+     */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_TEXT = new OutputStreamSink<AisPacket>() {
         @Override
         public void process(OutputStream stream, AisPacket message, long count) throws IOException {
@@ -114,9 +121,11 @@ public class AisPacketOutputSinks {
             stream.write("{\"track\": {".getBytes(StandardCharsets.US_ASCII));
         }
     };
-    
+
     /**
      * A sink that writes ais messages as JSON to an output stream. Each Line is a valid json object.
+     *
+     * @return the output stream sink
      */
     public static OutputStreamSink<AisPacket> jsonMessageSink() {
         return new OutputStreamSink<AisPacket>() {
@@ -189,20 +198,38 @@ public class AisPacketOutputSinks {
             }
         };
     }
-    
+
+    /**
+     * Json object sink output stream sink.
+     *
+     * @param format the format
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> jsonObjectSink(String format) {
         return new AisPacketOutputSinkJsonObject(format);
     }
-        
+
+    /**
+     * Json pos list sink output stream sink.
+     *
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> jsonPosListSink() {
         return new AisPacketOutputSinkJsonObject("mmsi;timestamp;lat;lon;sog;cog",";","dynamic");
     }
-    
+
+    /**
+     * Json static list sink output stream sink.
+     *
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> jsonStaticListSink() {
         return new AisPacketOutputSinkJsonObject("mmsi;name;dimBow;dimPort;dimStarboard;dimStern;shipType;shipCargo;callsign;timestamp;targetType",";","static");
     }
 
-    /** A sink that writes an AIS packet to an output stream. Printing only the actual sentence . */
+    /**
+     * A sink that writes an AIS packet to an output stream. Printing only the actual sentence .
+     */
     public static final OutputStreamSink<AisPacket> OUTPUT_PREFIXED_SENTENCES = new OutputStreamSink<AisPacket>() {
 
         @Override
@@ -219,7 +246,9 @@ public class AisPacketOutputSinks {
         }
     };
 
-    /** A sink that writes an AIS packet to an output stream. Using the default multi-line format. */
+    /**
+     * A sink that writes an AIS packet to an output stream. Using the default multi-line format.
+     */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_HTML = new OutputStreamSink<AisPacket>() {
         @Override
         public void process(OutputStream stream, AisPacket message, long count) throws IOException {
@@ -234,24 +263,24 @@ public class AisPacketOutputSinks {
             }
         }
     };
-    
-    /** A sink that transforms ais stream into kml. */
+
+    /**
+     * A sink that transforms ais stream into kml.  @return the output stream sink
+     *
+     * @return the output stream sink
+     */
     public static final OutputStreamSink<AisPacket> OUTPUT_TO_KML() {
         return new AisPacketKMLOutputSink();
     };
-    
-    
+
 
     /**
      * Filters a list of packets according to their timestamp.
      *
-     * @param packets
-     *            a list of packets
-     * @param start
-     *            inclusive start
-     * @param end
-     *            exclusive end
-     * @return
+     * @param packets a list of packets
+     * @param start   inclusive start
+     * @param end     exclusive end
+     * @return list list
      */
     static List<AisPacket> filterPacketsByTime(Iterable<AisPacket> packets, long start, long end) {
         ArrayList<AisPacket> result = new ArrayList<>();
@@ -263,7 +292,14 @@ public class AisPacketOutputSinks {
         return result;
     }
 
-    // currently unused
+    /**
+     * Read from file list.
+     *
+     * @param p the p
+     * @return the list
+     * @throws IOException the io exception
+     */
+// currently unused
     static List<AisPacket> readFromFile(Path p) throws IOException {
         final ConcurrentLinkedQueue<AisPacket> list = new ConcurrentLinkedQueue<>();
         AisPacket packet;
@@ -275,63 +311,196 @@ public class AisPacketOutputSinks {
         return new ArrayList<>(list);
     }
 
+    /**
+     * New table sink output stream sink.
+     *
+     * @param columns     the columns
+     * @param writeHeader the write header
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newTableSink(String columns, boolean writeHeader) {
         return new AisPacketOutputSinkTable(columns, writeHeader);
     }
 
+    /**
+     * New table sink output stream sink.
+     *
+     * @param columns     the columns
+     * @param writeHeader the write header
+     * @param seperator   the seperator
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newTableSink(String columns, boolean writeHeader, String seperator) {
         return new AisPacketOutputSinkTable(columns, writeHeader, seperator);
     }
 
+    /**
+     * New csv sink output stream sink.
+     *
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newCsvSink() {
         return new AisPacketCSVOutputSink();
     }
 
+    /**
+     * New csv sink output stream sink.
+     *
+     * @param format the format
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newCsvSink(String format) {
         return new AisPacketCSVOutputSink(format);
     }
 
+    /**
+     * New csv stateful sink output stream sink.
+     *
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newCsvStatefulSink() {
         return new AisPacketCSVStatefulOutputSink();
     }
 
+    /**
+     * New csv stateful sink output stream sink.
+     *
+     * @param format the format
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newCsvStatefulSink(String format) {
         return new AisPacketCSVStatefulOutputSink(format);
     }
 
+    /**
+     * New kml sink output stream sink.
+     *
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmlSink() {
         return new AisPacketKMLOutputSink();
     }
 
+    /**
+     * New kml sink output stream sink.
+     *
+     * @param filter the filter
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter) {
         return new AisPacketKMLOutputSink(filter);
     }
 
+    /**
+     * New kml sink output stream sink.
+     *
+     * @param filter                      the filter
+     * @param createSituationFolder       the create situation folder
+     * @param createMovementsFolder       the create movements folder
+     * @param createTracksFolder          the create tracks folder
+     * @param isPrimaryTarget             the is primary target
+     * @param isSecondaryTarget           the is secondary target
+     * @param triggerSnapshot             the trigger snapshot
+     * @param snapshotDescriptionSupplier the snapshot description supplier
+     * @param movementInterpolationStep   the movement interpolation step
+     * @param iconHrefSupplier            the icon href supplier
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         return new AisPacketKMLOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, iconHrefSupplier);
     }
 
+    /**
+     * New kml sink output stream sink.
+     *
+     * @param filter                      the filter
+     * @param createSituationFolder       the create situation folder
+     * @param createMovementsFolder       the create movements folder
+     * @param createTracksFolder          the create tracks folder
+     * @param isPrimaryTarget             the is primary target
+     * @param isSecondaryTarget           the is secondary target
+     * @param triggerSnapshot             the trigger snapshot
+     * @param snapshotDescriptionSupplier the snapshot description supplier
+     * @param movementInterpolationStep   the movement interpolation step
+     * @param supplyTitle                 the supply title
+     * @param supplyDescription           the supply description
+     * @param iconHrefSupplier            the icon href supplier
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmlSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         return new AisPacketKMLOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
     }
 
+    /**
+     * New kmz sink output stream sink.
+     *
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmzSink() {
         return new AisPacketKMZOutputSink();
     }
 
+    /**
+     * New kmz sink output stream sink.
+     *
+     * @param filter the filter
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmzSink(Predicate<? super AisPacket> filter) {
         return new AisPacketKMZOutputSink(filter);
     }
 
+    /**
+     * New kmz sink output stream sink.
+     *
+     * @param filter                      the filter
+     * @param createSituationFolder       the create situation folder
+     * @param createMovementsFolder       the create movements folder
+     * @param createTracksFolder          the create tracks folder
+     * @param isPrimaryTarget             the is primary target
+     * @param isSecondaryTarget           the is secondary target
+     * @param triggerSnapshot             the trigger snapshot
+     * @param snapshotDescriptionSupplier the snapshot description supplier
+     * @param movementInterpolationStep   the movement interpolation step
+     * @param iconHrefSupplier            the icon href supplier
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmzSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         return new AisPacketKMZOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, iconHrefSupplier);
     }
 
+    /**
+     * New kmz sink output stream sink.
+     *
+     * @param filter                      the filter
+     * @param createSituationFolder       the create situation folder
+     * @param createMovementsFolder       the create movements folder
+     * @param createTracksFolder          the create tracks folder
+     * @param isPrimaryTarget             the is primary target
+     * @param isSecondaryTarget           the is secondary target
+     * @param triggerSnapshot             the trigger snapshot
+     * @param snapshotDescriptionSupplier the snapshot description supplier
+     * @param movementInterpolationStep   the movement interpolation step
+     * @param supplyTitle                 the supply title
+     * @param supplyDescription           the supply description
+     * @param iconHrefSupplier            the icon href supplier
+     * @return the output stream sink
+     */
     public static OutputStreamSink<AisPacket> newKmzSink(Predicate<? super AisPacket> filter, boolean createSituationFolder, boolean createMovementsFolder, boolean createTracksFolder, Predicate<? super AisPacket> isPrimaryTarget, Predicate<? super AisPacket> isSecondaryTarget, Predicate<? super AisPacket> triggerSnapshot, Supplier<? extends String> snapshotDescriptionSupplier, Supplier<? extends Integer> movementInterpolationStep, Supplier<? extends String> supplyTitle, Supplier<? extends String> supplyDescription, BiFunction<? super ShipTypeCargo, ? super NavigationalStatus, ? extends String> iconHrefSupplier) {
         return new AisPacketKMZOutputSink(filter, createSituationFolder, createMovementsFolder, createTracksFolder, isPrimaryTarget, isSecondaryTarget, triggerSnapshot, snapshotDescriptionSupplier, movementInterpolationStep, supplyTitle, supplyDescription, iconHrefSupplier);
     }
-    
 
+
+    /**
+     * Gets output sink.
+     *
+     * @param params the params
+     * @return the output sink
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws IllegalAccessException   the illegal access exception
+     * @throws NoSuchFieldException     the no such field exception
+     * @throws SecurityException        the security exception
+     */
     @SuppressWarnings("unchecked")
     public static OutputStreamSink<AisPacket> getOutputSink(String...params) throws IllegalArgumentException, IllegalAccessException,
             NoSuchFieldException, SecurityException {

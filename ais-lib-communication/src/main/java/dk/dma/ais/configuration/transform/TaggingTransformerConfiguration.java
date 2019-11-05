@@ -23,6 +23,9 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 
+/**
+ * The type Tagging transformer configuration.
+ */
 @XmlRootElement
 public class TaggingTransformerConfiguration extends TransformerConfiguration {
 
@@ -30,32 +33,65 @@ public class TaggingTransformerConfiguration extends TransformerConfiguration {
     private PacketTaggingConfiguration tagging = new PacketTaggingConfiguration();
     private HashMap<String, String> extraTags = new HashMap<>();
 
+    /**
+     * Instantiates a new Tagging transformer configuration.
+     */
     public TaggingTransformerConfiguration() {
 
     }
 
+    /**
+     * Gets tag policy.
+     *
+     * @return the tag policy
+     */
     @XmlElement(required = true)
     public Policy getTagPolicy() {
         return tagPolicy;
     }
 
+    /**
+     * Sets tag policy.
+     *
+     * @param tagPolicy the tag policy
+     */
     public void setTagPolicy(Policy tagPolicy) {
         this.tagPolicy = tagPolicy;
     }
-    
+
+    /**
+     * Gets tagging.
+     *
+     * @return the tagging
+     */
     public PacketTaggingConfiguration getTagging() {
         return tagging;
     }
-    
+
+    /**
+     * Sets tagging.
+     *
+     * @param tagging the tagging
+     */
     public void setTagging(PacketTaggingConfiguration tagging) {
         this.tagging = tagging;
     }
 
+    /**
+     * Gets extra tags.
+     *
+     * @return the extra tags
+     */
     @XmlElement(name = "extraTag")
     public HashMap<String, String> getExtraTags() {
         return extraTags;
     }
 
+    /**
+     * Sets extra tags.
+     *
+     * @param extraTags the extra tags
+     */
     public void setExtraTags(HashMap<String, String> extraTags) {
         this.extraTags = extraTags;
     }

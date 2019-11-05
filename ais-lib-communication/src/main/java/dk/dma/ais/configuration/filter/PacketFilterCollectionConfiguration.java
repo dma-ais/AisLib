@@ -24,6 +24,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.PacketFilterCollection;
 
+/**
+ * The type Packet filter collection configuration.
+ */
 @XmlRootElement
 public class PacketFilterCollectionConfiguration extends FilterConfiguration {
     //TODO fix this into an enumeration type or something usable in PacketFilterCollection aswell
@@ -33,22 +36,47 @@ public class PacketFilterCollectionConfiguration extends FilterConfiguration {
     @XmlElement(name = "filterCollection")
     private List<FilterConfiguration> collection = new ArrayList<>();
 
+    /**
+     * Gets filter type.
+     *
+     * @return the filter type
+     */
     public int getFilterType() {
         return filterType;
     }
 
+    /**
+     * Sets filter type.
+     *
+     * @param filterType the filter type
+     */
     public void setFilterType(int filterType) {
         this.filterType = filterType;
     }
 
+    /**
+     * Gets collection.
+     *
+     * @return the collection
+     */
     public List<FilterConfiguration> getCollection() {
         return collection;
     }
 
+    /**
+     * Set.
+     *
+     * @param filters the filters
+     */
     public void set(List<FilterConfiguration> filters) {
         this.collection = filters;
     }
 
+    /**
+     * Add filter configuration.
+     *
+     * @param c the c
+     */
     public void addFilterConfiguration(FilterConfiguration c) {
         this.collection.add(c);
     }

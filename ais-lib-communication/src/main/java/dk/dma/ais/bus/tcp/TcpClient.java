@@ -27,12 +27,28 @@ import dk.dma.ais.bus.status.AisBusComponentStatus;
 @ThreadSafe
 public abstract class TcpClient extends Thread {
 
+    /**
+     * The Conf.
+     */
     protected final TcpClientConf conf;
+    /**
+     * The Socket.
+     */
     protected final Socket socket;
     private final IClientStoppedListener stopListener;
-    
+
+    /**
+     * The Status.
+     */
     protected final AisBusComponentStatus status = new AisBusComponentStatus();
 
+    /**
+     * Instantiates a new Tcp client.
+     *
+     * @param stopListener the stop listener
+     * @param socket       the socket
+     * @param conf         the conf
+     */
     public TcpClient(IClientStoppedListener stopListener, Socket socket, TcpClientConf conf) {
         status.setInitialized();
         this.stopListener = stopListener;
@@ -42,12 +58,18 @@ public abstract class TcpClient extends Thread {
 
     /**
      * Get status for "component"
-     * @return
+     *
+     * @return status status
      */
     public AisBusComponentStatus getStatus() {
         return status;
     }
-    
+
+    /**
+     * Gets remote host.
+     *
+     * @return the remote host
+     */
     public String getRemoteHost() {
         InetSocketAddress address = (InetSocketAddress)socket.getRemoteSocketAddress();
         if (address == null) {
@@ -77,6 +99,11 @@ public abstract class TcpClient extends Thread {
         }
     }
 
+    /**
+     * Rate report string.
+     *
+     * @return the string
+     */
     public String rateReport() {
         return String.format("[count/overflow] %4.2f / %4.2f  (packets/sec)", status.getInRate(), status.getOverflowRate());
     }

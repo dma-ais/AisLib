@@ -26,11 +26,22 @@ import dk.dma.enav.model.geometry.Position;
 public class PositionChangedEvent extends TrackEvent {
     private final Position oldPosition;
 
+    /**
+     * Instantiates a new Position changed event.
+     *
+     * @param track       the track
+     * @param oldPosition the old position
+     */
     public PositionChangedEvent(Track track, Position oldPosition) {
         super(track);
         this.oldPosition = oldPosition;
     }
 
+    /**
+     * Gets old position.
+     *
+     * @return the old position
+     */
     public final Position getOldPosition() {
         return oldPosition;
     }

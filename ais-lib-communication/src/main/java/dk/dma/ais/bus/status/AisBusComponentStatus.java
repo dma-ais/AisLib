@@ -18,14 +18,40 @@ import net.jcip.annotations.ThreadSafe;
 
 /**
  * Status of a bus component
- * 
+ * <p>
  * TODO: Flow history
  */
 @ThreadSafe
 public class AisBusComponentStatus {
 
+    /**
+     * The enum State.
+     */
     public enum State {
-        CREATED, INITIALIZED, STARTED, CONNECTED, NOT_CONNECTED, STOPPED;
+        /**
+         * Created state.
+         */
+        CREATED,
+        /**
+         * Initialized state.
+         */
+        INITIALIZED,
+        /**
+         * Started state.
+         */
+        STARTED,
+        /**
+         * Connected state.
+         */
+        CONNECTED,
+        /**
+         * Not connected state.
+         */
+        NOT_CONNECTED,
+        /**
+         * Stopped state.
+         */
+        STOPPED;
     }
 
     /**
@@ -71,11 +97,19 @@ public class AisBusComponentStatus {
      */
     private final FlowStat filteredCountStat;
 
+    /**
+     * Instantiates a new Ais bus component status.
+     */
     public AisBusComponentStatus() {
         // Default one minute interval
         this(60000);
     }
 
+    /**
+     * Instantiates a new Ais bus component status.
+     *
+     * @param flowStatInterval the flow stat interval
+     */
     public AisBusComponentStatus(long flowStatInterval) {
         this.state = State.CREATED;
         this.startTime = System.currentTimeMillis();
@@ -109,10 +143,18 @@ public class AisBusComponentStatus {
         overflowCount++;
     }
 
+    /**
+     * Gets state.
+     *
+     * @return the state
+     */
     public synchronized State getState() {
         return state;
     }
 
+    /**
+     * Sets initialized.
+     */
     public synchronized void setInitialized() {
         if (state != State.CREATED) {
             throw new IllegalStateException("Component must be in state CREATED to be initialized");
@@ -120,61 +162,123 @@ public class AisBusComponentStatus {
         state = State.INITIALIZED;
     }
 
+    /**
+     * Sets started.
+     */
     public synchronized void setStarted() {
         if (state == State.CREATED ) {
             throw new IllegalStateException("Component must be initialized to be started");
         }
         state = State.STARTED;
     }
-    
+
+    /**
+     * Is started boolean.
+     *
+     * @return the boolean
+     */
     public synchronized boolean isStarted() {
         return state == State.STARTED || state == State.CONNECTED || state == State.NOT_CONNECTED;
     }
-    
+
+    /**
+     * Sets connected.
+     */
     public synchronized void setConnected() {
         state = State.CONNECTED;
     }
-    
+
+    /**
+     * Is connected boolean.
+     *
+     * @return the boolean
+     */
     public synchronized boolean isConnected() {
         return state == State.CONNECTED;
     }
-    
+
+    /**
+     * Sets not connected.
+     */
     public synchronized void setNotConnected() {
         state = State.NOT_CONNECTED;
     }
-    
+
+    /**
+     * Sets stopped.
+     */
     public synchronized void setStopped() {
         state = State.STOPPED;
     }
 
+    /**
+     * Gets start time.
+     *
+     * @return the start time
+     */
     public long getStartTime() {
         return startTime;
     }
 
+    /**
+     * Gets flow stat interval.
+     *
+     * @return the flow stat interval
+     */
     public long getFlowStatInterval() {
         return flowStatInterval;
     }
 
+    /**
+     * Gets in count.
+     *
+     * @return the in count
+     */
     public synchronized long getInCount() {
         return inCount;
     }
-    
+
+    /**
+     * Gets in rate.
+     *
+     * @return the in rate
+     */
     public synchronized double getInRate() {
         return inCountStat.getRate();
     }
 
+    /**
+     * Gets filtered count.
+     *
+     * @return the filtered count
+     */
     public synchronized long getFilteredCount() {
         return filteredCount;
     }
-    
+
+    /**
+     * Gets filtered rate.
+     *
+     * @return the filtered rate
+     */
     public synchronized double getFilteredRate() {
         return filteredCountStat.getRate();
     }
 
+    /**
+     * Gets overflow count.
+     *
+     * @return the overflow count
+     */
     public synchronized long getOverflowCount() {
         return overflowCount;
     }
-    
+
+    /**
+     * Gets overflow rate.
+     *
+     * @return the overflow rate
+     */
     public synchronized double getOverflowRate() {
         return overflowCountStat.getRate();
     }

@@ -21,18 +21,28 @@ package dk.dma.ais.message;
  */
 public enum AisTargetType {
 
-    /** A Class A target type. */
+    /**
+     * A Class A target type.
+     */
     A,
 
-    /** A Class B target type. */
+    /**
+     * A Class B target type.
+     */
     B,
 
-    /** A Basestation. */
+    /**
+     * A Basestation.
+     */
     BS,
 
-    /** Aid To Navigation target. */
+    /**
+     * Aid To Navigation target.
+     */
     ATON,
 
-    /** A search and rescue target. */
+    /**
+     * A search and rescue target.
+     */
     SART;
 }

@@ -14,12 +14,33 @@
  */
 package dk.dma.ais.packet;
 
+/**
+ * The enum Compare to operator.
+ */
 public enum CompareToOperator {
+    /**
+     * Equals compare to operator.
+     */
     EQUALS("="),
+    /**
+     * Not equals compare to operator.
+     */
     NOT_EQUALS("!="),
+    /**
+     * Less than compare to operator.
+     */
     LESS_THAN("<"),
+    /**
+     * Less than or equals compare to operator.
+     */
     LESS_THAN_OR_EQUALS("<="),
+    /**
+     * Greater than compare to operator.
+     */
     GREATER_THAN(">"),
+    /**
+     * Greater than or equals compare to operator.
+     */
     GREATER_THAN_OR_EQUALS(">=");
 
     private final String operator;
@@ -28,6 +49,12 @@ public enum CompareToOperator {
         this.operator = operator;
     }
 
+    /**
+     * From string compare to operator.
+     *
+     * @param operator the operator
+     * @return the compare to operator
+     */
     static CompareToOperator fromString(String operator) {
         if ("=".equals(operator)) {
             return EQUALS;

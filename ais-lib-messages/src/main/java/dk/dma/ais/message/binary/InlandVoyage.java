@@ -19,10 +19,9 @@ import dk.dma.ais.binary.SixbitEncoder;
 import dk.dma.ais.binary.SixbitException;
 
 /**
- *
  * Subtype (DAC=200, FI=10) of AIS type 8 binary application message.
  * With title: Inland ship static and voyage related data
- * 
+ *
  * @author oteken
  */
 public class InlandVoyage extends AisApplicationMessage{
@@ -62,6 +61,12 @@ public class InlandVoyage extends AisApplicationMessage{
     
     private int spare; // 8 bit
 
+    /**
+     * Instantiates a new Inland voyage.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public InlandVoyage(BinArray binArray) throws SixbitException {
         super(200, 10, binArray);
     }
@@ -124,90 +129,200 @@ public class InlandVoyage extends AisApplicationMessage{
         return builder.toString();
     }
 
+    /**
+     * Gets length of ship.
+     *
+     * @return the length of ship
+     */
     public int getLengthOfShip() {
         return lengthOfShip;
     }
 
+    /**
+     * Sets length of ship.
+     *
+     * @param lengthOfShip the length of ship
+     */
     public void setLengthOfShip(int lengthOfShip) {
         this.lengthOfShip = lengthOfShip;
     }
 
+    /**
+     * Gets beam of ship.
+     *
+     * @return the beam of ship
+     */
     public int getBeamOfShip() {
         return beamOfShip;
     }
 
+    /**
+     * Sets beam of ship.
+     *
+     * @param beamOfShip the beam of ship
+     */
     public void setBeamOfShip(int beamOfShip) {
         this.beamOfShip = beamOfShip;
     }
 
+    /**
+     * Gets combination type.
+     *
+     * @return the combination type
+     */
     public int getCombinationType() {
         return combinationType;
     }
 
+    /**
+     * Sets combination type.
+     *
+     * @param combinationType the combination type
+     */
     public void setCombinationType(int combinationType) {
         this.combinationType = combinationType;
     }
 
+    /**
+     * Gets hazardous cargo.
+     *
+     * @return the hazardous cargo
+     */
     public int getHazardousCargo() {
         return hazardousCargo;
     }
 
+    /**
+     * Sets hazardous cargo.
+     *
+     * @param hazardousCargo the hazardous cargo
+     */
     public void setHazardousCargo(int hazardousCargo) {
         this.hazardousCargo = hazardousCargo;
     }
 
+    /**
+     * Gets draught.
+     *
+     * @return the draught
+     */
     public int getDraught() {
         return draught;
     }
 
+    /**
+     * Sets draught.
+     *
+     * @param draught the draught
+     */
     public void setDraught(int draught) {
         this.draught = draught;
     }
 
+    /**
+     * Gets loaded or unloaded.
+     *
+     * @return the loaded or unloaded
+     */
     public int getLoadedOrUnloaded() {
         return loadedOrUnloaded;
     }
 
+    /**
+     * Sets loaded or unloaded.
+     *
+     * @param loadedOrUnloaded the loaded or unloaded
+     */
     public void setLoadedOrUnloaded(int loadedOrUnloaded) {
         this.loadedOrUnloaded = loadedOrUnloaded;
     }
 
+    /**
+     * Gets quality of speed data.
+     *
+     * @return the quality of speed data
+     */
     public int getQualityOfSpeedData() {
         return qualityOfSpeedData;
     }
 
+    /**
+     * Sets quality of speed data.
+     *
+     * @param qualityOfSpeedData the quality of speed data
+     */
     public void setQualityOfSpeedData(int qualityOfSpeedData) {
         this.qualityOfSpeedData = qualityOfSpeedData;
     }
 
+    /**
+     * Gets quality of course data.
+     *
+     * @return the quality of course data
+     */
     public int getQualityOfCourseData() {
         return qualityOfCourseData;
     }
 
+    /**
+     * Sets quality of course data.
+     *
+     * @param qualityOfCourseData the quality of course data
+     */
     public void setQualityOfCourseData(int qualityOfCourseData) {
         this.qualityOfCourseData = qualityOfCourseData;
     }
 
+    /**
+     * Gets quality of heading data.
+     *
+     * @return the quality of heading data
+     */
     public int getQualityOfHeadingData() {
         return qualityOfHeadingData;
     }
 
+    /**
+     * Sets quality of heading data.
+     *
+     * @param qualityOfHeadingData the quality of heading data
+     */
     public void setQualityOfHeadingData(int qualityOfHeadingData) {
         this.qualityOfHeadingData = qualityOfHeadingData;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }
 
+    /**
+     * Gets vessel id.
+     *
+     * @return the vessel id
+     */
     public String getVesselId() {
         return vesselId;
     }
 
+    /**
+     * Sets vessel id.
+     *
+     * @param vesselId the vessel id
+     */
     public void setVesselId(String vesselId) {
         this.vesselId = vesselId;
     }

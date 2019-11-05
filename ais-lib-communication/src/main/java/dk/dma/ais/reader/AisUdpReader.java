@@ -32,7 +32,6 @@ import java.util.function.Consumer;
 
 /**
  * Thread class for reading AIS messages from UDP
- * 
  */
 public class AisUdpReader extends AisReader {
 
@@ -42,10 +41,21 @@ public class AisUdpReader extends AisReader {
     private volatile DatagramSocket socket;
     private volatile Thread reader;
 
+    /**
+     * Instantiates a new Ais udp reader.
+     *
+     * @param port the port
+     */
     AisUdpReader(int port) {
         this(null, port);
     }
 
+    /**
+     * Instantiates a new Ais udp reader.
+     *
+     * @param address the address
+     * @param port    the port
+     */
     AisUdpReader(String address, int port) {
         addr = (address == null) ? new InetSocketAddress(port) : new InetSocketAddress(address, port);
     }
@@ -112,14 +122,28 @@ public class AisUdpReader extends AisReader {
 
         private final ArrayBlockingQueue<byte[]> queue;
 
+        /**
+         * Instantiates a new Udp sentence input stream.
+         */
         public UdpSentenceInputStream() {
             this(1024);
         }
 
+        /**
+         * Instantiates a new Udp sentence input stream.
+         *
+         * @param maxLines the max lines
+         */
         public UdpSentenceInputStream(int maxLines) {
             queue = new ArrayBlockingQueue<>(maxLines);
         }
-        
+
+        /**
+         * Push.
+         *
+         * @param packet the packet
+         * @throws InterruptedException the interrupted exception
+         */
         public void push(byte[] packet) throws InterruptedException {
             queue.put(packet);
         }

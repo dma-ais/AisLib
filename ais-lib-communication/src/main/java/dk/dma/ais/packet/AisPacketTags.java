@@ -32,9 +32,21 @@ public class AisPacketTags implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The constant SOURCE_ID_KEY.
+     */
     public static final String SOURCE_ID_KEY = "si";
+    /**
+     * The constant SOURCE_BS_KEY.
+     */
     public static final String SOURCE_BS_KEY = "sb";
+    /**
+     * The constant SOURCE_COUNTRY_KEY.
+     */
     public static final String SOURCE_COUNTRY_KEY = "sc";
+    /**
+     * The constant SOURCE_TYPE_KEY.
+     */
     public static final String SOURCE_TYPE_KEY = "st";
 
     /**
@@ -58,14 +70,17 @@ public class AisPacketTags implements Serializable {
      */
     private SourceType sourceType;
 
+    /**
+     * Instantiates a new Ais packet tags.
+     */
     public AisPacketTags() {
 
     }
 
     /**
      * Copy constructor
-     * 
-     * @param t
+     *
+     * @param t the t
      */
     public AisPacketTags(AisPacketTags t) {
         if (t.timestamp != null) {
@@ -78,57 +93,107 @@ public class AisPacketTags implements Serializable {
 
     /**
      * Determine if any tag is non null
-     * 
-     * @return
+     *
+     * @return boolean boolean
      */
     public boolean isEmpty() {
         return timestamp == null && sourceId == null && sourceBs == null && sourceCountry == null && sourceType == null;
     }
 
+    /**
+     * Gets timestamp.
+     *
+     * @return the timestamp
+     */
     public Date getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Sets timestamp.
+     *
+     * @param timestamp the timestamp
+     */
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Gets source id.
+     *
+     * @return the source id
+     */
     public String getSourceId() {
         return sourceId;
     }
 
+    /**
+     * Sets source id.
+     *
+     * @param sourceId the source id
+     */
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
 
+    /**
+     * Gets source bs.
+     *
+     * @return the source bs
+     */
     public Integer getSourceBs() {
         return sourceBs;
     }
 
+    /**
+     * Sets source bs.
+     *
+     * @param sourceBs the source bs
+     */
     public void setSourceBs(Integer sourceBs) {
         this.sourceBs = sourceBs;
     }
 
+    /**
+     * Gets source country.
+     *
+     * @return the source country
+     */
     public Country getSourceCountry() {
         return sourceCountry;
     }
 
+    /**
+     * Sets source country.
+     *
+     * @param sourceCountry the source country
+     */
     public void setSourceCountry(Country sourceCountry) {
         this.sourceCountry = sourceCountry;
     }
 
+    /**
+     * Sets source type.
+     *
+     * @param sourceType the source type
+     */
     public void setSourceType(SourceType sourceType) {
         this.sourceType = sourceType;
     }
 
+    /**
+     * Gets source type.
+     *
+     * @return the source type
+     */
     public SourceType getSourceType() {
         return sourceType;
     }
 
     /**
      * Make comment block with tags
-     * 
-     * @return
+     *
+     * @return comment block
      */
     public CommentBlock getCommentBlock() {
         return getCommentBlock(new CommentBlock());
@@ -136,9 +201,9 @@ public class AisPacketTags implements Serializable {
 
     /**
      * Supplement given comment block with tags (overriding)
-     * 
-     * @param cb
-     * @return
+     *
+     * @param cb the cb
+     * @return comment block
      */
     public CommentBlock getCommentBlock(CommentBlock cb) {
         if (timestamp != null) {
@@ -161,9 +226,9 @@ public class AisPacketTags implements Serializable {
 
     /**
      * Supplement given comment block with tags (not overriding)
-     * 
-     * @param cb
-     * @return
+     *
+     * @param cb the cb
+     * @return comment block preserve
      */
     public CommentBlock getCommentBlockPreserve(CommentBlock cb) {
         if (timestamp != null && !cb.contains("c")) {
@@ -186,9 +251,9 @@ public class AisPacketTags implements Serializable {
 
     /**
      * Get new tagging with tags in proposed tagging not already in the current tag
-     * 
-     * @param tagging
-     * @return
+     *
+     * @param proposed the proposed
+     * @return ais packet tags
      */
     public AisPacketTags mergeMissing(AisPacketTags proposed) {
         AisPacketTags addedTagging = new AisPacketTags();
@@ -209,9 +274,9 @@ public class AisPacketTags implements Serializable {
 
     /**
      * Determine if given tagging match this tagging
-     * 
-     * @param parse
-     * @return
+     *
+     * @param tagging the tagging
+     * @return boolean boolean
      */
     public boolean filterMatch(AisPacketTags tagging) {
         if (sourceId != null && (tagging.getSourceId() == null || !tagging.getSourceId().equals(sourceId))) {
@@ -235,8 +300,8 @@ public class AisPacketTags implements Serializable {
 
     /**
      * Parse tags from Vdm. Uses comment block with first priority and fall back to proprietary tags.
-     * 
-     * @param packet
+     *
+     * @param vdm the vdm
      * @return tagging instance
      */
     static AisPacketTags parse(Vdm vdm) {
@@ -293,8 +358,25 @@ public class AisPacketTags implements Serializable {
     }
 
 
+    /**
+     * The enum Source type.
+     */
     public enum SourceType {
-        TERRESTRIAL, SATELLITE;
+        /**
+         * Terrestrial source type.
+         */
+        TERRESTRIAL,
+        /**
+         * Satellite source type.
+         */
+        SATELLITE;
+
+        /**
+         * From string source type.
+         *
+         * @param st the st
+         * @return the source type
+         */
         public static SourceType fromString(String st) {
             if (st == null) {
                 return null;
@@ -307,6 +389,11 @@ public class AisPacketTags implements Serializable {
             throw new IllegalArgumentException("Unknow source type: " + st);
         }
 
+        /**
+         * Encode string.
+         *
+         * @return the string
+         */
         public String encode() {
             return this == TERRESTRIAL ? "LIVE" : "SAT";
         }

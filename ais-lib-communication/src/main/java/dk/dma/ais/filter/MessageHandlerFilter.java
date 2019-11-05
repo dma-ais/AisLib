@@ -23,12 +23,11 @@ import java.util.function.Consumer;
 
 /**
  * Message handler filter
- * 
+ * <p>
  * A filter receives AIS messages, do some manipulation, and delivers messages to a list of receivers. Hence filters can be put
  * between an AIS source and handlers.
- * 
+ * <p>
  * Thread safe by delegation
- * 
  */
 @ThreadSafe
 public class MessageHandlerFilter implements Consumer<AisMessage> {
@@ -45,8 +44,8 @@ public class MessageHandlerFilter implements Consumer<AisMessage> {
 
     /**
      * Constructor given message filter
-     * 
-     * @param messageFilter
+     *
+     * @param messageFilter the message filter
      */
     public MessageHandlerFilter(IMessageFilter messageFilter) {
         this.messageFilter = messageFilter;
@@ -54,8 +53,8 @@ public class MessageHandlerFilter implements Consumer<AisMessage> {
 
     /**
      * Register a receiver of filtered messages
-     * 
-     * @param receiver
+     *
+     * @param receiver the receiver
      */
     public void registerReceiver(Consumer<? super AisMessage> receiver) {
         receivers.add(receiver);
@@ -63,8 +62,8 @@ public class MessageHandlerFilter implements Consumer<AisMessage> {
 
     /**
      * Remove receiver
-     * 
-     * @param receiver
+     *
+     * @param receiver the receiver
      */
     public void removeReceiver(Consumer<? super AisMessage> receiver) {
         receivers.remove(receiver);
@@ -72,8 +71,8 @@ public class MessageHandlerFilter implements Consumer<AisMessage> {
 
     /**
      * Send message to receivers
-     * 
-     * @param aisMessage
+     *
+     * @param aisMessage the ais message
      */
     protected void sendMessage(AisMessage aisMessage) {
         for (Consumer<? super AisMessage> receiver : receivers) {

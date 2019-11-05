@@ -25,14 +25,25 @@ import org.antlr.v4.runtime.misc.NotNull;
 import java.util.Calendar;
 
 /**
+ * The type Ais packet filters expression filter parser.
+ *
  * @author Kasper Nielsen
  */
 class AisPacketFiltersExpressionFilterParser extends ExpressionFilterParserBase {
 
+    /**
+     * Parse expression filter predicate.
+     *
+     * @param filter the filter
+     * @return the predicate
+     */
     static Predicate<AisPacket> parseExpressionFilter(String filter) {
         return createFilterContext(filter).filterExpression().accept(new ExpressionFilterToPredicateVisitor());
     }
 
+    /**
+     * The type Expression filter to predicate visitor.
+     */
     static class ExpressionFilterToPredicateVisitor extends ExpressionFilterBaseVisitor<Predicate<AisPacket>> {
 
         @Override

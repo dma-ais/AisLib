@@ -23,30 +23,56 @@ import javax.xml.bind.annotation.XmlRootElement;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.SourceTypeSatTransformer;
 
+/**
+ * The type Source type sat transformer configuration.
+ */
 @XmlRootElement
 public class SourceTypeSatTransformerConfiguration extends TransformerConfiguration {
 
     private List<String> satGhRegions = new ArrayList<>();
     private List<String> satSources = new ArrayList<>();
 
+    /**
+     * Instantiates a new Source type sat transformer configuration.
+     */
     public SourceTypeSatTransformerConfiguration() {
 
     }
 
+    /**
+     * Gets sat gh regions.
+     *
+     * @return the sat gh regions
+     */
     @XmlElement(name = "gh_region")
     public List<String> getSatGhRegions() {
         return satGhRegions;
     }
 
+    /**
+     * Sets sat gh regions.
+     *
+     * @param satGhRegions the sat gh regions
+     */
     public void setSatGhRegions(List<String> satGhRegions) {
         this.satGhRegions = satGhRegions;
     }
 
+    /**
+     * Gets sat sources.
+     *
+     * @return the sat sources
+     */
     @XmlElement(name = "source")
     public List<String> getSatSources() {
         return satSources;
     }
 
+    /**
+     * Sets sat sources.
+     *
+     * @param satSources the sat sources
+     */
     public void setSatSources(List<String> satSources) {
         this.satSources = satSources;
     }

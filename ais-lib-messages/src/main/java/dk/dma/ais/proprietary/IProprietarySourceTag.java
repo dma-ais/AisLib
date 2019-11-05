@@ -25,29 +25,29 @@ public interface IProprietarySourceTag extends IProprietaryTag {
 
     /**
      * Time of message receival at source
-     * 
-     * @return
+     *
+     * @return timestamp
      */
     Date getTimestamp();
 
     /**
      * Country origin of message
-     * 
-     * @return
+     *
+     * @return country
      */
     Country getCountry();
 
     /**
      * Unique region identifier
-     * 
-     * @return
+     *
+     * @return region
      */
     String getRegion();
 
     /**
      * Base station MMSI
-     * 
-     * @return
+     *
+     * @return base mmsi
      */
     Integer getBaseMmsi();
 

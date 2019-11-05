@@ -10,7 +10,7 @@
 
 	<groupId>dk.dma.ais.lib</groupId>
 	<artifactId>ais-parent</artifactId>
-	<version>2.4-SNAPSHOT</version>
+	<version>2.4</version>
 	<name>AIS Parent</name>
 	<packaging>pom</packaging>
 	<description>This parent pom for AIS</description>

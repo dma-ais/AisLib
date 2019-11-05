@@ -51,14 +51,28 @@ public class AisPacketCSVStatefulOutputSink extends AisPacketCSVOutputSink {
 
     private TargetTracker tracker = new TargetTracker();
 
+    /**
+     * Instantiates a new Ais packet csv stateful output sink.
+     */
     public AisPacketCSVStatefulOutputSink() {
         this("timestamp_pretty;timestamp;targetType;mmsi;msgid;posacc;lat;lon;sog;cog;draught;name;dimBow;dimPort;dimStarboard;dimStern;shipTypeCargoTypeCode;shipType;shipCargo;destination;eta;imo;callsign", ";");
     }
 
+    /**
+     * Instantiates a new Ais packet csv stateful output sink.
+     *
+     * @param format the format
+     */
     public AisPacketCSVStatefulOutputSink(String format) {
         this(format, ";");
     }
 
+    /**
+     * Instantiates a new Ais packet csv stateful output sink.
+     *
+     * @param format    the format
+     * @param separator the separator
+     */
     public AisPacketCSVStatefulOutputSink(String format, String separator) {
         super(format, separator);
         setNullValueForPositionAccuracy(cachedPositionAccuracy);

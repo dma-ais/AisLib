@@ -33,7 +33,10 @@ public class MessageTypeFilter implements IPacketFilter {
      */
     private final Set<Integer> messageTypes = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
     private volatile boolean disallowed;
-    
+
+    /**
+     * Instantiates a new Message type filter.
+     */
     public MessageTypeFilter() {
         
     }
@@ -49,11 +52,21 @@ public class MessageTypeFilter implements IPacketFilter {
         }
         return !disallowed;
     }
-    
+
+    /**
+     * Gets message types.
+     *
+     * @return the message types
+     */
     public Set<Integer> getMessageTypes() {
         return messageTypes;
     }
-    
+
+    /**
+     * Sets disallowed.
+     *
+     * @param disallowed the disallowed
+     */
     public void setDisallowed(boolean disallowed) {
         this.disallowed = disallowed;
     }

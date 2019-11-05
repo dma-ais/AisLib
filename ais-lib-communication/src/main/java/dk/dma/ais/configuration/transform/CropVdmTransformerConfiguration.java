@@ -20,9 +20,15 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.transform.CropVdmTransformer;
 import dk.dma.ais.transform.IAisPacketTransformer;
 
+/**
+ * The type Crop vdm transformer configuration.
+ */
 @XmlRootElement
 public class CropVdmTransformerConfiguration extends TransformerConfiguration {
 
+    /**
+     * Instantiates a new Crop vdm transformer configuration.
+     */
     public CropVdmTransformerConfiguration() {
 
     }

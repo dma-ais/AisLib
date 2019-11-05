@@ -27,12 +27,21 @@ public class Abm extends SendSentence {
 
     private int destination;
 
+    /**
+     * Instantiates a new Abm.
+     */
     public Abm() {
         super();
         formatter = "ABM";
         channel = '0';
     }
 
+    /**
+     * Is abm boolean.
+     *
+     * @param line the line
+     * @return the boolean
+     */
     public static boolean isAbm(String line) {
         return line.indexOf("!AIABM") >= 0 || line.indexOf("!BSABM") >= 0;
     }
@@ -47,13 +56,14 @@ public class Abm extends SendSentence {
         encodedFields.add(4, Integer.toString(destination));
         return finalEncode();
     }
-    
+
     /**
      * Helper method parsing line to SentenceLine and passing to parse
-     * @param line
-     * @return
-     * @throws SentenceException
-     * @throws SixbitException 
+     *
+     * @param line the line
+     * @return int
+     * @throws SentenceException the sentence exception
+     * @throws SixbitException   the sixbit exception
      */
     public int parse(String line) throws SentenceException, SixbitException {
         return parse(new SentenceLine(line));
@@ -62,8 +72,8 @@ public class Abm extends SendSentence {
     /**
      * Implemented parse method. See {@link EncapsulatedSentence}
      * 
-     * @throws SentenceException
-     * @throws SixbitException
+     * @throws SentenceException a Sentence Exception
+     * @throws SixbitException a Sixbit Exception
      */
     @Override
     public int parse(SentenceLine sl) throws SentenceException, SixbitException {
@@ -106,14 +116,34 @@ public class Abm extends SendSentence {
         return 1;
     }
 
+    /**
+     * Gets destination.
+     *
+     * @return the destination
+     */
     public int getDestination() {
         return destination;
     }
 
+    /**
+     * Sets destination.
+     *
+     * @param destination the destination
+     */
     public void setDestination(int destination) {
         this.destination = destination;
     }
 
+    /**
+     * Gets ais message.
+     *
+     * @param mmsi       the mmsi
+     * @param repeat     the repeat
+     * @param retransmit the retransmit
+     * @return the ais message
+     * @throws SentenceException the sentence exception
+     * @throws SixbitException   the sixbit exception
+     */
     public AisMessage getAisMessage(int mmsi, int repeat, int retransmit) throws SentenceException, SixbitException {
         AisMessage aisMessage;
         if (msgId == 12) {
@@ -141,13 +171,13 @@ public class Abm extends SendSentence {
 
     /**
      * Make a single VDM from this ABM
-     * 
-     * @param mmsi
-     * @param repeat
-     * @param retransmit
-     * @return
-     * @throws SixbitException
-     * @throws SentenceException
+     *
+     * @param mmsi       the mmsi
+     * @param repeat     the repeat
+     * @param retransmit the retransmit
+     * @return vdm
+     * @throws SixbitException   the sixbit exception
+     * @throws SentenceException the sentence exception
      */
     public Vdm makeVdm(int mmsi, int repeat, int retransmit) throws SixbitException, SentenceException {
         AisMessage aisMessage = getAisMessage(mmsi, repeat, retransmit);

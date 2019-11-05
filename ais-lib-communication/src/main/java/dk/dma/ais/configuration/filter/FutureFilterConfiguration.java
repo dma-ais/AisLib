@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.filter.FutureFilter;
 import dk.dma.ais.filter.IPacketFilter;
 
+/**
+ * The type Future filter configuration.
+ */
 @XmlRootElement
 public class FutureFilterConfiguration extends FilterConfiguration {
 
@@ -29,10 +32,18 @@ public class FutureFilterConfiguration extends FilterConfiguration {
      */
     private long threshold = 60000;
 
+    /**
+     * Instantiates a new Future filter configuration.
+     */
     public FutureFilterConfiguration() {
 
     }
 
+    /**
+     * Instantiates a new Future filter configuration.
+     *
+     * @param threshold the threshold
+     */
     public FutureFilterConfiguration(long threshold) {
         this.threshold = threshold;
     }

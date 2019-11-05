@@ -20,19 +20,35 @@ import dk.dma.ais.configuration.transform.PacketTaggingConfiguration;
 import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.TaggingFilter;
 
+/**
+ * The type Tagging filter configuration.
+ */
 @XmlRootElement
 public class TaggingFilterConfiguration extends FilterConfiguration {
     
     private PacketTaggingConfiguration filterTagging = new PacketTaggingConfiguration();
-    
+
+    /**
+     * Instantiates a new Tagging filter configuration.
+     */
     public TaggingFilterConfiguration() {
         
     }
-    
+
+    /**
+     * Gets filter tagging.
+     *
+     * @return the filter tagging
+     */
     public PacketTaggingConfiguration getFilterTagging() {
         return filterTagging;
     }
-    
+
+    /**
+     * Sets filter tagging.
+     *
+     * @param filterTagging the filter tagging
+     */
     public void setFilterTagging(PacketTaggingConfiguration filterTagging) {
         this.filterTagging = filterTagging;
     }

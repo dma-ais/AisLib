@@ -21,9 +21,18 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import dk.dma.ais.reader.AisReader;
 
+/**
+ * The type Ais reader configuration.
+ */
 @XmlRootElement
 @XmlSeeAlso({ AisFileReaderConfiguration.class, AisTcpReaderConfiguration.class})
 public abstract class AisReaderConfiguration {
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     * @throws FileNotFoundException the file not found exception
+     */
     public abstract AisReader getInstance() throws FileNotFoundException;
 }

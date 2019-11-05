@@ -23,29 +23,55 @@ import javax.xml.bind.annotation.XmlRootElement;
 import dk.dma.ais.filter.IPacketFilter;
 import dk.dma.ais.filter.MessageTypeFilter;
 
+/**
+ * The type Message type filter configuration.
+ */
 @XmlRootElement
 public class MessageTypeFilterConfiguration extends FilterConfiguration {
 
     private List<Integer> messageTypes = new ArrayList<>();
     private boolean disallowed;
 
+    /**
+     * Instantiates a new Message type filter configuration.
+     */
     public MessageTypeFilterConfiguration() {
 
     }
 
+    /**
+     * Gets message types.
+     *
+     * @return the message types
+     */
     @XmlElement(name = "message_type")
     public List<Integer> getMessageTypes() {
         return messageTypes;
     }
 
+    /**
+     * Sets message types.
+     *
+     * @param messageTypes the message types
+     */
     public void setMessageTypes(List<Integer> messageTypes) {
         this.messageTypes = messageTypes;
     }
 
+    /**
+     * Is disallowed boolean.
+     *
+     * @return the boolean
+     */
     public boolean isDisallowed() {
         return disallowed;
     }
 
+    /**
+     * Sets disallowed.
+     *
+     * @param disallowed the disallowed
+     */
     public void setDisallowed(boolean disallowed) {
         this.disallowed = disallowed;
     }

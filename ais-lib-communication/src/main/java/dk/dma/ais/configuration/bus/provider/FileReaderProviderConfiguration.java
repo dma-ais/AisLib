@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.provider.FileReaderProvider;
 
+/**
+ * The type File reader provider configuration.
+ */
 @XmlRootElement
 public class FileReaderProviderConfiguration extends AisBusProviderConfiguration {
 
@@ -33,22 +36,45 @@ public class FileReaderProviderConfiguration extends AisBusProviderConfiguration
     private String filename;
     private boolean gzip;
 
+    /**
+     * Instantiates a new File reader provider configuration.
+     */
     public FileReaderProviderConfiguration() {
 
     }
 
+    /**
+     * Gets filename.
+     *
+     * @return the filename
+     */
     public String getFilename() {
         return filename;
     }
 
+    /**
+     * Sets filename.
+     *
+     * @param filename the filename
+     */
     public void setFilename(String filename) {
         this.filename = filename;
     }
 
+    /**
+     * Is gzip boolean.
+     *
+     * @return the boolean
+     */
     public boolean isGzip() {
         return gzip;
     }
 
+    /**
+     * Sets gzip.
+     *
+     * @param gzip the gzip
+     */
     public void setGzip(boolean gzip) {
         this.gzip = gzip;
     }

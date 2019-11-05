@@ -22,10 +22,11 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public interface IAisPacketTransformer {
-    
+
     /**
-     * Transform AisPacket 
-     * @param packet
+     * Transform AisPacket
+     *
+     * @param packet the packet
      * @return transformed packet
      */
     AisPacket transform(AisPacket packet);

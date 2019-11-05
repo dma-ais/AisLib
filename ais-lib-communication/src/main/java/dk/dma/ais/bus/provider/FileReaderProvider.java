@@ -26,11 +26,24 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe
 public class FileReaderProvider extends StreamReaderProvider {
-    
+
+    /**
+     * Instantiates a new File reader provider.
+     *
+     * @param filename the filename
+     * @throws IOException the io exception
+     */
     public FileReaderProvider(String filename) throws IOException {
         this(filename, false);
     }
-    
+
+    /**
+     * Instantiates a new File reader provider.
+     *
+     * @param filename the filename
+     * @param gzip     the gzip
+     * @throws IOException the io exception
+     */
     public FileReaderProvider(String filename, boolean gzip) throws IOException {
         super(true);
         InputStream stream = new FileInputStream(filename);

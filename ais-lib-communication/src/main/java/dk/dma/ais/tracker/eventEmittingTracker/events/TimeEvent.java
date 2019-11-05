@@ -30,15 +30,31 @@ public class TimeEvent extends TrackerEvent {
     private final Instant timestamp;
     private final Duration millisSinceLastMark;
 
+    /**
+     * Instantiates a new Time event.
+     *
+     * @param timestamp         the timestamp
+     * @param timeSinceLastMark the time since last mark
+     */
     public TimeEvent(Instant timestamp, Duration timeSinceLastMark) {
         this.timestamp = timestamp;
         this.millisSinceLastMark = timeSinceLastMark;
     }
 
+    /**
+     * Gets timestamp.
+     *
+     * @return the timestamp
+     */
     public final Instant getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Gets millis since last mark.
+     *
+     * @return the millis since last mark
+     */
     public Duration getMillisSinceLastMark() {
         return millisSinceLastMark;
     }

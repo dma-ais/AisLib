@@ -24,17 +24,47 @@ public class Abk extends ParametricSentence {
      * Type of acknowledgement
      */
     public enum Result {
-        ADDRESSED_SUCCESS(0), ADDRESSED_NO_ACKNOWLEDGE(1), COULD_NOT_BROADCAST(2), BROADCAST_SENT(3), LATE_RECEPTION(4);
+        /**
+         * Addressed success result.
+         */
+        ADDRESSED_SUCCESS(0),
+        /**
+         * Addressed no acknowledge result.
+         */
+        ADDRESSED_NO_ACKNOWLEDGE(1),
+        /**
+         * Could not broadcast result.
+         */
+        COULD_NOT_BROADCAST(2),
+        /**
+         * Broadcast sent result.
+         */
+        BROADCAST_SENT(3),
+        /**
+         * Late reception result.
+         */
+        LATE_RECEPTION(4);
         private int res;
 
         private Result(int res) {
             this.res = res;
         }
 
+        /**
+         * Gets res.
+         *
+         * @return the res
+         */
         public int getRes() {
             return res;
         }
 
+        /**
+         * Parse int result.
+         *
+         * @param res the res
+         * @return the result
+         */
         public static Result parseInt(int res) {
             switch (res) {
             case 0:
@@ -59,12 +89,21 @@ public class Abk extends ParametricSentence {
     private int sequence;
     private Result result;
 
+    /**
+     * Instantiates a new Abk.
+     */
     public Abk() {
         super();
         this.destination = 0;
         this.formatter = "ABK";
     }
 
+    /**
+     * Is abk boolean.
+     *
+     * @param line the line
+     * @return the boolean
+     */
     public static boolean isAbk(String line) {
         return line.indexOf("$AIABK") >= 0;
     }
@@ -128,49 +167,99 @@ public class Abk extends ParametricSentence {
 
     /**
      * Returns if result indicates success
-     * 
-     * @return success
+     *
+     * @return success boolean
      */
     public boolean isSuccess() {
         return getResult() == Result.ADDRESSED_SUCCESS || getResult() == Result.BROADCAST_SENT;
     }
 
+    /**
+     * Gets destination.
+     *
+     * @return the destination
+     */
     public int getDestination() {
         return destination;
     }
 
+    /**
+     * Sets destination.
+     *
+     * @param destination the destination
+     */
     public void setDestination(int destination) {
         this.destination = destination;
     }
 
+    /**
+     * Gets channel.
+     *
+     * @return the channel
+     */
     public Character getChannel() {
         return channel;
     }
 
+    /**
+     * Sets channel.
+     *
+     * @param channel the channel
+     */
     public void setChannel(Character channel) {
         this.channel = channel;
     }
 
+    /**
+     * Gets msg id.
+     *
+     * @return the msg id
+     */
     public int getMsgId() {
         return msgId;
     }
 
+    /**
+     * Sets msg id.
+     *
+     * @param msgId the msg id
+     */
     public void setMsgId(int msgId) {
         this.msgId = msgId;
     }
 
+    /**
+     * Gets sequence.
+     *
+     * @return the sequence
+     */
     public int getSequence() {
         return sequence;
     }
 
+    /**
+     * Sets sequence.
+     *
+     * @param sequence the sequence
+     */
     public void setSequence(int sequence) {
         this.sequence = sequence;
     }
 
+    /**
+     * Gets result.
+     *
+     * @return the result
+     */
     public Result getResult() {
         return result;
     }
 
+    /**
+     * Sets result.
+     *
+     * @param result the result
+     */
     public void setResult(Result result) {
         this.result = result;
     }

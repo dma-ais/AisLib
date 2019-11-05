@@ -23,6 +23,12 @@ import dk.dma.ais.message.AisMessage;
 @ThreadSafe
 public interface IMessageFilter {
 
+    /**
+     * Rejected by filter boolean.
+     *
+     * @param message the message
+     * @return the boolean
+     */
     boolean rejectedByFilter(AisMessage message);
 
 }

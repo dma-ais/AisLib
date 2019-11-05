@@ -20,9 +20,8 @@ import java.io.Serializable;
 
 /**
  * AIS position class
- * 
+ * <p>
  * Convert raw unsigned AIS position to signed 1/10000 degree position and provide helper methods for other formats
- * 
  */
 public class AisPosition implements Serializable{
 
@@ -32,13 +31,16 @@ public class AisPosition implements Serializable{
     private long rawLongitude;
     private double resolution = 10000.0;
 
+    /**
+     * Instantiates a new Ais position.
+     */
     public AisPosition() {}
 
     /**
      * Constructor given raw latitude and raw longitude as received in AIS message
-     * 
-     * @param rawLatitude
-     * @param rawLongitude
+     *
+     * @param rawLatitude  the raw latitude
+     * @param rawLongitude the raw longitude
      */
     public AisPosition(long rawLatitude, long rawLongitude) {
         this.rawLatitude = rawLatitude;
@@ -47,8 +49,8 @@ public class AisPosition implements Serializable{
 
     /**
      * Constructor given a GeoLocation
-     * 
-     * @param location
+     *
+     * @param location the location
      */
     public AisPosition(Position location) {
         setLatitude(Math.round(location.getLatitude() * resolution * 60.0));
@@ -66,8 +68,8 @@ public class AisPosition implements Serializable{
 
     /**
      * Get position as {@link Position} object
-     * 
-     * @return
+     *
+     * @return geo location
      */
     public Position getGeoLocation() {
         double lat = getLatitude() / resolution / 60.0;
@@ -80,8 +82,8 @@ public class AisPosition implements Serializable{
 
     /**
      * Get signed latitude
-     * 
-     * @return
+     *
+     * @return latitude
      */
     public long getLatitude() {
         long latitude;
@@ -94,18 +96,28 @@ public class AisPosition implements Serializable{
         return latitude;
     }
 
+    /**
+     * Gets latitude double.
+     *
+     * @return the latitude double
+     */
     public double getLatitudeDouble() {
         return getLatitude() / resolution / 60.0;
     }
 
+    /**
+     * Gets longitude double.
+     *
+     * @return the longitude double
+     */
     public double getLongitudeDouble() {
         return getLongitude() / resolution / 60.0;
     }
 
     /**
      * Get signed longitude
-     * 
-     * @return
+     *
+     * @return longitude
      */
     public long getLongitude() {
         long longitude;
@@ -118,10 +130,20 @@ public class AisPosition implements Serializable{
         return longitude;
     }
 
+    /**
+     * Gets raw latitude.
+     *
+     * @return the raw latitude
+     */
     public long getRawLatitude() {
         return rawLatitude;
     }
 
+    /**
+     * Gets raw longitude.
+     *
+     * @return the raw longitude
+     */
     public long getRawLongitude() {
         return rawLongitude;
     }
@@ -158,6 +180,8 @@ public class AisPosition implements Serializable{
 
     /**
      * Set signed latitude
+     *
+     * @param latitude the latitude
      */
     public void setLatitude(long latitude) {
         if (latitude < 0) {
@@ -169,6 +193,8 @@ public class AisPosition implements Serializable{
 
     /**
      * Set signed longitude
+     *
+     * @param longitude the longitude
      */
     public void setLongitude(long longitude) {
         if (longitude < 0) {
@@ -180,8 +206,8 @@ public class AisPosition implements Serializable{
 
     /**
      * Set the raw latitude as received from AIS
-     * 
-     * @param rawLatitude
+     *
+     * @param rawLatitude the raw latitude
      */
     public void setRawLatitude(long rawLatitude) {
         this.rawLatitude = rawLatitude;
@@ -189,8 +215,8 @@ public class AisPosition implements Serializable{
 
     /**
      * Set the raw longitude as received from AIS
-     * 
-     * @param rawLongitude
+     *
+     * @param rawLongitude the raw longitude
      */
     public void setRawLongitude(long rawLongitude) {
         this.rawLongitude = rawLongitude;

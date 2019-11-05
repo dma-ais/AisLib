@@ -32,7 +32,10 @@ public class TargetCountryFilter extends MessageFilterBase {
      * Set of allowed countries by their ISO 3166 three letter code
      */
     private final Set<String> allowedCountries = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-    
+
+    /**
+     * Instantiates a new Target country filter.
+     */
     public TargetCountryFilter() {
         
     }
@@ -47,11 +50,21 @@ public class TargetCountryFilter extends MessageFilterBase {
         }
         return !allowedCountries.contains(country.getThreeLetter());
     }
-    
+
+    /**
+     * Add country.
+     *
+     * @param country the country
+     */
     public void addCountry(Country country) {
         allowedCountries.add(country.getThreeLetter());
     }
-    
+
+    /**
+     * Remove country.
+     *
+     * @param country the country
+     */
     public void removeCountry(Country country) {
         allowedCountries.remove(country.getThreeLetter());
     }

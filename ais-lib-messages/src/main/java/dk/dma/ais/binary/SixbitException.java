@@ -21,6 +21,11 @@ public class SixbitException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Sixbit exception.
+     *
+     * @param msg the msg
+     */
     public SixbitException(String msg) {
         super(msg);
     }

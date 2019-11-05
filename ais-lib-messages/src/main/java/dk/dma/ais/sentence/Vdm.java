@@ -36,10 +36,10 @@ public class Vdm extends EncapsulatedSentence {
 
     /**
      * Helper method parsing line to SentenceLine and passing to parse
-     * 
-     * @param line
-     * @return
-     * @throws SentenceException
+     *
+     * @param line the line
+     * @return int
+     * @throws SentenceException the sentence exception
      */
     public int parse(String line) throws SentenceException {
         return parse(new SentenceLine(line));
@@ -100,9 +100,9 @@ public class Vdm extends EncapsulatedSentence {
 
     /**
      * Determine if line seems to contain VDM or VDO sentence
-     * 
-     * @param line
-     * @return
+     *
+     * @param line the line
+     * @return boolean
      */
     public static boolean isVdm(String line) {
         int sentenceStart = line.indexOf('!');
@@ -118,8 +118,8 @@ public class Vdm extends EncapsulatedSentence {
 
     /**
      * Determine if VDO instead of VDM
-     * 
-     * @return
+     *
+     * @return boolean
      */
     public boolean isOwnMessage() {
         return ownMessage;
@@ -137,14 +137,13 @@ public class Vdm extends EncapsulatedSentence {
 
     /**
      * Make max 80 chars length sentences from AIS message given sequence number
-     * 
+     * <p>
      * If all VDM fields are used, 61 chars are left for encoded AIS message
-     * 
-     * @param aisMessage
-     * @param sequence
+     *
+     * @param aisMessage the ais message
+     * @param sequence   the sequence
      * @return array of sentence parts
-     * @throws IllegalArgumentException
-     * @throws SixbitException
+     * @throws SixbitException the sixbit exception
      */
     public static String[] createSentences(AisMessage aisMessage, int sequence) throws SixbitException {
         // Encode the AIS message to get full string
@@ -186,8 +185,8 @@ public class Vdm extends EncapsulatedSentence {
 
     /**
      * Split single VDM into possible multiple VDM's to adherne to the 80 character max
-     * 
-     * @return
+     *
+     * @return vdm [ ]
      */
     public Vdm[] createSentences() {
         // Make sure there is a sequence number

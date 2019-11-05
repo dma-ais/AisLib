@@ -16,15 +16,134 @@ package dk.dma.ais.message;
 
 import java.io.Serializable;
 
+/**
+ * The type Ship type cargo.
+ */
 public class ShipTypeCargo implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The enum Ship type.
+     */
     public enum ShipType {
-        UNDEFINED, WIG, PILOT, SAR, TUG, PORT_TENDER, ANTI_POLLUTION, LAW_ENFORCEMENT, MEDICAL, FISHING, TOWING, TOWING_LONG_WIDE, DREDGING, DIVING, MILITARY, SAILING, PLEASURE, HSC, PASSENGER, CARGO, TANKER, SHIPS_ACCORDING_TO_RR, UNKNOWN
+        /**
+         * Undefined ship type.
+         */
+        UNDEFINED,
+        /**
+         * Wig ship type.
+         */
+        WIG,
+        /**
+         * Pilot ship type.
+         */
+        PILOT,
+        /**
+         * Sar ship type.
+         */
+        SAR,
+        /**
+         * Tug ship type.
+         */
+        TUG,
+        /**
+         * Port tender ship type.
+         */
+        PORT_TENDER,
+        /**
+         * Anti pollution ship type.
+         */
+        ANTI_POLLUTION,
+        /**
+         * Law enforcement ship type.
+         */
+        LAW_ENFORCEMENT,
+        /**
+         * Medical ship type.
+         */
+        MEDICAL,
+        /**
+         * Fishing ship type.
+         */
+        FISHING,
+        /**
+         * Towing ship type.
+         */
+        TOWING,
+        /**
+         * Towing long wide ship type.
+         */
+        TOWING_LONG_WIDE,
+        /**
+         * Dredging ship type.
+         */
+        DREDGING,
+        /**
+         * Diving ship type.
+         */
+        DIVING,
+        /**
+         * Military ship type.
+         */
+        MILITARY,
+        /**
+         * Sailing ship type.
+         */
+        SAILING,
+        /**
+         * Pleasure ship type.
+         */
+        PLEASURE,
+        /**
+         * Hsc ship type.
+         */
+        HSC,
+        /**
+         * Passenger ship type.
+         */
+        PASSENGER,
+        /**
+         * Cargo ship type.
+         */
+        CARGO,
+        /**
+         * Tanker ship type.
+         */
+        TANKER,
+        /**
+         * Ships according to rr ship type.
+         */
+        SHIPS_ACCORDING_TO_RR,
+        /**
+         * Unknown ship type.
+         */
+        UNKNOWN
     }
 
+    /**
+     * The enum Cargo type.
+     */
     public enum CargoType {
-        UNDEFINED, A, B, C, D
+        /**
+         * Undefined cargo type.
+         */
+        UNDEFINED,
+        /**
+         * A cargo type.
+         */
+        A,
+        /**
+         * B cargo type.
+         */
+        B,
+        /**
+         * C cargo type.
+         */
+        C,
+        /**
+         * D cargo type.
+         */
+        D
     }
 
     private final ShipType shipType;
@@ -33,6 +152,11 @@ public class ShipTypeCargo implements Serializable {
     /** The original coded value as per ITU 1371.5 table 53 */
     private final int code;
 
+    /**
+     * Instantiates a new Ship type cargo.
+     *
+     * @param intShipType the int ship type
+     */
     public ShipTypeCargo(int intShipType) {
         this.code = intShipType;
 
@@ -153,18 +277,38 @@ public class ShipTypeCargo implements Serializable {
         this.cargoType= cargoTypeTmp;
     }
 
+    /**
+     * Gets ship type.
+     *
+     * @return the ship type
+     */
     public ShipType getShipType() {
         return this.shipType;
     }
 
+    /**
+     * Gets ship cargo.
+     *
+     * @return the ship cargo
+     */
     public CargoType getShipCargo() {
         return this.cargoType;
     }
 
+    /**
+     * Gets code.
+     *
+     * @return the code
+     */
     public int getCode() {
         return code;
     }
 
+    /**
+     * Pretty type string.
+     *
+     * @return the string
+     */
     public String prettyType() {
         ShipTypeCargo shipTypeCargo = this;
         String result;
@@ -183,6 +327,11 @@ public class ShipTypeCargo implements Serializable {
         return result;
     }
 
+    /**
+     * Pretty cargo string.
+     *
+     * @return the string
+     */
     public String prettyCargo() {
         CargoType shipTypeCargo = this.getShipCargo();
         String result;

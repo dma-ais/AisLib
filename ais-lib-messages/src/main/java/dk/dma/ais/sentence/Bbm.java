@@ -25,11 +25,20 @@ import dk.dma.ais.message.AisMessage8;
  */
 public class Bbm extends SendSentence {
 
+    /**
+     * Instantiates a new Bbm.
+     */
     public Bbm() {
         formatter = "BBM";
         channel = '0';
     }
 
+    /**
+     * Is bbm boolean.
+     *
+     * @param line the line
+     * @return the boolean
+     */
     public static boolean isBbm(String line) {
         return line.indexOf("!AIBBM") >= 0 || line.indexOf("!BSBBM") >= 0;
     }
@@ -42,14 +51,22 @@ public class Bbm extends SendSentence {
         super.encode();
         return finalEncode();
     }
-        
+
+    /**
+     * Parse int.
+     *
+     * @param line the line
+     * @return the int
+     * @throws SentenceException the sentence exception
+     * @throws SixbitException   the sixbit exception
+     */
     public int parse(String line) throws SentenceException, SixbitException {
         return parse(new SentenceLine(line));
     }
 
     /**
      * Implemented parse method. See {@link EncapsulatedSentence}
-     * @throws SixbitException 
+     * @throws SixbitException a SixbitException
      */
     @Override
     public int parse(SentenceLine sl) throws SentenceException, SixbitException {
@@ -84,6 +101,15 @@ public class Bbm extends SendSentence {
         return 1;
     }
 
+    /**
+     * Gets ais message.
+     *
+     * @param mmsi   the mmsi
+     * @param repeat the repeat
+     * @return the ais message
+     * @throws SentenceException the sentence exception
+     * @throws SixbitException   the sixbit exception
+     */
     public AisMessage getAisMessage(int mmsi, int repeat) throws SentenceException, SixbitException {
         AisMessage aisMessage;
         if (msgId == 14) {
@@ -108,12 +134,12 @@ public class Bbm extends SendSentence {
 
     /**
      * Make a single VDM from this BBM
-     * 
-     * @param mmsi
-     * @param repeat
-     * @return
-     * @throws SixbitException
-     * @throws SentenceException
+     *
+     * @param mmsi   the mmsi
+     * @param repeat the repeat
+     * @return vdm
+     * @throws SixbitException   the sixbit exception
+     * @throws SentenceException the sentence exception
      */
     public Vdm makeVdm(int mmsi, int repeat) throws SixbitException, SentenceException {
         AisMessage aisMessage = getAisMessage(mmsi, repeat);

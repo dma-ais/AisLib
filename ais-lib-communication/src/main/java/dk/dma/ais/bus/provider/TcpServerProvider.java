@@ -29,6 +29,9 @@ public class TcpServerProvider extends AisBusProvider implements Consumer<AisPac
 
     private final TcpReadServer server;
 
+    /**
+     * Instantiates a new Tcp server provider.
+     */
     public TcpServerProvider() {
         server = new TcpReadServer(this);
     }
@@ -64,14 +67,29 @@ public class TcpServerProvider extends AisBusProvider implements Consumer<AisPac
         setStopped();
     }
 
+    /**
+     * Sets client conf.
+     *
+     * @param clientConf the client conf
+     */
     public void setClientConf(TcpClientConf clientConf) {
         server.setClientConf(clientConf);
     }
 
+    /**
+     * Sets server conf.
+     *
+     * @param serverConf the server conf
+     */
     public void setServerConf(TcpServerConf serverConf) {
         server.setServerConf(serverConf);
     }
-    
+
+    /**
+     * Gets server.
+     *
+     * @return the server
+     */
     public TcpServer getServer() {
         return server;
     }

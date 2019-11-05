@@ -23,30 +23,63 @@ public class TcpClientConf {
     private int gzipBufferSize = 2048;
     private int bufferSize = 8192;
 
+    /**
+     * Instantiates a new Tcp client conf.
+     */
     public TcpClientConf() {
 
     }
 
+    /**
+     * Is gzip compress boolean.
+     *
+     * @return the boolean
+     */
     public boolean isGzipCompress() {
         return gzipCompress;
     }
 
+    /**
+     * Sets gzip compress.
+     *
+     * @param gzipCompress the gzip compress
+     */
     public void setGzipCompress(boolean gzipCompress) {
         this.gzipCompress = gzipCompress;
     }
 
+    /**
+     * Gets gzip buffer size.
+     *
+     * @return the gzip buffer size
+     */
     public int getGzipBufferSize() {
         return gzipBufferSize;
     }
 
+    /**
+     * Sets gzip buffer size.
+     *
+     * @param gzipBufferSize the gzip buffer size
+     */
     public void setGzipBufferSize(int gzipBufferSize) {
         this.gzipBufferSize = gzipBufferSize;
     }
 
+    /**
+     * Gets buffer size.
+     *
+     * @return the buffer size
+     */
     public int getBufferSize() {
         return bufferSize;
     }
 
+    /**
+     * Sets buffer size.
+     *
+     * @param bufferSize the buffer size
+     */
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
     }

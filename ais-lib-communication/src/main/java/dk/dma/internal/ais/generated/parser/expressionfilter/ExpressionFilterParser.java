@@ -24,25 +24,244 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
+/**
+ * The type Expression filter parser.
+ */
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class ExpressionFilterParser extends Parser {
-	protected static final DFA[] _decisionToDFA;
-	protected static final PredictionContextCache _sharedContextCache =
+    /**
+     * The constant _decisionToDFA.
+     */
+    protected static final DFA[] _decisionToDFA;
+    /**
+     * The constant _sharedContextCache.
+     */
+    protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
-	public static final int
-		T__15=1, T__14=2, T__13=3, T__12=4, T__11=5, T__10=6, T__9=7, T__8=8, 
-		T__7=9, T__6=10, T__5=11, T__4=12, T__3=13, T__2=14, T__1=15, T__0=16, 
-		AND=17, OR=18, RANGE=19, LIKE=20, BBOX=21, CIRCLE=22, WITHIN=23, INT=24, 
-		FLOAT=25, STRING=26, WS=27, PREFIX_SOURCE=28, PREFIX_MESSAGE=29, PREFIX_TARGET=30, 
-		SRC_ID=31, SRC_BASESTATION=32, SRC_COUNTRY=33, SRC_TYPE=34, SRC_REGION=35, 
-		MSG_MSGID=36, MSG_MMSI=37, MSG_IMO=38, MSG_TYPE=39, MSG_COUNTRY=40, MSG_NAVSTAT=41, 
-		MSG_NAME=42, MSG_CALLSIGN=43, MSG_SPEED=44, MSG_COURSE=45, MSG_HEADING=46, 
-		MSG_DRAUGHT=47, MSG_LATITUDE=48, MSG_LONGITUDE=49, MSG_POSITION=50, MSG_TIME_YEAR=51, 
-		MSG_TIME_MONTH=52, MSG_TIME_DAY=53, MSG_TIME_WEEKDAY=54, MSG_TIME_HOUR=55, 
-		MSG_TIME_MINUTE=56, TGT_IMO=57, TGT_TYPE=58, TGT_COUNTRY=59, TGT_NAVSTAT=60, 
-		TGT_NAME=61, TGT_CALLSIGN=62, TGT_SPEED=63, TGT_COURSE=64, TGT_HEADING=65, 
-		TGT_DRAUGHT=66, TGT_LATITUDE=67, TGT_LONGITUDE=68, TGT_POSITION=69;
-	public static final String[] tokenNames = {
+    /**
+     * The constant T__15.
+     */
+    public static final int
+		T__15=1, /**
+     * The T __ 14.
+     */
+    T__14=2, /**
+     * The T __ 13.
+     */
+    T__13=3, /**
+     * The T __ 12.
+     */
+    T__12=4, /**
+     * The T __ 11.
+     */
+    T__11=5, /**
+     * The T __ 10.
+     */
+    T__10=6, /**
+     * The T __ 9.
+     */
+    T__9=7, /**
+     * The T __ 8.
+     */
+    T__8=8,
+    /**
+     * The T __ 7.
+     */
+    T__7=9, /**
+     * The T __ 6.
+     */
+    T__6=10, /**
+     * The T __ 5.
+     */
+    T__5=11, /**
+     * The T __ 4.
+     */
+    T__4=12, /**
+     * The T __ 3.
+     */
+    T__3=13, /**
+     * The T __ 2.
+     */
+    T__2=14, /**
+     * The T __ 1.
+     */
+    T__1=15, /**
+     * The T __ 0.
+     */
+    T__0=16,
+    /**
+     * The And.
+     */
+    AND=17, /**
+     * The Or.
+     */
+    OR=18, /**
+     * The Range.
+     */
+    RANGE=19, /**
+     * The Like.
+     */
+    LIKE=20, /**
+     * The Bbox.
+     */
+    BBOX=21, /**
+     * The Circle.
+     */
+    CIRCLE=22, /**
+     * The Within.
+     */
+    WITHIN=23, /**
+     * The Int.
+     */
+    INT=24,
+    /**
+     * The Float.
+     */
+    FLOAT=25, /**
+     * The String.
+     */
+    STRING=26, /**
+     * The Ws.
+     */
+    WS=27, /**
+     * The Prefix source.
+     */
+    PREFIX_SOURCE=28, /**
+     * The Prefix message.
+     */
+    PREFIX_MESSAGE=29, /**
+     * The Prefix target.
+     */
+    PREFIX_TARGET=30,
+    /**
+     * The Src id.
+     */
+    SRC_ID=31, /**
+     * The Src basestation.
+     */
+    SRC_BASESTATION=32, /**
+     * The Src country.
+     */
+    SRC_COUNTRY=33, /**
+     * The Src type.
+     */
+    SRC_TYPE=34, /**
+     * The Src region.
+     */
+    SRC_REGION=35,
+    /**
+     * The Msg msgid.
+     */
+    MSG_MSGID=36, /**
+     * The Msg mmsi.
+     */
+    MSG_MMSI=37, /**
+     * The Msg imo.
+     */
+    MSG_IMO=38, /**
+     * The Msg type.
+     */
+    MSG_TYPE=39, /**
+     * The Msg country.
+     */
+    MSG_COUNTRY=40, /**
+     * The Msg navstat.
+     */
+    MSG_NAVSTAT=41,
+    /**
+     * The Msg name.
+     */
+    MSG_NAME=42, /**
+     * The Msg callsign.
+     */
+    MSG_CALLSIGN=43, /**
+     * The Msg speed.
+     */
+    MSG_SPEED=44, /**
+     * The Msg course.
+     */
+    MSG_COURSE=45, /**
+     * The Msg heading.
+     */
+    MSG_HEADING=46,
+    /**
+     * The Msg draught.
+     */
+    MSG_DRAUGHT=47, /**
+     * The Msg latitude.
+     */
+    MSG_LATITUDE=48, /**
+     * The Msg longitude.
+     */
+    MSG_LONGITUDE=49, /**
+     * The Msg position.
+     */
+    MSG_POSITION=50, /**
+     * The Msg time year.
+     */
+    MSG_TIME_YEAR=51,
+    /**
+     * The Msg time month.
+     */
+    MSG_TIME_MONTH=52, /**
+     * The Msg time day.
+     */
+    MSG_TIME_DAY=53, /**
+     * The Msg time weekday.
+     */
+    MSG_TIME_WEEKDAY=54, /**
+     * The Msg time hour.
+     */
+    MSG_TIME_HOUR=55,
+    /**
+     * The Msg time minute.
+     */
+    MSG_TIME_MINUTE=56, /**
+     * The Tgt imo.
+     */
+    TGT_IMO=57, /**
+     * The Tgt type.
+     */
+    TGT_TYPE=58, /**
+     * The Tgt country.
+     */
+    TGT_COUNTRY=59, /**
+     * The Tgt navstat.
+     */
+    TGT_NAVSTAT=60,
+    /**
+     * The Tgt name.
+     */
+    TGT_NAME=61, /**
+     * The Tgt callsign.
+     */
+    TGT_CALLSIGN=62, /**
+     * The Tgt speed.
+     */
+    TGT_SPEED=63, /**
+     * The Tgt course.
+     */
+    TGT_COURSE=64, /**
+     * The Tgt heading.
+     */
+    TGT_HEADING=65,
+    /**
+     * The Tgt draught.
+     */
+    TGT_DRAUGHT=66, /**
+     * The Tgt latitude.
+     */
+    TGT_LATITUDE=67, /**
+     * The Tgt longitude.
+     */
+    TGT_LONGITUDE=68, /**
+     * The Tgt position.
+     */
+    TGT_POSITION=69;
+    /**
+     * The constant tokenNames.
+     */
+    public static final String[] tokenNames = {
 		"<INVALID>", "'NOT IN'", "'not in'", "'!='", "'messagetype'", "'!@'", 
 		"'>='", "'<'", "'='", "'>'", "'@'", "'<='", "'IN'", "'in'", "'('", "')'", 
 		"','", "'&'", "'|'", "'..'", "LIKE", "BBOX", "CIRCLE", "WITHIN", "INT", 
@@ -56,12 +275,54 @@ public class ExpressionFilterParser extends Parser {
 		"TGT_COURSE", "TGT_HEADING", "TGT_DRAUGHT", "TGT_LATITUDE", "TGT_LONGITUDE", 
 		"TGT_POSITION"
 	};
-	public static final int
-		RULE_filter = 0, RULE_filterExpression = 1, RULE_compareTo = 2, RULE_in = 3, 
-		RULE_notin = 4, RULE_intList = 5, RULE_stringList = 6, RULE_intRange = 7, 
-		RULE_numberRange = 8, RULE_number = 9, RULE_string = 10, RULE_bbox = 11, 
-		RULE_circle = 12;
-	public static final String[] ruleNames = {
+    /**
+     * The constant RULE_filter.
+     */
+    public static final int
+		RULE_filter = 0, /**
+     * The Rule filter expression.
+     */
+    RULE_filterExpression = 1, /**
+     * The Rule compare to.
+     */
+    RULE_compareTo = 2, /**
+     * The Rule in.
+     */
+    RULE_in = 3,
+    /**
+     * The Rule notin.
+     */
+    RULE_notin = 4, /**
+     * The Rule int list.
+     */
+    RULE_intList = 5, /**
+     * The Rule string list.
+     */
+    RULE_stringList = 6, /**
+     * The Rule int range.
+     */
+    RULE_intRange = 7,
+    /**
+     * The Rule number range.
+     */
+    RULE_numberRange = 8, /**
+     * The Rule number.
+     */
+    RULE_number = 9, /**
+     * The Rule string.
+     */
+    RULE_string = 10, /**
+     * The Rule bbox.
+     */
+    RULE_bbox = 11,
+    /**
+     * The Rule circle.
+     */
+    RULE_circle = 12;
+    /**
+     * The constant ruleNames.
+     */
+    public static final String[] ruleNames = {
 		"filter", "filterExpression", "compareTo", "in", "notin", "intList", "stringList", 
 		"intRange", "numberRange", "number", "string", "bbox", "circle"
 	};
@@ -81,16 +342,43 @@ public class ExpressionFilterParser extends Parser {
 	@Override
 	public ATN getATN() { return _ATN; }
 
-	public ExpressionFilterParser(TokenStream input) {
+    /**
+     * Instantiates a new Expression filter parser.
+     *
+     * @param input the input
+     */
+    public ExpressionFilterParser(TokenStream input) {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
-	public static class FilterContext extends ParserRuleContext {
-		public FilterExpressionContext filterExpression() {
+
+    /**
+     * The type Filter context.
+     */
+    public static class FilterContext extends ParserRuleContext {
+        /**
+         * Filter expression filter expression context.
+         *
+         * @return the filter expression context
+         */
+        public FilterExpressionContext filterExpression() {
 			return getRuleContext(FilterExpressionContext.class,0);
 		}
-		public TerminalNode EOF() { return getToken(ExpressionFilterParser.EOF, 0); }
-		public FilterContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * Eof terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode EOF() { return getToken(ExpressionFilterParser.EOF, 0); }
+
+        /**
+         * Instantiates a new Filter context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public FilterContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_filter; }
@@ -101,7 +389,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final FilterContext filter() throws RecognitionException {
+    /**
+     * Filter filter context.
+     *
+     * @return the filter context
+     * @throws RecognitionException the recognition exception
+     */
+    public final FilterContext filter() throws RecognitionException {
 		FilterContext _localctx = new FilterContext(_ctx, getState());
 		enterRule(_localctx, 0, RULE_filter);
 		try {
@@ -122,1269 +416,3661 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FilterExpressionContext extends ParserRuleContext {
-		public FilterExpressionContext(ParserRuleContext parent, int invokingState) {
+    /**
+     * The type Filter expression context.
+     */
+    public static class FilterExpressionContext extends ParserRuleContext {
+        /**
+         * Instantiates a new Filter expression context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public FilterExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_filterExpression; }
-	 
-		public FilterExpressionContext() { }
-		public void copyFrom(FilterExpressionContext ctx) {
+
+        /**
+         * Instantiates a new Filter expression context.
+         */
+        public FilterExpressionContext() { }
+
+        /**
+         * Copy from.
+         *
+         * @param ctx the ctx
+         */
+        public void copyFrom(FilterExpressionContext ctx) {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class MessageTrueHeadingContext extends FilterExpressionContext {
-		public TerminalNode MSG_HEADING() { return getToken(ExpressionFilterParser.MSG_HEADING, 0); }
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message true heading context.
+     */
+    public static class MessageTrueHeadingContext extends FilterExpressionContext {
+        /**
+         * Msg heading terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_HEADING() { return getToken(ExpressionFilterParser.MSG_HEADING, 0); }
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageTrueHeadingContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message true heading context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTrueHeadingContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTrueHeading(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTrueHeadingInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message true heading in context.
+     */
+    public static class MessageTrueHeadingInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public TerminalNode MSG_HEADING() { return getToken(ExpressionFilterParser.MSG_HEADING, 0); }
-		public IntRangeContext intRange() {
+
+        /**
+         * Msg heading terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_HEADING() { return getToken(ExpressionFilterParser.MSG_HEADING, 0); }
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public MessageTrueHeadingInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message true heading in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTrueHeadingInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTrueHeadingIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class ParensContext extends FilterExpressionContext {
-		public FilterExpressionContext filterExpression() {
+
+    /**
+     * The type Parens context.
+     */
+    public static class ParensContext extends FilterExpressionContext {
+        /**
+         * Filter expression filter expression context.
+         *
+         * @return the filter expression context
+         */
+        public FilterExpressionContext filterExpression() {
 			return getRuleContext(FilterExpressionContext.class,0);
 		}
-		public ParensContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Parens context.
+         *
+         * @param ctx the ctx
+         */
+        public ParensContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitParens(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeMinuteContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message time minute context.
+     */
+    public static class MessageTimeMinuteContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public TerminalNode MSG_TIME_MINUTE() { return getToken(ExpressionFilterParser.MSG_TIME_MINUTE, 0); }
-		public MessageTimeMinuteContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Msg time minute terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_MINUTE() { return getToken(ExpressionFilterParser.MSG_TIME_MINUTE, 0); }
+
+        /**
+         * Instantiates a new Message time minute context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeMinuteContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeMinute(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeYearContext extends FilterExpressionContext {
-		public TerminalNode MSG_TIME_YEAR() { return getToken(ExpressionFilterParser.MSG_TIME_YEAR, 0); }
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message time year context.
+     */
+    public static class MessageTimeYearContext extends FilterExpressionContext {
+        /**
+         * Msg time year terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_YEAR() { return getToken(ExpressionFilterParser.MSG_TIME_YEAR, 0); }
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageTimeYearContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message time year context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeYearContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeYear(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageNavigationalStatusContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message navigational status context.
+     */
+    public static class MessageNavigationalStatusContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public StringContext string() {
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public TerminalNode MSG_NAVSTAT() { return getToken(ExpressionFilterParser.MSG_NAVSTAT, 0); }
-		public MessageNavigationalStatusContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg navstat terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_NAVSTAT() { return getToken(ExpressionFilterParser.MSG_NAVSTAT, 0); }
+
+        /**
+         * Instantiates a new Message navigational status context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageNavigationalStatusContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageNavigationalStatus(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeMinuteInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message time minute in context.
+     */
+    public static class MessageTimeMinuteInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public TerminalNode MSG_TIME_MINUTE() { return getToken(ExpressionFilterParser.MSG_TIME_MINUTE, 0); }
-		public MessageTimeMinuteInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg time minute terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_MINUTE() { return getToken(ExpressionFilterParser.MSG_TIME_MINUTE, 0); }
+
+        /**
+         * Instantiates a new Message time minute in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeMinuteInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeMinuteIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class SourceBasestationContext extends FilterExpressionContext {
-		public TerminalNode SRC_BASESTATION() { return getToken(ExpressionFilterParser.SRC_BASESTATION, 0); }
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Source basestation context.
+     */
+    public static class SourceBasestationContext extends FilterExpressionContext {
+        /**
+         * Src basestation terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode SRC_BASESTATION() { return getToken(ExpressionFilterParser.SRC_BASESTATION, 0); }
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public SourceBasestationContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Source basestation context.
+         *
+         * @param ctx the ctx
+         */
+        public SourceBasestationContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitSourceBasestation(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetNavigationalStatusInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target navigational status in context.
+     */
+    public static class TargetNavigationalStatusInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public TerminalNode TGT_NAVSTAT() { return getToken(ExpressionFilterParser.TGT_NAVSTAT, 0); }
-		public TargetNavigationalStatusInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt navstat terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_NAVSTAT() { return getToken(ExpressionFilterParser.TGT_NAVSTAT, 0); }
+
+        /**
+         * Instantiates a new Target navigational status in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetNavigationalStatusInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetNavigationalStatusIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetLatitudeInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target latitude in context.
+     */
+    public static class TargetLatitudeInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public TerminalNode TGT_LATITUDE() { return getToken(ExpressionFilterParser.TGT_LATITUDE, 0); }
-		public NotinContext notin() {
+
+        /**
+         * Tgt latitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_LATITUDE() { return getToken(ExpressionFilterParser.TGT_LATITUDE, 0); }
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TargetLatitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Target latitude in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetLatitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetLatitudeIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetCountryInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target country in context.
+     */
+    public static class TargetCountryInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode TGT_COUNTRY() { return getToken(ExpressionFilterParser.TGT_COUNTRY, 0); }
-		public TargetCountryInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt country terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_COUNTRY() { return getToken(ExpressionFilterParser.TGT_COUNTRY, 0); }
+
+        /**
+         * Instantiates a new Target country in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetCountryInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetCountryIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetCallsignContext extends FilterExpressionContext {
-		public TerminalNode TGT_CALLSIGN() { return getToken(ExpressionFilterParser.TGT_CALLSIGN, 0); }
-		public StringContext string() {
+
+    /**
+     * The type Target callsign context.
+     */
+    public static class TargetCallsignContext extends FilterExpressionContext {
+        /**
+         * Tgt callsign terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_CALLSIGN() { return getToken(ExpressionFilterParser.TGT_CALLSIGN, 0); }
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
-		public TargetCallsignContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Like terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
+
+        /**
+         * Instantiates a new Target callsign context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetCallsignContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetCallsign(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeMonthInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message time month in context.
+     */
+    public static class MessageTimeMonthInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode MSG_TIME_MONTH() { return getToken(ExpressionFilterParser.MSG_TIME_MONTH, 0); }
-		public IntListContext intList() {
+
+        /**
+         * Msg time month terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_MONTH() { return getToken(ExpressionFilterParser.MSG_TIME_MONTH, 0); }
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageTimeMonthInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message time month in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeMonthInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeMonthIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class SourceBasestationInContext extends FilterExpressionContext {
-		public TerminalNode SRC_BASESTATION() { return getToken(ExpressionFilterParser.SRC_BASESTATION, 0); }
-		public InContext in() {
+
+    /**
+     * The type Source basestation in context.
+     */
+    public static class SourceBasestationInContext extends FilterExpressionContext {
+        /**
+         * Src basestation terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode SRC_BASESTATION() { return getToken(ExpressionFilterParser.SRC_BASESTATION, 0); }
+
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public SourceBasestationInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Source basestation in context.
+         *
+         * @param ctx the ctx
+         */
+        public SourceBasestationInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitSourceBasestationIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageImoInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message imo in context.
+     */
+    public static class MessageImoInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public TerminalNode MSG_IMO() { return getToken(ExpressionFilterParser.MSG_IMO, 0); }
-		public IntRangeContext intRange() {
+
+        /**
+         * Msg imo terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_IMO() { return getToken(ExpressionFilterParser.MSG_IMO, 0); }
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageImoInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message imo in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageImoInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageImoIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetImoContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Target imo context.
+     */
+    public static class TargetImoContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public TerminalNode TGT_IMO() { return getToken(ExpressionFilterParser.TGT_IMO, 0); }
-		public TargetImoContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Tgt imo terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_IMO() { return getToken(ExpressionFilterParser.TGT_IMO, 0); }
+
+        /**
+         * Instantiates a new Target imo context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetImoContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetImo(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeWeekdayContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message time weekday context.
+     */
+    public static class MessageTimeWeekdayContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public StringContext string() {
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public TerminalNode MSG_TIME_WEEKDAY() { return getToken(ExpressionFilterParser.MSG_TIME_WEEKDAY, 0); }
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageTimeWeekdayContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg time weekday terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_WEEKDAY() { return getToken(ExpressionFilterParser.MSG_TIME_WEEKDAY, 0); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message time weekday context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeWeekdayContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeWeekday(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageCountryInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message country in context.
+     */
+    public static class MessageCountryInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode MSG_COUNTRY() { return getToken(ExpressionFilterParser.MSG_COUNTRY, 0); }
-		public MessageCountryInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg country terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_COUNTRY() { return getToken(ExpressionFilterParser.MSG_COUNTRY, 0); }
+
+        /**
+         * Instantiates a new Message country in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageCountryInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageCountryIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetSpeedOverGroundContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Target speed over ground context.
+     */
+    public static class TargetSpeedOverGroundContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode TGT_SPEED() { return getToken(ExpressionFilterParser.TGT_SPEED, 0); }
-		public TargetSpeedOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt speed terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_SPEED() { return getToken(ExpressionFilterParser.TGT_SPEED, 0); }
+
+        /**
+         * Instantiates a new Target speed over ground context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetSpeedOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetSpeedOverGround(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetTrueHeadingContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Target true heading context.
+     */
+    public static class TargetTrueHeadingContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public TerminalNode TGT_HEADING() { return getToken(ExpressionFilterParser.TGT_HEADING, 0); }
-		public TargetTrueHeadingContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Tgt heading terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_HEADING() { return getToken(ExpressionFilterParser.TGT_HEADING, 0); }
+
+        /**
+         * Instantiates a new Target true heading context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetTrueHeadingContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetTrueHeading(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetTrueHeadingInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target true heading in context.
+     */
+    public static class TargetTrueHeadingInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode TGT_HEADING() { return getToken(ExpressionFilterParser.TGT_HEADING, 0); }
-		public TargetTrueHeadingInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt heading terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_HEADING() { return getToken(ExpressionFilterParser.TGT_HEADING, 0); }
+
+        /**
+         * Instantiates a new Target true heading in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetTrueHeadingInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetTrueHeadingIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageLatitudeInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message latitude in context.
+     */
+    public static class MessageLatitudeInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode MSG_LATITUDE() { return getToken(ExpressionFilterParser.MSG_LATITUDE, 0); }
-		public MessageLatitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg latitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_LATITUDE() { return getToken(ExpressionFilterParser.MSG_LATITUDE, 0); }
+
+        /**
+         * Instantiates a new Message latitude in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageLatitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageLatitudeIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageIdContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message id context.
+     */
+    public static class MessageIdContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode MSG_MSGID() { return getToken(ExpressionFilterParser.MSG_MSGID, 0); }
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageIdContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg msgid terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_MSGID() { return getToken(ExpressionFilterParser.MSG_MSGID, 0); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message id context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageIdContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageId(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageCallsignContext extends FilterExpressionContext {
-		public TerminalNode MSG_CALLSIGN() { return getToken(ExpressionFilterParser.MSG_CALLSIGN, 0); }
-		public StringContext string() {
+
+    /**
+     * The type Message callsign context.
+     */
+    public static class MessageCallsignContext extends FilterExpressionContext {
+        /**
+         * Msg callsign terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_CALLSIGN() { return getToken(ExpressionFilterParser.MSG_CALLSIGN, 0); }
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
-		public MessageCallsignContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Like terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
+
+        /**
+         * Instantiates a new Message callsign context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageCallsignContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageCallsign(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageSpeedOverGroundContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Message speed over ground context.
+     */
+    public static class MessageSpeedOverGroundContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode MSG_SPEED() { return getToken(ExpressionFilterParser.MSG_SPEED, 0); }
-		public MessageSpeedOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg speed terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_SPEED() { return getToken(ExpressionFilterParser.MSG_SPEED, 0); }
+
+        /**
+         * Instantiates a new Message speed over ground context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageSpeedOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageSpeedOverGround(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetNameInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target name in context.
+     */
+    public static class TargetNameInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode TGT_NAME() { return getToken(ExpressionFilterParser.TGT_NAME, 0); }
-		public TargetNameInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt name terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_NAME() { return getToken(ExpressionFilterParser.TGT_NAME, 0); }
+
+        /**
+         * Instantiates a new Target name in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetNameInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetNameIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageCourseOverGroundInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message course over ground in context.
+     */
+    public static class MessageCourseOverGroundInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode MSG_COURSE() { return getToken(ExpressionFilterParser.MSG_COURSE, 0); }
-		public MessageCourseOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg course terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_COURSE() { return getToken(ExpressionFilterParser.MSG_COURSE, 0); }
+
+        /**
+         * Instantiates a new Message course over ground in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageCourseOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageCourseOverGroundIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageDraughtContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Message draught context.
+     */
+    public static class MessageDraughtContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode MSG_DRAUGHT() { return getToken(ExpressionFilterParser.MSG_DRAUGHT, 0); }
-		public MessageDraughtContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg draught terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_DRAUGHT() { return getToken(ExpressionFilterParser.MSG_DRAUGHT, 0); }
+
+        /**
+         * Instantiates a new Message draught context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageDraughtContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageDraught(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageMmsiInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message mmsi in context.
+     */
+    public static class MessageMmsiInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public TerminalNode MSG_MMSI() { return getToken(ExpressionFilterParser.MSG_MMSI, 0); }
-		public NotinContext notin() {
+
+        /**
+         * Msg mmsi terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_MMSI() { return getToken(ExpressionFilterParser.MSG_MMSI, 0); }
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageMmsiInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message mmsi in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageMmsiInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageMmsiIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeHourContext extends FilterExpressionContext {
-		public TerminalNode MSG_TIME_HOUR() { return getToken(ExpressionFilterParser.MSG_TIME_HOUR, 0); }
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message time hour context.
+     */
+    public static class MessageTimeHourContext extends FilterExpressionContext {
+        /**
+         * Msg time hour terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_HOUR() { return getToken(ExpressionFilterParser.MSG_TIME_HOUR, 0); }
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageTimeHourContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message time hour context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeHourContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeHour(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeWeekdayInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message time weekday in context.
+     */
+    public static class MessageTimeWeekdayInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public TerminalNode MSG_TIME_WEEKDAY() { return getToken(ExpressionFilterParser.MSG_TIME_WEEKDAY, 0); }
-		public NotinContext notin() {
+
+        /**
+         * Msg time weekday terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_WEEKDAY() { return getToken(ExpressionFilterParser.MSG_TIME_WEEKDAY, 0); }
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageTimeWeekdayInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message time weekday in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeWeekdayInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeWeekdayIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class SourceCountryInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Source country in context.
+     */
+    public static class SourceCountryInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode SRC_COUNTRY() { return getToken(ExpressionFilterParser.SRC_COUNTRY, 0); }
-		public SourceCountryInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Src country terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode SRC_COUNTRY() { return getToken(ExpressionFilterParser.SRC_COUNTRY, 0); }
+
+        /**
+         * Instantiates a new Source country in context.
+         *
+         * @param ctx the ctx
+         */
+        public SourceCountryInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitSourceCountryIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageIdInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message id in context.
+     */
+    public static class MessageIdInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public TerminalNode MSG_MSGID() { return getToken(ExpressionFilterParser.MSG_MSGID, 0); }
-		public NotinContext notin() {
+
+        /**
+         * Msg msgid terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_MSGID() { return getToken(ExpressionFilterParser.MSG_MSGID, 0); }
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageIdInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message id in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageIdInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageIdIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetDraughtContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Target draught context.
+     */
+    public static class TargetDraughtContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode TGT_DRAUGHT() { return getToken(ExpressionFilterParser.TGT_DRAUGHT, 0); }
-		public TargetDraughtContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt draught terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_DRAUGHT() { return getToken(ExpressionFilterParser.TGT_DRAUGHT, 0); }
+
+        /**
+         * Instantiates a new Target draught context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetDraughtContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetDraught(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetImoInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target imo in context.
+     */
+    public static class TargetImoInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public TerminalNode TGT_IMO() { return getToken(ExpressionFilterParser.TGT_IMO, 0); }
-		public TargetImoInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt imo terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_IMO() { return getToken(ExpressionFilterParser.TGT_IMO, 0); }
+
+        /**
+         * Instantiates a new Target imo in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetImoInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetImoIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeYearInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message time year in context.
+     */
+    public static class MessageTimeYearInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public TerminalNode MSG_TIME_YEAR() { return getToken(ExpressionFilterParser.MSG_TIME_YEAR, 0); }
-		public NotinContext notin() {
+
+        /**
+         * Msg time year terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_YEAR() { return getToken(ExpressionFilterParser.MSG_TIME_YEAR, 0); }
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageTimeYearInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message time year in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeYearInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeYearIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageNameContext extends FilterExpressionContext {
-		public TerminalNode MSG_NAME() { return getToken(ExpressionFilterParser.MSG_NAME, 0); }
-		public StringContext string() {
+
+    /**
+     * The type Message name context.
+     */
+    public static class MessageNameContext extends FilterExpressionContext {
+        /**
+         * Msg name terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_NAME() { return getToken(ExpressionFilterParser.MSG_NAME, 0); }
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
-		public MessageNameContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Like terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
+
+        /**
+         * Instantiates a new Message name context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageNameContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageName(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeHourInContext extends FilterExpressionContext {
-		public TerminalNode MSG_TIME_HOUR() { return getToken(ExpressionFilterParser.MSG_TIME_HOUR, 0); }
-		public InContext in() {
+
+    /**
+     * The type Message time hour in context.
+     */
+    public static class MessageTimeHourInContext extends FilterExpressionContext {
+        /**
+         * Msg time hour terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_HOUR() { return getToken(ExpressionFilterParser.MSG_TIME_HOUR, 0); }
+
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageTimeHourInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message time hour in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeHourInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeHourIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetNavigationalStatusContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Target navigational status context.
+     */
+    public static class TargetNavigationalStatusContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public StringContext string() {
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public TerminalNode TGT_NAVSTAT() { return getToken(ExpressionFilterParser.TGT_NAVSTAT, 0); }
-		public TargetNavigationalStatusContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt navstat terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_NAVSTAT() { return getToken(ExpressionFilterParser.TGT_NAVSTAT, 0); }
+
+        /**
+         * Instantiates a new Target navigational status context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetNavigationalStatusContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetNavigationalStatus(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetNameContext extends FilterExpressionContext {
-		public StringContext string() {
+
+    /**
+     * The type Target name context.
+     */
+    public static class TargetNameContext extends FilterExpressionContext {
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
-		public TerminalNode TGT_NAME() { return getToken(ExpressionFilterParser.TGT_NAME, 0); }
-		public TargetNameContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Like terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode LIKE() { return getToken(ExpressionFilterParser.LIKE, 0); }
+
+        /**
+         * Tgt name terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_NAME() { return getToken(ExpressionFilterParser.TGT_NAME, 0); }
+
+        /**
+         * Instantiates a new Target name context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetNameContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetName(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageLatitudeContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Message latitude context.
+     */
+    public static class MessageLatitudeContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode MSG_LATITUDE() { return getToken(ExpressionFilterParser.MSG_LATITUDE, 0); }
-		public MessageLatitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg latitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_LATITUDE() { return getToken(ExpressionFilterParser.MSG_LATITUDE, 0); }
+
+        /**
+         * Instantiates a new Message latitude context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageLatitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageLatitude(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageDraughtInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message draught in context.
+     */
+    public static class MessageDraughtInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode MSG_DRAUGHT() { return getToken(ExpressionFilterParser.MSG_DRAUGHT, 0); }
-		public MessageDraughtInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg draught terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_DRAUGHT() { return getToken(ExpressionFilterParser.MSG_DRAUGHT, 0); }
+
+        /**
+         * Instantiates a new Message draught in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageDraughtInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageDraughtIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetCourseOverGroundInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target course over ground in context.
+     */
+    public static class TargetCourseOverGroundInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public TerminalNode TGT_COURSE() { return getToken(ExpressionFilterParser.TGT_COURSE, 0); }
-		public NotinContext notin() {
+
+        /**
+         * Tgt course terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_COURSE() { return getToken(ExpressionFilterParser.TGT_COURSE, 0); }
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TargetCourseOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Target course over ground in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetCourseOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetCourseOverGroundIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeDayContext extends FilterExpressionContext {
-		public TerminalNode MSG_TIME_DAY() { return getToken(ExpressionFilterParser.MSG_TIME_DAY, 0); }
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message time day context.
+     */
+    public static class MessageTimeDayContext extends FilterExpressionContext {
+        /**
+         * Msg time day terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_DAY() { return getToken(ExpressionFilterParser.MSG_TIME_DAY, 0); }
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageTimeDayContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message time day context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeDayContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeDay(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageCourseOverGroundContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Message course over ground context.
+     */
+    public static class MessageCourseOverGroundContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode MSG_COURSE() { return getToken(ExpressionFilterParser.MSG_COURSE, 0); }
-		public MessageCourseOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg course terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_COURSE() { return getToken(ExpressionFilterParser.MSG_COURSE, 0); }
+
+        /**
+         * Instantiates a new Message course over ground context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageCourseOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageCourseOverGround(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessagePositionInsideContext extends FilterExpressionContext {
-		public TerminalNode MSG_POSITION() { return getToken(ExpressionFilterParser.MSG_POSITION, 0); }
-		public BboxContext bbox() {
+
+    /**
+     * The type Message position inside context.
+     */
+    public static class MessagePositionInsideContext extends FilterExpressionContext {
+        /**
+         * Msg position terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_POSITION() { return getToken(ExpressionFilterParser.MSG_POSITION, 0); }
+
+        /**
+         * Bbox bbox context.
+         *
+         * @return the bbox context
+         */
+        public BboxContext bbox() {
 			return getRuleContext(BboxContext.class,0);
 		}
-		public CircleContext circle() {
+
+        /**
+         * Circle circle context.
+         *
+         * @return the circle context
+         */
+        public CircleContext circle() {
 			return getRuleContext(CircleContext.class,0);
 		}
-		public TerminalNode WITHIN() { return getToken(ExpressionFilterParser.WITHIN, 0); }
-		public MessagePositionInsideContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Within terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode WITHIN() { return getToken(ExpressionFilterParser.WITHIN, 0); }
+
+        /**
+         * Instantiates a new Message position inside context.
+         *
+         * @param ctx the ctx
+         */
+        public MessagePositionInsideContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessagePositionInside(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageShiptypeInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message shiptype in context.
+     */
+    public static class MessageShiptypeInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public TerminalNode MSG_TYPE() { return getToken(ExpressionFilterParser.MSG_TYPE, 0); }
-		public MessageShiptypeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg type terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TYPE() { return getToken(ExpressionFilterParser.MSG_TYPE, 0); }
+
+        /**
+         * Instantiates a new Message shiptype in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageShiptypeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageShiptypeIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetCourseOverGroundContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Target course over ground context.
+     */
+    public static class TargetCourseOverGroundContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public TerminalNode TGT_COURSE() { return getToken(ExpressionFilterParser.TGT_COURSE, 0); }
-		public CompareToContext compareTo() {
+
+        /**
+         * Tgt course terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_COURSE() { return getToken(ExpressionFilterParser.TGT_COURSE, 0); }
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TargetCourseOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Target course over ground context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetCourseOverGroundContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetCourseOverGround(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetPositionInsideContext extends FilterExpressionContext {
-		public TerminalNode TGT_POSITION() { return getToken(ExpressionFilterParser.TGT_POSITION, 0); }
-		public BboxContext bbox() {
+
+    /**
+     * The type Target position inside context.
+     */
+    public static class TargetPositionInsideContext extends FilterExpressionContext {
+        /**
+         * Tgt position terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_POSITION() { return getToken(ExpressionFilterParser.TGT_POSITION, 0); }
+
+        /**
+         * Bbox bbox context.
+         *
+         * @return the bbox context
+         */
+        public BboxContext bbox() {
 			return getRuleContext(BboxContext.class,0);
 		}
-		public CircleContext circle() {
+
+        /**
+         * Circle circle context.
+         *
+         * @return the circle context
+         */
+        public CircleContext circle() {
 			return getRuleContext(CircleContext.class,0);
 		}
-		public TerminalNode WITHIN() { return getToken(ExpressionFilterParser.WITHIN, 0); }
-		public TargetPositionInsideContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Within terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode WITHIN() { return getToken(ExpressionFilterParser.WITHIN, 0); }
+
+        /**
+         * Instantiates a new Target position inside context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetPositionInsideContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetPositionInside(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageNavigationalStatusInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message navigational status in context.
+     */
+    public static class MessageNavigationalStatusInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode MSG_NAVSTAT() { return getToken(ExpressionFilterParser.MSG_NAVSTAT, 0); }
-		public IntListContext intList() {
+
+        /**
+         * Msg navstat terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_NAVSTAT() { return getToken(ExpressionFilterParser.MSG_NAVSTAT, 0); }
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageNavigationalStatusInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message navigational status in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageNavigationalStatusInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageNavigationalStatusIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetSpeedOverGroundInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target speed over ground in context.
+     */
+    public static class TargetSpeedOverGroundInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode TGT_SPEED() { return getToken(ExpressionFilterParser.TGT_SPEED, 0); }
-		public TargetSpeedOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt speed terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_SPEED() { return getToken(ExpressionFilterParser.TGT_SPEED, 0); }
+
+        /**
+         * Instantiates a new Target speed over ground in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetSpeedOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetSpeedOverGroundIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetDraughtInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target draught in context.
+     */
+    public static class TargetDraughtInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode TGT_DRAUGHT() { return getToken(ExpressionFilterParser.TGT_DRAUGHT, 0); }
-		public TargetDraughtInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt draught terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_DRAUGHT() { return getToken(ExpressionFilterParser.TGT_DRAUGHT, 0); }
+
+        /**
+         * Instantiates a new Target draught in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetDraughtInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetDraughtIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class OrAndContext extends FilterExpressionContext {
-		public Token op;
-		public TerminalNode AND(int i) {
+
+    /**
+     * The type Or and context.
+     */
+    public static class OrAndContext extends FilterExpressionContext {
+        /**
+         * The Op.
+         */
+        public Token op;
+
+        /**
+         * And terminal node.
+         *
+         * @param i the
+         * @return the terminal node
+         */
+        public TerminalNode AND(int i) {
 			return getToken(ExpressionFilterParser.AND, i);
 		}
-		public List<FilterExpressionContext> filterExpression() {
+
+        /**
+         * Filter expression list.
+         *
+         * @return the list
+         */
+        public List<FilterExpressionContext> filterExpression() {
 			return getRuleContexts(FilterExpressionContext.class);
 		}
-		public FilterExpressionContext filterExpression(int i) {
+
+        /**
+         * Filter expression filter expression context.
+         *
+         * @param i the
+         * @return the filter expression context
+         */
+        public FilterExpressionContext filterExpression(int i) {
 			return getRuleContext(FilterExpressionContext.class,i);
 		}
-		public List<TerminalNode> AND() { return getTokens(ExpressionFilterParser.AND); }
-		public List<TerminalNode> OR() { return getTokens(ExpressionFilterParser.OR); }
-		public TerminalNode OR(int i) {
+
+        /**
+         * And list.
+         *
+         * @return the list
+         */
+        public List<TerminalNode> AND() { return getTokens(ExpressionFilterParser.AND); }
+
+        /**
+         * Or list.
+         *
+         * @return the list
+         */
+        public List<TerminalNode> OR() { return getTokens(ExpressionFilterParser.OR); }
+
+        /**
+         * Or terminal node.
+         *
+         * @param i the
+         * @return the terminal node
+         */
+        public TerminalNode OR(int i) {
 			return getToken(ExpressionFilterParser.OR, i);
 		}
-		public OrAndContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Or and context.
+         *
+         * @param ctx the ctx
+         */
+        public OrAndContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitOrAnd(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetLatitudeContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Target latitude context.
+     */
+    public static class TargetLatitudeContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode TGT_LATITUDE() { return getToken(ExpressionFilterParser.TGT_LATITUDE, 0); }
-		public TargetLatitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt latitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_LATITUDE() { return getToken(ExpressionFilterParser.TGT_LATITUDE, 0); }
+
+        /**
+         * Instantiates a new Target latitude context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetLatitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetLatitude(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetShiptypeInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target shiptype in context.
+     */
+    public static class TargetShiptypeInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode TGT_TYPE() { return getToken(ExpressionFilterParser.TGT_TYPE, 0); }
-		public IntListContext intList() {
+
+        /**
+         * Tgt type terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_TYPE() { return getToken(ExpressionFilterParser.TGT_TYPE, 0); }
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public TargetShiptypeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Target shiptype in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetShiptypeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetShiptypeIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeDayInContext extends FilterExpressionContext {
-		public TerminalNode MSG_TIME_DAY() { return getToken(ExpressionFilterParser.MSG_TIME_DAY, 0); }
-		public InContext in() {
+
+    /**
+     * The type Message time day in context.
+     */
+    public static class MessageTimeDayInContext extends FilterExpressionContext {
+        /**
+         * Msg time day terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_DAY() { return getToken(ExpressionFilterParser.MSG_TIME_DAY, 0); }
+
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public IntRangeContext intRange() {
+
+        /**
+         * Int range int range context.
+         *
+         * @return the int range context
+         */
+        public IntRangeContext intRange() {
 			return getRuleContext(IntRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public IntListContext intList() {
+
+        /**
+         * Int list int list context.
+         *
+         * @return the int list context
+         */
+        public IntListContext intList() {
 			return getRuleContext(IntListContext.class,0);
 		}
-		public MessageTimeDayInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message time day in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeDayInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeDayIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class AisMessagetypeContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Ais messagetype context.
+     */
+    public static class AisMessagetypeContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public AisMessagetypeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Ais messagetype context.
+         *
+         * @param ctx the ctx
+         */
+        public AisMessagetypeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitAisMessagetype(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class SourceIdInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Source id in context.
+     */
+    public static class SourceIdInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public TerminalNode SRC_ID() { return getToken(ExpressionFilterParser.SRC_ID, 0); }
-		public StringListContext stringList() {
+
+        /**
+         * Src id terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode SRC_ID() { return getToken(ExpressionFilterParser.SRC_ID, 0); }
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public SourceIdInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Source id in context.
+         *
+         * @param ctx the ctx
+         */
+        public SourceIdInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitSourceIdIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class SourceRegionInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Source region in context.
+     */
+    public static class SourceRegionInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode SRC_REGION() { return getToken(ExpressionFilterParser.SRC_REGION, 0); }
-		public SourceRegionInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Src region terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode SRC_REGION() { return getToken(ExpressionFilterParser.SRC_REGION, 0); }
+
+        /**
+         * Instantiates a new Source region in context.
+         *
+         * @param ctx the ctx
+         */
+        public SourceRegionInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitSourceRegionIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageCallsignInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message callsign in context.
+     */
+    public static class MessageCallsignInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public TerminalNode MSG_CALLSIGN() { return getToken(ExpressionFilterParser.MSG_CALLSIGN, 0); }
-		public StringListContext stringList() {
+
+        /**
+         * Msg callsign terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_CALLSIGN() { return getToken(ExpressionFilterParser.MSG_CALLSIGN, 0); }
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public MessageCallsignInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message callsign in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageCallsignInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageCallsignIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageLongitudeInContext extends FilterExpressionContext {
-		public TerminalNode MSG_LONGITUDE() { return getToken(ExpressionFilterParser.MSG_LONGITUDE, 0); }
-		public InContext in() {
+
+    /**
+     * The type Message longitude in context.
+     */
+    public static class MessageLongitudeInContext extends FilterExpressionContext {
+        /**
+         * Msg longitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_LONGITUDE() { return getToken(ExpressionFilterParser.MSG_LONGITUDE, 0); }
+
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public MessageLongitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message longitude in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageLongitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageLongitudeIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class SourceTypeInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Source type in context.
+     */
+    public static class SourceTypeInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public TerminalNode SRC_TYPE() { return getToken(ExpressionFilterParser.SRC_TYPE, 0); }
-		public StringListContext stringList() {
+
+        /**
+         * Src type terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode SRC_TYPE() { return getToken(ExpressionFilterParser.SRC_TYPE, 0); }
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public SourceTypeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Source type in context.
+         *
+         * @param ctx the ctx
+         */
+        public SourceTypeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitSourceTypeIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageNameInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message name in context.
+     */
+    public static class MessageNameInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public TerminalNode MSG_NAME() { return getToken(ExpressionFilterParser.MSG_NAME, 0); }
-		public NotinContext notin() {
+
+        /**
+         * Msg name terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_NAME() { return getToken(ExpressionFilterParser.MSG_NAME, 0); }
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public MessageNameInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message name in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageNameInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageNameIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageSpeedOverGroundInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Message speed over ground in context.
+     */
+    public static class MessageSpeedOverGroundInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode MSG_SPEED() { return getToken(ExpressionFilterParser.MSG_SPEED, 0); }
-		public MessageSpeedOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg speed terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_SPEED() { return getToken(ExpressionFilterParser.MSG_SPEED, 0); }
+
+        /**
+         * Instantiates a new Message speed over ground in context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageSpeedOverGroundInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageSpeedOverGroundIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageMmsiContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message mmsi context.
+     */
+    public static class MessageMmsiContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode MSG_MMSI() { return getToken(ExpressionFilterParser.MSG_MMSI, 0); }
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageMmsiContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg mmsi terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_MMSI() { return getToken(ExpressionFilterParser.MSG_MMSI, 0); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message mmsi context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageMmsiContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageMmsi(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetShiptypeContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Target shiptype context.
+     */
+    public static class TargetShiptypeContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public StringContext string() {
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public TerminalNode TGT_TYPE() { return getToken(ExpressionFilterParser.TGT_TYPE, 0); }
-		public TargetShiptypeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt type terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_TYPE() { return getToken(ExpressionFilterParser.TGT_TYPE, 0); }
+
+        /**
+         * Instantiates a new Target shiptype context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetShiptypeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetShiptype(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageLongitudeContext extends FilterExpressionContext {
-		public TerminalNode MSG_LONGITUDE() { return getToken(ExpressionFilterParser.MSG_LONGITUDE, 0); }
-		public NumberContext number() {
+
+    /**
+     * The type Message longitude context.
+     */
+    public static class MessageLongitudeContext extends FilterExpressionContext {
+        /**
+         * Msg longitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_LONGITUDE() { return getToken(ExpressionFilterParser.MSG_LONGITUDE, 0); }
+
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public MessageLongitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Message longitude context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageLongitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageLongitude(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageTimeMonthContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message time month context.
+     */
+    public static class MessageTimeMonthContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public StringContext string() {
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public TerminalNode MSG_TIME_MONTH() { return getToken(ExpressionFilterParser.MSG_TIME_MONTH, 0); }
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageTimeMonthContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg time month terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TIME_MONTH() { return getToken(ExpressionFilterParser.MSG_TIME_MONTH, 0); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message time month context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageTimeMonthContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageTimeMonth(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetLongitudeContext extends FilterExpressionContext {
-		public NumberContext number() {
+
+    /**
+     * The type Target longitude context.
+     */
+    public static class TargetLongitudeContext extends FilterExpressionContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public CompareToContext compareTo() {
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode TGT_LONGITUDE() { return getToken(ExpressionFilterParser.TGT_LONGITUDE, 0); }
-		public TargetLongitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt longitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_LONGITUDE() { return getToken(ExpressionFilterParser.TGT_LONGITUDE, 0); }
+
+        /**
+         * Instantiates a new Target longitude context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetLongitudeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetLongitude(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetCallsignInContext extends FilterExpressionContext {
-		public TerminalNode TGT_CALLSIGN() { return getToken(ExpressionFilterParser.TGT_CALLSIGN, 0); }
-		public InContext in() {
+
+    /**
+     * The type Target callsign in context.
+     */
+    public static class TargetCallsignInContext extends FilterExpressionContext {
+        /**
+         * Tgt callsign terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_CALLSIGN() { return getToken(ExpressionFilterParser.TGT_CALLSIGN, 0); }
+
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public StringListContext stringList() {
+
+        /**
+         * String list string list context.
+         *
+         * @return the string list context
+         */
+        public StringListContext stringList() {
 			return getRuleContext(StringListContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TargetCallsignInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Instantiates a new Target callsign in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetCallsignInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetCallsignIn(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageShiptypeContext extends FilterExpressionContext {
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message shiptype context.
+     */
+    public static class MessageShiptypeContext extends FilterExpressionContext {
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public StringContext string() {
+
+        /**
+         * String string context.
+         *
+         * @return the string context
+         */
+        public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public TerminalNode MSG_TYPE() { return getToken(ExpressionFilterParser.MSG_TYPE, 0); }
-		public MessageShiptypeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Msg type terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_TYPE() { return getToken(ExpressionFilterParser.MSG_TYPE, 0); }
+
+        /**
+         * Instantiates a new Message shiptype context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageShiptypeContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageShiptype(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class MessageImoContext extends FilterExpressionContext {
-		public TerminalNode MSG_IMO() { return getToken(ExpressionFilterParser.MSG_IMO, 0); }
-		public CompareToContext compareTo() {
+
+    /**
+     * The type Message imo context.
+     */
+    public static class MessageImoContext extends FilterExpressionContext {
+        /**
+         * Msg imo terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode MSG_IMO() { return getToken(ExpressionFilterParser.MSG_IMO, 0); }
+
+        /**
+         * Compare to compare to context.
+         *
+         * @return the compare to context
+         */
+        public CompareToContext compareTo() {
 			return getRuleContext(CompareToContext.class,0);
 		}
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public MessageImoContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Instantiates a new Message imo context.
+         *
+         * @param ctx the ctx
+         */
+        public MessageImoContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitMessageImo(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class TargetLongitudeInContext extends FilterExpressionContext {
-		public InContext in() {
+
+    /**
+     * The type Target longitude in context.
+     */
+    public static class TargetLongitudeInContext extends FilterExpressionContext {
+        /**
+         * In in context.
+         *
+         * @return the in context
+         */
+        public InContext in() {
 			return getRuleContext(InContext.class,0);
 		}
-		public NumberRangeContext numberRange() {
+
+        /**
+         * Number range number range context.
+         *
+         * @return the number range context
+         */
+        public NumberRangeContext numberRange() {
 			return getRuleContext(NumberRangeContext.class,0);
 		}
-		public NotinContext notin() {
+
+        /**
+         * Notin notin context.
+         *
+         * @return the notin context
+         */
+        public NotinContext notin() {
 			return getRuleContext(NotinContext.class,0);
 		}
-		public TerminalNode TGT_LONGITUDE() { return getToken(ExpressionFilterParser.TGT_LONGITUDE, 0); }
-		public TargetLongitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
+
+        /**
+         * Tgt longitude terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode TGT_LONGITUDE() { return getToken(ExpressionFilterParser.TGT_LONGITUDE, 0); }
+
+        /**
+         * Instantiates a new Target longitude in context.
+         *
+         * @param ctx the ctx
+         */
+        public TargetLongitudeInContext(FilterExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof ExpressionFilterVisitor ) return ((ExpressionFilterVisitor<? extends T>)visitor).visitTargetLongitudeIn(this);
@@ -1392,7 +4078,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final FilterExpressionContext filterExpression() throws RecognitionException {
+    /**
+     * Filter expression filter expression context.
+     *
+     * @return the filter expression context
+     * @throws RecognitionException the recognition exception
+     */
+    public final FilterExpressionContext filterExpression() throws RecognitionException {
 		return filterExpression(0);
 	}
 
@@ -3364,8 +6056,17 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class CompareToContext extends ParserRuleContext {
-		public CompareToContext(ParserRuleContext parent, int invokingState) {
+    /**
+     * The type Compare to context.
+     */
+    public static class CompareToContext extends ParserRuleContext {
+        /**
+         * Instantiates a new Compare to context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public CompareToContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_compareTo; }
@@ -3376,7 +6077,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final CompareToContext compareTo() throws RecognitionException {
+    /**
+     * Compare to compare to context.
+     *
+     * @return the compare to context
+     * @throws RecognitionException the recognition exception
+     */
+    public final CompareToContext compareTo() throws RecognitionException {
 		CompareToContext _localctx = new CompareToContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_compareTo);
 		int _la;
@@ -3402,8 +6109,17 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class InContext extends ParserRuleContext {
-		public InContext(ParserRuleContext parent, int invokingState) {
+    /**
+     * The type In context.
+     */
+    public static class InContext extends ParserRuleContext {
+        /**
+         * Instantiates a new In context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public InContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_in; }
@@ -3414,7 +6130,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final InContext in() throws RecognitionException {
+    /**
+     * In in context.
+     *
+     * @return the in context
+     * @throws RecognitionException the recognition exception
+     */
+    public final InContext in() throws RecognitionException {
 		InContext _localctx = new InContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_in);
 		int _la;
@@ -3440,8 +6162,17 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class NotinContext extends ParserRuleContext {
-		public NotinContext(ParserRuleContext parent, int invokingState) {
+    /**
+     * The type Notin context.
+     */
+    public static class NotinContext extends ParserRuleContext {
+        /**
+         * Instantiates a new Notin context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public NotinContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_notin; }
@@ -3452,7 +6183,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final NotinContext notin() throws RecognitionException {
+    /**
+     * Notin notin context.
+     *
+     * @return the notin context
+     * @throws RecognitionException the recognition exception
+     */
+    public final NotinContext notin() throws RecognitionException {
 		NotinContext _localctx = new NotinContext(_ctx, getState());
 		enterRule(_localctx, 8, RULE_notin);
 		int _la;
@@ -3478,12 +6215,34 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class IntListContext extends ParserRuleContext {
-		public TerminalNode INT(int i) {
+    /**
+     * The type Int list context.
+     */
+    public static class IntListContext extends ParserRuleContext {
+        /**
+         * Int terminal node.
+         *
+         * @param i the
+         * @return the terminal node
+         */
+        public TerminalNode INT(int i) {
 			return getToken(ExpressionFilterParser.INT, i);
 		}
-		public List<TerminalNode> INT() { return getTokens(ExpressionFilterParser.INT); }
-		public IntListContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * Int list.
+         *
+         * @return the list
+         */
+        public List<TerminalNode> INT() { return getTokens(ExpressionFilterParser.INT); }
+
+        /**
+         * Instantiates a new Int list context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public IntListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_intList; }
@@ -3494,7 +6253,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final IntListContext intList() throws RecognitionException {
+    /**
+     * Int list int list context.
+     *
+     * @return the int list context
+     * @throws RecognitionException the recognition exception
+     */
+    public final IntListContext intList() throws RecognitionException {
 		IntListContext _localctx = new IntListContext(_ctx, getState());
 		enterRule(_localctx, 10, RULE_intList);
 		int _la;
@@ -3548,14 +6313,36 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class StringListContext extends ParserRuleContext {
-		public StringContext string(int i) {
+    /**
+     * The type String list context.
+     */
+    public static class StringListContext extends ParserRuleContext {
+        /**
+         * String string context.
+         *
+         * @param i the
+         * @return the string context
+         */
+        public StringContext string(int i) {
 			return getRuleContext(StringContext.class,i);
 		}
-		public List<StringContext> string() {
+
+        /**
+         * String list.
+         *
+         * @return the list
+         */
+        public List<StringContext> string() {
 			return getRuleContexts(StringContext.class);
 		}
-		public StringListContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * Instantiates a new String list context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public StringListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stringList; }
@@ -3566,7 +6353,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final StringListContext stringList() throws RecognitionException {
+    /**
+     * String list string list context.
+     *
+     * @return the string list context
+     * @throws RecognitionException the recognition exception
+     */
+    public final StringListContext stringList() throws RecognitionException {
 		StringListContext _localctx = new StringListContext(_ctx, getState());
 		enterRule(_localctx, 12, RULE_stringList);
 		int _la;
@@ -3620,13 +6413,41 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class IntRangeContext extends ParserRuleContext {
-		public TerminalNode INT(int i) {
+    /**
+     * The type Int range context.
+     */
+    public static class IntRangeContext extends ParserRuleContext {
+        /**
+         * Int terminal node.
+         *
+         * @param i the
+         * @return the terminal node
+         */
+        public TerminalNode INT(int i) {
 			return getToken(ExpressionFilterParser.INT, i);
 		}
-		public TerminalNode RANGE() { return getToken(ExpressionFilterParser.RANGE, 0); }
-		public List<TerminalNode> INT() { return getTokens(ExpressionFilterParser.INT); }
-		public IntRangeContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * Range terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode RANGE() { return getToken(ExpressionFilterParser.RANGE, 0); }
+
+        /**
+         * Int list.
+         *
+         * @return the list
+         */
+        public List<TerminalNode> INT() { return getTokens(ExpressionFilterParser.INT); }
+
+        /**
+         * Instantiates a new Int range context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public IntRangeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_intRange; }
@@ -3637,7 +6458,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final IntRangeContext intRange() throws RecognitionException {
+    /**
+     * Int range int range context.
+     *
+     * @return the int range context
+     * @throws RecognitionException the recognition exception
+     */
+    public final IntRangeContext intRange() throws RecognitionException {
 		IntRangeContext _localctx = new IntRangeContext(_ctx, getState());
 		enterRule(_localctx, 14, RULE_intRange);
 		int _la;
@@ -3676,15 +6503,43 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class NumberRangeContext extends ParserRuleContext {
-		public List<NumberContext> number() {
+    /**
+     * The type Number range context.
+     */
+    public static class NumberRangeContext extends ParserRuleContext {
+        /**
+         * Number list.
+         *
+         * @return the list
+         */
+        public List<NumberContext> number() {
 			return getRuleContexts(NumberContext.class);
 		}
-		public TerminalNode RANGE() { return getToken(ExpressionFilterParser.RANGE, 0); }
-		public NumberContext number(int i) {
+
+        /**
+         * Range terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode RANGE() { return getToken(ExpressionFilterParser.RANGE, 0); }
+
+        /**
+         * Number number context.
+         *
+         * @param i the
+         * @return the number context
+         */
+        public NumberContext number(int i) {
 			return getRuleContext(NumberContext.class,i);
 		}
-		public NumberRangeContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * Instantiates a new Number range context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public NumberRangeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_numberRange; }
@@ -3695,7 +6550,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final NumberRangeContext numberRange() throws RecognitionException {
+    /**
+     * Number range number range context.
+     *
+     * @return the number range context
+     * @throws RecognitionException the recognition exception
+     */
+    public final NumberRangeContext numberRange() throws RecognitionException {
 		NumberRangeContext _localctx = new NumberRangeContext(_ctx, getState());
 		enterRule(_localctx, 16, RULE_numberRange);
 		int _la;
@@ -3734,10 +6595,31 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class NumberContext extends ParserRuleContext {
-		public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
-		public TerminalNode FLOAT() { return getToken(ExpressionFilterParser.FLOAT, 0); }
-		public NumberContext(ParserRuleContext parent, int invokingState) {
+    /**
+     * The type Number context.
+     */
+    public static class NumberContext extends ParserRuleContext {
+        /**
+         * Int terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode INT() { return getToken(ExpressionFilterParser.INT, 0); }
+
+        /**
+         * Float terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode FLOAT() { return getToken(ExpressionFilterParser.FLOAT, 0); }
+
+        /**
+         * Instantiates a new Number context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public NumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_number; }
@@ -3748,7 +6630,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final NumberContext number() throws RecognitionException {
+    /**
+     * Number number context.
+     *
+     * @return the number context
+     * @throws RecognitionException the recognition exception
+     */
+    public final NumberContext number() throws RecognitionException {
 		NumberContext _localctx = new NumberContext(_ctx, getState());
 		enterRule(_localctx, 18, RULE_number);
 		int _la;
@@ -3774,12 +6662,33 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class StringContext extends ParserRuleContext {
-		public NumberContext number() {
+    /**
+     * The type String context.
+     */
+    public static class StringContext extends ParserRuleContext {
+        /**
+         * Number number context.
+         *
+         * @return the number context
+         */
+        public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public TerminalNode STRING() { return getToken(ExpressionFilterParser.STRING, 0); }
-		public StringContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * String terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode STRING() { return getToken(ExpressionFilterParser.STRING, 0); }
+
+        /**
+         * Instantiates a new String context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public StringContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_string; }
@@ -3790,7 +6699,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final StringContext string() throws RecognitionException {
+    /**
+     * String string context.
+     *
+     * @return the string context
+     * @throws RecognitionException the recognition exception
+     */
+    public final StringContext string() throws RecognitionException {
 		StringContext _localctx = new StringContext(_ctx, getState());
 		enterRule(_localctx, 20, RULE_string);
 		try {
@@ -3824,15 +6739,43 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BboxContext extends ParserRuleContext {
-		public List<NumberContext> number() {
+    /**
+     * The type Bbox context.
+     */
+    public static class BboxContext extends ParserRuleContext {
+        /**
+         * Number list.
+         *
+         * @return the list
+         */
+        public List<NumberContext> number() {
 			return getRuleContexts(NumberContext.class);
 		}
-		public NumberContext number(int i) {
+
+        /**
+         * Number number context.
+         *
+         * @param i the
+         * @return the number context
+         */
+        public NumberContext number(int i) {
 			return getRuleContext(NumberContext.class,i);
 		}
-		public TerminalNode BBOX() { return getToken(ExpressionFilterParser.BBOX, 0); }
-		public BboxContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * Bbox terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode BBOX() { return getToken(ExpressionFilterParser.BBOX, 0); }
+
+        /**
+         * Instantiates a new Bbox context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public BboxContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_bbox; }
@@ -3843,7 +6786,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final BboxContext bbox() throws RecognitionException {
+    /**
+     * Bbox bbox context.
+     *
+     * @return the bbox context
+     * @throws RecognitionException the recognition exception
+     */
+    public final BboxContext bbox() throws RecognitionException {
 		BboxContext _localctx = new BboxContext(_ctx, getState());
 		enterRule(_localctx, 22, RULE_bbox);
 		int _la;
@@ -3887,15 +6836,43 @@ public class ExpressionFilterParser extends Parser {
 		return _localctx;
 	}
 
-	public static class CircleContext extends ParserRuleContext {
-		public List<NumberContext> number() {
+    /**
+     * The type Circle context.
+     */
+    public static class CircleContext extends ParserRuleContext {
+        /**
+         * Number list.
+         *
+         * @return the list
+         */
+        public List<NumberContext> number() {
 			return getRuleContexts(NumberContext.class);
 		}
-		public NumberContext number(int i) {
+
+        /**
+         * Number number context.
+         *
+         * @param i the
+         * @return the number context
+         */
+        public NumberContext number(int i) {
 			return getRuleContext(NumberContext.class,i);
 		}
-		public TerminalNode CIRCLE() { return getToken(ExpressionFilterParser.CIRCLE, 0); }
-		public CircleContext(ParserRuleContext parent, int invokingState) {
+
+        /**
+         * Circle terminal node.
+         *
+         * @return the terminal node
+         */
+        public TerminalNode CIRCLE() { return getToken(ExpressionFilterParser.CIRCLE, 0); }
+
+        /**
+         * Instantiates a new Circle context.
+         *
+         * @param parent        the parent
+         * @param invokingState the invoking state
+         */
+        public CircleContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_circle; }
@@ -3906,7 +6883,13 @@ public class ExpressionFilterParser extends Parser {
 		}
 	}
 
-	public final CircleContext circle() throws RecognitionException {
+    /**
+     * Circle circle context.
+     *
+     * @return the circle context
+     * @throws RecognitionException the recognition exception
+     */
+    public final CircleContext circle() throws RecognitionException {
 		CircleContext _localctx = new CircleContext(_ctx, getState());
 		enterRule(_localctx, 24, RULE_circle);
 		int _la;
@@ -3961,7 +6944,10 @@ public class ExpressionFilterParser extends Parser {
 		return true;
 	}
 
-	public static final String _serializedATN =
+    /**
+     * The constant _serializedATN.
+     */
+    public static final String _serializedATN =
 		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3G\u0246\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\3\2\3\2\3\2\3\3\3\3\3\3\3\3\5\3$\n\3\3\3"+
@@ -4200,7 +7186,10 @@ public class ExpressionFilterParser extends Parser {
 		"\u0167\u0172\u0177\u017c\u0182\u0189\u018f\u019a\u01a5\u01b0\u01bb\u01c6"+
 		"\u01d1\u01d9\u01e3\u01ea\u01ee\u01f8\u01ff\u0203\u0206\u020d\u0211\u0214"+
 		"\u021a\u021d\u0223\u0229\u022d\u0237\u023b\u0243";
-	public static final ATN _ATN =
+    /**
+     * The constant _ATN.
+     */
+    public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
 		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];

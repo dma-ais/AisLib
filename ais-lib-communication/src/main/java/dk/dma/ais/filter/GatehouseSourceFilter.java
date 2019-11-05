@@ -28,8 +28,8 @@ import dk.dma.enav.model.Country;
 
 /**
  * Filtering based on the source information attached to message.
- * 
- * @see dk.dma.ais.data.AisTargetSourceData
+ *
+ * see dk.dma.ais.data.AisTargetSourceData (broken link!?)
  */
 @ThreadSafe
 public class GatehouseSourceFilter extends MessageFilterBase {
@@ -51,6 +51,9 @@ public class GatehouseSourceFilter extends MessageFilterBase {
      */
     private final Map<String, HashSet<String>> filter = new ConcurrentHashMap<>();
 
+    /**
+     * Instantiates a new Gatehouse source filter.
+     */
     public GatehouseSourceFilter() {
 
     }
@@ -99,10 +102,21 @@ public class GatehouseSourceFilter extends MessageFilterBase {
         return false;
     }
 
+    /**
+     * Is empty boolean.
+     *
+     * @return the boolean
+     */
     public boolean isEmpty() {
         return filter.size() == 0;
     }
 
+    /**
+     * Add filter value.
+     *
+     * @param filterName the filter name
+     * @param value      the value
+     */
     public void addFilterValue(String filterName, String value) {
         if (!FILTER_NAMES.contains(filterName)) {
             throw new IllegalArgumentException("Unknown filter: " + filterName);

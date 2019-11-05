@@ -49,10 +49,19 @@ public class AsmAcknowledge extends AisApplicationMessage {
     private int aiResponse; // 3 bits
     private int spare; // 49 bits
 
+    /**
+     * Instantiates a new Asm acknowledge.
+     */
     public AsmAcknowledge() {
         super(1, 5);
     }
 
+    /**
+     * Instantiates a new Asm acknowledge.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public AsmAcknowledge(BinArray binArray) throws SixbitException {
         super(1, 5, binArray);
     }
@@ -78,50 +87,110 @@ public class AsmAcknowledge extends AisApplicationMessage {
         return encoder;
     }
 
+    /**
+     * Gets received dac.
+     *
+     * @return the received dac
+     */
     public int getReceivedDac() {
         return receivedDac;
     }
 
+    /**
+     * Sets received dac.
+     *
+     * @param receivedDac the received dac
+     */
     public void setReceivedDac(int receivedDac) {
         this.receivedDac = receivedDac;
     }
 
+    /**
+     * Gets received fi.
+     *
+     * @return the received fi
+     */
     public int getReceivedFi() {
         return receivedFi;
     }
 
+    /**
+     * Sets received fi.
+     *
+     * @param receivedFi the received fi
+     */
     public void setReceivedFi(int receivedFi) {
         this.receivedFi = receivedFi;
     }
 
+    /**
+     * Gets text sequence num.
+     *
+     * @return the text sequence num
+     */
     public int getTextSequenceNum() {
         return textSequenceNum;
     }
 
+    /**
+     * Sets text sequence num.
+     *
+     * @param textSequenceNum the text sequence num
+     */
     public void setTextSequenceNum(int textSequenceNum) {
         this.textSequenceNum = textSequenceNum;
     }
 
+    /**
+     * Gets ai available.
+     *
+     * @return the ai available
+     */
     public int getAiAvailable() {
         return aiAvailable;
     }
 
+    /**
+     * Sets ai available.
+     *
+     * @param aiAvailable the ai available
+     */
     public void setAiAvailable(int aiAvailable) {
         this.aiAvailable = aiAvailable;
     }
 
+    /**
+     * Gets ai response.
+     *
+     * @return the ai response
+     */
     public int getAiResponse() {
         return aiResponse;
     }
 
+    /**
+     * Sets ai response.
+     *
+     * @param aiResponse the ai response
+     */
     public void setAiResponse(int aiResponse) {
         this.aiResponse = aiResponse;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }

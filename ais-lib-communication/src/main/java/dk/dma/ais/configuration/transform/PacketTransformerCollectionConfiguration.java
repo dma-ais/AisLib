@@ -22,16 +22,29 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.transform.IAisPacketTransformer;
 import dk.dma.ais.transform.PacketTransformerCollection;
 
+/**
+ * The type Packet transformer collection configuration.
+ */
 public class PacketTransformerCollectionConfiguration extends
         TransformerConfiguration {
 
     //@XmlElement(name="transformerCollection")
     private List<TransformerConfiguration> collection = new ArrayList<>();
-    
+
+    /**
+     * Gets collection.
+     *
+     * @return the collection
+     */
     public List<TransformerConfiguration> getCollection() {
         return collection;
     }
 
+    /**
+     * Sets collection.
+     *
+     * @param collection the collection
+     */
     public void setCollection(List<TransformerConfiguration> collection) {
         this.collection = collection;
     }
@@ -47,7 +60,12 @@ public class PacketTransformerCollectionConfiguration extends
         
         return packetTransformerCollection;
     }
-    
+
+    /**
+     * Add transformer configuration.
+     *
+     * @param transformerConfiguration the transformer configuration
+     */
     public void addTransformerConfiguration(TransformerConfiguration transformerConfiguration) {
         this.collection.add(transformerConfiguration);
     }

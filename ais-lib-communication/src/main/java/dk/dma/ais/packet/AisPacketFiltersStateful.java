@@ -30,16 +30,16 @@ import java.util.function.Predicate;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class provides factory methods to create Predicate<AisPacket> functions which can be used to filter AisPackets.
- *
+ * This class provides factory methods to create Predicate&lt;AisPacket&gt; functions which can be used to filter AisPackets.
+ * <p>
  * As opposed to the AisPacketFilters class, this class is designed to create predicates which "remember" some state of AisPackets
  * that have previously been served. This implies, that it is possible to establish more advanced filtering, than just inspecting
  * the current AisPacket.
- *
+ * <p>
  * Instead, with this stateful filter, it is possible to generate Predicates which can e.g. filter away AisStaticCommon packages for
  * targets whose position is outside some defined area.
  *
- * @author Thomas Borg Salling <tbsalling@tbsalling.dk>
+ * @author Thomas Borg Salling &lt;tbsalling@tbsalling.dk&gt;
  * @since v2.1
  */
 public class AisPacketFiltersStateful extends AisPacketFiltersBase {
@@ -47,6 +47,9 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     private AisPacketStream aisPacketStream = new AisPacketStreamImpl();
     private TargetTracker targetTracker = new TargetTracker();
 
+    /**
+     * Instantiates a new Ais packet filters stateful.
+     */
     public AisPacketFiltersStateful() {
         targetTracker.subscribeToPacketStream(aisPacketStream);
     }
@@ -55,12 +58,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an IMO no. different to 'imo'.
-     * 
-     * @param operator
-     * @param rhsImo
-     * @return
+     *
+     * @param operator the operator
+     * @param rhsImo   the rhs imo
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetImo(final CompareToOperator operator, Integer rhsImo) {
         final int imo = rhsImo;
         return new Predicate<AisPacket>() {
@@ -79,8 +81,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an IMO outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetImo(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -98,8 +103,10 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an IMO outside the given list.
+     *
+     * @param imos the imos
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetImo(Integer[] imos) {
         final int[] list = ArrayUtils.toPrimitive(imos);
         Arrays.sort(list);
@@ -121,12 +128,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an IMO no. different to 'imo'.
-     * 
-     * @param operator
-     * @param rhsShiptype
-     * @return
+     *
+     * @param operator    the operator
+     * @param rhsShiptype the rhs shiptype
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetShiptype(final CompareToOperator operator, Integer rhsShiptype) {
         final int shiptype = rhsShiptype;
         return new Predicate<AisPacket>() {
@@ -145,8 +151,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an shiptype outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetShiptype(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -164,8 +173,10 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a ship type outside the given list.
+     *
+     * @param shiptypes the shiptypes
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetShiptype(Integer[] shiptypes) {
         final int[] list = ArrayUtils.toPrimitive(shiptypes);
         Arrays.sort(list);
@@ -187,12 +198,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with an navstat different to the rhs parameter.
-     * 
-     * @param operator
-     * @param rhsNavstat
-     * @return
+     *
+     * @param operator   the operator
+     * @param rhsNavstat the rhs navstat
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetNavigationalStatus(final CompareToOperator operator, Integer rhsNavstat) {
         final int navstat = rhsNavstat;
         return new Predicate<AisPacket>() {
@@ -211,8 +221,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a navstat outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetNavigationalStatus(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -230,8 +243,10 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a navstat outside the given list.
+     *
+     * @param navstats the navstats
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetNavigationalStatus(Integer[] navstats) {
         final int[] list = ArrayUtils.toPrimitive(navstats);
         Arrays.sort(list);
@@ -253,12 +268,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a SOG comparing false to 'sog'.
-     * 
-     * @param operator
-     * @param sog
-     * @return
+     *
+     * @param operator the operator
+     * @param sog      the sog
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetSpeedOverGround(final CompareToOperator operator, Float sog) {
         final float rhsSog = sog;
         return new Predicate<AisPacket>() {
@@ -277,8 +291,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a SOG outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetSpeedOverGround(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -298,12 +315,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a COG comparing false to 'cog'.
-     * 
-     * @param operator
-     * @param cog
-     * @return
+     *
+     * @param operator the operator
+     * @param cog      the cog
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetCourseOverGround(final CompareToOperator operator, Float cog) {
         final float rhsCog = cog;
         return new Predicate<AisPacket>() {
@@ -322,8 +338,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a COG outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetCourseOverGround(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -343,12 +362,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a COG comparing false to 'hdg'.
-     * 
-     * @param operator
-     * @param hdg
-     * @return
+     *
+     * @param operator the operator
+     * @param hdg      the hdg
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetTrueHeading(final CompareToOperator operator, Integer hdg) {
         final int rhsHdg = hdg;
         return new Predicate<AisPacket>() {
@@ -367,8 +385,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a COG outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetTrueHeading(final int min, final int max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -388,12 +409,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a draught comparing false to 'draught'.
-     * 
-     * @param operator
-     * @param draught
-     * @return
+     *
+     * @param operator the operator
+     * @param draught  the draught
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetDraught(final CompareToOperator operator, Float draught) {
         final float rhsDraught = draught;
         return new Predicate<AisPacket>() {
@@ -412,8 +432,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a draught outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetDraught(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -433,12 +456,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a latitude comparing false to 'lat'.
-     * 
-     * @param operator
-     * @param lat
-     * @return
+     *
+     * @param operator the operator
+     * @param lat      the lat
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetLatitude(final CompareToOperator operator, Float lat) {
         final float rhsLat = lat;
         return new Predicate<AisPacket>() {
@@ -457,8 +479,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a latitude outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetLatitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -478,12 +503,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a longitude comparing false to 'lon'.
-     * 
-     * @param operator
-     * @param lon
-     * @return
+     *
+     * @param operator the operator
+     * @param lon      the lon
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetLongitude(final CompareToOperator operator, Float lon) {
         final float rhsLon = lon;
         return new Predicate<AisPacket>() {
@@ -502,8 +526,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a longitude outside the given range.
+     *
+     * @param min the min
+     * @param max the max
+     * @return the predicate
      */
-
     public Predicate<AisPacket> filterOnTargetLongitude(final float min, final float max) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -523,10 +550,11 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a name not comparing to rhs parameter.
-     * 
-     * @return
+     *
+     * @param operator the operator
+     * @param rhsName  the rhs name
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetName(final CompareToOperator operator, final String rhsName) {
         return new Predicate<AisPacket>() {
             public boolean test(AisPacket p) {
@@ -544,10 +572,10 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a name not comparing to rhs parameter.
-     * 
-     * @return
+     *
+     * @param pattern the pattern
+     * @return predicate predicate
      */
-
     public Predicate<AisPacket> filterOnTargetNameMatch(final String pattern) {
         final String glob = preprocessExpressionString(pattern);
         return p -> {
@@ -562,8 +590,10 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a callsign not comparing to rhs parameter.
-     * 
-     * @return
+     *
+     * @param operator    the operator
+     * @param rhsCallsign the rhs callsign
+     * @return predicate predicate
      */
     public Predicate<AisPacket> filterOnTargetCallsign(final CompareToOperator operator, final String rhsCallsign) {
         return new Predicate<AisPacket>() {
@@ -582,8 +612,9 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
 
     /**
      * Return false if this message is known to be related to a target with a callsign not comparing to rhs parameter.
-     * 
-     * @return
+     *
+     * @param pattern the pattern
+     * @return predicate predicate
      */
     public Predicate<AisPacket> filterOnTargetCallsignMatch(final String pattern) {
         final String glob = preprocessExpressionString(pattern);
@@ -604,9 +635,8 @@ public class AisPacketFiltersStateful extends AisPacketFiltersBase {
     /**
      * Filter on message to have known position inside given area.
      *
-     * @param area
-     *            The area that the position must reside inside.
-     * @return
+     * @param area The area that the position must reside inside.
+     * @return predicate predicate
      */
     public Predicate<AisPacket> filterOnTargetPositionWithin(final Area area) {
         requireNonNull(area);

@@ -26,10 +26,20 @@ public abstract class TrackEvent extends TrackerEvent {
 
     private final Track track;
 
+    /**
+     * Instantiates a new Track event.
+     *
+     * @param track the track
+     */
     TrackEvent(Track track) {
         this.track = track;
     }
 
+    /**
+     * Gets track.
+     *
+     * @return the track
+     */
     public final Track getTrack() {
         return track;
     }

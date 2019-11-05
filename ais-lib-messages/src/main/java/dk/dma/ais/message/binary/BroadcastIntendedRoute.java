@@ -22,13 +22,28 @@ import dk.dma.ais.binary.SixbitException;
  */
 public class BroadcastIntendedRoute extends RouteExchange {
 
+    /**
+     * The constant DAC.
+     */
     public static final int DAC = 219;
+    /**
+     * The constant FI.
+     */
     public static final int FI = 1;
 
+    /**
+     * Instantiates a new Broadcast intended route.
+     */
     public BroadcastIntendedRoute() {
         super(DAC, FI);
     }
 
+    /**
+     * Instantiates a new Broadcast intended route.
+     *
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public BroadcastIntendedRoute(BinArray binArray) throws SixbitException {
         super(DAC, FI, binArray);
     }

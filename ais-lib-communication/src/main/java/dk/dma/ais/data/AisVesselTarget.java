@@ -28,9 +28,18 @@ public abstract class AisVesselTarget extends AisTarget {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The Vessel static.
+     */
     protected AisVesselStatic vesselStatic;
+    /**
+     * The Vessel position.
+     */
     protected AisVesselPosition vesselPosition;
 
+    /**
+     * Instantiates a new Ais vessel target.
+     */
     public AisVesselTarget() {
         super();
     }
@@ -77,18 +86,38 @@ public abstract class AisVesselTarget extends AisTarget {
         super.update(aisMessage);
     }
 
+    /**
+     * Gets vessel static.
+     *
+     * @return the vessel static
+     */
     public AisVesselStatic getVesselStatic() {
         return vesselStatic;
     }
 
+    /**
+     * Sets vessel static.
+     *
+     * @param vesselStatic the vessel static
+     */
     public void setVesselStatic(AisVesselStatic vesselStatic) {
         this.vesselStatic = vesselStatic;
     }
 
+    /**
+     * Gets vessel position.
+     *
+     * @return the vessel position
+     */
     public AisVesselPosition getVesselPosition() {
         return vesselPosition;
     }
 
+    /**
+     * Sets vessel position.
+     *
+     * @param vesselPosition the vessel position
+     */
     public void setVesselPosition(AisVesselPosition vesselPosition) {
         this.vesselPosition = vesselPosition;
     }

@@ -30,43 +30,81 @@ import java.util.List;
  */
 public abstract class Sentence {
 
+    /**
+     * The Delimiter.
+     */
     protected String delimiter = "!";
+    /**
+     * The Talker.
+     */
     protected String talker;
+    /**
+     * The Formatter.
+     */
     protected String formatter;
+    /**
+     * The Checksum.
+     */
     protected int checksum;
+    /**
+     * The Msg checksum.
+     */
     protected String msgChecksum;
+    /**
+     * The Sentence str.
+     */
     protected String sentenceStr;
+    /**
+     * The Org lines.
+     */
     protected List<String> orgLines = new ArrayList<>();
+    /**
+     * The Raw sentences.
+     */
     protected List<String> rawSentences = new ArrayList<>();
+    /**
+     * The Encoded fields.
+     */
     protected LinkedList<String> encodedFields;
+    /**
+     * The Comment block.
+     */
     protected CommentBlock commentBlock;
+    /**
+     * The Tags.
+     */
     protected LinkedList<IProprietaryTag> tags; // Possible proprietary source tags for the message
+    /**
+     * The Mssis timestamp.
+     */
     protected Date mssisTimestamp;
 
     /**
      * Abstract method that all sentence classes must implement
-     * 
+     * <p>
      * The method handles assembly and extraction of the 6-bit data from sentences. The sentence is expected to be in order.
-     * 
+     * <p>
      * It will return an error if received line is out of order or from a new sequence before the previous one is finished.
-     * 
-     * @param line
+     *
+     * @param sl the sl
      * @return 0 Complete packet - 1 Incomplete packet
+     * @throws SentenceException the sentence exception
+     * @throws SixbitException   the sixbit exception
      */
     public abstract int parse(SentenceLine sl) throws SentenceException, SixbitException;
 
     /**
      * Get an encoded sentence
-     * 
-     * @return
+     *
+     * @return encoded
      */
     public abstract String getEncoded();
 
     /**
      * Basic parse of line into sentence parts
-     * 
-     * @param line
-     * @throws SentenceException
+     *
+     * @param sl the sl
+     * @throws SentenceException the sentence exception
      */
     protected void baseParse(SentenceLine sl) throws SentenceException {
         this.orgLines.add(sl.getLine());
@@ -98,6 +136,12 @@ public abstract class Sentence {
         mssisTimestamp = findMssisTimestamp(sl);
     }
 
+    /**
+     * Add single comment block.
+     *
+     * @param line the line
+     * @throws SentenceException the sentence exception
+     */
     public void addSingleCommentBlock(String line) throws SentenceException {
         this.orgLines.add(line);
         addCommentBlock(line);
@@ -124,7 +168,7 @@ public abstract class Sentence {
 
     /**
      * Method to finalize the encoding and return sentence
-     * 
+     *
      * @return final sentence
      */
     protected String finalEncode() {
@@ -154,10 +198,10 @@ public abstract class Sentence {
 
     /**
      * Calculate checksum of sentence
-     * 
-     * @param sentence
-     * @return
-     * @throws SentenceException
+     *
+     * @param sentence the sentence
+     * @return checksum
+     * @throws SentenceException the sentence exception
      */
     public static int getChecksum(String sentence) throws SentenceException {
         int checksum = 0;
@@ -176,9 +220,9 @@ public abstract class Sentence {
 
     /**
      * Get checksum string representation
-     * 
-     * @param checksum
-     * @return
+     *
+     * @param checksum the checksum
+     * @return string checksum
      */
     public static String getStringChecksum(int checksum) {
         String strChecksum = Integer.toString(checksum, 16).toUpperCase();
@@ -190,8 +234,9 @@ public abstract class Sentence {
 
     /**
      * Try to get the proprietary MSSIS timestamp appended to the NMEA sentence
-     * 
-     * @return
+     *
+     * @param sentenceLine the sentence line
+     * @return date
      */
     public static Date findMssisTimestamp(SentenceLine sentenceLine) {
         if (sentenceLine == null) {
@@ -211,10 +256,11 @@ public abstract class Sentence {
         }
         return null;
     }
-    
+
     /**
      * Get found MSSIS timestamp
-     * @return
+     *
+     * @return mssis timestamp
      */
     public Date getMssisTimestamp() {
         return mssisTimestamp;
@@ -222,8 +268,8 @@ public abstract class Sentence {
 
     /**
      * Try to get timestamp in this order: Comment block timestamp, proprietary tag timestamp and MSSIS timestamp
-     * 
-     * @return
+     *
+     * @return timestamp
      */
     public Date getTimestamp() {
         // Try comment block first
@@ -249,6 +295,13 @@ public abstract class Sentence {
         return mssisTimestamp;
     }
 
+    /**
+     * Parse int int.
+     *
+     * @param str the str
+     * @return the int
+     * @throws SentenceException the sentence exception
+     */
     public static int parseInt(String str) throws SentenceException {
         if (str == null || str.length() == 0) {
             throw new SentenceException("Invalid integer field: " + str);
@@ -262,9 +315,9 @@ public abstract class Sentence {
 
     /**
      * Determine if a line seems to contain a sentence There should be a ! or $
-     * 
-     * @param line
-     * @return
+     *
+     * @param line the line
+     * @return boolean
      */
     public static boolean hasSentence(String line) {
         return line.indexOf('!') >= 0 || line.indexOf('$') >= 0;
@@ -272,8 +325,8 @@ public abstract class Sentence {
 
     /**
      * Get original lines for this sentence
-     * 
-     * @return
+     *
+     * @return org lines
      */
     public List<String> getOrgLines() {
         return orgLines;
@@ -281,8 +334,8 @@ public abstract class Sentence {
 
     /**
      * Get original lines joined by carriage return line feed
-     * 
-     * @return
+     *
+     * @return org lines joined
      */
     public String getOrgLinesJoined() {
         return StringUtils.join(orgLines.iterator(), "\r\n");
@@ -290,8 +343,8 @@ public abstract class Sentence {
 
     /**
      * Get original raw sentences without any prefix
-     * 
-     * @return
+     *
+     * @return raw sentences
      */
     public List<String> getRawSentences() {
         return rawSentences;
@@ -299,8 +352,8 @@ public abstract class Sentence {
 
     /**
      * Get original raw sentences without any prefix joined by carriage return line feed
-     * 
-     * @return
+     *
+     * @return raw sentences joined
      */
     public String getRawSentencesJoined() {
         return StringUtils.join(rawSentences.iterator(), "\r\n");
@@ -308,8 +361,8 @@ public abstract class Sentence {
 
     /**
      * Set talker
-     * 
-     * @param talker
+     *
+     * @param talker the talker
      */
     public void setTalker(String talker) {
         this.talker = talker;
@@ -317,8 +370,8 @@ public abstract class Sentence {
 
     /**
      * Set delimiter
-     * 
-     * @param delimiter
+     *
+     * @param delimiter the delimiter
      */
     public void setDelimiter(String delimiter) {
         this.delimiter = delimiter;
@@ -326,8 +379,8 @@ public abstract class Sentence {
 
     /**
      * Set formatter
-     * 
-     * @param formatter
+     *
+     * @param formatter the formatter
      */
     public void setFormatter(String formatter) {
         this.formatter = formatter;
@@ -335,8 +388,8 @@ public abstract class Sentence {
 
     /**
      * Get possible comment block
-     * 
-     * @return
+     *
+     * @return comment block
      */
     public CommentBlock getCommentBlock() {
         return commentBlock;
@@ -344,21 +397,26 @@ public abstract class Sentence {
 
     /**
      * Get all tags
-     * 
-     * @return
+     *
+     * @return tags
      */
     public LinkedList<IProprietaryTag> getTags() {
         return tags;
     }
 
+    /**
+     * Sets tags.
+     *
+     * @param tags the tags
+     */
     public void setTags(LinkedList<IProprietaryTag> tags) {
         this.tags = tags;
     }
 
     /**
      * Return the LAST source tag (closest to AIS sentence)
-     * 
-     * @return
+     *
+     * @return source tag
      */
     public IProprietarySourceTag getSourceTag() {
         if (tags == null) {
@@ -376,8 +434,8 @@ public abstract class Sentence {
 
     /**
      * Add tag (to front)
-     * 
-     * @param sourceTag
+     *
+     * @param tag the tag
      */
     public void setTag(IProprietaryTag tag) {
         if (this.tags == null) {
@@ -387,13 +445,14 @@ public abstract class Sentence {
     }
 
     /**
-     * Convert any sentence to new sentence with !<talker><formatter>,....,
-     * 
-     * @param sentence
-     * @param talker
-     * @param formatter
-     * @return
-     * @throws SentenceException
+     * Convert any sentence to new sentence with !
+     * <pre>{@code <talker><formatter>,...., }</pre>
+     *
+     * @param sentence  the sentence
+     * @param talker    the talker
+     * @param formatter the formatter
+     * @return string
+     * @throws SentenceException the sentence exception
      */
     public static String convert(String sentence, String talker, String formatter) throws SentenceException {
         String newSentence = sentence.trim();

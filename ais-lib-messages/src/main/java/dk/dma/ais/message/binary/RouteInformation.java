@@ -25,8 +25,38 @@ import dk.dma.ais.binary.SixbitException;
  */
 public abstract class RouteInformation extends RouteMessage {
 
+    /**
+     * The enum Route type.
+     */
     public enum RouteType {
-        NOT_AVAIABLE(0), MANDATORY(1), RECOMMENDED(2), ALTERNATIVE(3), RECOMMENDED_THROUGH_ICE(4), SHIP_ROUTE(5), CANCELLATION(
+        /**
+         * Not avaiable route type.
+         */
+        NOT_AVAIABLE(0),
+        /**
+         * Mandatory route type.
+         */
+        MANDATORY(1),
+        /**
+         * Recommended route type.
+         */
+        RECOMMENDED(2),
+        /**
+         * Alternative route type.
+         */
+        ALTERNATIVE(3),
+        /**
+         * Recommended through ice route type.
+         */
+        RECOMMENDED_THROUGH_ICE(4),
+        /**
+         * Ship route route type.
+         */
+        SHIP_ROUTE(5),
+        /**
+         * Cancellation route type.
+         */
+        CANCELLATION(
                 31);
 
         private int type;
@@ -35,6 +65,11 @@ public abstract class RouteInformation extends RouteMessage {
             this.type = type;
         }
 
+        /**
+         * Gets type.
+         *
+         * @return the type
+         */
         public int getType() {
             return type;
         }
@@ -45,11 +80,25 @@ public abstract class RouteInformation extends RouteMessage {
     private int senderClassification; // 3 bits: 0=ship, 1=authority
     private int routeType; // 5 bits
 
+    /**
+     * Instantiates a new Route information.
+     *
+     * @param dac the dac
+     * @param fi  the fi
+     */
     public RouteInformation(int dac, int fi) {
         super(dac, fi);
         this.waypoints = new ArrayList<>();
     }
 
+    /**
+     * Instantiates a new Route information.
+     *
+     * @param dac      the dac
+     * @param fi       the fi
+     * @param binArray the bin array
+     * @throws SixbitException the sixbit exception
+     */
     public RouteInformation(int dac, int fi, BinArray binArray) throws SixbitException {
         super(dac, fi, binArray);
     }
@@ -73,26 +122,56 @@ public abstract class RouteInformation extends RouteMessage {
         super.parse(binArray);
     }
 
+    /**
+     * Gets msg link id.
+     *
+     * @return the msg link id
+     */
     public int getMsgLinkId() {
         return msgLinkId;
     }
 
+    /**
+     * Sets msg link id.
+     *
+     * @param msgLinkId the msg link id
+     */
     public void setMsgLinkId(int msgLinkId) {
         this.msgLinkId = msgLinkId;
     }
 
+    /**
+     * Gets sender classification.
+     *
+     * @return the sender classification
+     */
     public int getSenderClassification() {
         return senderClassification;
     }
 
+    /**
+     * Sets sender classification.
+     *
+     * @param senderClassification the sender classification
+     */
     public void setSenderClassification(int senderClassification) {
         this.senderClassification = senderClassification;
     }
 
+    /**
+     * Gets route type.
+     *
+     * @return the route type
+     */
     public int getRouteType() {
         return routeType;
     }
 
+    /**
+     * Sets route type.
+     *
+     * @param routeType the route type
+     */
     public void setRouteType(int routeType) {
         this.routeType = routeType;
     }

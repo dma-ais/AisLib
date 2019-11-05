@@ -29,19 +29,40 @@ public class StreamReaderProvider extends AisReaderProvider {
     @GuardedBy("this")
     private InputStream stream;
 
+    /**
+     * Instantiates a new Stream reader provider.
+     *
+     * @param blocking the blocking
+     */
     public StreamReaderProvider(boolean blocking) {
         super(blocking);
     }
 
+    /**
+     * Instantiates a new Stream reader provider.
+     *
+     * @param stream   the stream
+     * @param blocking the blocking
+     */
     public StreamReaderProvider(InputStream stream, boolean blocking) {
         super(blocking);
         this.stream = stream;
     }
-    
+
+    /**
+     * Instantiates a new Stream reader provider.
+     *
+     * @param stream the stream
+     */
     public StreamReaderProvider(InputStream stream) {
         this(stream, false);
     }
 
+    /**
+     * Sets stream.
+     *
+     * @param stream the stream
+     */
     protected synchronized void setStream(InputStream stream) {
         this.stream = stream;
     }

@@ -21,9 +21,8 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 27
- *
+ * <p>
  * Long-range broadcast position report implemented according to ITU-R M.1371-4
- *
  */
 public class AisMessage27 extends AisMessage implements IPositionMessage {
 
@@ -71,15 +70,31 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
      */
     private int spare; // 1 bit
 
+    /**
+     * Instantiates a new Ais message 27.
+     */
     public AisMessage27() {
         super(27);
     }
 
+    /**
+     * Instantiates a new Ais message 27.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage27(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() != 96) {
@@ -114,6 +129,11 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
         return encoder;
     }
 
+    /**
+     * Gets serial version uid.
+     *
+     * @return the serial version uid
+     */
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -122,22 +142,47 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
         return posAcc;
     }
 
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
     }
 
+    /**
+     * Gets raim.
+     *
+     * @return the raim
+     */
     public int getRaim() {
         return raim;
     }
 
+    /**
+     * Sets raim.
+     *
+     * @param raim the raim
+     */
     public void setRaim(int raim) {
         this.raim = raim;
     }
 
+    /**
+     * Gets nav status.
+     *
+     * @return the nav status
+     */
     public int getNavStatus() {
         return navStatus;
     }
 
+    /**
+     * Sets nav status.
+     *
+     * @param navStatus the nav status
+     */
     public void setNavStatus(int navStatus) {
         this.navStatus = navStatus;
     }
@@ -146,38 +191,83 @@ public class AisMessage27 extends AisMessage implements IPositionMessage {
         return pos;
     }
 
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
     public void setPos(AisPosition pos) {
         this.pos = pos;
     }
 
+    /**
+     * Gets sog.
+     *
+     * @return the sog
+     */
     public int getSog() {
         return sog;
     }
 
+    /**
+     * Sets sog.
+     *
+     * @param sog the sog
+     */
     public void setSog(int sog) {
         this.sog = sog;
     }
 
+    /**
+     * Gets cog.
+     *
+     * @return the cog
+     */
     public int getCog() {
         return cog;
     }
 
+    /**
+     * Sets cog.
+     *
+     * @param cog the cog
+     */
     public void setCog(int cog) {
         this.cog = cog;
     }
 
+    /**
+     * Gets gnss pos status.
+     *
+     * @return the gnss pos status
+     */
     public int getGnssPosStatus() {
         return gnssPosStatus;
     }
 
+    /**
+     * Sets gnss pos status.
+     *
+     * @param gnssPosStatus the gnss pos status
+     */
     public void setGnssPosStatus(int gnssPosStatus) {
         this.gnssPosStatus = gnssPosStatus;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }

@@ -26,13 +26,24 @@ import java.util.List;
  * that if an AisPacket passed to the filter is positively known to origin from inside one of these bounding
  * boxes, then it is rejected.
  *
- * @author Thomas Borg Salling <tbsalling@tbsalling.dk>
+ * @author Thomas Borg Salling &lt;tbsalling@tbsalling.dk&gt;
  */
 public class GeoMaskFilter implements IPacketFilter {
 
+    /**
+     * The Blocked.
+     */
     final Predicate<AisPacket> blocked;
+    /**
+     * The Suppressed bounding boxes.
+     */
     final List<BoundingBox> suppressedBoundingBoxes;
 
+    /**
+     * Instantiates a new Geo mask filter.
+     *
+     * @param suppressedBoundingBoxes the suppressed bounding boxes
+     */
     public GeoMaskFilter(List<BoundingBox> suppressedBoundingBoxes) {
         this.suppressedBoundingBoxes = suppressedBoundingBoxes;
 
@@ -49,6 +60,11 @@ public class GeoMaskFilter implements IPacketFilter {
         this.blocked = oredPredicates;
     }
 
+    /**
+     * Gets suppressed bounding boxes.
+     *
+     * @return the suppressed bounding boxes
+     */
     public List<BoundingBox> getSuppressedBoundingBoxes() {
         return suppressedBoundingBoxes;
     }

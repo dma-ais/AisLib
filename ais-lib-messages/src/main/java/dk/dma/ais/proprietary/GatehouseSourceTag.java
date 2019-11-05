@@ -32,6 +32,15 @@ public class GatehouseSourceTag implements IProprietarySourceTag {
     private final Date timestamp;
     private final String orgSentence;
 
+    /**
+     * Instantiates a new Gatehouse source tag.
+     *
+     * @param baseMmsi    the base mmsi
+     * @param country     the country
+     * @param region      the region
+     * @param timestamp   the timestamp
+     * @param orgSentence the org sentence
+     */
     public GatehouseSourceTag(Integer baseMmsi, Country country, String region, Date timestamp, String orgSentence) {
         this.baseMmsi = baseMmsi;
         this.country = country;

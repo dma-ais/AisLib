@@ -22,15 +22,14 @@ import dk.dma.enav.model.geometry.Position;
 
 /**
  * AIS position message
- *
+ * <p>
  * An AIS position message is defined by ITU-R M.1371-4 in annex 8 - AIS messages section 3.1
- *
+ * <p>
  * This is a generalization for message types 1-3 and possibly more in the future.
- *
+ * <p>
  * Type 1: Scheduled position report (Class A shipborne mobile equipment) Type 2: Assigned scheduled position report
  * (Class A shipborne mobile equipment) Type 3: Special position report, response to interrogation;(Class A shipborne
  * mobile equipment)
- *
  */
 public abstract class AisPositionMessage extends AisMessage implements IVesselPositionMessage {
 
@@ -53,10 +52,10 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
      * up to 708 degrees per min or higher Values between 0 and 708 degrees per min coded by ROTais = 4.733
      * SQRT(ROTsensor) degrees per min where ROTsensor is the Rate of Turn as input by an external Rate of Turn
      * Indicator (TI). ROTais is rounded to the nearest integer value.
-     *
+     * <p>
      * +127 = turning right at more than 5 degrees per 30 s (No TI available) -127 = turning left at more than 5 degrees
      * per 30 s (No TI available) -128 (80 hex) indicates no turn information available (default).
-     *
+     * <p>
      * ROT data should not be derived from COG information.
      */
     protected int rot; // 8 bits :
@@ -69,7 +68,7 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
 
     /**
      * AisPosition Accuracy: The position accuracy (PA) flag should be determined in accordance with Table 47 1 = high (
-     * =< 10 m) 0 = low (>10 m) 0 = default
+     * =&lt; 10 m) 0 = low (&gt;10 m) 0 = default
      */
     protected int posAcc; // 1 bit
 
@@ -100,14 +99,14 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     /**
      * Special manoeuvre indicator: 0 = not available = default 1 = not engaged in special manoeuvre 2 = engaged in
      * special manoeuvre (i.e.: regional passing arrangement on Inland Waterway)
-     *
+     * <p>
      * NOTE: This field is added in ITU-R M1371-4
      */
     protected int specialManIndicator; // 2 bits
 
     /**
      * Not used. Should be set to zero. Reserved for future use.
-     *
+     * <p>
      * NOTE: In ITU-R M1371-4 this field is 3 bits compared to 1 previously
      */
     protected int spare; // 3 bits
@@ -121,17 +120,27 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     /**
      * SOTDMA/ITDMA sync state: sync state is part of the defined communication state (19) bits. The sync state is the
      * first 2 bits of the 19 bits in the communication state of the message.
-     *
+     * <p>
      * 0 UTC direct (see 3.1.1.1) 1 UTC indirect (see 3.1.1.2) 2 Station is synchronized to a base station (base direct)
      * 3 Station is synchronized to another station based on the highest number of received stations or to another
      * mobile station, which is directly synchronized to a base station
      */
     protected int syncState; // 2 bits
 
+    /**
+     * Instantiates a new Ais position message.
+     *
+     * @param msgId the msg id
+     */
     public AisPositionMessage(int msgId) {
         super(msgId);
     }
 
+    /**
+     * Instantiates a new Ais position message.
+     *
+     * @param vdm the vdm
+     */
     public AisPositionMessage(Vdm vdm) {
         super(vdm);
     }
@@ -219,18 +228,38 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return builder.toString();
     }
 
+    /**
+     * Gets nav status.
+     *
+     * @return the nav status
+     */
     public int getNavStatus() {
         return navStatus;
     }
 
+    /**
+     * Sets nav status.
+     *
+     * @param navStatus the nav status
+     */
     public void setNavStatus(int navStatus) {
         this.navStatus = navStatus;
     }
 
+    /**
+     * Gets rot.
+     *
+     * @return the rot
+     */
     public int getRot() {
         return rot;
     }
 
+    /**
+     * Gets sensor rot.
+     *
+     * @return the sensor rot
+     */
     public Float getSensorRot() {
         if (rot == 128) {
             return null;
@@ -243,6 +272,11 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return sensorRot;
     }
 
+    /**
+     * Sets rot.
+     *
+     * @param rot the rot
+     */
     public void setRot(int rot) {
         this.rot = rot;
     }
@@ -251,6 +285,11 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return sog;
     }
 
+    /**
+     * Sets sog.
+     *
+     * @param sog the sog
+     */
     public void setSog(int sog) {
         this.sog = sog;
     }
@@ -259,6 +298,11 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return posAcc;
     }
 
+    /**
+     * Sets pos acc.
+     *
+     * @param posAcc the pos acc
+     */
     public void setPosAcc(int posAcc) {
         this.posAcc = posAcc;
     }
@@ -273,6 +317,11 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return pos;
     }
 
+    /**
+     * Sets pos.
+     *
+     * @param pos the pos
+     */
     public void setPos(AisPosition pos) {
         this.pos = pos;
     }
@@ -281,6 +330,11 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return cog;
     }
 
+    /**
+     * Sets cog.
+     *
+     * @param cog the cog
+     */
     public void setCog(int cog) {
         this.cog = cog;
     }
@@ -289,6 +343,11 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return trueHeading;
     }
 
+    /**
+     * Sets true heading.
+     *
+     * @param trueHeading the true heading
+     */
     public void setTrueHeading(int trueHeading) {
         this.trueHeading = trueHeading;
     }
@@ -297,11 +356,18 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return utcSec;
     }
 
+    /**
+     * Sets utc sec.
+     *
+     * @param utcSec the utc sec
+     */
     public void setUtcSec(int utcSec) {
         this.utcSec = utcSec;
     }
 
     /**
+     * Gets special man indicator.
+     *
      * @return the specialManIndicator
      */
     public int getSpecialManIndicator() {
@@ -309,17 +375,28 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
     }
 
     /**
-     * @param specialManIndicator
-     *            the specialManIndicator to set
+     * Sets special man indicator.
+     *
+     * @param specialManIndicator the specialManIndicator to set
      */
     public void setSpecialManIndicator(int specialManIndicator) {
         this.specialManIndicator = specialManIndicator;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }
@@ -328,14 +405,29 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return raim;
     }
 
+    /**
+     * Sets raim.
+     *
+     * @param raim the raim
+     */
     public void setRaim(int raim) {
         this.raim = raim;
     }
 
+    /**
+     * Gets sync state.
+     *
+     * @return the sync state
+     */
     public int getSyncState() {
         return syncState;
     }
 
+    /**
+     * Sets sync state.
+     *
+     * @param syncState the sync state
+     */
     public void setSyncState(int syncState) {
         this.syncState = syncState;
     }
@@ -357,6 +449,11 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return trueHeading < 360;
     }
 
+    /**
+     * Is rot valid boolean.
+     *
+     * @return the boolean
+     */
     public boolean isRotValid() {
         return rot > -128;
     }

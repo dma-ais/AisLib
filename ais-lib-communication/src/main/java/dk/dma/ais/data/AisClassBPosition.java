@@ -25,15 +25,28 @@ public class AisClassBPosition extends AisVesselPosition {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Ais class b position.
+     */
     public AisClassBPosition() {
         super();
     }
 
+    /**
+     * Instantiates a new Ais class b position.
+     *
+     * @param msg18 the msg 18
+     */
     public AisClassBPosition(AisMessage18 msg18) {
         super();
         update(msg18);
     }
-    
+
+    /**
+     * Instantiates a new Ais class b position.
+     *
+     * @param msg19 the msg 19
+     */
     public AisClassBPosition(AisMessage19 msg19) {
         super();
         update(msg19);
@@ -41,17 +54,17 @@ public class AisClassBPosition extends AisVesselPosition {
 
     /**
      * Update data object with data from AIS message
-     * 
-     * @param msg18
+     *
+     * @param msg18 the msg 18
      */
     public void update(AisMessage18 msg18) {
         super.update((IVesselPositionMessage) msg18);
     }
-    
+
     /**
      * Update data object with data from AIS message
-     * 
-     * @param msg19
+     *
+     * @param msg19 the msg 19
      */
     public void update(AisMessage19 msg19) {
         super.update((IVesselPositionMessage) msg19);

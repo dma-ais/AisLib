@@ -31,12 +31,17 @@ import java.util.function.Consumer;
 
 /**
  * Necessary Evil for legacy resources and convenience
- * 
- * @author Jens Tuxen
  *
+ * @author Jens Tuxen
  */
 public class TargetInfoToAisTarget {
 
+    /**
+     * Gets packets in order.
+     *
+     * @param ti the ti
+     * @return the packets in order
+     */
     static PriorityQueue<AisPacket> getPacketsInOrder(TargetInfo ti) {
 
         // Min-Heap = Oldest first when creating AisTarget (natural)
@@ -62,6 +67,12 @@ public class TargetInfoToAisTarget {
         return messages;
     }
 
+    /**
+     * Generate ais target ais target.
+     *
+     * @param ti the ti
+     * @return the ais target
+     */
     public static AisTarget generateAisTarget(TargetInfo ti) {
         PriorityQueue<AisPacket> normal = getPacketsInOrder(ti);
         // why reversed also? A workaround for AisTargets without static information for some reason
@@ -76,9 +87,9 @@ public class TargetInfoToAisTarget {
     /**
      * Update aisTarget with messages (note that if the packets are of different class type,
      *
-     * @param aisTarget
-     * @param messages
-     * @return
+     * @param aisTarget the ais target
+     * @param messages  the messages
+     * @return ais target
      */
     static AisTarget updateAisTarget(AisTarget aisTarget, PriorityQueue<AisPacket> messages) {
         while (!messages.isEmpty()) {
@@ -118,6 +129,12 @@ public class TargetInfoToAisTarget {
 
     }
 
+    /**
+     * Generate ais target ais target.
+     *
+     * @param messages the messages
+     * @return the ais target
+     */
     static AisTarget generateAisTarget(PriorityQueue<AisPacket> messages) {
         AisTarget aisTarget = null;
 
@@ -128,6 +145,13 @@ public class TargetInfoToAisTarget {
         return updateAisTarget(aisTarget, messages);
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws IOException          the io exception
+     * @throws InterruptedException the interrupted exception
+     */
     public static void main(String[] args) throws IOException, InterruptedException {
         AisReader reader = AisReaders.createDirectoryReader("src/test", "s*.txt", true);
 

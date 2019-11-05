@@ -29,7 +29,7 @@ import dk.dma.ais.transform.AisPacketTaggingTransformer.Policy;
 
 /**
  * Transformer that maps a number of proprietary taggings into
- * source type SATELLITE tagging 
+ * source type SATELLITE tagging
  */
 @ThreadSafe
 public class SourceTypeSatTransformer implements IAisPacketTransformer {
@@ -47,7 +47,13 @@ public class SourceTypeSatTransformer implements IAisPacketTransformer {
     
     private final AisPacketTags satTagging; 
     private final AisPacketTaggingTransformer transformer;
-    
+
+    /**
+     * Instantiates a new Source type sat transformer.
+     *
+     * @param satGhRegions the sat gh regions
+     * @param satSources   the sat sources
+     */
     public SourceTypeSatTransformer(Collection<String> satGhRegions, Collection<String> satSources) {
         this.satTagging = new AisPacketTags();
         this.satTagging.setSourceType(SourceType.SATELLITE);

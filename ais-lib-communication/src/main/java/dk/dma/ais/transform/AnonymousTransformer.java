@@ -114,6 +114,9 @@ public class AnonymousTransformer implements IAisPacketTransformer {
      */
     private final Random rand;
 
+    /**
+     * Instantiates a new Anonymous transformer.
+     */
     public AnonymousTransformer() {
         rand = new Random(System.currentTimeMillis());
     }
@@ -290,6 +293,15 @@ public class AnonymousTransformer implements IAisPacketTransformer {
         private final String callsign;
         private final String destination;
 
+        /**
+         * Instantiates a new Anon data.
+         *
+         * @param mmsi        the mmsi
+         * @param name        the name
+         * @param imoNo       the imo no
+         * @param callsign    the callsign
+         * @param destination the destination
+         */
         public AnonData(int mmsi, String name, int imoNo, String callsign, String destination) {
             this.mmsi = mmsi;
             this.name = name;
@@ -298,22 +310,47 @@ public class AnonymousTransformer implements IAisPacketTransformer {
             this.destination = destination;
         }
 
+        /**
+         * Gets mmsi.
+         *
+         * @return the mmsi
+         */
         public int getMmsi() {
             return mmsi;
         }
 
+        /**
+         * Gets name.
+         *
+         * @return the name
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Gets imo no.
+         *
+         * @return the imo no
+         */
         public int getImoNo() {
             return imoNo;
         }
 
+        /**
+         * Gets callsign.
+         *
+         * @return the callsign
+         */
         public String getCallsign() {
             return callsign;
         }
 
+        /**
+         * Gets destination.
+         *
+         * @return the destination
+         */
         public synchronized String getDestination() {
             return destination;
         }

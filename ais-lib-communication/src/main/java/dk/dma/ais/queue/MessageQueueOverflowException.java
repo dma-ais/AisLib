@@ -21,6 +21,9 @@ public class MessageQueueOverflowException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Instantiates a new Message queue overflow exception.
+     */
     public MessageQueueOverflowException() {
         super();
     }

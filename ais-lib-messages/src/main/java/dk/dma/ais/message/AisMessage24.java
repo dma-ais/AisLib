@@ -21,9 +21,8 @@ import dk.dma.ais.sentence.Vdm;
 
 /**
  * AIS message 24
- * 
+ * <p>
  * Static data report as defined by ITU-R M.1371-4
- * 
  */
 public class AisMessage24 extends AisStaticCommon {
 
@@ -57,15 +56,31 @@ public class AisMessage24 extends AisStaticCommon {
      */
     int spare; // 2 bits
 
+    /**
+     * Instantiates a new Ais message 24.
+     */
     public AisMessage24() {
         super(24);
     }
 
+    /**
+     * Instantiates a new Ais message 24.
+     *
+     * @param vdm the vdm
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public AisMessage24(Vdm vdm) throws AisMessageException, SixbitException {
         super(vdm);
         parse();
     }
 
+    /**
+     * Parse.
+     *
+     * @throws AisMessageException the ais message exception
+     * @throws SixbitException     the sixbit exception
+     */
     public void parse() throws AisMessageException, SixbitException {
         BinArray binArray = vdm.getBinArray();
         if (binArray.getLength() < 160) {
@@ -122,34 +137,74 @@ public class AisMessage24 extends AisStaticCommon {
         return encoder;
     }
 
+    /**
+     * Gets part number.
+     *
+     * @return the part number
+     */
     public int getPartNumber() {
         return partNumber;
     }
 
+    /**
+     * Sets part number.
+     *
+     * @param partNumber the part number
+     */
     public void setPartNumber(int partNumber) {
         this.partNumber = partNumber;
     }
 
+    /**
+     * Gets vendor id.
+     *
+     * @return the vendor id
+     */
     public String getVendorId() {
         return vendorId;
     }
 
+    /**
+     * Sets vendor id.
+     *
+     * @param vendorId the vendor id
+     */
     public void setVendorId(String vendorId) {
         this.vendorId = vendorId;
     }
 
+    /**
+     * Gets pos type.
+     *
+     * @return the pos type
+     */
     public int getPosType() {
         return posType;
     }
 
+    /**
+     * Sets pos type.
+     *
+     * @param posType the pos type
+     */
     public void setPosType(int posType) {
         this.posType = posType;
     }
 
+    /**
+     * Gets spare.
+     *
+     * @return the spare
+     */
     public int getSpare() {
         return spare;
     }
 
+    /**
+     * Sets spare.
+     *
+     * @param spare the spare
+     */
     public void setSpare(int spare) {
         this.spare = spare;
     }

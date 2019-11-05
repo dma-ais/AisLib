@@ -20,28 +20,54 @@ import javax.xml.bind.annotation.XmlTransient;
 import dk.dma.ais.bus.AisBusComponent;
 import dk.dma.ais.bus.provider.RepeatingFileReaderProvider;
 
+/**
+ * The type Repeating file reader provider configuration.
+ */
 @XmlRootElement
 public class RepeatingFileReaderProviderConfiguration extends AisBusProviderConfiguration {
 
     private String filename;
     private boolean gzip;
 
+    /**
+     * Instantiates a new Repeating file reader provider configuration.
+     */
     public RepeatingFileReaderProviderConfiguration() {
 
     }
 
+    /**
+     * Gets filename.
+     *
+     * @return the filename
+     */
     public String getFilename() {
         return filename;
     }
 
+    /**
+     * Sets filename.
+     *
+     * @param filename the filename
+     */
     public void setFilename(String filename) {
         this.filename = filename;
     }
 
+    /**
+     * Is gzip boolean.
+     *
+     * @return the boolean
+     */
     public boolean isGzip() {
         return gzip;
     }
 
+    /**
+     * Sets gzip.
+     *
+     * @param gzip the gzip
+     */
     public void setGzip(boolean gzip) {
         this.gzip = gzip;
     }

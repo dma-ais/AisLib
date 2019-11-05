@@ -38,20 +38,34 @@ public class SendRequest {
     private int destination;
     private String talker;
 
+    /**
+     * Instantiates a new Send request.
+     *
+     * @param aisMessage  the ais message
+     * @param sequence    the sequence
+     * @param destination the destination
+     */
     public SendRequest(AisMessage aisMessage, int sequence, int destination) {
         this.aisMessage = aisMessage;
         this.sequence = sequence;
         this.destination = destination;
     }
 
+    /**
+     * Instantiates a new Send request.
+     *
+     * @param aisMessage the ais message
+     * @param sequence   the sequence
+     */
     public SendRequest(AisMessage aisMessage, int sequence) {
         this(aisMessage, sequence, 0);
     }
 
     /**
      * Generate sentences to send. ABM or BBM. c
-     * 
+     *
      * @return list of actual sentences
+     * @throws SendException the send exception
      */
     public String[] createSentences() throws SendException {
         SendSentence sendSentence = null;
@@ -109,38 +123,83 @@ public class SendRequest {
         return encodedSentences;
     }
 
+    /**
+     * Gets ais message.
+     *
+     * @return the ais message
+     */
     public AisMessage getAisMessage() {
         return aisMessage;
     }
 
+    /**
+     * Sets ais message.
+     *
+     * @param aisMessage the ais message
+     */
     public void setAisMessage(AisMessage aisMessage) {
         this.aisMessage = aisMessage;
     }
 
+    /**
+     * Gets sequence.
+     *
+     * @return the sequence
+     */
     public int getSequence() {
         return sequence;
     }
 
+    /**
+     * Sets sequence.
+     *
+     * @param sequence the sequence
+     */
     public void setSequence(int sequence) {
         this.sequence = sequence;
     }
 
+    /**
+     * Gets destination.
+     *
+     * @return the destination
+     */
     public int getDestination() {
         return destination;
     }
 
+    /**
+     * Sets destination.
+     *
+     * @param destination the destination
+     */
     public void setDestination(int destination) {
         this.destination = destination;
     }
 
+    /**
+     * Add prefix sentence.
+     *
+     * @param sentence the sentence
+     */
     public void addPrefixSentence(String sentence) {
         this.prefixSentences.add(sentence);
     }
 
+    /**
+     * Gets talker.
+     *
+     * @return the talker
+     */
     public String getTalker() {
         return talker;
     }
 
+    /**
+     * Sets talker.
+     *
+     * @param talker the talker
+     */
     public void setTalker(String talker) {
         this.talker = talker;
     }

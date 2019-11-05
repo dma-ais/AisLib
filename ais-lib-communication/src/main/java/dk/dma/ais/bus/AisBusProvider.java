@@ -17,13 +17,24 @@ package dk.dma.ais.bus;
 import net.jcip.annotations.ThreadSafe;
 import dk.dma.ais.packet.AisPacket;
 
+/**
+ * The type Ais bus provider.
+ */
 @ThreadSafe
 public abstract class AisBusProvider extends AisBusSocket {
 
+    /**
+     * Instantiates a new Ais bus provider.
+     */
     public AisBusProvider() {
         this(false);
     }
 
+    /**
+     * Instantiates a new Ais bus provider.
+     *
+     * @param blocking the blocking
+     */
     public AisBusProvider(boolean blocking) {
         super(blocking);
     }
@@ -40,8 +51,8 @@ public abstract class AisBusProvider extends AisBusSocket {
 
     /**
      * Helper method to push to bus
-     * 
-     * @param packet
+     *
+     * @param packet the packet
      */
     protected void push(AisPacket packet) {
         // Do filtering, transformation and filtering

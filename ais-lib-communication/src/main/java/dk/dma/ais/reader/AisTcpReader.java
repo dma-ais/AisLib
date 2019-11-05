@@ -36,31 +36,48 @@ import java.util.function.Consumer;
 
 /**
  * Thread class for reading AIS messages from a TCP stream.
- * 
+ * <p>
  * Connection handling is fail tolerant. Connection error is handled by waiting a specified amount of time before doing
  * a re-connect (default 5 sec).
- * 
+ * <p>
  * Handlers for the parsed AIS messages must be registered with registerHanlder() method.
- * 
+ * <p>
  * Example of use:
- * 
+ * <p>
  * IAisHandler handler = new SomeHandler();
- * 
+ * <p>
  * AisTcpReader aisReader = new AisTcpReader("localhost", 4001); aisReader.registerHandler(handler);
  * aisReader.addProprietaryFactory(new GatehouseFactory()); aisReader.start(); aisReader.join();
- * 
  */
 public class AisTcpReader extends AisReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisTcpReader.class);
 
+    /**
+     * The Reconnect interval.
+     */
     protected volatile long reconnectInterval = 5000; // Default 5 sec
+    /**
+     * The Output stream.
+     */
     protected OutputStream outputStream;
+    /**
+     * The Client socket.
+     */
     protected final AtomicReference<Socket> clientSocket = new AtomicReference<>(new Socket());
 
+    /**
+     * The Timeout.
+     */
     protected volatile int timeout = 10;
 
+    /**
+     * The Hosts.
+     */
     List<HostAndPort> hosts = new ArrayList<>();
+    /**
+     * The Current host index.
+     */
     int currentHostIndex = -1;
 
     // /**
@@ -75,8 +92,8 @@ public class AisTcpReader extends AisReader {
 
     /**
      * Add another host/port on the form host:port
-     * 
-     * @param hostPort
+     *
+     * @param hostAndPort the host and port
      */
     void addHostPort(HostAndPort hostAndPort) {
         requireNonNull(hostAndPort);
@@ -124,6 +141,11 @@ public class AisTcpReader extends AisReader {
         } catch (IOException ignored) {}
     }
 
+    /**
+     * Connect.
+     *
+     * @throws IOException the io exception
+     */
     protected void connect() throws IOException {
         try {
             LOG.info("Connecting to source " + currentHost());
@@ -147,6 +169,9 @@ public class AisTcpReader extends AisReader {
         }
     }
 
+    /**
+     * Disconnect.
+     */
     protected void disconnect() {
         if (getStatus() == Status.CONNECTED) {
             try {
@@ -159,9 +184,9 @@ public class AisTcpReader extends AisReader {
     /**
      * Send sendRequest to the socket output stream and get result sent to resultListener.
      * 
-     * @param sendRequest
-     * @param resultListener
-     * @throws SendException
+     * @param sendRequest sendRequest
+     * @param resultListener Consumer resultListener
+     * @throws SendException a SendException
      */
     @Override
     public void send(SendRequest sendRequest, Consumer<Abk> resultListener) throws SendException {
@@ -174,8 +199,8 @@ public class AisTcpReader extends AisReader {
 
     /**
      * Get the interval in milliseconds between re-connect attempts
-     * 
-     * @return reconnectInterval
+     *
+     * @return reconnectInterval reconnect interval
      */
     public long getReconnectInterval() {
         return reconnectInterval;
@@ -183,8 +208,8 @@ public class AisTcpReader extends AisReader {
 
     /**
      * Set the interval in milliseconds between re-connect attempts
-     * 
-     * @param reconnectInterval
+     *
+     * @param reconnectInterval the reconnect interval
      */
     public void setReconnectInterval(long reconnectInterval) {
         this.reconnectInterval = reconnectInterval;
@@ -192,8 +217,8 @@ public class AisTcpReader extends AisReader {
 
     /**
      * Get the number of hosts
-     * 
-     * @return
+     *
+     * @return host count
      */
     public int getHostCount() {
         return hosts.size();
@@ -201,8 +226,8 @@ public class AisTcpReader extends AisReader {
 
     /**
      * Get socket read timeout
-     * 
-     * @return
+     *
+     * @return timeout timeout
      */
     public int getTimeout() {
         return timeout;
@@ -210,8 +235,8 @@ public class AisTcpReader extends AisReader {
 
     /**
      * Set socket read timeout
-     * 
-     * @param timeout
+     *
+     * @param timeout the timeout
      */
     public void setTimeout(int timeout) {
         this.timeout = timeout;
@@ -219,21 +244,26 @@ public class AisTcpReader extends AisReader {
 
     /**
      * Returns the current hostname
-     * 
-     * @return
+     *
+     * @return hostname hostname
      */
     public String getHostname() {
         return currentHost().getHostText();
     }
 
+    /**
+     * Current host host and port.
+     *
+     * @return the host and port
+     */
     HostAndPort currentHost() {
         return hosts.get(currentHostIndex);
     }
 
     /**
      * Get port
-     * 
-     * @return
+     *
+     * @return port port
      */
     public int getPort() {
         return currentHost().getPort();

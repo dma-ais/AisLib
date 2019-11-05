@@ -30,29 +30,49 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The default implements of {@link AisPacketStream}.
- * 
+ *
  * @author Kasper Nielsen
  */
 class AisPacketStreamImpl extends AisPacketStream {
 
-    /** The logger */
+    /**
+     * The logger
+     */
     static final Logger LOG = LoggerFactory.getLogger(AisPacketStreamImpl.class);
 
     /** A lock we use to make sure packets are delivered in order. */
     private final Object deliveryLock = new Object();
 
+    /**
+     * The Subscriptions.
+     */
     final ConcurrentHashMap<SubscriptionImpl, SubscriptionImpl> subscriptions;
 
+    /**
+     * The Predicate.
+     */
     final Predicate<? super AisPacket> predicate;
 
+    /**
+     * The Root.
+     */
     final AisPacketStreamImpl root;
 
+    /**
+     * Instantiates a new Ais packet stream.
+     */
     AisPacketStreamImpl() {
         predicate = null;
         subscriptions = new ConcurrentHashMap<>();
         root = null;
     }
 
+    /**
+     * Instantiates a new Ais packet stream.
+     *
+     * @param parent    the parent
+     * @param predicate the predicate
+     */
     AisPacketStreamImpl(AisPacketStreamImpl parent, Predicate<? super AisPacket> predicate) {
         this.root = requireNonNull(parent);
         this.predicate = requireNonNull(predicate);
@@ -87,6 +107,12 @@ class AisPacketStreamImpl extends AisPacketStream {
                         : this.predicate.and((Predicate) predicate)));
     }
 
+    /**
+     * Handle packet.
+     *
+     * @param p the p
+     * @param s the s
+     */
     void handlePacket(AisPacket p, SubscriptionImpl s) {
         if (s.predicate == null || s.predicate.test(p)) {
             s.consumer.accept(p);
@@ -101,14 +127,41 @@ class AisPacketStreamImpl extends AisPacketStream {
         return s;
     }
 
+    /**
+     * The type Subscription.
+     */
     class SubscriptionImpl implements Subscription {
+        /**
+         * The Cancelled.
+         */
         final CountDownLatch cancelled = new CountDownLatch(1);
+        /**
+         * The Consumer.
+         */
         final Consumer<? super AisPacket> consumer;
+        /**
+         * The Count.
+         */
         final AtomicLong count = new AtomicLong();
+        /**
+         * The Lock.
+         */
         final ReentrantLock lock = new ReentrantLock();
+        /**
+         * The Packets.
+         */
         final ConcurrentLinkedQueue<AisPacket> packets = new ConcurrentLinkedQueue<>();
+        /**
+         * The Predicate.
+         */
         final Predicate<? super AisPacket> predicate;
 
+        /**
+         * Instantiates a new Subscription.
+         *
+         * @param predicate the predicate
+         * @param consumer  the consumer
+         */
         SubscriptionImpl(Predicate<? super AisPacket> predicate, Consumer<? super AisPacket> consumer) {
             this.predicate = predicate;
             this.consumer = requireNonNull(consumer);
@@ -132,7 +185,11 @@ class AisPacketStreamImpl extends AisPacketStream {
             cancel(null);
         }
 
-        /** {@inheritDoc} */
+        /**
+         * {@inheritDoc} @param e the e
+         *
+         * @param e the e
+         */
         synchronized void cancel(Throwable e) {
             lock.lock();
             try {
@@ -157,7 +214,9 @@ class AisPacketStreamImpl extends AisPacketStream {
             }
         }
 
-        /** This method delivers the actual event. */
+        /**
+         * This method delivers the actual event.
+         */
         void deliver() {
             while (lock.tryLock()) {
                 try {

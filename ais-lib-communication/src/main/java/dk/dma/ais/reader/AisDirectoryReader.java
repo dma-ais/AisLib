@@ -42,11 +42,10 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * AIS reader that iterates over every file from a given base directory. If a file matches a given pattern it will be read.
- * 
+ * <p>
  * If recursive used all sub directories will also be scanned using depth first.
- * 
- * Default ordering is by full path names. A Comparator<Path> can be provided for alternative ordering. 
- * 
+ * <p>
+ * Default ordering is by full path names. A Comparator&lt;Path&gt; can be provided for alternative ordering.
  */
 public class AisDirectoryReader extends AisReader {
 
@@ -59,11 +58,28 @@ public class AisDirectoryReader extends AisReader {
     private final Comparator<Path> comparator;
 
     private Long totalNumberOfPacketsToRead;
-    
+
+    /**
+     * Instantiates a new Ais directory reader.
+     *
+     * @param dir       the dir
+     * @param pattern   the pattern
+     * @param recursive the recursive
+     * @throws IOException the io exception
+     */
     AisDirectoryReader(String dir, String pattern, boolean recursive) throws IOException {
         this(dir, pattern, recursive, null);
     }
 
+    /**
+     * Instantiates a new Ais directory reader.
+     *
+     * @param dir        the dir
+     * @param pattern    the pattern
+     * @param recursive  the recursive
+     * @param comparator the comparator
+     * @throws IOException the io exception
+     */
     AisDirectoryReader(String dir, String pattern, boolean recursive, Comparator<Path> comparator) throws IOException {
         requireNonNull(dir);
         requireNonNull(pattern);
@@ -109,7 +125,7 @@ public class AisDirectoryReader extends AisReader {
      * Compute an estimate of the fraction of AIS packets which have been read, out of the total no. of AIS packets to read in the
      * matching files. The first call to this method may be long-running as it will scan all the matching files to count AIS
      * packets.
-     * 
+     *
      * @return Estimated fraction of AIS packets read as a floating point number between 0 and 1.
      */
     public float getEstimatedFractionOfPacketsRead() {
@@ -160,12 +176,23 @@ public class AisDirectoryReader extends AisReader {
      */
     private abstract class MatchingFileIterator {
         
-        private final Comparator<Path> comparator;      
-        
+        private final Comparator<Path> comparator;
+
+        /**
+         * Instantiates a new Matching file iterator.
+         *
+         * @param comparator the comparator
+         */
         public MatchingFileIterator(Comparator<Path> comparator) {
             this.comparator = comparator;
         }
-        
+
+        /**
+         * Do with matching file.
+         *
+         * @param matchingFile the matching file
+         * @throws IOException the io exception
+         */
         protected abstract void doWithMatchingFile(Path matchingFile) throws IOException;
 
         private void handleFile(Path file) {
@@ -178,6 +205,9 @@ public class AisDirectoryReader extends AisReader {
             }
         }
 
+        /**
+         * Iterate.
+         */
         public void iterate() {
             final List<Path> files = new ArrayList<>();
             final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);

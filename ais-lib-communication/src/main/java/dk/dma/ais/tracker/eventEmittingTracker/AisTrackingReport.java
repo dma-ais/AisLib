@@ -33,6 +33,11 @@ public final class AisTrackingReport extends TrackingReport {
 
     private final AisPacket packet;
 
+    /**
+     * Instantiates a new Ais tracking report.
+     *
+     * @param aisPacket the ais packet
+     */
     public AisTrackingReport(AisPacket aisPacket) {
         AisMessage aisMessage = aisPacket.tryGetAisMessage();
         if (! (aisMessage instanceof IVesselPositionMessage)) {
@@ -42,6 +47,11 @@ public final class AisTrackingReport extends TrackingReport {
         this.packet = aisPacket;
     }
 
+    /**
+     * Gets packet.
+     *
+     * @return the packet
+     */
     public AisPacket getPacket() {
         return packet;
     }
