@@ -31,8 +31,8 @@
 	</modules>
 
 	<properties>
-		<dependencies.enav.version>0.6-SNAPSHOT</dependencies.enav.version>
-		<dependencies.dma.commons.version>0.5-SNAPSHOT</dependencies.dma.commons.version>
+		<dependencies.enav.version>0.6</dependencies.enav.version>
+		<dependencies.dma.commons.version>0.5</dependencies.dma.commons.version>
 	</properties>
 
 	<profiles>
