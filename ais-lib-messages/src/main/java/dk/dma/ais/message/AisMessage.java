@@ -312,14 +312,6 @@ public abstract class AisMessage implements Serializable {
         case 14:
             message = new AisMessage14(vdm);
             break;
-        case 15:
-            // TODO implement real message class
-            message = new AisUnsupportedMessageType(vdm);
-            break;
-        case 16:
-            // TODO implement real message class
-            message = new AisUnsupportedMessageType(vdm);
-            break;
         case 17:
             message = new AisMessage17(vdm);
             break;
@@ -329,26 +321,24 @@ public abstract class AisMessage implements Serializable {
         case 19:
             message = new AisMessage19(vdm);
             break;
-        case 20:
-            // TODO implement real message class
-            message = new AisUnsupportedMessageType(vdm);
-            break;
         case 21:
             message = new AisMessage21(vdm);
-            break;
-        case 22:
-            // TODO implement real message class
-            message = new AisUnsupportedMessageType(vdm);
-            break;
-        case 23:
-            // TODO implement real message class
-            message = new AisUnsupportedMessageType(vdm);
             break;
         case 24:
             message = new AisMessage24(vdm);
             break;
         case 27:
             message = new AisMessage27(vdm);
+            break;
+        // TODO: Implement the unsupported message types
+        case 15:
+        case 16:
+        case 20:
+        case 22:
+        case 23:
+        case 25:
+        case 26:
+            message = new AisUnsupportedMessageType(vdm);
             break;
         default:
             throw new AisMessageException("Unknown AIS message id " + vdm.getMsgId());
