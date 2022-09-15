@@ -150,7 +150,7 @@ public class AisTcpReader extends AisReader {
         try {
             LOG.info("Connecting to source " + currentHost());
             clientSocket.set(new Socket());
-            InetSocketAddress address = new InetSocketAddress(currentHost().getHostText(), currentHost().getPort());
+            InetSocketAddress address = new InetSocketAddress(currentHost().getHost(), currentHost().getPort());
             clientSocket.get().connect(address);
             if (timeout > 0) {
                 clientSocket.get().setSoTimeout(timeout * 1000);
@@ -159,7 +159,7 @@ public class AisTcpReader extends AisReader {
             outputStream = clientSocket.get().getOutputStream();
             LOG.info("Connected to source " + currentHost());
         } catch (UnknownHostException e) {
-            LOG.error("Unknown host: " + currentHost().getHostText() + ": " + e.getMessage());
+            LOG.error("Unknown host: " + currentHost().getHost() + ": " + e.getMessage());
             throw e;
         } catch (IOException e) {
             if (!isShutdown()) {
@@ -248,7 +248,7 @@ public class AisTcpReader extends AisReader {
      * @return hostname hostname
      */
     public String getHostname() {
-        return currentHost().getHostText();
+        return currentHost().getHost();
     }
 
     /**
