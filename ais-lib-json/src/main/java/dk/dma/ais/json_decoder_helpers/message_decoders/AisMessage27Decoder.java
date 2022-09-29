@@ -55,12 +55,12 @@ public class AisMessage27Decoder extends AisMessageDecoder {
 
     public DecodedAisFieldObject getSogDFO() {
         int sog = aisMessage27.getSog();
-        return CommonFieldDecoderHelper.getSogDFO(sog);
+        return CommonFieldDecoderHelper.getSogDFOMessage27(sog);
     }
 
     public DecodedAisFieldObject getCogDFO() {
         int cog = aisMessage27.getCog();
-        return CommonFieldDecoderHelper.getCogDFO(cog);
+        return CommonFieldDecoderHelper.getCogDFOMessage27(cog);
     }
 
     public DecodedAisFieldObject getGnssPosStatusDFO() {

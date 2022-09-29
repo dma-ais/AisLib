@@ -82,13 +82,13 @@ public class AisMessage27DecoderTest {
 
         JSONAssert.assertEquals(
                 DecoderTestHelper.getJson(objectWriter,
-                        CommonFieldDecoderHelper.getSogDFO(0)).toString(),
+                        CommonFieldDecoderHelper.getSogDFOMessage27(0)).toString(),
                 jsonObject.get("sogDFO").toString(),
                 true);
 
         JSONAssert.assertEquals(
                 DecoderTestHelper.getJson(objectWriter,
-                        CommonFieldDecoderHelper.getCogDFO(11)).toString(),
+                        CommonFieldDecoderHelper.getCogDFOMessage27(11)).toString(),
                 jsonObject.get("cogDFO").toString(),
                 true);
 
