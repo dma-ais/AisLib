@@ -9,4 +9,4 @@ ais-lib-communication/aisbus.xml
 .idea
 *.iml
 .DS_Store
-
+*.sw*
