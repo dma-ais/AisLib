@@ -10,6 +10,6 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
-      - name: Publish package
+      - name: Build package
         run: mvn --batch-mode package 
 
