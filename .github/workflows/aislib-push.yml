@@ -1,0 +1,15 @@
+name: Build Ais Lib and run tests
+on: push
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and run tests
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+      - name: Publish package
+        run: mvn --batch-mode package 
+
