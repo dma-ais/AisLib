@@ -15,7 +15,8 @@ public abstract class AisMessageDecoder {
 
     private int msgId;
     private DecodedAisFieldObject repeatDFO;
-    private int userId;
+    private Integer userId;
+
 
     public AisMessageDecoder(AisMessage aisMessage) {
         this.aisMessage = aisMessage;
@@ -23,8 +24,11 @@ public abstract class AisMessageDecoder {
 
     //region Getters
 
-    public int getMsgId() {
-        return msgId;
+    public Integer getMsgId() {
+        if(aisMessage.getMsgId() == 0){
+            return null;
+        }
+        return aisMessage.getMsgId();
     }
 
     public DecodedAisFieldObject getRepeatDFO() {
@@ -33,15 +37,18 @@ public abstract class AisMessageDecoder {
         return new DecodedAisFieldObject(repeat, text);
     }
 
-    public int getUserId() {
-        return userId;
+    public Integer getUserId() {
+        if (aisMessage.getUserId() == 0) {
+            return null;
+        }
+        return aisMessage.getUserId();
     }
 
     //endregion
 
     //region Setters
 
-    public void setMsgId(int msgId) {
+    public void setMsgId(Integer msgId) {
         this.msgId = msgId;
     }
 
@@ -49,7 +56,7 @@ public abstract class AisMessageDecoder {
         this.repeatDFO = repeatDFO;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 

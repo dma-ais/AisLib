@@ -33,6 +33,32 @@ public class CommonFieldDecoderHelper {
         return new DecodedAisFieldObject(cog, text);
     }
 
+    public static DecodedAisFieldObject getSogDFOMessage27(int sog) {
+        String text;
+        if (sog == 63) {
+            text = "Speed over ground not available";
+        } else if (sog == 62) {
+            text = "62.1 knots or higher";
+        } else {
+            double dbl = sog;
+            text = dbl + " knots";
+        }
+        return new DecodedAisFieldObject(sog, text);
+    }
+
+    public static DecodedAisFieldObject getCogDFOMessage27(int cog) {
+        String text;
+        if (cog >= 0 && cog < 360) {
+            double cogTrue = cog;
+            text = cogTrue + " degrees";
+        } else if (cog == 511) {
+            text = "Course over ground not available";
+        } else {
+            text = "These values should not be used";
+        }
+        return new DecodedAisFieldObject(cog, text);
+    }
+
     public static DecodedAisFieldObject getTrueHeadingDFO(int trueHeading) {
         String text;
         if (trueHeading >= 0 && trueHeading < 360) {

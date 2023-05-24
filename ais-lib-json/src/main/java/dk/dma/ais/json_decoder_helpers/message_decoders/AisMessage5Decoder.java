@@ -7,20 +7,22 @@ import dk.dma.ais.json_decoder_helpers.enums.EPFDFixType;
 import dk.dma.ais.json_decoder_helpers.util.Decodes;
 import dk.dma.ais.message.AisMessage5;
 
+import java.util.Date;
+
 @SuppressWarnings("unused")
 @Decodes(className = AisMessage5.class)
 public class AisMessage5Decoder extends AisStaticCommonDecoder {
 
     private transient AisMessage5 aisMessage5;
-    
+
     private DecodedAisFieldObject versionDFO;
-    private long imo;
+    private Long imo;
     private DecodedAisFieldObject posTypeDFO;
     private DecodedAisFieldObject etaDFO;
     private DecodedAisFieldObject draughtDFO;
     private String dest;
     private DecodedAisFieldObject dteDFO;
-    
+
     public AisMessage5Decoder(AisMessage5 aisMessage5) {
         super(aisMessage5);
         this.aisMessage5 = aisMessage5;
@@ -33,7 +35,7 @@ public class AisMessage5Decoder extends AisStaticCommonDecoder {
         String text;
         if (version == 0) {
             text = "Station compliant with Recommendation ITU-R M.1371-1";
-        } else if (version == 1){
+        } else if (version == 1) {
             text = "station compliant with Recommendation ITU-R M.1371-3";
         } else {
             text = "Station compliant with future editions";
@@ -41,7 +43,10 @@ public class AisMessage5Decoder extends AisStaticCommonDecoder {
         return new DecodedAisFieldObject(version, text);
     }
 
-    public long getImo() {
+    public Long getImo() {
+        if (aisMessage5.getImo() == 0) {
+            return null;
+        }
         return aisMessage5.getImo();
     }
 
@@ -51,25 +56,35 @@ public class AisMessage5Decoder extends AisStaticCommonDecoder {
     }
 
     public DecodedAisDate getEtaDFO() {
-        return new DecodedAisDate(aisMessage5.getEtaDate());
+        return new DecodedAisDate(this.aisMessage5.getEtaDate());
     }
+
 
     public DecodedAisFieldObject getDraughtDFO() {
         int draught = aisMessage5.getDraught();
         String text;
         if (draught == 0) {
             text = "Not available";
+            return new DecodedAisFieldObject(null, text);
         } else if (draught == 255) {
             text = "Draught 25.5 m or greater";
         } else {
-            double dbl = draught/10.0;
+            double dbl = draught / 10.0;
             text = "Draught is " + dbl + " m";
         }
         return new DecodedAisFieldObject(draught, text);
     }
 
     public String getDest() {
-        return aisMessage5.getDest();
+        if (aisMessage5.getDest() != null && !containsLetters(aisMessage5.getDest()) && aisMessage5.getDest().contains("@")) {
+            return dest;
+        } else if (containsLetters(aisMessage5.getDest())) {
+            return aisMessage5.getDest().replace("@", "").trim();
+        } else if (containsLetters(aisMessage5.getDest()) && !aisMessage5.getDest().contains("@")) {
+            return aisMessage5.getDest();
+        } else {
+            return dest;
+        }
     }
 
     public DecodedAisFieldObject getDteDFO() {
@@ -78,14 +93,14 @@ public class AisMessage5Decoder extends AisStaticCommonDecoder {
     }
 
     //endregion
-    
+
     //region Setters
 
     public void setVersionDFO(DecodedAisFieldObject versionDFO) {
         this.versionDFO = versionDFO;
     }
 
-    public void setImo(long imo) {
+    public void setImo(Long imo) {
         this.imo = imo;
     }
 

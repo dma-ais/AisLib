@@ -31,8 +31,7 @@ public class DecoderTest {
 
     @Before
     public void setup() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(Objects.requireNonNull(
-                getClass().getClassLoader().getResource("ais250.txt")).getFile()));
+        BufferedReader br = new BufferedReader(new FileReader("ais250.txt"));
 
         readInData(br);
     }

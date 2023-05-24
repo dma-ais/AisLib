@@ -222,24 +222,22 @@ public class AisMessage5 extends AisStaticCommon {
      * @return date eta date
      */
     public Date getEtaDate() {
+        Calendar cal = Calendar.getInstance();
         int min = (int) (eta & 0x3F);
         int hour = (int) (eta & 0x7C0) >> 6;
         int day = (int) (eta & 0xF800) >> 11;
         int mon = (int) (eta & 0xF0000) >> 16;
-        if (min == 60 || hour == 24 || day == 0 || mon == 0) {
-            return null;
+        if (min != 60 && hour != 24 && day != 0 && mon != 0) {
+            cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+            cal.set(Calendar.MILLISECOND, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MINUTE, min);
+            cal.set(Calendar.HOUR_OF_DAY, hour);
+            cal.set(Calendar.DAY_OF_MONTH, day);
+            cal.set(Calendar.MONTH, mon - 1);
+            return cal.getTime();
         }
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("GMT+0000"));
-        
-		cal.set(Calendar.MILLISECOND, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MINUTE, min);
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.DAY_OF_MONTH, day);
-        cal.set(Calendar.MONTH, mon - 1);
-        
-        return cal.getTime();
+        return null;
     }
 
     /**
