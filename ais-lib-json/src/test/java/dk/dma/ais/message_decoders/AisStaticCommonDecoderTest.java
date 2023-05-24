@@ -59,7 +59,7 @@ public class AisStaticCommonDecoderTest {
 
         assert jsonObject.get("callsign") == JSONObject.NULL;
 
-        assert jsonObject.getString("name").equals("CAPT.J.RIMES@@@@@@@@");
+        assert jsonObject.getString("name").equals("CAPT.J.RIMES");
 
         JSONAssert.assertEquals(
                 DecoderTestHelper.getJson(objectWriter,

@@ -9,7 +9,7 @@ import java.util.TimeZone;
 @SuppressWarnings("unused")
 public class DecodedAisDate {
 
-    private long dateInMillis;
+    private Long dateInMillis;
     private String textDate;
 
     public DecodedAisDate(long dateInMillis, String textDate) {
@@ -18,19 +18,25 @@ public class DecodedAisDate {
     }
 
     public DecodedAisDate(Date date) {
-        this.dateInMillis = date.getTime();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(date);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE YYYY MMM dd HH:mm:ss zzz ", Locale.US);
-        this.textDate = simpleDateFormat.format(calendar.getTime());
+        if (date != null) {
+            this.dateInMillis = date.getTime();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(TimeZone.getDefault());
+            calendar.setTime(date);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE YYYY MMM dd HH:mm:ss zzz ", Locale.US);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            this.textDate = simpleDateFormat.format(calendar.getTime());
+        } else {
+            this.dateInMillis = null;
+            this.textDate = "Month not available (default), Day not available (default)";
+        }
     }
 
-    public long getDateInMillis() {
+    public Long getDateInMillis() {
         return dateInMillis;
     }
 
-    public void setDateInMillis(long dateInMillis) {
+    public void setDateInMillis(Long dateInMillis) {
         this.dateInMillis = dateInMillis;
     }
 

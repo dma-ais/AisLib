@@ -21,7 +21,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class AisMessage27DecoderTest {
 
     @Test(expected = SentenceException.class)
-    public void shouldThrowException()  throws Exception {
+    public void shouldThrowException() throws Exception {
         Vdm vdm = new Vdm();
         vdm.parse(
                 "!AIVDM,1,1,,B,J5DfMB9FLsM?P00d,0*70" //changed K to J
@@ -30,7 +30,7 @@ public class AisMessage27DecoderTest {
     }
 
     @Test
-    public void shouldNotWork() throws Exception{
+    public void shouldNotWork() throws Exception {
         Vdm vdm = new Vdm();
         vdm.parse(
                 "!AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B" //this is ais message 19

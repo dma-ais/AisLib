@@ -7,7 +7,7 @@ import dk.dma.ais.message.AisStaticCommon;
 
 @SuppressWarnings("unused")
 @Decodes(className = AisStaticCommon.class)
-public class AisStaticCommonDecoder extends AisMessageDecoder{
+public class AisStaticCommonDecoder extends AisMessageDecoder {
 
     private transient AisStaticCommon aisStaticCommon;
 
@@ -27,15 +27,34 @@ public class AisStaticCommonDecoder extends AisMessageDecoder{
     //region Getters
 
     public String getCallsign() {
-        return aisStaticCommon.getCallsign();
+        if (aisStaticCommon.getCallsign() != null && !containsLetters(aisStaticCommon.getCallsign()) && aisStaticCommon.getCallsign().contains("@")) {
+            return callsign;
+        } else if (containsLetters(aisStaticCommon.getCallsign())) {
+            return aisStaticCommon.getCallsign().replace("@", "").trim();
+        } else if (containsLetters(aisStaticCommon.getCallsign()) && !aisStaticCommon.getCallsign().contains("@")) {
+            return aisStaticCommon.getCallsign();
+        } else {
+            return callsign;
+        }
     }
 
     public String getName() {
-        return aisStaticCommon.getName();
+        if (aisStaticCommon.getName() != null && !containsLetters(aisStaticCommon.getName()) && aisStaticCommon.getName().contains("@")) {
+            return name;
+        } else if (containsLetters(aisStaticCommon.getName())) {
+            return aisStaticCommon.getName().replace("@", "").trim();
+        } else if (containsLetters(aisStaticCommon.getName()) && !aisStaticCommon.getName().contains("@")) {
+            return aisStaticCommon.getName();
+        } else {
+            return name;
+        }
     }
 
     public DecodedAisFieldObject getShipTypeDFO() {
         int shipType = aisStaticCommon.getShipType();
+        if (shipType == 0) {
+            return new DecodedAisFieldObject(null, ShipType.get(shipType).prettyPrint());
+        }
         return new DecodedAisFieldObject(shipType, ShipType.get(shipType).prettyPrint());
     }
 
@@ -44,6 +63,7 @@ public class AisStaticCommonDecoder extends AisMessageDecoder{
         String text;
         if (dimBow == 0) {
             text = "GPS position is not available";
+            return new DecodedAisFieldObject(null, text);
         } else {
             text = "Distance from GPS antenna to bow " + dimBow + " m";
         }
@@ -55,6 +75,7 @@ public class AisStaticCommonDecoder extends AisMessageDecoder{
         String text;
         if (dimStern == 0) {
             text = "Length of ship is " + dimStern + " m";
+            return new DecodedAisFieldObject(null, text);
         } else {
             text = "Distance from GPS antenna to stern " + dimStern + " m";
         }
@@ -66,6 +87,7 @@ public class AisStaticCommonDecoder extends AisMessageDecoder{
         String text;
         if (dimPort == 0) {
             text = "GPS position is not available";
+            return new DecodedAisFieldObject(null, text);
         } else {
             text = "Distance from GPS antenna to port " + dimPort + " m";
         }
@@ -77,6 +99,7 @@ public class AisStaticCommonDecoder extends AisMessageDecoder{
         String text;
         if (dimStarboard == 0) {
             text = "Width of ship is " + dimStarboard + " m";
+            return new DecodedAisFieldObject(null, text);
         } else {
             text = "Distance from GPS antenna to starboard " + dimStarboard + " m";
         }
@@ -115,5 +138,16 @@ public class AisStaticCommonDecoder extends AisMessageDecoder{
         this.dimStarboardDFO = dimStarboardDFO;
     }
 
+    public static boolean containsLetters(String string) {
+        if (string == null || string.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < string.length(); ++i) {
+            if (Character.isLetter(string.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
     //endregion
 }

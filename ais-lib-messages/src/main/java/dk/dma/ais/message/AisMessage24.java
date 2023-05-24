@@ -26,7 +26,9 @@ import dk.dma.ais.sentence.Vdm;
  */
 public class AisMessage24 extends AisStaticCommon {
 
-    /** serialVersionUID. */
+    /**
+     * serialVersionUID.
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -227,6 +229,8 @@ public class AisMessage24 extends AisStaticCommon {
         builder.append(dimStern);
         builder.append(", name=");
         builder.append(name);
+        builder.append(", vendorId=");
+        builder.append(vendorId);
         builder.append(", shipType=");
         builder.append(shipType);
         builder.append(", posType=");
