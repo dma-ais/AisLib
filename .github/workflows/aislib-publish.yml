@@ -1,3 +1,4 @@
+# Ais Lib Maven Central Release
 name: Publish package to the Maven Central Repository
 on:
   release:
