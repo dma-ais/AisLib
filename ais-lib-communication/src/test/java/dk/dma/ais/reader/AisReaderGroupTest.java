@@ -47,8 +47,8 @@ public class AisReaderGroupTest {
     @Test
     public void parseTwoHosts() {
         AisTcpReader tr = AisReaders.parseSource("sdsd=ff:123, dd:1235");
-        assertEquals("ff", tr.hosts.get(0).getHostText());
-        assertEquals("dd", tr.hosts.get(1).getHostText());
+        assertEquals("ff", tr.hosts.get(0).getHost());
+        assertEquals("dd", tr.hosts.get(1).getHost());
         assertEquals(123, tr.hosts.get(0).getPort());
         assertEquals(1235, tr.hosts.get(1).getPort());
         assertEquals(2, tr.getHostCount());
