@@ -43,6 +43,16 @@ public class CommentBlockLine {
         int start = -1;
         int end = -1;
         checksum = 0;
+
+        if (line.startsWith("\\g:")) {
+            parseCommentBlockWithLetterG(line);
+        } else {
+            System.out.println(line);
+            validateCommentBlock(line, start, end);
+        }
+    }
+
+    public void validateCommentBlock(String line, int start, int end) throws CommentBlockException {
         // Find start, end, checksum and fields
         for (int i = 0; i < line.length(); i++) {
             char c = line.charAt(i);
@@ -59,13 +69,6 @@ public class CommentBlockLine {
                 }
             }
         }
-        if (start < 0) {
-            throw new CommentBlockException("No comment block found");
-        }
-        if (end < 0) {
-            throw new CommentBlockException("Malformed comment block");
-        }
-
         // Check checksum
         try {
             String given = line.substring(end + 1, end + 3);
@@ -128,6 +131,36 @@ public class CommentBlockLine {
                 groupId = tagGroupParts[2];
             }
             parameterMap.put(parameterCode, value);
+        }
+    }
+
+    public void parseCommentBlockWithLetterG(String line) throws CommentBlockException {
+        parameterMap = new HashMap<>();
+        int start = line.indexOf("\\g:");
+        int end = line.indexOf("*");
+
+        if (start < 0) {
+            throw new CommentBlockException("No comment block found");
+        }
+
+        if (end < 0) {
+            throw new CommentBlockException("Malformed comment block");
+        }
+
+        // Extract the parameter values from the line
+        String params = line.substring(start + 3, end);
+
+        // Split the parameters using regular expression
+        String[] pairs = params.split("(?<!\\\\),");
+
+        for (String pair : pairs) {
+            // Split each pair into parameter code and value
+            String[] parts = pair.split("(?<!\\\\):");
+            if (parts.length == 2) {
+                String parameterCode = parts[0].replaceAll("\\\\,", ",");
+                String value = parts[1].replaceAll("\\\\:", ":");
+                parameterMap.put(parameterCode, value);
+            }
         }
     }
 
