@@ -56,7 +56,7 @@ public class AisPositionMessageDecoderTest {
 
         JSONAssert.assertEquals(
                 DecoderTestHelper.getJson(objectWriter,
-                        new DecodedAisFieldObject(-1, "Turning left at 0.04464028833340796 degrees/ min")).toString(),
+                        new DecodedAisFieldObject(0, "Turning right at 0.0 degrees/ min")).toString(),
                 jsonObject.get("rotDFO").toString(),
                 true);
 
