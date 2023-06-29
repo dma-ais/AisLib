@@ -52,7 +52,7 @@ public class AisPositionMessageDecoder extends AisMessageDecoder{
             else if (rot == 127) {
                 text = "Turning right at more than 5 degrees per 30s";
             } else {
-                double rotTrue = Math.pow((rot / 4.733), 2);
+                Double rotTrue = Math.pow((rot / 4.733), 2);
                 text = "Turning right at " + rotTrue + " degrees/ min";
             }
         } else { //turning left
@@ -61,7 +61,7 @@ public class AisPositionMessageDecoder extends AisMessageDecoder{
             } else if (rot == -127) {
                 text = "Turning left at more than 5 degrees per 30s";
             } else {
-                double rotTrue = Math.pow((rot / 4.733), 2);
+                Double rotTrue = Math.pow((rot / 4.733), 2);
                 text = "Turning left at " + rotTrue + " degrees/ min";
             }
         }

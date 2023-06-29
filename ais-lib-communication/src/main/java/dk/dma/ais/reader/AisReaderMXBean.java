@@ -101,7 +101,7 @@ class AisReaderMXBeanImpl implements AisReaderMXBean {
     public String getHosts() {
         List<String> l = new ArrayList<>();
         for (HostAndPort hap : reader.hosts) {
-            l.add(hap.getHostText());
+            l.add(hap.getHost());
         }
         return Joiner.on(',').join(l);
     }
