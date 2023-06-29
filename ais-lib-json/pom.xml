@@ -9,6 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+
     <artifactId>ais-lib-json</artifactId>
     <name>AIS JSON Decoders</name>
 

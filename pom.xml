@@ -15,6 +15,7 @@
 	<packaging>pom</packaging>
 	<description>This parent pom for AIS</description>
 
+
 	<scm>
 		<connection>scm:git:git@github.com:dma-ais/AisLib.git</connection>
 		<developerConnection>scm:git:git@github.com:dma-ais/AisLib.git</developerConnection>

@@ -9,6 +9,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
+
 	<artifactId>ais-lib-messages</artifactId>
 	<name>AIS Messages</name>
 
