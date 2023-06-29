@@ -12,6 +12,7 @@
 	<artifactId>ais-lib-utils</artifactId>
 	<name>AIS utils</name>
 
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

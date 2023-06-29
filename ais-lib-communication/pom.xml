@@ -9,6 +9,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
+
   <artifactId>ais-lib-communication</artifactId>
   <name>AIS Communication </name>
 
