@@ -255,6 +255,8 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
         return rot;
     }
 
+
+
     /**
      * Gets sensor rot.
      *
