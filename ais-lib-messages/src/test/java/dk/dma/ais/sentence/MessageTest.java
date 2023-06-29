@@ -44,7 +44,7 @@ public class MessageTest {
         Assert.assertEquals("repeat", 0, msg.getRepeat());
         Assert.assertEquals("userid", 636012431, msg.getUserId());
         Assert.assertEquals("nav_status", 8, msg.getNavStatus());
-        Assert.assertEquals("rot", 0, msg.getRot());
+        Assert.assertEquals("rot", -1, msg.getRot());
         Assert.assertEquals("sog", 191, msg.getSog());
         Assert.assertEquals("pos_acc", 1, msg.getPosAcc());
         Assert.assertEquals("longitude", -73481550, msg.getPos().getLongitude());
