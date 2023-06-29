@@ -251,9 +251,9 @@ public abstract class AisPositionMessage extends AisMessage implements IVesselPo
      *
      * @return the rot
      */
-    public Integer getRot() {
+    public int getRot() {
         if (rot == 128) {
-            return null;
+            return 0;
         }
         int signedRot = (byte) rot;
         double sensorRot = Math.pow(signedRot / 4.733, 2);
