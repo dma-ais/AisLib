@@ -46,19 +46,22 @@ public class AisPositionMessageDecoder extends AisMessageDecoder{
         int rot = aisPositionMessage.getRot();
         String text;
         if (rot >= 0) { //then turning right
-            if (rot == 127) {
+            if (rot == 128) {
+                text = "No turn information available";
+            }
+            else if (rot == 127) {
                 text = "Turning right at more than 5 degrees per 30s";
             } else {
-                Double rotTrue = Math.pow((rot * 4.733), 2);
+                double rotTrue = Math.pow((rot / 4.733), 2);
                 text = "Turning right at " + rotTrue + " degrees/ min";
             }
         } else { //turning left
-            if (rot == -128) {
+            if (rot <= -128) {
                 text = "No turn information available";
             } else if (rot == -127) {
                 text = "Turning left at more than 5 degrees per 30s";
             } else {
-                Double rotTrue = Math.pow((rot * 4.733), 2);
+                double rotTrue = Math.pow((rot / 4.733), 2);
                 text = "Turning left at " + rotTrue + " degrees/ min";
             }
         }
