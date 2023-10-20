@@ -42,7 +42,7 @@ public class AisStreamReader extends AisReader {
      *
      * @param stream the stream
      */
-    AisStreamReader(InputStream stream) {
+    protected AisStreamReader(InputStream stream) {
         this.stream = requireNonNull(stream);
     }
 

@@ -80,7 +80,7 @@ public class AisDirectoryReader extends AisReader {
      * @param comparator the comparator
      * @throws IOException the io exception
      */
-    AisDirectoryReader(String dir, String pattern, boolean recursive, Comparator<Path> comparator) throws IOException {
+    protected AisDirectoryReader(String dir, String pattern, boolean recursive, Comparator<Path> comparator) throws IOException {
         requireNonNull(dir);
         requireNonNull(pattern);
         this.pattern = pattern;
