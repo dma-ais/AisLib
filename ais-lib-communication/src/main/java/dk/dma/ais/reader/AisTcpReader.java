@@ -95,7 +95,7 @@ public class AisTcpReader extends AisReader {
      *
      * @param hostAndPort the host and port
      */
-    void addHostPort(HostAndPort hostAndPort) {
+    protected void addHostPort(HostAndPort hostAndPort) {
         requireNonNull(hostAndPort);
         hosts.add(hostAndPort);
         currentHostIndex++;
@@ -256,7 +256,7 @@ public class AisTcpReader extends AisReader {
      *
      * @return the host and port
      */
-    HostAndPort currentHost() {
+    protected HostAndPort currentHost() {
         return hosts.get(currentHostIndex);
     }
 
