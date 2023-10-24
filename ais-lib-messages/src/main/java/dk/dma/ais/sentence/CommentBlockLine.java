@@ -47,7 +47,6 @@ public class CommentBlockLine {
         if (line.startsWith("\\g:")) {
             parseCommentBlockWithLetterG(line);
         } else {
-            System.out.println(line);
             validateCommentBlock(line, start, end);
         }
     }
