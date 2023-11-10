@@ -690,7 +690,7 @@ to send application specific message. See AisReader for different sending option
 example below all ABM packaging is handled by AisReader.
 
 ```java
-AisReader aisReader = new AisTcpReader(host, port);
+AisReader aisReader = AisReaders.createReader(host, port);
 aisReader.start();
 ...
 // Make AIS message 12
