@@ -55,6 +55,10 @@ You're encouraged to contribute to AisLib. Fork the code from
 
 This library is licensed under the Apache License, Version 2.0.
 
+## Usage ##
+
+AisLib is available on [Maven Repository](https://mvnrepository.com/artifact/dk.dma.ais.lib)
+
 ## Examples ##
 
 ### Simple read and message handling ###
@@ -548,7 +552,7 @@ The following fields can be used in filter expressions
  sources   | s.id      | Source id                  |
            | s.bs      | Source base station        |
            | s.country | Source country             | DNK
-           | s.type    | Source type                | LIVE, SAT 
+           | s.type    | Source type                | LIVE, SAT 
            | s.region  | Source region              | 0
 <hr>       | <hr>      | <hr>                       | <hr>
  messages  | m.id      | Message type               | 1, 2, 3, 5
@@ -559,7 +563,7 @@ The following fields can be used in filter expressions
            | m.dow     | Msg recv'd on day-of-week  | mon, monday, 1
            | m.hour    | Msg recv'd on hour         | 14
            | m.minute  | Msg recv'd on minute       | 34
-<hr>       | <hr>      | <hr>                       | <hr>
+<hr>       | <hr>      | <hr>                       | <hr>
            | m.imo     | IMO number                 | 6159463
            | m.type    | Ship type                  | tanker, 32
            | m.navstat | Navigational status        | AT_ANCHOR, 1
