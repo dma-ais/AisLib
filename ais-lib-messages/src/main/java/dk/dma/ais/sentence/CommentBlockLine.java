@@ -42,13 +42,30 @@ public class CommentBlockLine {
         parameterMap = new HashMap<>();
         int start = line.indexOf("\\");
         int end = line.indexOf("\\", start + 1);
+        checksum = 0;
 
         if (start < 0) {
             throw new CommentBlockException("No comment block found");
         }
-
         if (end < 0) {
             throw new CommentBlockException("Malformed comment block");
+        }
+
+        // Validate Checksum
+        for (int i = start + 1; i < end - 3; i++) {
+            char curr = line.charAt(i);
+            checksum ^= curr;
+        }
+
+        try {
+            String received = line.substring(end - 2, end);
+            if (checksum != Integer.parseInt(received, 16)) {
+                throw new CommentBlockException("Received checksum invalid: " + received + " != " + Integer.toString(checksum, 16).toUpperCase());
+            }
+        } catch (IndexOutOfBoundsException e) {
+            throw new CommentBlockException("Missing checksum in comment block");
+        } catch (NumberFormatException e) {
+            throw new CommentBlockException("Malformed checksum");
         }
 
         // Extract the parameter values from the line
@@ -60,8 +77,8 @@ public class CommentBlockLine {
         // Split the parameters using regular expression
         String[] pairs = params.split(",");
 
+        // Split each pair into parameter code and value
         for (String pair : pairs) {
-            // Split each pair into parameter code and value
             String[] parts = pair.split(":", 2);
             if (parts.length != 2) {
                 throw new CommentBlockException("Malformed parameter-code and value pair: " + pair);
