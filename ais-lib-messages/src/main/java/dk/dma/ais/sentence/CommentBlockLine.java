@@ -40,17 +40,35 @@ public class CommentBlockLine {
      */
     public void parse(String line) throws CommentBlockException {
         parameterMap = new HashMap<>();
-        int start = -1;
-        int end = -1;
-        checksum = 0;
+        int start = line.indexOf("\\g:");
+        int end = line.indexOf("*");
 
-        if (line.startsWith("\\g:")) {
-            parseCommentBlockWithLetterG(line);
-        } else {
-            validateCommentBlock(line, start, end);
+        if (start < 0) {
+            throw new CommentBlockException("No comment block found");
+        }
+
+        if (end < 0) {
+            throw new CommentBlockException("Malformed comment block");
+        }
+
+        // Extract the parameter values from the line
+        String params = line.substring(start + 3, end);
+
+        // Split the parameters using regular expression
+        String[] pairs = params.split("(?<!\\\\),");
+
+        for (String pair : pairs) {
+            // Split each pair into parameter code and value
+            String[] parts = pair.split("(?<!\\\\):");
+            if (parts.length == 2) {
+                String parameterCode = parts[0].replaceAll("\\\\,", ",");
+                String value = parts[1].replaceAll("\\\\:", ":");
+                parameterMap.put(parameterCode, value);
+            }
         }
     }
 
+    @Deprecated
     public void validateCommentBlock(String line, int start, int end) throws CommentBlockException {
         // Find start, end, checksum and fields
         for (int i = 0; i < line.length(); i++) {
@@ -133,6 +151,7 @@ public class CommentBlockLine {
         }
     }
 
+    @Deprecated
     public void parseCommentBlockWithLetterG(String line) throws CommentBlockException {
         parameterMap = new HashMap<>();
         int start = line.indexOf("\\g:");
