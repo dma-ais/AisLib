@@ -66,6 +66,15 @@ public class CommentBlockLine {
             if (parts.length != 2) {
                 throw new CommentBlockException("Malformed parameter-code and value pair: " + pair);
             }
+
+            // Read group related values
+            if (parts[0].equals("g")) {
+                String[] group_tag = StringUtils.splitPreserveAllTokens(parts[1], "-");
+                lineNumber = Integer.parseInt(group_tag[0]);
+                totalLines = Integer.parseInt(group_tag[1]);
+                groupId = group_tag[2];
+            }
+
             parameterMap.put(parts[0], parts[1]);
         }
     }
