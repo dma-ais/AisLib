@@ -80,19 +80,31 @@ public class CommentBlockLine {
         // Split each pair into parameter code and value
         for (String pair : pairs) {
             String[] parts = pair.split(":", 2);
+            String param_code = parts[0];
             if (parts.length != 2) {
                 throw new CommentBlockException("Malformed parameter-code and value pair: " + pair);
             }
 
             // Read group related values
-            if (parts[0].equals("g")) {
+            if (param_code.equals("g")) {
                 String[] group_tag = StringUtils.splitPreserveAllTokens(parts[1], "-");
                 lineNumber = Integer.parseInt(group_tag[0]);
                 totalLines = Integer.parseInt(group_tag[1]);
                 groupId = group_tag[2];
             }
 
-            parameterMap.put(parts[0], parts[1]);
+            int groupCharIndex;
+            if ((groupCharIndex = param_code.indexOf('G')) >= 0) {
+                try {
+                    lineNumber = Integer.parseInt(param_code.substring(0, groupCharIndex));
+                    totalLines = Integer.parseInt(param_code.substring(groupCharIndex + 1));
+                } catch (NumberFormatException e) {
+                    throw new CommentBlockException("Invalid group tag: " + param_code);
+                }
+                groupId = parts[1];
+            }
+
+            parameterMap.put(param_code, parts[1]);
         }
     }
 
