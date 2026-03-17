@@ -40,8 +40,8 @@ public class CommentBlockLine {
      */
     public void parse(String line) throws CommentBlockException {
         parameterMap = new HashMap<>();
-        int start = line.indexOf("\\g:");
-        int end = line.indexOf("*");
+        int start = line.indexOf("\\");
+        int end = line.indexOf("\\", start + 1);
 
         if (start < 0) {
             throw new CommentBlockException("No comment block found");
@@ -52,19 +52,21 @@ public class CommentBlockLine {
         }
 
         // Extract the parameter values from the line
-        String params = line.substring(start + 3, end);
+        String params = line.substring(start + 1, end - 3);
+        if (params.isEmpty()) {
+            return;
+        }
 
         // Split the parameters using regular expression
-        String[] pairs = params.split("(?<!\\\\),");
+        String[] pairs = params.split(",");
 
         for (String pair : pairs) {
             // Split each pair into parameter code and value
-            String[] parts = pair.split("(?<!\\\\):");
-            if (parts.length == 2) {
-                String parameterCode = parts[0].replaceAll("\\\\,", ",");
-                String value = parts[1].replaceAll("\\\\:", ":");
-                parameterMap.put(parameterCode, value);
+            String[] parts = pair.split(":", 2);
+            if (parts.length != 2) {
+                throw new CommentBlockException("Malformed parameter-code and value pair: " + pair);
             }
+            parameterMap.put(parts[0], parts[1]);
         }
     }
 
