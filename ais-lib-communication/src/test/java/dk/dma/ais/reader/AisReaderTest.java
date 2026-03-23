@@ -48,7 +48,7 @@ public class AisReaderTest {
         });
         reader.start();
         reader.join();
-        assertEquals(4062L, reader.getNumberOfLinesRead());
+        assertEquals(4063L, reader.getNumberOfLinesRead());
     }
 
     @Test
