@@ -40,17 +40,75 @@ public class CommentBlockLine {
      */
     public void parse(String line) throws CommentBlockException {
         parameterMap = new HashMap<>();
-        int start = -1;
-        int end = -1;
+        int start = line.indexOf("\\");
+        int end = line.indexOf("\\", start + 1);
         checksum = 0;
 
-        if (line.startsWith("\\g:")) {
-            parseCommentBlockWithLetterG(line);
-        } else {
-            validateCommentBlock(line, start, end);
+        if (start < 0) {
+            throw new CommentBlockException("No comment block found");
+        }
+        if (end < 0) {
+            throw new CommentBlockException("Malformed comment block");
+        }
+
+        // Validate Checksum
+        for (int i = start + 1; i < end - 3; i++) {
+            char curr = line.charAt(i);
+            checksum ^= curr;
+        }
+
+        try {
+            String received = line.substring(end - 2, end);
+            if (checksum != Integer.parseInt(received, 16)) {
+                throw new CommentBlockException("Received checksum invalid: " + received + " != " + Integer.toString(checksum, 16).toUpperCase());
+            }
+        } catch (IndexOutOfBoundsException e) {
+            throw new CommentBlockException("Missing checksum in comment block");
+        } catch (NumberFormatException e) {
+            throw new CommentBlockException("Malformed checksum");
+        }
+
+        // Extract the parameter values from the line
+        String params = line.substring(start + 1, end - 3);
+        if (params.isEmpty()) {
+            return;
+        }
+
+        // Split the parameters using regular expression
+        String[] pairs = params.split(",");
+
+        // Split each pair into parameter code and value
+        for (String pair : pairs) {
+            String[] parts = pair.split(":", 2);
+            String param_code = parts[0];
+            if (parts.length != 2) {
+                throw new CommentBlockException("Malformed parameter-code and value pair: " + pair);
+            }
+
+            // Read group related values
+            if (param_code.equals("g")) {
+                String[] group_tag = StringUtils.splitPreserveAllTokens(parts[1], "-");
+                lineNumber = Integer.parseInt(group_tag[0]);
+                totalLines = Integer.parseInt(group_tag[1]);
+                groupId = group_tag[2];
+            }
+
+            int groupCharIndex;
+            if ((groupCharIndex = param_code.indexOf('G')) >= 0) {
+                try {
+                    lineNumber = Integer.parseInt(param_code.substring(0, groupCharIndex));
+                    totalLines = Integer.parseInt(param_code.substring(groupCharIndex + 1));
+                } catch (NumberFormatException e) {
+                    throw new CommentBlockException("Invalid group tag: " + param_code);
+                }
+                groupId = parts[1];
+            }
+
+            parameterMap.put(param_code, parts[1]);
         }
     }
 
+    @Deprecated
     public void validateCommentBlock(String line, int start, int end) throws CommentBlockException {
         // Find start, end, checksum and fields
         for (int i = 0; i < line.length(); i++) {
@@ -133,6 +191,7 @@ public class CommentBlockLine {
         }
     }
 
+    @Deprecated
     public void parseCommentBlockWithLetterG(String line) throws CommentBlockException {
         parameterMap = new HashMap<>();
         int start = line.indexOf("\\g:");
